@@ -1,0 +1,18 @@
+{
+  "environment": "Android API 36 emulator, local Convex backend",
+  "checks": [
+    {
+      "check": "Emulator completed boot",
+      "passed": true
+    },
+    {
+      "check": "APK installed successfully",
+      "passed": true
+    }
+  ],
+  "screenshots": [],
+  "errors": [
+    "Cannot attach to the debug WebView"
+  ],
+  "fatalCrashFound": false
+}
