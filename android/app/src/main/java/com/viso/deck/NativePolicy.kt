@@ -45,4 +45,15 @@ internal object NativePolicy {
         require(value.isFinite() && value in 0.0..100.0)
         return value.toInt()
     }
+
+    /** Android reports a timestamped position, not a continuously advancing value. */
+    fun mediaPosition(position: Long, updatedAt: Long, now: Long, speed: Float,
+                      playing: Boolean, duration: Long): Long {
+        if (position < 0) return 0 // PLAYBACK_POSITION_UNKNOWN is not an elapsed time.
+        val advance = if (playing && speed.isFinite() && updatedAt > 0 && now > updatedAt) {
+            (now.toDouble() - updatedAt.toDouble()) * speed.toDouble()
+        } else 0.0
+        val value = (position.toDouble() + advance).coerceIn(0.0, Long.MAX_VALUE.toDouble()).toLong()
+        return if (duration > 0) minOf(value, duration) else value
+    }
 }

@@ -4,6 +4,7 @@ import { MonitorPlay, Plug, Zap } from "lucide-react";
 import { SignInButton } from "@/components/ui/signin.tsx";
 import KeyCap from "@/components/key-cap.tsx";
 import StatusScreen from "@/components/status-screen.tsx";
+import { VisoBrand } from "@/components/viso-brand.tsx";
 
 const FEATURES = [
   { icon: Zap, title: "Un toque", text: "Cambia tu estado desde cualquier dispositivo." },
@@ -51,9 +52,7 @@ export default function Landing() {
       />
 
       <header className="relative mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
-        <span className="text-2xl font-extrabold tracking-tight">
-          VISO<span style={{ color: current.color }}>.</span>
-        </span>
+        <VisoBrand className="h-8 max-w-36" />
         <SignInButton variant="secondary" signInText="Entrar al panel" />
       </header>
 

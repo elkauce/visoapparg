@@ -5,16 +5,20 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.media.AudioManager
+import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Build
+import android.os.BatteryManager
+import android.os.SystemClock
 import android.provider.Settings
 import android.text.InputType
 import android.text.Editable
@@ -57,6 +61,8 @@ class VisoNativePlugin : Plugin() {
     private lateinit var vault: SecureVault
     private lateinit var homeAssistant: HomeAssistantClient
     private val preferences get() = context.getSharedPreferences("viso_native_preferences", Context.MODE_PRIVATE)
+    private var mediaArtworkKey: String? = null
+    private var mediaArtworkData: String? = null
 
     override fun load() {
         vault = SecureVault(context)
@@ -319,6 +325,150 @@ class VisoNativePlugin : Plugin() {
         call.resolve()
     }
 
+    private fun mediaText(value: CharSequence?): String? = value?.toString()
+        ?.filter { !it.isISOControl() }?.trim()?.take(300)?.takeIf { it.isNotEmpty() }
+
+    private fun emptyMediaState(granted: Boolean): JSObject = JSObject()
+        .put("permissionGranted", granted).put("available", false)
+        .put("packageName", JSONObject.NULL).put("sourceName", JSONObject.NULL)
+        .put("title", JSONObject.NULL).put("artist", JSONObject.NULL).put("album", JSONObject.NULL)
+        .put("artwork", JSONObject.NULL).put("state", "none")
+        .put("positionMs", 0).put("durationMs", 0)
+        .put("canPlayPause", false).put("canNext", false).put("canPrevious", false)
+
+    private fun clearMediaArtwork() {
+        mediaArtworkKey = null
+        mediaArtworkData = null
+    }
+
+    private fun mediaArtwork(metadata: MediaMetadata?, trackKey: String): String? {
+        val bitmap = metadata?.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
+            ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_ART)
+            ?: metadata?.getBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON)
+        if (bitmap == null || bitmap.isRecycled || bitmap.width < 1 || bitmap.height < 1) {
+            clearMediaArtwork()
+            return null
+        }
+        var resized: Bitmap? = null
+        return try {
+            // The platform owns the source bitmap. Only our bounded copy may be recycled.
+            // Sample a few actual pixels to notice artwork changes without JPEG-encoding
+            // the entire image at each progress update.
+            var fingerprint = 1
+            for (row in 0 until 8) for (column in 0 until 8) {
+                val x = column * (bitmap.width - 1) / 7
+                val y = row * (bitmap.height - 1) / 7
+                fingerprint = 31 * fingerprint + bitmap.getPixel(x, y)
+            }
+            val key = "$trackKey:${bitmap.width}:${bitmap.height}:$fingerprint"
+            if (key == mediaArtworkKey) return mediaArtworkData
+            val scale = minOf(1.0, 512.0 / maxOf(bitmap.width, bitmap.height))
+            val width = (bitmap.width * scale).toInt().coerceAtLeast(1)
+            val height = (bitmap.height * scale).toInt().coerceAtLeast(1)
+            val image = if (scale < 1.0) {
+                Bitmap.createScaledBitmap(bitmap, width, height, true).also { resized = it }
+            } else bitmap
+            val bytes = ByteArrayOutputStream()
+            val result = if (image.compress(Bitmap.CompressFormat.JPEG, 72, bytes) && bytes.size() <= 262_144) {
+                "data:image/jpeg;base64," + Base64.encodeToString(bytes.toByteArray(), Base64.NO_WRAP)
+            } else null
+            mediaArtworkKey = key
+            mediaArtworkData = result
+            result
+        } catch (_: Exception) {
+            clearMediaArtwork()
+            null
+        } finally {
+            resized?.takeIf { it !== bitmap }?.recycle()
+        }
+    }
+
+    @PluginMethod
+    fun getMediaState(call: PluginCall) = background(call, "No se pudo consultar la reproducción. Revisá el acceso multimedia de Android.") {
+        val requestedPackage = call.getString("packageName")
+        if (requestedPackage != null) require(NativePolicy.validPackage(requestedPackage))
+        val granted = mediaAccessGranted()
+        if (!granted) {
+            clearMediaArtwork()
+            return@background emptyMediaState(false)
+        }
+        val controllers = sessions()
+        val controller = if (requestedPackage != null) {
+            // A Spotify screen must never display or control an unrelated player.
+            controllers.firstOrNull { it.packageName == requestedPackage }
+        } else {
+            controllers.firstOrNull { it.packageName == "com.spotify.music" }
+                ?: controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+                ?: controllers.firstOrNull()
+        }
+        if (controller == null) {
+            clearMediaArtwork()
+            return@background emptyMediaState(true)
+        }
+        val metadata = controller.metadata
+        val playback = controller.playbackState
+        val title = mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_TITLE))
+            ?: mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE))
+        val artist = mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_ARTIST))
+            ?: mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM_ARTIST))
+            ?: mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE))
+        val album = mediaText(metadata?.getText(MediaMetadata.METADATA_KEY_ALBUM))
+        val duration = (metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L).coerceAtLeast(0)
+        val playing = playback?.state == PlaybackState.STATE_PLAYING
+        val position = NativePolicy.mediaPosition(playback?.position ?: -1L,
+            playback?.lastPositionUpdateTime ?: 0L, SystemClock.elapsedRealtime(),
+            playback?.playbackSpeed ?: 0f, playing, duration)
+        val state = when (playback?.state) {
+            PlaybackState.STATE_PLAYING -> "playing"
+            PlaybackState.STATE_PAUSED -> "paused"
+            PlaybackState.STATE_BUFFERING, PlaybackState.STATE_CONNECTING -> "buffering"
+            PlaybackState.STATE_STOPPED -> "stopped"
+            else -> "none"
+        }
+        val supported = playback?.actions ?: 0L
+        val toggleAction = if (playing) PlaybackState.ACTION_PAUSE else PlaybackState.ACTION_PLAY
+        val sourceName = try {
+            @Suppress("DEPRECATION")
+            val app = context.packageManager.getApplicationInfo(controller.packageName, 0)
+            mediaText(context.packageManager.getApplicationLabel(app))
+        } catch (_: Exception) { null }
+        val trackKey = "${controller.packageName}:$title:$artist:$album:$duration"
+        JSObject().put("permissionGranted", true).put("available", true)
+            .put("packageName", controller.packageName).put("sourceName", sourceName ?: JSONObject.NULL)
+            .put("title", title ?: JSONObject.NULL).put("artist", artist ?: JSONObject.NULL)
+            .put("album", album ?: JSONObject.NULL).put("artwork", mediaArtwork(metadata, trackKey) ?: JSONObject.NULL)
+            .put("state", state).put("positionMs", position).put("durationMs", duration)
+            .put("canPlayPause", supported and (toggleAction or PlaybackState.ACTION_PLAY_PAUSE) != 0L)
+            .put("canNext", supported and PlaybackState.ACTION_SKIP_TO_NEXT != 0L)
+            .put("canPrevious", supported and PlaybackState.ACTION_SKIP_TO_PREVIOUS != 0L)
+    }
+
+    @PluginMethod
+    fun getStandbyDeviceState(call: PluginCall) = background(call, "No se pudo consultar la batería de Android.") {
+        // A null receiver reads the system's sticky snapshot without registering a
+        // listener. No notification, location or battery permissions are requested.
+        val battery = try {
+            context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        } catch (_: Exception) { null }
+        val level = battery?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = battery?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+        val percentage = if (scale > 0 && level in 0..scale) {
+            (level.toLong() * 100 / scale).toInt()
+        } else {
+            try {
+                (context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager)
+                    ?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)?.takeIf { it in 0..100 }
+            } catch (_: Exception) { null }
+        }
+        val charging = when (battery?.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)) {
+            BatteryManager.BATTERY_STATUS_CHARGING, BatteryManager.BATTERY_STATUS_FULL -> true
+            BatteryManager.BATTERY_STATUS_DISCHARGING, BatteryManager.BATTERY_STATUS_NOT_CHARGING -> false
+            else -> null
+        }
+        JSObject().put("batteryPercentage", percentage ?: JSONObject.NULL)
+            .put("charging", charging ?: JSONObject.NULL)
+    }
+
     @PluginMethod
     fun media(call: PluginCall) = ui(call, "Control multimedia no disponible: revisá permisos y una sesión de música activa.") {
         val command = call.getString("command") ?: ""
@@ -334,8 +484,14 @@ class VisoNativePlugin : Plugin() {
             require(command in listOf("play-pause", "next", "previous"))
             require(mediaAccessGranted())
             val controllers = sessions()
-            val controller = controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
-                ?: controllers.firstOrNull() ?: error("No media sessions")
+            val requestedPackage = call.getString("packageName")
+            if (requestedPackage != null) require(NativePolicy.validPackage(requestedPackage))
+            val controller = if (requestedPackage != null) {
+                controllers.firstOrNull { it.packageName == requestedPackage } ?: error("Media session unavailable")
+            } else {
+                controllers.firstOrNull { it.playbackState?.state == PlaybackState.STATE_PLAYING }
+                    ?: controllers.firstOrNull() ?: error("No media sessions")
+            }
             val state = controller.playbackState ?: error("No playback state")
             val supported = state.actions
             val transport = controller.transportControls
@@ -497,6 +653,7 @@ class VisoNativePlugin : Plugin() {
 
     override fun handleOnDestroy() {
         worker.shutdownNow()
+        clearMediaArtwork()
     }
 
     companion object {

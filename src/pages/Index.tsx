@@ -11,14 +11,13 @@ import StreamDeckPanel from "./_components/stream-deck-panel.tsx";
 import LightsPanel from "./_components/lights-panel.tsx";
 import DevicesPanel from "./_components/devices-panel.tsx";
 import LightSync from "./_components/light-sync.tsx";
+import { VisoBrand } from "@/components/viso-brand.tsx";
 
 function DeckScreen() {
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-        <span className="text-2xl font-bold tracking-tight">
-          VISO<span className="text-primary">.</span>
-        </span>
+        <VisoBrand className="h-8 max-w-36" />
         <div className="flex items-center gap-2">
           <Button asChild size="sm">
             <Link to="/deck">
