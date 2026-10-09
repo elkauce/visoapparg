@@ -1,0 +1,105 @@
+{
+  "reference": "original",
+  "candidate": "android-web",
+  "keyCount": {
+    "reference": 7,
+    "candidate": 7
+  },
+  "originalKeyAppearancePreserved": true,
+  "fonts": {
+    "reference": {
+      "family": "\"Bricolage Grotesque\", \"Space Grotesk\", Geist, ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "loadedFaces": [
+        {
+          "family": "Bricolage Grotesque",
+          "status": "unloaded"
+        },
+        {
+          "family": "Bricolage Grotesque",
+          "status": "loaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        }
+      ],
+      "rendered": [
+        {
+          "familyName": "Bricolage Grotesque 96pt ExtraBold",
+          "postScriptName": "BricolageGrotesque96ptExtraBold-Regular",
+          "isCustomFont": true,
+          "glyphCount": 5
+        }
+      ]
+    },
+    "candidate": {
+      "family": "\"Bricolage Grotesque\", \"Space Grotesk\", Geist, ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+      "loadedFaces": [
+        {
+          "family": "Bricolage Grotesque",
+          "status": "unloaded"
+        },
+        {
+          "family": "Bricolage Grotesque",
+          "status": "loaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        },
+        {
+          "family": "Bricolage Grotesque",
+          "status": "unloaded"
+        },
+        {
+          "family": "Bricolage Grotesque",
+          "status": "loaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        },
+        {
+          "family": "Geist Mono",
+          "status": "unloaded"
+        }
+      ],
+      "rendered": [
+        {
+          "familyName": "Bricolage Grotesque 96pt ExtraBold",
+          "postScriptName": "BricolageGrotesque96ptExtraBold-Regular",
+          "isCustomFont": true,
+          "glyphCount": 5
+        }
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "orientation": "landscape",
+      "width": 1280,
+      "height": 720,
+      "changedPixels": 16,
+      "totalPixels": 921600,
+      "changedPercent": 0,
+      "difference": "android-web-vs-original-landscape-diff.png"
+    },
+    {
+      "orientation": "portrait",
+      "width": 720,
+      "height": 1280,
+      "changedPixels": 59693,
+      "totalPixels": 921600,
+      "changedPercent": 6.48,
+      "difference": "android-web-vs-original-portrait-diff.png"
+    }
+  ]
+}

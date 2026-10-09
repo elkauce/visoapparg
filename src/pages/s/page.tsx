@@ -105,8 +105,10 @@ export default function PublicStatusPage() {
       void immersive.exit().then(() => setIsFullscreen(false));
     };
     window.addEventListener("viso:android-back", back);
-    return () => { window.removeEventListener("viso:android-back", back); void immersive.exit().catch(() => undefined); };
+    return () => window.removeEventListener("viso:android-back", back);
   }, [isFullscreen]);
+
+  useEffect(() => () => { if (isAndroidNative()) void immersive.exit().catch(() => undefined); }, []);
 
   if (data === undefined) {
     return <div className="min-h-screen bg-background" />;

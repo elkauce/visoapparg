@@ -2,6 +2,16 @@
 
 Copia independiente con React, Vite y Convex. El registro, inicio y cierre de sesión usan email y contraseña propios con Convex Auth. No requiere Hercules.
 
+## Web vinculada a la APK Android
+
+**Web completa: https://viso-deck-android.vercel.app/**. Usa el mismo correo y contraseña que en la APK. Desde el panel, abre **Pantalla completa → Abrir** en el dispositivo que funcionará como Display; ese enlace público no requiere iniciar sesión. Deja **Deck** abierto en Android y pulsa un estado: el Display cambia en tiempo real. También puedes controlar el estado desde el panel web o **Abrir deck**.
+
+[Descargar APK Android](https://viso-deck-android.vercel.app/downloads/VISO-Deck-debug.apk). Es una compilación de depuración. La APK ya descargada también funciona con esta web; no requiere una nueva cuenta ni reinstalación para sincronizar.
+
+Esta web conserva el sitio completo original y comparte `vivid-nightingale-785` con la APK. El navegador muestra la portada y el panel completos; la app nativa conserva su menú Android. Se verificaron inicio de sesión, Deck → Display, panel web → Display y persistencia tras recargar con dos sesiones de navegador independientes. Los detalles y límites de la comprobación están en [android-validation.md](docs/android-validation.md).
+
+La web original indicada a continuación conserva su backend anterior y sus cuentas independientes. Para vincular la APK actual, usa la dirección de esta sección. La implementación está en la rama `feature/viso-deck-android` y el [PR #1](https://github.com/elkauce/visoapparg/pull/1).
+
 Aplicación publicada: **https://visoapparg.vercel.app**. Crea tu cuenta desde **Entrar → Crear cuenta**; las cuentas de Vercel y Convex administran el alojamiento y son independientes de las cuentas dentro de la aplicación.
 
 El backend de producción pertenece al proyecto `c4-maguilar/visoapparg` de Convex: API `https://useful-egret-915.convex.cloud` y acciones HTTP `https://useful-egret-915.convex.site`. Las claves de autenticación se generaron directamente en producción y permanecen allí.

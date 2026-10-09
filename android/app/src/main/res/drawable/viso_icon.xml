@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Original index.html favicon: dark rounded square and VISO green circle. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#111111" android:pathData="M24,0H76A24,24 0,0 1,100 24V76A24,24 0,0 1,76 100H24A24,24 0,0 1,0 76V24A24,24 0,0 1,24 0Z" />
+    <path android:fillColor="#84e03a" android:pathData="M50,28A22,22 0,1 0,50 72A22,22 0,1 0,50 28Z" />
+</vector>

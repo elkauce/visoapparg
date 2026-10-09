@@ -10,10 +10,15 @@ export default function AndroidRuntime() {
   useEffect(() => {
     if (!isAndroidNative()) return;
     const listener = NativeApp.addListener("backButton", () => {
+      if (document.querySelector('[role="dialog"][data-state="open"]')) {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+        return;
+      }
       const event = new Event("viso:android-back", { cancelable: true });
       if (!window.dispatchEvent(event)) return;
       if (pathname === "/") void NativeApp.exitApp();
-      else navigate(-1);
+      else if ((window.history.state?.idx ?? 0) > 0) navigate(-1);
+      else navigate("/", { replace: true });
     });
     return () => { void listener.then((handle) => handle.remove()); };
   }, [navigate, pathname]);

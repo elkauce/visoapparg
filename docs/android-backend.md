@@ -1,16 +1,38 @@
 # Backend de VISO Deck Android
 
 Este cambio está preparado en la rama de Android para revisión. No despliega ni
-migra el backend de producción. Las pruebas usan `convex-test` y el entorno
-local; no certifican una integración nativa ni una ejecución en producción.
+migra el backend de producción. Las pruebas automatizadas usan `convex-test` y
+el entorno local. También se verificaron operaciones reales contra un despliegue
+separado de desarrollo; no certifican una integración nativa ni una ejecución en
+el backend de producción.
 
 ## Compatibilidad y activación
 
-La APK de prueba usa las operaciones ya publicadas. Las funciones nuevas requieren
-desplegar esta versión de Convex en un entorno autorizado y compilar el cliente
-con `VITE_ANDROID_DECK_EXTENSIONS=true`. El valor predeterminado es `false`.
-Activar el flag contra el backend publicado actual no agrega sus funciones y
-puede producir errores de función inexistente.
+La APK descargable usa el despliegue separado de desarrollo
+`vivid-nightingale-785` (`dev/viso-deck-android`), con esta versión del backend y
+`VITE_ANDROID_DECK_EXTENSIONS=true`. Tiene cuentas y datos propios: no migra
+usuarios de producción. Se comprobaron alta, inicio de sesión, estados originales,
+creación del Deck y confirmación remota de un estado contra ese despliegue.
+
+La web completa compatible con la APK está publicada en
+[`https://viso-deck-android.vercel.app`](https://viso-deck-android.vercel.app/).
+Usa `https://vivid-nightingale-785.convex.cloud` y
+`https://vivid-nightingale-785.convex.site`, con las extensiones activadas. Así,
+la sesión de la misma cuenta VISO accede a los mismos estados y páginas desde
+la APK y desde la web completa. La web muestra la portada convencional mediante
+`VITE_ANDROID_PREVIEW=false`; la pantalla de inicio Android corresponde al
+contenedor nativo. La publicación comprobada quedó en estado `READY`
+(`dpl_4HM5J1SrziLEjoHU9kXbD82KqEen`).
+Compartir backend es una condición para vincularlos y no sustituye una prueba
+de sincronización entre dos clientes.
+
+La web original [`https://visoapparg.vercel.app`](https://visoapparg.vercel.app/)
+conserva el backend estable `useful-egret-915` y las extensiones desactivadas.
+Una cuenta de un despliegue no inicia sesión automáticamente en el otro, aunque
+use el mismo email; sus datos y estados tampoco se comparten. Para usar ese
+backend estable, el script de compilación desactiva las extensiones y rechaza
+activarlas expresamente. No se han desplegado las funciones nuevas en ese backend
+de producción. No existe aún un proceso automático de promoción o migración.
 
 Los argumentos originales de `deck_layout.get`, `ensureDefault`, `createPage`,
 `setKey`, `removeKey`, `renamePage` y `removePage` siguen siendo válidos. Los
@@ -90,8 +112,13 @@ ese recurso.
 
 Guardar una acción Android, multimedia o RGB configura su intención. Su
 ejecución depende del proveedor nativo, permisos y dispositivos autorizados.
-El backend no descubre lámparas ni afirma haberlas conectado. Google Home y
-RGB permanecen pendientes de una integración oficial autorizada y probada.
+El backend no descubre lámparas ni afirma haberlas conectado. El proveedor
+nativo de Home Assistant implementa autorización mediante un token almacenado
+en Android Keystore, descubrimiento y control HTTPS de luces compatibles. Esa
+implementación aún requiere una prueba con un servidor y lámparas reales.
+Google Home continúa pendiente del SDK y de la autorización oficial; véase
+[android-google-home.md](android-google-home.md). Guardar una acción RGB no
+acredita conexión ni control de una luz física.
 
 `deck_actions.activateStatus({statusId, requestId, deviceId})` añade confirmación
 idempotente para el cliente nuevo. `statusId:null` apaga. `requestId` y `deviceId`
@@ -117,6 +144,9 @@ Las pruebas verifican compatibilidad inicial, límites, aislamiento entre usuari
 duplicación, reducción sin pérdida, intercambio/movimiento concurrente, edición
 atómica, referencias anidadas, archivos y Canvas de propietarios correctos, y
 confirmaciones idempotentes sin repetir webhooks. No contactan despliegues ni
-servicios de iluminación. La aprobación y el despliegue del backend nuevo, sus
-pruebas con una cuenta real y las pruebas en Android físico siguen siendo pasos
-separados de estas comprobaciones.
+servicios de iluminación. Las comprobaciones remotas de registro, sesión,
+creación del Deck y activación corresponden únicamente al despliegue separado
+de desarrollo. Promover este backend o migrar datos al entorno estable, probar
+el flujo completo con dos dispositivos y verificar Android físico siguen siendo
+pasos separados. El estado y los límites de cada comprobación figuran en
+[android-validation.md](android-validation.md).
