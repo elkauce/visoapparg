@@ -39,7 +39,9 @@ tsconfig.tsbuildinfo
 /artifacts/
 *.apk
 !/downloads/VISO-Deck-1.1-debug.apk
+!/downloads/VISO-Deck-1.2-debug.apk
 *.aab
+*.aar
 *.jks
 *.keystore
 /android/local.properties

@@ -1,10 +1,12 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { DefaultProviders } from "./components/providers/default.tsx";
 import DeckPage from "./pages/deck/page.tsx";
+import AndroidDeck from "./pages/deck/android-deck.tsx";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import PublicStatusPage from "./pages/s/page.tsx";
 import AndroidRuntime from "./components/android-runtime.tsx";
+import GoogleHomeSync from "./pages/_components/google-home-sync.tsx";
 import AndroidHome from "./pages/android/home.tsx";
 import AndroidSettings from "./pages/android/settings.tsx";
 import AndroidDisplay from "./pages/android/display.tsx";
@@ -17,6 +19,7 @@ export default function App() {
     <DefaultProviders>
       <BrowserRouter>
         <AndroidRuntime />
+        <GoogleHomeSync />
         <Routes>
           <Route path="/" element={isAndroidNative() || import.meta.env.VITE_ANDROID_PREVIEW === "true" ? <AndroidHome /> : <Index />} />
           <Route path="/android" element={<AndroidHome />} />
@@ -24,7 +27,7 @@ export default function App() {
           <Route path="/android/display" element={<AndroidDisplay />} />
           <Route path="/android/integrations" element={<AndroidIntegrations />} />
           <Route path="/android/integrations/:integration" element={<AndroidIntegrationDetails />} />
-          <Route path="/deck" element={<DeckPage />} />
+          <Route path="/deck" element={isAndroidNative() || import.meta.env.VITE_ANDROID_DECK_PRESETS === "true" ? <AndroidDeck /> : <DeckPage />} />
           <Route path="/s/:slug" element={<PublicStatusPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

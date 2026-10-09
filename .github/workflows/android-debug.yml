@@ -1,9 +1,9 @@
 name: VISO Deck Android APK
 on:
   pull_request:
-    branches: [main, feature/viso-deck-android]
+    branches: [main, feature/viso-deck-android, feature/viso-deck-android-improvements]
   push:
-    branches: [feature/viso-deck-android, feature/viso-deck-android-improvements]
+    branches: [feature/viso-deck-android, feature/viso-deck-android-improvements, feature/viso-three-screens]
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,7 +35,8 @@ jobs:
       - run: cd android && ./gradlew testDebugUnitTest --max-workers=4 --console=plain
       - uses: actions/upload-artifact@v4
         with:
-          name: VISO-Deck-debug
+          # CI has no access to the owner's private official Home SDK files.
+          name: VISO-Deck-debug-without-google-home-sdk
           path: artifacts/android/VISO-Deck-debug.apk
           if-no-files-found: error
           retention-days: 30

@@ -57,4 +57,17 @@ class NativePolicyTest {
         assertFalse(NativePolicy.validStorageKey("token\u0000"))
         assertFalse(NativePolicy.validStorageKey("x".repeat(257)))
     }
+
+    @Test fun mediaProgressUsesTheSessionClockAndNeverRunsPastTheTrack() {
+        assertEquals(7_000L, NativePolicy.mediaPosition(5_000, 1_000, 3_000, 1f, true, 10_000))
+        assertEquals(9_000L, NativePolicy.mediaPosition(5_000, 1_000, 3_000, 2f, true, 10_000))
+        assertEquals(10_000L, NativePolicy.mediaPosition(9_000, 1_000, 3_000, 1f, true, 10_000))
+        assertEquals(5_000L, NativePolicy.mediaPosition(5_000, 1_000, 3_000, 1f, false, 10_000))
+        assertEquals(5_000L, NativePolicy.mediaPosition(5_000, 4_000, 3_000, 1f, true, 10_000))
+        assertEquals(5_000L, NativePolicy.mediaPosition(5_000, 0, 3_000, 1f, true, 10_000))
+        assertEquals(5_000L, NativePolicy.mediaPosition(5_000, 1_000, 3_000, Float.NaN, true, 10_000))
+        assertEquals(0L, NativePolicy.mediaPosition(-1, 1_000, 3_000, 1f, true, 10_000))
+        assertEquals(0L, NativePolicy.mediaPosition(1_000, 1_000, 3_000, -1f, true, 10_000))
+        assertEquals(7_000L, NativePolicy.mediaPosition(5_000, 1_000, 3_000, 1f, true, 0))
+    }
 }

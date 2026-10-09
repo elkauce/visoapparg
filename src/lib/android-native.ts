@@ -9,6 +9,37 @@ export type MediaCommand =
   | "volume-down"
   | "mute";
 
+/** A snapshot of a real Android MediaSession. Metadata stays on this device. */
+export interface AndroidMediaState {
+  permissionGranted: boolean;
+  available: boolean;
+  packageName: string | null;
+  sourceName: string | null;
+  title: string | null;
+  artist: string | null;
+  album: string | null;
+  /** Bounded artwork provided by the session, without fetching external URLs. */
+  artwork: string | null;
+  state: "playing" | "paused" | "buffering" | "stopped" | "none";
+  positionMs: number;
+  /** Zero when the session does not expose a duration. */
+  durationMs: number;
+  canPlayPause: boolean;
+  canNext: boolean;
+  canPrevious: boolean;
+}
+
+export interface AndroidMediaOptions {
+  /** When supplied, never substitutes another application's session. */
+  packageName?: string;
+}
+
+/** Device-local readings; null means Android did not supply a value. */
+export interface StandbyDeviceState {
+  batteryPercentage: number | null;
+  charging: boolean | null;
+}
+
 export interface IntegrationStatus {
   status: "connected" | "disconnected" | "pending" | "unavailable";
   configured?: boolean;
@@ -59,7 +90,9 @@ interface VisoNativePlugin {
   exitImmersive(): Promise<void>;
   openUrl(options: { url: string }): Promise<void>;
   openApp(options: { packageName: string }): Promise<void>;
-  media(options: { command: MediaCommand }): Promise<void>;
+  media(options: { command: MediaCommand; packageName?: string }): Promise<void>;
+  getMediaState(options?: AndroidMediaOptions): Promise<AndroidMediaState>;
+  getStandbyDeviceState(): Promise<StandbyDeviceState>;
   getToken(options: { key: string }): Promise<{ value: string | null }>;
   setToken(options: { key: string; value: string }): Promise<void>;
   removeToken(options: { key: string }): Promise<void>;
@@ -108,9 +141,9 @@ export const actions = {
     requireAndroid();
     await plugin.openApp({ packageName });
   },
-  async media(command: MediaCommand): Promise<void> {
+  async media(command: MediaCommand, packageName?: string): Promise<void> {
     requireAndroid();
-    await plugin.media({ command });
+    await plugin.media({ command, ...(packageName ? { packageName } : {}) });
   },
 };
 
@@ -167,6 +200,14 @@ export const nativeDeck = {
   getCapabilities: capabilities,
   requestMediaAccess,
   openMediaPermissionSettings: requestMediaAccess,
+  async getMediaState(options?: AndroidMediaOptions): Promise<AndroidMediaState> {
+    requireAndroid();
+    return plugin.getMediaState(options ?? {});
+  },
+  async getStandbyDeviceState(): Promise<StandbyDeviceState> {
+    requireAndroid();
+    return plugin.getStandbyDeviceState();
+  },
   configureAllowedApps,
   manageAllowedApps: configureAllowedApps,
   async getAllowedApps(): Promise<string[]> {

@@ -1,6 +1,27 @@
 apply plugin: 'com.android.application'
 apply plugin: 'org.jetbrains.kotlin.android'
 
+// The official Home SDK is supplied from the user's existing STATUS project.
+// Keep the standalone SDK outside the public repository. CI without it builds
+// an explicitly unavailable bridge, rather than pretending that Home is linked.
+def homeSdkPath = System.getenv('VISO_GOOGLE_HOME_SDK_DIR')
+def homeSdkFiles = homeSdkPath ? [
+    new File(homeSdkPath, 'play-services-home-17.1.0.aar'),
+    new File(homeSdkPath, 'play-services-home-types-17.1.0.aar')
+] : []
+if (homeSdkPath) {
+    def expected = [
+        'dd088a22a0fc16886ee8a81bb86db9efc254378cf68b5cf4d59c5a7c1405b02b',
+        '4eda000761e067ec5b009a1b2cf6fce67f32dbf15628d1dcf8846db58f303003'
+    ]
+    homeSdkFiles.eachWithIndex { sdk, index ->
+        if (!sdk.isFile()) throw new GradleException('The configured official Google Home SDK is incomplete.')
+        def sha = java.security.MessageDigest.getInstance('SHA-256').digest(sdk.bytes).encodeHex().toString()
+        if (sha != expected[index]) throw new GradleException('The configured Google Home SDK does not match the reviewed STATUS distribution.')
+    }
+}
+def hasHomeSdk = !homeSdkFiles.isEmpty()
+
 android {
     namespace = "com.viso.deck"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -8,8 +29,8 @@ android {
         applicationId "com.viso.deck"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.1.0"
+        versionCode 3
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -23,6 +44,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = '21'
+    }
+    sourceSets {
+        main.java.srcDirs += ['src/googleHome/shared', hasHomeSdk ? 'src/googleHome/java' : 'src/googleHomeUnavailable/java']
     }
     // Signing material is supplied by the release operator, never committed.
     def releaseStore = System.getenv('VISO_RELEASE_STORE_FILE')
@@ -65,6 +89,17 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    if (hasHomeSdk) {
+        implementation files(homeSdkFiles)
+        // Dependencies of the reviewed STATUS/viso-safe SDK integration.
+        implementation 'com.google.android.gms:play-services-auth:21.6.0'
+        implementation 'com.google.android.gms:play-services-auth-base:18.0.10'
+        implementation 'com.google.android.gms:play-services-base:18.5.0'
+        implementation 'com.google.android.gms:play-services-basement:18.9.0'
+        implementation 'com.google.android.gms:play-services-tasks:18.2.0'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2'
+    }
 }
 
 apply from: 'capacitor.build.gradle'
