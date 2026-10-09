@@ -33,3 +33,4 @@ tsconfig.tsbuildinfo
 
 # Version the public template, never local credentials.
 !.env.example
+.vercel

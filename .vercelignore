@@ -1,0 +1,10 @@
+# Keep local databases, credentials and generated files out of deployments.
+.convex
+.vercel
+.env*
+node_modules
+dist
+.pnpm-store
+*.log
+*.tsbuildinfo
+viso-codigo (2).zip

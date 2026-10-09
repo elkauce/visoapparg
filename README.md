@@ -2,6 +2,10 @@
 
 Copia independiente con React, Vite y Convex. El registro, inicio y cierre de sesión usan email y contraseña propios con Convex Auth. No requiere Hercules.
 
+Aplicación publicada: **https://visoapparg.vercel.app**. Crea tu cuenta desde **Entrar → Crear cuenta**; las cuentas de Vercel y Convex administran el alojamiento y son independientes de las cuentas dentro de la aplicación.
+
+El backend de producción pertenece al proyecto `c4-maguilar/visoapparg` de Convex: API `https://useful-egret-915.convex.cloud` y acciones HTTP `https://useful-egret-915.convex.site`. Las claves de autenticación se generaron directamente en producción y permanecen allí.
+
 ## Desarrollo local
 
 Necesitas Node.js 24 y pnpm 11.19.0.
@@ -68,6 +72,12 @@ Publicar el entorno de Codex guarda la configuración de desarrollo. Para obtene
 
 5. Abre la URL de Vercel y usa **Entrar → Crear cuenta**. Las cuentas y datos de esta base de producción comienzan vacíos. Comprueba también un enlace público `/s/:slug` recargando directamente esa dirección.
 
-Los cambios del frontend se publican al actualizar la rama conectada a Vercel. Para publicar cambios de `convex/`, ejecuta de nuevo `pnpm exec convex deploy` desde la copia vinculada al proyecto de Convex Cloud. Si cambias el dominio público, actualiza `SITE_URL` en las variables de producción de Convex.
+Si conectas una rama de GitHub a Vercel, sus cambios del frontend se publicarán automáticamente. Para publicar cambios de `convex/`, ejecuta de nuevo `pnpm exec convex deploy` desde la copia vinculada al proyecto de Convex Cloud. Si cambias el dominio público, actualiza `SITE_URL` en las variables de producción de Convex.
+
+El despliegue actual se publicó con Vercel CLI. Para actualizarlo desde una copia local autenticada y vinculada al mismo proyecto, usa `vercel --prod`. `.vercelignore` excluye de las subidas el estado local de Convex, credenciales, dependencias, resultados de compilación y el ZIP de referencia. Para apuntar explícitamente al backend actual desde una copia que conserve el desarrollo local, puedes ejecutar:
+
+```bash
+CONVEX_DEPLOYMENT=prod:useful-egret-915 pnpm exec convex deploy
+```
 
 Referencias: [Convex en producción](https://docs.convex.dev/production) y [configuración de Convex Auth](https://labs.convex.dev/auth/setup/manual).
