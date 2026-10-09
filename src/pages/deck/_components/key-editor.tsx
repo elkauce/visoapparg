@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
+import { Switch } from "@/components/ui/switch.tsx";
+import AndroidAppIcon from "@/components/android-app-icon.tsx";
 import {
   Select,
   SelectContent,
@@ -40,6 +42,8 @@ import { deckErrorMessage } from "../_lib/deck-options.ts";
 import { uploadKeyMedia, validateKeyMedia } from "../_lib/upload-media.ts";
 import ActionEditor, { getActionValidationMessage } from "./action-editor.tsx";
 import type { DeckAction } from "../_lib/action-runner.ts";
+import { encodeKeyVisibility } from "../_lib/key-visibility.ts";
+import DeckKey from "./deck-key.tsx";
 
 export type EditTarget = {
   pageId: string;
@@ -181,6 +185,15 @@ function KeyForm({
   const [icon, setIcon] = useState(
     initialFace ? initialFace.icon : kind === "folder" ? "folder" : "globe",
   );
+  const [iconCustomized, setIconCustomized] = useState(
+    Boolean(target.appearance?.icon && initialFace?.icon !== "android-app") ||
+      (initial?.kind === "action" &&
+        initial.icon !== "globe" &&
+        initial.icon !== "android-app"),
+  );
+  const [showLabel, setShowLabel] = useState(initialFace?.showLabel !== false);
+  const [showIcon, setShowIcon] = useState(initialFace?.showIcon !== false);
+  const [visibilityTouched, setVisibilityTouched] = useState(false);
   const [color, setColor] = useState(initialFace?.color ?? STATUS_COLORS[4]);
   const [action, setAction] = useState<DeckAction>(
     initial?.kind === "action" ? initial.action : { type: "display" },
@@ -304,16 +317,21 @@ function KeyForm({
       const needsAppearance =
         advanced &&
         (appearanceTouched ||
+          visibilityTouched ||
           media ||
           removeMedia ||
           target.appearance ||
           resetAppearance);
       const appearance =
-        resetAppearance && !appearanceTouched && !media
+        resetAppearance && !appearanceTouched && !visibilityTouched && !media
           ? null
           : {
               ...(appearanceTouched
-                ? { label: label.trim(), icon, color }
+                ? {
+                    label: label.trim(),
+                    icon: encodeKeyVisibility(icon, showLabel, showIcon),
+                    color,
+                  }
                 : {
                     ...(target.appearance?.label
                       ? { label: target.appearance.label }
@@ -325,6 +343,9 @@ function KeyForm({
                       ? { color: target.appearance.color }
                       : {}),
                   }),
+              ...(visibilityTouched
+                ? { icon: encodeKeyVisibility(icon, showLabel, showIcon) }
+                : {}),
               ...(uploaded
                 ? {
                     mediaStorageId: uploaded.storageId,
@@ -506,7 +527,22 @@ function KeyForm({
         {kind === "action" && (
           <ActionEditor
             value={action}
-            onChange={setAction}
+            onChange={(next) => {
+              if (next.type === "android-app" && !iconCustomized)
+                setIcon("android-app");
+              setAction(next);
+            }}
+            onAppSelected={(app) => {
+              if (
+                !label.trim() ||
+                (initial?.kind !== "action" && !appearanceTouched)
+              ) {
+                setLabel(app.name.slice(0, 20));
+                if (advanced && target.appearance?.label)
+                  setAppearanceTouched(true);
+              }
+              if (!iconCustomized) setIcon("android-app");
+            }}
             statuses={statuses}
             pages={pages}
             disabled={!advanced}
@@ -609,6 +645,28 @@ function KeyForm({
             </div>
             <div className="space-y-2">
               <Label>Icono</Label>
+              {kind === "action" &&
+                action.type === "android-app" &&
+                action.packageName && (
+                  <Button
+                    type="button"
+                    variant={icon === "android-app" ? "secondary" : "outline"}
+                    size="sm"
+                    aria-pressed={icon === "android-app"}
+                    onClick={() => {
+                      setIcon("android-app");
+                      setIconCustomized(false);
+                      if (advanced) setAppearanceTouched(true);
+                    }}
+                  >
+                    <AndroidAppIcon
+                      packageName={action.packageName}
+                      className="size-5"
+                      fallback={<StatusIcon name="phone" className="size-5" />}
+                    />
+                    Usar icono de la aplicación
+                  </Button>
+                )}
               <div className="grid grid-cols-8 gap-1.5">
                 {STATUS_ICON_KEYS.map((key) => (
                   <button
@@ -617,6 +675,7 @@ function KeyForm({
                     aria-label={key}
                     onClick={() => {
                       setIcon(key);
+                      setIconCustomized(true);
                       if (advanced) setAppearanceTouched(true);
                     }}
                     className={cn(
@@ -640,27 +699,34 @@ function KeyForm({
               Imagen, GIF o video de la tecla
             </Label>
             {(previewUrl || (!removeMedia && target.appearance?.mediaUrl)) && (
-              <div className="overflow-hidden rounded-xl border bg-black">
-                {(
-                  media
-                    ? media.type.startsWith("video/")
-                    : target.appearance?.mediaType === "video"
-                ) ? (
-                  <video
-                    src={previewUrl ?? target.appearance?.mediaUrl ?? undefined}
-                    muted
-                    loop
-                    autoPlay
-                    playsInline
-                    className="h-32 w-full object-cover"
-                  />
-                ) : (
-                  <img
-                    src={previewUrl ?? target.appearance?.mediaUrl ?? undefined}
-                    alt="Vista previa de la tecla"
-                    className="h-32 w-full object-cover"
-                  />
-                )}
+              <div
+                className="grid h-36 overflow-hidden rounded-2xl border bg-black"
+                aria-label="Vista previa de la tecla"
+              >
+                <DeckKey
+                  face={{
+                    label,
+                    icon,
+                    color,
+                    active: false,
+                    mediaUrl: previewUrl ?? target.appearance?.mediaUrl,
+                    mediaType: (
+                      media
+                        ? media.type.startsWith("video/")
+                        : target.appearance?.mediaType === "video"
+                    )
+                      ? "video"
+                      : "image",
+                    showLabel,
+                    showIcon,
+                    ...(kind === "action" && action.type === "android-app"
+                      ? { appPackageName: action.packageName }
+                      : {}),
+                  }}
+                  editMode={false}
+                  onPress={() => {}}
+                  disabled
+                />
               </div>
             )}
             <Input
@@ -700,6 +766,32 @@ function KeyForm({
               Hasta 60 MB. El archivo se sube al guardar. La reproducción
               depende del formato compatible con el dispositivo.
             </p>
+            <div className="space-y-3 rounded-xl border p-3">
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="key-show-label">Mostrar nombre</Label>
+                <Switch
+                  id="key-show-label"
+                  checked={showLabel}
+                  onCheckedChange={(value) => {
+                    setShowLabel(value);
+                    setVisibilityTouched(true);
+                    setResetAppearance(false);
+                  }}
+                />
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="key-show-icon">Mostrar icono</Label>
+                <Switch
+                  id="key-show-icon"
+                  checked={showIcon}
+                  onCheckedChange={(value) => {
+                    setShowIcon(value);
+                    setVisibilityTouched(true);
+                    setResetAppearance(false);
+                  }}
+                />
+              </div>
+            </div>
             {target.appearance && (
               <Button
                 type="button"
@@ -711,6 +803,10 @@ function KeyForm({
                     : null;
                   setLabel(face?.label ?? "");
                   setIcon(face?.icon ?? "globe");
+                  setIconCustomized(false);
+                  setShowLabel(true);
+                  setShowIcon(true);
+                  setVisibilityTouched(false);
                   setColor(face?.color ?? STATUS_COLORS[4]);
                   setMedia(null);
                   setPreviewUrl(null);

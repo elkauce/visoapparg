@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Plus } from "lucide-react";
 import StatusIcon from "@/components/status-icon.tsx";
+import AndroidAppIcon from "@/components/android-app-icon.tsx";
 import { readableTextColor } from "@/lib/color.ts";
 import { cn } from "@/lib/utils.ts";
 
@@ -11,6 +12,9 @@ export type KeyFace = {
   active: boolean;
   mediaUrl?: string | null;
   mediaType?: "image" | "video";
+  showLabel?: boolean;
+  showIcon?: boolean;
+  appPackageName?: string;
 };
 
 type DeckKeyProps = {
@@ -50,6 +54,24 @@ export default function DeckKey({
   }
 
   const text = readableTextColor(face.color);
+  const showLabel = face.showLabel !== false;
+  const showIcon = face.showIcon !== false;
+  const iconClassName =
+    "relative size-9 shrink-0 sm:size-[min(3rem,var(--deck-icon-limit,3rem))] lg:size-[min(4rem,var(--deck-icon-limit,4rem))]";
+  const icon = (
+    <StatusIcon
+      name={face.icon === "android-app" ? "phone" : face.icon}
+      strokeWidth={1.5}
+      className={iconClassName}
+      style={
+        face.mediaUrl && face.active
+          ? { color: "#ffffff" }
+          : face.active
+            ? undefined
+            : { color: face.color }
+      }
+    />
+  );
   return (
     <motion.button
       type="button"
@@ -99,27 +121,27 @@ export default function DeckKey({
             className="absolute inset-0 size-full object-cover"
           />
         ))}
-      {face.mediaUrl && (
+      {face.mediaUrl && (showLabel || showIcon) && (
         <span className="absolute inset-0 bg-black/40" aria-hidden="true" />
       )}
-      <StatusIcon
-        name={face.icon}
-        strokeWidth={1.5}
-        className="relative size-9 shrink-0 sm:size-[min(3rem,var(--deck-icon-limit,3rem))] lg:size-[min(4rem,var(--deck-icon-limit,4rem))]"
-        style={
-          face.mediaUrl && face.active
-            ? { color: "#ffffff" }
-            : face.active
-              ? undefined
-              : { color: face.color }
-        }
-      />
-      <span
-        className="relative line-clamp-2 w-full text-balance px-1 text-center text-sm leading-tight sm:text-[min(1.125rem,var(--deck-text-limit,1.125rem))] lg:text-[min(1.5rem,var(--deck-text-limit,1.5rem))]"
-        style={face.mediaUrl ? { color: "#ffffff" } : undefined}
-      >
-        {face.label}
-      </span>
+      {showIcon &&
+        (face.appPackageName && face.icon === "android-app" ? (
+          <AndroidAppIcon
+            packageName={face.appPackageName}
+            className={iconClassName}
+            fallback={icon}
+          />
+        ) : (
+          icon
+        ))}
+      {showLabel && (
+        <span
+          className="relative line-clamp-2 w-full text-balance px-1 text-center text-sm leading-tight sm:text-[min(1.125rem,var(--deck-text-limit,1.125rem))] lg:text-[min(1.5rem,var(--deck-text-limit,1.5rem))]"
+          style={face.mediaUrl ? { color: "#ffffff" } : undefined}
+        >
+          {face.label}
+        </span>
+      )}
       {!face.active && (
         <span
           className="absolute inset-x-6 bottom-0 h-1 rounded-t-full"

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
-import { resolveKeyFace, type DeckStatusInfo } from "./resolve-key.ts";
+import {
+  resolveKeyFace,
+  type DeckStatusInfo,
+  type KeyContent,
+} from "./resolve-key.ts";
+import { encodeKeyVisibility } from "./key-visibility.ts";
 
 const statuses: DeckStatusInfo[] = [
   { _id: "free", name: "Libre", color: "#22c55e", icon: "check-circle" },
@@ -80,5 +85,70 @@ describe("original Deck faces", () => {
       mediaType: "image",
     });
     expect(statuses).toEqual(original);
+  });
+  it.each([
+    [false, false],
+    [true, false],
+    [false, true],
+    [true, true],
+  ])(
+    "reads per-key label=%s icon=%s without changing its action or other keys",
+    (showLabel, showIcon) => {
+      const content: KeyContent = {
+        kind: "status",
+        statusId: "free" as Id<"statuses">,
+      };
+      const original = structuredClone(content);
+      const face = resolveKeyFace(content, statuses, "free", 0, {
+        icon: encodeKeyVisibility("check-circle", showLabel, showIcon),
+        mediaUrl: "https://example.com/deck.mp4",
+        mediaType: "video",
+      });
+      expect(face).toMatchObject({
+        label: "Libre",
+        icon: "check-circle",
+        showLabel,
+        showIcon,
+        active: true,
+        mediaType: "video",
+        mediaUrl: "https://example.com/deck.mp4",
+      });
+      expect(content).toEqual(original);
+      expect(
+        resolveKeyFace(
+          { kind: "status", statusId: "busy" as Id<"statuses"> },
+          statuses,
+          "free",
+          0,
+        ),
+      ).toEqual({
+        label: "Ocupado",
+        icon: "ban",
+        color: "#ef4444",
+        active: false,
+      });
+    },
+  );
+  it("uses the real app icon as the default and preserves a custom icon", () => {
+    const content: KeyContent = {
+      kind: "action",
+      label: "Spotify",
+      icon: "globe",
+      color: "#22c55e",
+      action: { type: "android-app", packageName: "com.spotify.music" },
+    };
+    expect(resolveKeyFace(content, [], null, 0)).toMatchObject({
+      icon: "android-app",
+      appPackageName: "com.spotify.music",
+    });
+    expect(
+      resolveKeyFace(content, [], null, 0, { icon: "music" }),
+    ).toMatchObject({ icon: "music" });
+    expect(
+      resolveKeyFace(content, [], null, 0, { icon: "music" }),
+    ).not.toHaveProperty("appPackageName");
+    expect(
+      resolveKeyFace({ ...content, icon: "headphones" }, [], null, 0),
+    ).toMatchObject({ icon: "headphones" });
   });
 });

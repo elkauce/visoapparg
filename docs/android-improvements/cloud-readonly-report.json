@@ -1,0 +1,14 @@
+{
+  "url": "https://viso-deck-mejoras-npgfwlf4l-manuelhaguilar8-4981s-projects.vercel.app",
+  "checkedAt": "2026-10-09T20:40:17.300Z",
+  "checks": {
+    "fullLanding": true,
+    "existingTestAccountSignsIn": true,
+    "existingDeckLoaded": true,
+    "newIntegrationsLoaded": true
+  },
+  "pageErrorCount": 0,
+  "customerAccountUsed": false,
+  "dataMutationsExecuted": false,
+  "passed": true
+}

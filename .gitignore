@@ -38,6 +38,7 @@ tsconfig.tsbuildinfo
 # Android outputs and private release signing material
 /artifacts/
 *.apk
+!/downloads/VISO-Deck-1.1-debug.apk
 *.aab
 *.jks
 *.keystore

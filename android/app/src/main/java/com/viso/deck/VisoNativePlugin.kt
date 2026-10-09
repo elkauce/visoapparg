@@ -1,9 +1,14 @@
 package com.viso.deck
 
 import android.app.NotificationManager
+import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ResolveInfo
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
@@ -12,11 +17,21 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.text.InputType
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Base64
+import android.view.Gravity
 import android.view.WindowManager
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.BaseAdapter
+import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ListView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -29,6 +44,10 @@ import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
 import org.json.JSONObject
+import java.io.ByteArrayOutputStream
+import java.text.Collator
+import java.text.Normalizer
+import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.Executors
 
@@ -87,12 +106,69 @@ class VisoNativePlugin : Plugin() {
 
     private fun allowedApps(): Set<String> = preferences.getStringSet("allowed_apps", emptySet())?.toSet() ?: emptySet()
 
+    private data class LaunchableApp(val packageName: String, val name: String, val resolved: ResolveInfo)
+
+    private fun launchableApps(): List<LaunchableApp> {
+        // This is the existing MAIN/LAUNCHER visibility query, not a scan of all packages.
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
+        val manager = context.packageManager
+        @Suppress("DEPRECATION")
+        val visible = manager.queryIntentActivities(intent, 0)
+        val collator = Collator.getInstance(Locale.getDefault())
+        return visible.distinctBy { it.activityInfo.packageName }
+            .filter { it.activityInfo.packageName != context.packageName && NativePolicy.validPackage(it.activityInfo.packageName) }
+            .map { resolved ->
+                val packageName = resolved.activityInfo.packageName
+                val label = resolved.activityInfo.applicationInfo.loadLabel(manager).toString()
+                    .filter { !it.isISOControl() }.trim().take(100)
+                val name = label.takeIf { it.isNotEmpty() && it != packageName } ?: "Aplicación"
+                LaunchableApp(packageName, name, resolved)
+            }
+            .sortedWith { first, second -> collator.compare(first.name, second.name) }
+    }
+
+    private fun appDrawable(app: LaunchableApp): Drawable? = try {
+        app.resolved.activityInfo.applicationInfo.loadIcon(context.packageManager)
+    } catch (_: Exception) { null }
+
+    private fun appIcon(app: LaunchableApp): String? {
+        val drawable = appDrawable(app) ?: return null
+        val bitmap = Bitmap.createBitmap(96, 96, Bitmap.Config.ARGB_8888)
+        return try {
+            val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 96
+            val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 96
+            val scale = minOf(96.0 / width, 96.0 / height)
+            val drawnWidth = (width * scale).toInt().coerceIn(1, 96)
+            val drawnHeight = (height * scale).toInt().coerceIn(1, 96)
+            val left = (96 - drawnWidth) / 2
+            val top = (96 - drawnHeight) / 2
+            drawable.setBounds(left, top, left + drawnWidth, top + drawnHeight)
+            drawable.draw(Canvas(bitmap))
+            val bytes = ByteArrayOutputStream()
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, bytes) || bytes.size() > 65_536) null
+            else "data:image/png;base64," + Base64.encodeToString(bytes.toByteArray(), Base64.NO_WRAP)
+        } catch (_: Exception) { null } finally { bitmap.recycle() }
+    }
+
     @PluginMethod
-    fun openApp(call: PluginCall) = ui(call, "Aplicación no permitida o no disponible. Seleccionala primero en Configuración.") {
+    fun openApp(call: PluginCall) = ui(call, "No se pudo abrir la aplicación. Elegí otra desde el editor.") {
         val packageName = call.getString("packageName") ?: ""
-        require(NativePolicy.allowedPackage(packageName, allowedApps()))
-        val intent = context.packageManager.getLaunchIntentForPackage(packageName) ?: error("Unavailable")
-        activity.startActivity(intent)
+        if (!NativePolicy.allowedPackage(packageName, allowedApps())) {
+            call.reject("Esta aplicación no está permitida. Elegila en Aplicaciones permitidas.", "APP_NOT_ALLOWED")
+            return@ui
+        }
+        val intent = context.packageManager.getLaunchIntentForPackage(packageName)
+        if (intent == null) {
+            call.reject("La aplicación ya no está instalada o disponible. Elegí otra desde el editor.", "APP_UNAVAILABLE")
+            return@ui
+        }
+        try { activity.startActivity(intent) } catch (_: ActivityNotFoundException) {
+            call.reject("La aplicación ya no está instalada o disponible. Elegí otra desde el editor.", "APP_UNAVAILABLE")
+            return@ui
+        } catch (_: SecurityException) {
+            call.reject("Android no permite abrir esta aplicación. Elegí otra desde el editor.", "APP_UNAVAILABLE")
+            return@ui
+        }
         call.resolve()
     }
 
@@ -102,23 +178,113 @@ class VisoNativePlugin : Plugin() {
     }
 
     @PluginMethod
+    fun listInstalledApps(call: PluginCall) = background(call, "No se pudieron consultar las aplicaciones disponibles.") {
+        val selected = allowedApps()
+        val apps = JSArray()
+        launchableApps().forEach { app ->
+            apps.put(JSObject().put("packageName", app.packageName).put("name", app.name)
+                .put("icon", appIcon(app) ?: JSONObject.NULL).put("allowed", app.packageName in selected))
+        }
+        JSObject().put("apps", apps)
+    }
+
+    @PluginMethod
+    fun getAppIcon(call: PluginCall) = background(call, "No se pudo leer el icono de la aplicación.") {
+        val packageName = call.getString("packageName") ?: ""
+        require(NativePolicy.validPackage(packageName))
+        val app = launchableApps().firstOrNull { it.packageName == packageName }
+        JSObject().put("icon", app?.let(::appIcon) ?: JSONObject.NULL)
+    }
+
+    @PluginMethod
     fun configureAllowedApps(call: PluginCall) = ui(call, "No se pudo configurar la lista de aplicaciones.") {
-        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-        @Suppress("DEPRECATION")
-        val applications = context.packageManager.queryIntentActivities(intent, 0)
-            .distinctBy { it.activityInfo.packageName }
-            .filter { it.activityInfo.packageName != context.packageName }
-            .sortedBy { it.loadLabel(context.packageManager).toString().lowercase() }
-        val labels = applications.map { "${it.loadLabel(context.packageManager)} (${it.activityInfo.packageName})" }.toTypedArray()
+        val applications = launchableApps()
         val selected = allowedApps().toMutableSet()
-        val checked = applications.map { it.activityInfo.packageName in selected }.toBooleanArray()
-        AlertDialog.Builder(activity).setTitle("Aplicaciones permitidas")
-            .setMultiChoiceItems(labels, checked) { _, index, enabled ->
-                val packageName = applications[index].activityInfo.packageName
-                if (enabled) selected.add(packageName) else selected.remove(packageName)
+        val density = context.resources.displayMetrics.density
+        fun dp(value: Int) = (value * density).toInt()
+        val layout = LinearLayout(activity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(20), dp(8), dp(20), 0)
+        }
+        val search = EditText(activity).apply {
+            hint = "Buscar aplicación"
+            inputType = InputType.TYPE_CLASS_TEXT
+            setSingleLine(true)
+            isSaveEnabled = false
+            imeOptions = EditorInfo.IME_ACTION_DONE
+        }
+        val list = ListView(activity).apply {
+            dividerHeight = 0
+            isVerticalScrollBarEnabled = true
+        }
+        val empty = TextView(activity).apply {
+            text = "No hay aplicaciones disponibles."
+            gravity = Gravity.CENTER
+            setPadding(0, dp(24), 0, dp(24))
+        }
+        var filtered = applications
+        val adapter = object : BaseAdapter() {
+            override fun getCount() = filtered.size
+            override fun getItem(position: Int) = filtered[position]
+            override fun getItemId(position: Int) = position.toLong()
+            override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
+                val row = convertView as? LinearLayout ?: LinearLayout(activity).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    minimumHeight = dp(64)
+                    setPadding(dp(4), dp(8), dp(4), dp(8))
+                    addView(ImageView(activity).apply {
+                        scaleType = ImageView.ScaleType.FIT_CENTER
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    }, LinearLayout.LayoutParams(dp(40), dp(40)).apply { marginEnd = dp(14) })
+                    addView(TextView(activity).apply {
+                        textSize = 16f
+                        setSingleLine(false)
+                        maxLines = 2
+                    }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+                    addView(CheckBox(activity).apply {
+                        isClickable = false
+                        isFocusable = false
+                        importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                    })
+                }
+                val app = filtered[position]
+                (row.getChildAt(0) as ImageView).setImageDrawable(appDrawable(app))
+                (row.getChildAt(1) as TextView).text = app.name
+                (row.getChildAt(2) as CheckBox).isChecked = app.packageName in selected
+                row.contentDescription = "${app.name}, ${if (app.packageName in selected) "seleccionada" else "sin seleccionar"}"
+                return row
             }
+        }
+        list.adapter = adapter
+        list.setOnItemClickListener { _, _, position, _ ->
+            val packageName = filtered[position].packageName
+            if (!selected.add(packageName)) selected.remove(packageName)
+            adapter.notifyDataSetChanged()
+        }
+        fun searchKey(value: String): String = Normalizer.normalize(value, Normalizer.Form.NFD)
+            .replace(Regex("\\p{M}"), "").lowercase(Locale.getDefault())
+        search.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(text: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(text: CharSequence?, start: Int, before: Int, count: Int) {
+                val term = searchKey(text?.toString()?.trim() ?: "")
+                filtered = applications.filter { searchKey(it.name).contains(term) }
+                empty.text = if (applications.isEmpty()) "No hay aplicaciones disponibles." else "No se encontraron aplicaciones."
+                empty.visibility = if (filtered.isEmpty()) View.VISIBLE else View.GONE
+                adapter.notifyDataSetChanged()
+            }
+            override fun afterTextChanged(text: Editable?) = Unit
+        })
+        empty.visibility = if (applications.isEmpty()) View.VISIBLE else View.GONE
+        layout.addView(search)
+        layout.addView(empty)
+        // A recycled native list remains smooth even with many launchable applications.
+        layout.addView(list, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+            minOf(dp(360), (context.resources.displayMetrics.heightPixels * 0.42).toInt())))
+        AlertDialog.Builder(activity).setTitle("Aplicaciones permitidas")
+            .setView(layout)
             .setPositiveButton("Guardar") { _, _ ->
-                val visible = applications.map { it.activityInfo.packageName }.toSet()
+                val visible = applications.map { it.packageName }.toSet()
                 val saved = selected.intersect(visible)
                 preferences.edit().putStringSet("allowed_apps", saved).apply()
                 call.resolve(JSObject().put("packages", JSArray(saved.sorted())))
@@ -350,10 +516,14 @@ class VisoNativePlugin : Plugin() {
             if (immersive) controller.hide(WindowInsetsCompat.Type.systemBars()) else controller.show(WindowInsetsCompat.Type.systemBars())
             if (webView != null) {
                 ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
-                    val type = if (immersive) WindowInsetsCompat.Type.displayCutout() else WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
-                    val safe = insets.getInsets(type)
-                    val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
-                    view.setPadding(safe.left, safe.top, safe.right, maxOf(safe.bottom, keyboard.bottom))
+                    if (activity is MainActivity) {
+                        activity.applyWebViewInsets(view, insets, immersive)
+                    } else {
+                        val type = if (immersive) WindowInsetsCompat.Type.displayCutout() else WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+                        val safe = insets.getInsets(type)
+                        val keyboard = insets.getInsets(WindowInsetsCompat.Type.ime())
+                        view.setPadding(safe.left, safe.top, safe.right, maxOf(safe.bottom, keyboard.bottom))
+                    }
                     insets
                 }
                 ViewCompat.requestApplyInsets(webView)

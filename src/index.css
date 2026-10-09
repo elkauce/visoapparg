@@ -136,3 +136,51 @@
     cursor: pointer;
   }
 }
+
+/* Android injects its actual system/cutout insets even on older WebViews where
+   env(safe-area-inset-*) is always zero. Browser previews retain the env fallback. */
+:root {
+  --viso-safe-top: env(safe-area-inset-top, 0px);
+  --viso-safe-right: env(safe-area-inset-right, 0px);
+  --viso-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --viso-safe-left: env(safe-area-inset-left, 0px);
+}
+
+.viso-safe-screen {
+  --viso-screen-top: 1rem;
+  --viso-screen-horizontal: 1.25rem;
+  padding-top: max(var(--viso-safe-top), var(--viso-screen-top));
+  padding-right: max(var(--viso-safe-right), var(--viso-screen-horizontal));
+  padding-bottom: max(var(--viso-safe-bottom), 2rem);
+  padding-left: max(var(--viso-safe-left), var(--viso-screen-horizontal));
+}
+
+.viso-safe-home {
+  --viso-screen-top: 2rem;
+  --viso-screen-horizontal: 1.5rem;
+}
+
+:root[data-viso-native="true"] .viso-display-safe-content {
+  padding-top: max(var(--viso-safe-top), 2rem);
+  padding-right: max(var(--viso-safe-right), 2rem);
+  padding-bottom: max(var(--viso-safe-bottom), 2rem);
+  padding-left: max(var(--viso-safe-left), 2rem);
+}
+
+:root[data-viso-native="true"] .viso-display-hint {
+  top: calc(var(--viso-safe-top) + 1.25rem);
+}
+
+:root[data-viso-native="true"] .viso-display-fullscreen {
+  right: calc(var(--viso-safe-right) + 1.25rem);
+  bottom: calc(var(--viso-safe-bottom) + 1.25rem);
+}
+
+:root[data-viso-native="true"] [data-slot="dialog-content"],
+:root[data-viso-native="true"] [data-slot="alert-dialog-content"] {
+  top: calc(50% + (var(--viso-safe-top) - var(--viso-safe-bottom)) / 2);
+  left: calc(50% + (var(--viso-safe-left) - var(--viso-safe-right)) / 2);
+  max-height: calc(100dvh - var(--viso-safe-top) - var(--viso-safe-bottom) - 2rem);
+  width: calc(100% - var(--viso-safe-left) - var(--viso-safe-right) - 2rem);
+  overflow-y: auto;
+}

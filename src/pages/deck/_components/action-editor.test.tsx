@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 import type { DeckAction } from "../_lib/action-runner.ts";
 import {
@@ -8,6 +8,41 @@ import {
   createSimpleAction,
   getActionValidationMessage,
 } from "./action-editor.tsx";
+
+const native = vi.hoisted(() => ({
+  enabled: false,
+  getInstalledApps: vi.fn(),
+  configureAllowedApps: vi.fn(),
+}));
+vi.mock("@/lib/android-native.ts", () => ({
+  isAndroidNative: () => native.enabled,
+  nativeDeck: {
+    getInstalledApps: native.getInstalledApps,
+    configureAllowedApps: native.configureAllowedApps,
+  },
+}));
+
+const installed = [
+  {
+    packageName: "com.spotify.music",
+    name: "Spotify",
+    icon: "data:image/png;base64,YQ==",
+    allowed: true,
+  },
+  {
+    packageName: "com.google.android.youtube",
+    name: "YouTube",
+    icon: null,
+    allowed: true,
+  },
+  { packageName: "com.whatsapp", name: "WhatsApp", icon: null, allowed: false },
+];
+
+beforeEach(() => {
+  native.enabled = false;
+  native.getInstalledApps.mockReset().mockResolvedValue(installed);
+  native.configureAllowedApps.mockReset().mockResolvedValue([]);
+});
 
 const statuses = [
   { _id: "status-one", name: "Disponible", icon: "check", color: "#00ff00" },
@@ -206,5 +241,145 @@ describe("ActionEditor", () => {
       command: "brightness",
       deviceId: "light.salon",
     });
+  });
+  it("preserves a saved Android action on the web without pretending to list or open apps", () => {
+    const onChange = vi.fn();
+    const { container } = render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "com.spotify.music" }}
+        onChange={onChange}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    expect(
+      screen.getByText(/Elige las aplicaciones desde la APK/),
+    ).toHaveTextContent("La aplicación guardada se conserva.");
+    expect(screen.queryByLabelText("Paquete Android")).not.toBeInTheDocument();
+    expect(container.textContent).not.toContain("com.spotify.music");
+    expect(native.getInstalledApps).not.toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+  it("shows only allowed apps with names and real icons, then assigns the selected app", async () => {
+    native.enabled = true;
+    const onChange = vi.fn();
+    const onAppSelected = vi.fn();
+    const { container } = render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "" }}
+        onChange={onChange}
+        onAppSelected={onAppSelected}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    const spotify = await screen.findByRole("button", { name: "Spotify" });
+    expect(spotify.querySelector("img")).toHaveAttribute(
+      "src",
+      installed[0].icon,
+    );
+    expect(
+      screen.queryByRole("button", { name: "WhatsApp" }),
+    ).not.toBeInTheDocument();
+    expect(container.textContent).not.toMatch(
+      /com\.spotify|com\.google|com\.whatsapp/,
+    );
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.click(spotify);
+    expect(onChange).toHaveBeenCalledWith({
+      type: "android-app",
+      packageName: "com.spotify.music",
+    });
+    expect(onAppSelected).toHaveBeenCalledWith(installed[0]);
+  });
+  it("searches by app name and preserves the existing selection", async () => {
+    native.enabled = true;
+    const onChange = vi.fn();
+    render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "com.spotify.music" }}
+        onChange={onChange}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    expect(
+      await screen.findByRole("button", { name: "Spotify" }),
+    ).toHaveAttribute("aria-pressed", "true");
+    fireEvent.change(screen.getByLabelText("Buscar aplicaciones"), {
+      target: { value: "yOu" },
+    });
+    expect(
+      screen.queryByRole("button", { name: "Spotify" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "YouTube" })).toBeInTheDocument();
+    expect(screen.getByText("Seleccionada: Spotify")).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+  it("refreshes the real permission selection without emitting an unrelated action", async () => {
+    native.enabled = true;
+    native.getInstalledApps
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(installed);
+    const onChange = vi.fn();
+    render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "" }}
+        onChange={onChange}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    await screen.findByText(
+      "Elige qué aplicaciones permites abrir desde VISO.",
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Administrar aplicaciones permitidas",
+      }),
+    );
+    expect(
+      await screen.findByRole("button", { name: "Spotify" }),
+    ).toBeInTheDocument();
+    expect(native.configureAllowedApps).toHaveBeenCalledTimes(1);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+  it("reports an uninstalled or disallowed saved app and retains its action", async () => {
+    native.enabled = true;
+    const onChange = vi.fn();
+    render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "com.whatsapp" }}
+        onChange={onChange}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    expect(
+      await screen.findByText(
+        /La aplicación guardada ya no está instalada o permitida/,
+      ),
+    ).toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+  it("reports enumeration errors without exposing technical details", async () => {
+    native.enabled = true;
+    native.getInstalledApps.mockRejectedValueOnce(
+      new Error("package com.private.secret failed"),
+    );
+    render(
+      <ActionEditor
+        value={{ type: "android-app", packageName: "com.spotify.music" }}
+        onChange={vi.fn()}
+        statuses={statuses}
+        pages={pages}
+      />,
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("No se pudieron cargar las aplicaciones."),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByText(/com.private/)).not.toBeInTheDocument();
   });
 });

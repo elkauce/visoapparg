@@ -1,9 +1,9 @@
 name: VISO Deck Android APK
 on:
   pull_request:
-    branches: [main]
+    branches: [main, feature/viso-deck-android]
   push:
-    branches: [feature/viso-deck-android]
+    branches: [feature/viso-deck-android, feature/viso-deck-android-improvements]
   workflow_dispatch:
 permissions:
   contents: read

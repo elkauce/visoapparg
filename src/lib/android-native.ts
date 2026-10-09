@@ -45,6 +45,15 @@ export interface LightControl {
   color?: string;
 }
 
+/** Launchable apps visible to Android, with icons held only in device memory. */
+export interface InstalledAndroidApp {
+  packageName: string;
+  name: string;
+  /** A bounded PNG data URI, or null when Android cannot load the icon. */
+  icon: string | null;
+  allowed: boolean;
+}
+
 interface VisoNativePlugin {
   enterImmersive(): Promise<void>;
   exitImmersive(): Promise<void>;
@@ -59,6 +68,8 @@ interface VisoNativePlugin {
   requestMediaAccess(): Promise<void>;
   configureAllowedApps(): Promise<{ packages: string[] }>;
   getAllowedApps(): Promise<{ packages: string[] }>;
+  listInstalledApps(): Promise<{ apps: InstalledAndroidApp[] }>;
+  getAppIcon(options: { packageName: string }): Promise<{ icon: string | null }>;
   configureHomeAssistant(): Promise<IntegrationStatus>;
   homeAssistantStatus(): Promise<IntegrationStatus>;
   discoverLights(): Promise<{ lights: HomeAssistantLight[] }>;
@@ -161,6 +172,14 @@ export const nativeDeck = {
   async getAllowedApps(): Promise<string[]> {
     requireAndroid();
     return (await plugin.getAllowedApps()).packages;
+  },
+  async getInstalledApps(): Promise<InstalledAndroidApp[]> {
+    requireAndroid();
+    return (await plugin.listInstalledApps()).apps;
+  },
+  async getAppIcon(packageName: string): Promise<string | null> {
+    requireAndroid();
+    return (await plugin.getAppIcon({ packageName })).icon;
   },
   async getDeviceId(): Promise<string> {
     requireAndroid();

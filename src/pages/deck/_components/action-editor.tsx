@@ -1,4 +1,5 @@
-import { useId } from "react";
+import { useEffect, useId, useState } from "react";
+import { Check, Smartphone } from "lucide-react";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { Input } from "@/components/ui/input.tsx";
@@ -12,6 +13,12 @@ import {
 } from "@/components/ui/select.tsx";
 import type { DeckAction, SimpleDeckAction } from "../_lib/action-runner.ts";
 import type { DeckStatusInfo } from "../_lib/resolve-key.ts";
+import {
+  isAndroidNative,
+  nativeDeck,
+  type InstalledAndroidApp,
+} from "@/lib/android-native.ts";
+import { cn } from "@/lib/utils.ts";
 
 type PageInfo = { _id: string; name: string };
 export type ActionEditorProps = {
@@ -20,6 +27,7 @@ export type ActionEditorProps = {
   statuses: DeckStatusInfo[];
   pages: PageInfo[];
   disabled?: boolean;
+  onAppSelected?: (app: InstalledAndroidApp) => void;
 };
 
 const ACTION_LABELS: Record<DeckAction["type"], string> = {
@@ -28,7 +36,7 @@ const ACTION_LABELS: Record<DeckAction["type"], string> = {
   display: "Abrir Display",
   page: "Cambiar página",
   url: "Abrir enlace web",
-  "android-app": "Abrir aplicación Android",
+  "android-app": "Abrir aplicación",
   media: "Control multimedia Android",
   rgb: "Control de luz RGB",
   automation: "Automatización",
@@ -109,7 +117,7 @@ export function getActionValidationMessage(action: DeckAction): string | null {
       return action.packageName.length <= 200 &&
         /^[a-zA-Z][\w]*(?:\.[a-zA-Z][\w]*)+$/.test(action.packageName)
         ? null
-        : "Escribe el nombre de paquete Android, por ejemplo com.spotify.music.";
+        : "Elige una aplicación permitida.";
     case "rgb":
       if (!action.deviceId.trim() || action.deviceId.trim().length > 200) {
         return "Escribe el ID real de una luz descubierta y autorizada.";
@@ -190,12 +198,164 @@ function ActionSelect<T extends string>({
   );
 }
 
+function AllowedAppSelector({
+  packageName,
+  onSelect,
+  disabled,
+}: {
+  packageName: string;
+  onSelect: (app: InstalledAndroidApp) => void;
+  disabled?: boolean;
+}) {
+  const id = useId();
+  const [apps, setApps] = useState<InstalledAndroidApp[] | null>(null);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [managing, setManaging] = useState(false);
+  const android = isAndroidNative();
+
+  useEffect(() => {
+    if (!android) return;
+    let active = true;
+    nativeDeck.getInstalledApps().then(
+      (installed) => {
+        if (active) setApps(installed.filter((app) => app.allowed));
+      },
+      () => {
+        if (active) setError("No se pudieron cargar las aplicaciones.");
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [android]);
+
+  if (!android) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Elige las aplicaciones desde la APK de VISO Deck en Android.
+        {packageName && " La aplicación guardada se conserva."}
+      </p>
+    );
+  }
+
+  const selected = apps?.find((app) => app.packageName === packageName);
+  const normalizedSearch = search.trim().toLocaleLowerCase();
+  const filtered = apps?.filter((app) =>
+    app.name.toLocaleLowerCase().includes(normalizedSearch),
+  );
+
+  const manage = async () => {
+    if (managing) return;
+    setManaging(true);
+    setError(null);
+    try {
+      await nativeDeck.configureAllowedApps();
+      setApps(
+        (await nativeDeck.getInstalledApps()).filter((app) => app.allowed),
+      );
+    } catch {
+      setError("No se pudo actualizar la selección. Intenta de nuevo.");
+    } finally {
+      setManaging(false);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="space-y-2">
+        <Label htmlFor={id}>Buscar aplicaciones</Label>
+        <Input
+          id={id}
+          value={search}
+          disabled={disabled || managing}
+          placeholder="Nombre de la aplicación"
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </div>
+      {!apps && !error && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Cargando aplicaciones…
+        </p>
+      )}
+      {error && (
+        <p role="status" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
+      {selected && (
+        <p className="text-xs text-muted-foreground">
+          Seleccionada: {selected.name}
+        </p>
+      )}
+      {apps && packageName && !selected && (
+        <p role="status" className="text-sm text-muted-foreground">
+          La aplicación guardada ya no está instalada o permitida. Elige otra o
+          revisa tu selección.
+        </p>
+      )}
+      {apps && (
+        <div className="max-h-60 space-y-1 overflow-y-auto overscroll-contain rounded-xl border p-1">
+          {filtered?.map((app) => (
+            <button
+              key={app.packageName}
+              type="button"
+              aria-label={app.name}
+              aria-pressed={packageName === app.packageName}
+              disabled={disabled || managing}
+              onClick={() => onSelect(app)}
+              className={cn(
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-accent disabled:opacity-50",
+                packageName === app.packageName && "bg-accent",
+              )}
+            >
+              {app.icon ? (
+                <img
+                  src={app.icon}
+                  alt=""
+                  className="size-9 shrink-0 object-contain"
+                />
+              ) : (
+                <Smartphone className="size-9 shrink-0 text-muted-foreground" />
+              )}
+              <span className="min-w-0 flex-1 truncate">{app.name}</span>
+              {packageName === app.packageName && (
+                <Check
+                  className="size-4 shrink-0 text-primary"
+                  aria-hidden="true"
+                />
+              )}
+            </button>
+          ))}
+          {!filtered?.length && (
+            <p className="p-3 text-sm text-muted-foreground">
+              {apps.length
+                ? "No hay aplicaciones con ese nombre."
+                : "Elige qué aplicaciones permites abrir desde VISO."}
+            </p>
+          )}
+        </div>
+      )}
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        disabled={disabled || managing}
+        onClick={() => void manage()}
+      >
+        {managing ? "Actualizando…" : "Administrar aplicaciones permitidas"}
+      </Button>
+    </div>
+  );
+}
+
 function ActionFields({
   value,
   onChange,
   statuses,
   pages,
   disabled,
+  onAppSelected,
 }: Omit<ActionEditorProps, "value" | "onChange"> & {
   value: SimpleDeckAction;
   onChange: (value: SimpleDeckAction) => void;
@@ -237,35 +397,31 @@ function ActionFields({
         </p>
       );
     case "url":
-    case "android-app":
       return (
         <div className="space-y-2">
-          <Label htmlFor={id}>
-            {value.type === "url" ? "Dirección web" : "Paquete Android"}
-          </Label>
+          <Label htmlFor={id}>Dirección web</Label>
           <Input
             id={id}
             disabled={disabled}
-            value={value.type === "url" ? value.url : value.packageName}
-            maxLength={value.type === "url" ? 500 : 200}
-            placeholder={
-              value.type === "url" ? "https://example.com" : "com.spotify.music"
-            }
+            value={value.url}
+            maxLength={500}
+            placeholder="https://example.com"
             onChange={(event) =>
-              onChange(
-                value.type === "url"
-                  ? { ...value, url: event.target.value }
-                  : { ...value, packageName: event.target.value },
-              )
+              onChange({ ...value, url: event.target.value })
             }
           />
-          {value.type === "android-app" && (
-            <p className="text-xs text-muted-foreground">
-              Requiere VISO Deck en Android y autorizar la aplicación en su
-              configuración.
-            </p>
-          )}
         </div>
+      );
+    case "android-app":
+      return (
+        <AllowedAppSelector
+          packageName={value.packageName}
+          disabled={disabled}
+          onSelect={(app) => {
+            onChange({ ...value, packageName: app.packageName });
+            onAppSelected?.(app);
+          }}
+        />
       );
     case "media":
       return (
@@ -415,6 +571,7 @@ export function ActionEditor({
   statuses,
   pages,
   disabled,
+  onAppSelected,
 }: ActionEditorProps) {
   const message = getActionValidationMessage(value);
   const simpleOptions = choices(ACTION_LABELS).filter(
@@ -537,6 +694,7 @@ export function ActionEditor({
           statuses={statuses}
           pages={pages}
           disabled={disabled}
+          onAppSelected={onAppSelected}
         />
       )}
       {message && (
