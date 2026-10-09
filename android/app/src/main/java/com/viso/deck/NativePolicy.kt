@@ -25,8 +25,11 @@ internal object NativePolicy {
         return URI("https", null, uri.host, uri.port, null, null, null).toASCIIString()
     }
 
+    fun validPackage(value: String): Boolean =
+        value.length in 1..255 && packagePattern.matches(value)
+
     fun allowedPackage(value: String, allowed: Set<String>): Boolean =
-        value.length <= 255 && packagePattern.matches(value) && value in allowed
+        validPackage(value) && value in allowed
 
     fun validStorageKey(value: String): Boolean =
         value.length in 1..256 && value.none { it.code < 32 }

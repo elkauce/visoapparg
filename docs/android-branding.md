@@ -1,0 +1,7 @@
+# Identidad visual y áreas seguras de Android
+
+El verde oficial ya definido por VISO es `--primary: oklch(0.88 0.22 130)`; las tarjetas Deck y Display del inicio usan ese token y su color de texto `--primary-foreground`, sin modificar el diseño de las teclas.
+
+No se encontró el archivo del logo oficial completo en `public`, los fuentes ni el ZIP original. El favicon original (círculo verde sobre un cuadrado oscuro) no se presenta como ese logo. `VisoBrand` admite `VITE_VISO_LOGO_URL` o la prop `logoUrl` para incorporar el SVG/PNG transparente entregado por el propietario, manteniendo su proporción. Conviene guardar el recurso en `public/brand` y configurarlo mediante una ruta local para que también esté disponible sin conexión en la APK. Hasta recibirlo, permanece el encabezado existente, sin inventar otro diseño; una URL inválida también conserva ese encabezado.
+
+`MainActivity.applyWebViewInsets` publica `--viso-safe-top/right/bottom/left` desde los insets reales de Android, convertidos a unidades CSS. Las pantallas Android y los diálogos respetan esos márgenes. El teclado ajusta solamente el viewport nativo; no se suma una segunda vez al margen inferior CSS. El modo inmersivo conserva el recorte de cámara pero permite ocultar las barras del sistema. La configuración de Capacitor desactiva su segundo tratamiento de insets para evitar consumirlos o duplicar márgenes. En navegador normal se conservan los valores `env(safe-area-inset-*)`.

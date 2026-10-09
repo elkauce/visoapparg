@@ -2,6 +2,10 @@
 
 Copia independiente con React, Vite y Convex. El registro, inicio y cierre de sesión usan email y contraseña propios con Convex Auth. No requiere Hercules.
 
+## APK 1.1 de prueba
+
+[Descargar la nueva APK VISO Deck 1.1](https://raw.githubusercontent.com/elkauce/visoapparg/feature/viso-deck-android-improvements/downloads/VISO-Deck-1.1-debug.apk). Se instala como actualización de la APK anterior y utiliza la misma cuenta. [Web candidata para probar junto a la app](https://viso-deck-mejoras-npgfwlf4l-manuelhaguilar8-4981s-projects.vercel.app/). La rama `feature/viso-deck-android-improvements` contiene las mejoras de inicio, editor, aplicaciones e integraciones. La web estable permanece sin cambios hasta aprobar la candidata. [Cambios, verificaciones y pendientes](docs/android-improvements.md).
+
 ## Web vinculada a la APK Android
 
 **Web completa: https://viso-deck-android.vercel.app/**. Usa el mismo correo y contraseña que en la APK. Desde el panel, abre **Pantalla completa → Abrir** en el dispositivo que funcionará como Display; ese enlace público no requiere iniciar sesión. Deja **Deck** abierto en Android y pulsa un estado: el Display cambia en tiempo real. También puedes controlar el estado desde el panel web o **Abrir deck**.

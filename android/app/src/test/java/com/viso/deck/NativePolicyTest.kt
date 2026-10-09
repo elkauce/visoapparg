@@ -36,6 +36,9 @@ class NativePolicyTest {
         assertFalse(NativePolicy.allowedPackage("com.android.settings", allowed))
         assertFalse(NativePolicy.allowedPackage("com.spotify.music;am start", allowed))
         assertFalse(NativePolicy.allowedPackage("com..spotify.music", allowed))
+        assertTrue(NativePolicy.validPackage("com.spotify.music"))
+        assertFalse(NativePolicy.validPackage("com.spotify.music\u0000"))
+        assertFalse(NativePolicy.validPackage("com." + "a".repeat(252)))
     }
 
     @Test fun lightActionsRejectPathInjectionInvalidRgbAndUnsafeBrightness() {

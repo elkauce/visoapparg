@@ -9,6 +9,7 @@ import AndroidHome from "./pages/android/home.tsx";
 import AndroidSettings from "./pages/android/settings.tsx";
 import AndroidDisplay from "./pages/android/display.tsx";
 import AndroidIntegrations from "./pages/android/integrations.tsx";
+import AndroidIntegrationDetails from "./pages/android/integration-details.tsx";
 import { isAndroidNative } from "./lib/android-native.ts";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/android/settings" element={<AndroidSettings />} />
           <Route path="/android/display" element={<AndroidDisplay />} />
           <Route path="/android/integrations" element={<AndroidIntegrations />} />
+          <Route path="/android/integrations/:integration" element={<AndroidIntegrationDetails />} />
           <Route path="/deck" element={<DeckPage />} />
           <Route path="/s/:slug" element={<PublicStatusPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

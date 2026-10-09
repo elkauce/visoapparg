@@ -147,7 +147,7 @@ export default function PublicStatusPage() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="absolute inset-0 flex flex-col items-center justify-center p-8"
+          className="viso-display-safe-content absolute inset-0 flex flex-col items-center justify-center p-8"
         >
           {status && <MediaBackground status={status} volume={data.volume} />}
           {!hasMedia && (
@@ -201,7 +201,7 @@ export default function PublicStatusPage() {
       </AnimatePresence>
 
       {!isFullscreen && (
-        <p className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm text-white backdrop-blur">
+        <p className="viso-display-hint pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 rounded-full bg-black/50 px-4 py-1.5 text-sm text-white backdrop-blur">
           Toca la pantalla para verla completa
         </p>
       )}
@@ -214,7 +214,7 @@ export default function PublicStatusPage() {
           void toggleFullscreen();
         }}
         aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
-        className="absolute bottom-5 right-5 opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100"
+        className="viso-display-fullscreen absolute bottom-5 right-5 opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100"
       >
         {isFullscreen ? <Minimize /> : <Maximize />}
       </Button>

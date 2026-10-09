@@ -6,6 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   loggingBehavior: 'none',
   server: { androidScheme: 'https' },
+  // MainActivity owns safe-area and keyboard insets in normal and immersive modes.
+  plugins: { SystemBars: { insetsHandling: 'disable', style: 'DARK' } },
   android: {
     allowMixedContent: process.env.VISO_ANDROID_LOCAL_TEST === '1',
     backgroundColor: '#0b0c10',

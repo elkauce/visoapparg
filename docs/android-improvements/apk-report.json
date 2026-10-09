@@ -1,0 +1,11 @@
+{
+  "package": "com.viso.deck",
+  "versionCode": 2,
+  "versionName": "1.1.0",
+  "sha256": "3f9ebcd05f03699797cae2abc3fa50ae78e08e167c4753e63f5a6aa5a5c713be",
+  "bytes": 5062248,
+  "sameSigningCertificateAsStable": true,
+  "signatureV2Verified": true,
+  "backend": "https://vivid-nightingale-785.convex.cloud",
+  "localBackendAbsent": true
+}

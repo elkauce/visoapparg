@@ -1,6 +1,7 @@
 import type { Doc } from "@/convex/_generated/dataModel.d.ts";
 import { SPORTS_LEAGUES, isSportsLeague } from "@/convex/lib/sports_leagues.ts";
 import type { KeyFace } from "../_components/deck-key.tsx";
+import { decodeKeyVisibility } from "./key-visibility.ts";
 
 export type DeckStatusInfo = {
   _id: string;
@@ -31,16 +32,25 @@ export function resolveKeyFace(
 ): KeyFace | null {
   const face = resolveContentFace(content, statuses, activeStatusId, volume);
   if (!appearance) return face;
+  const visibility = decodeKeyVisibility(appearance.icon);
+  const icon = visibility.icon ?? face?.icon ?? "calendar";
   return {
     label:
       appearance.label ??
       face?.label ??
       (content.kind === "clock" ? "Reloj" : "Clima"),
-    icon: appearance.icon ?? face?.icon ?? "calendar",
+    icon,
     color: appearance.color ?? face?.color ?? "#64748b",
     active: face?.active ?? false,
     mediaUrl: appearance.mediaUrl,
     mediaType: appearance.mediaType,
+    showLabel: visibility.showLabel,
+    showIcon: visibility.showIcon,
+    ...(content.kind === "action" &&
+    content.action.type === "android-app" &&
+    icon === "android-app"
+      ? { appPackageName: content.action.packageName }
+      : {}),
   };
 }
 
@@ -71,13 +81,32 @@ function resolveContentFace(
       };
     case "link":
     case "folder":
-    case "action":
       return {
         label: content.label,
         icon: content.icon,
         color: content.color,
         active: false,
       };
+    case "action": {
+      // A saved custom icon is preserved; the former generic globe uses the
+      // application's real icon by default on Android.
+      const isApp = content.action.type === "android-app";
+      const icon =
+        isApp && (content.icon === "globe" || content.icon === "android-app")
+          ? "android-app"
+          : content.icon;
+      return {
+        label: content.label,
+        icon,
+        color: content.color,
+        active: false,
+        ...(isApp &&
+        icon === "android-app" &&
+        content.action.type === "android-app"
+          ? { appPackageName: content.action.packageName }
+          : {}),
+      };
+    }
     case "sports":
       return {
         label: isSportsLeague(content.league)

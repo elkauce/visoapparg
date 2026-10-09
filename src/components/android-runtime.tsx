@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import { App as NativeApp } from "@capacitor/app";
 import { useLocation, useNavigate } from "react-router-dom";
 import { isAndroidNative } from "@/lib/android-native.ts";
@@ -7,6 +7,12 @@ import { isAndroidNative } from "@/lib/android-native.ts";
 export default function AndroidRuntime() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  useLayoutEffect(() => {
+    // A long integration menu must not carry its scroll into the next screen.
+    if (isAndroidNative() || pathname.startsWith("/android")) {
+      window.scrollTo(0, 0);
+    }
+  }, [pathname]);
   useEffect(() => {
     if (!isAndroidNative()) return;
     const listener = NativeApp.addListener("backButton", () => {

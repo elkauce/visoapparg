@@ -1,0 +1,14 @@
+{
+  "url": "https://viso-deck-mejoras-npgfwlf4l-manuelhaguilar8-4981s-projects.vercel.app",
+  "deploymentId": "dpl_3mvzzxVS219Ffxwr99SZ6CLwNUGf",
+  "projectId": "prj_wXryzWRrJpmROueD6MlhnS3xtMQx",
+  "target": "preview",
+  "readyState": "READY",
+  "apkUrl": "https://viso-deck-mejoras-npgfwlf4l-manuelhaguilar8-4981s-projects.vercel.app/downloads/VISO-Deck-1.1-debug.apk",
+  "apkSha256": "3f9ebcd05f03699797cae2abc3fa50ae78e08e167c4753e63f5a6aa5a5c713be",
+  "backend": "https://vivid-nightingale-785.convex.cloud",
+  "stableDeploymentUnchanged": true,
+  "stableFrontendSha256Unchanged": true,
+  "stableApkSha256Unchanged": true,
+  "checkedAt": "2026-10-09T20:35:52.774Z"
+}

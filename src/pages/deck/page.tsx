@@ -439,10 +439,10 @@ export default function DeckPage() {
     <div
       className="flex h-dvh flex-col gap-3 bg-background p-3 [--deck-padding:0.75rem] sm:p-4 sm:[--deck-padding:1rem]"
       style={{
-        paddingTop: "max(env(safe-area-inset-top), var(--deck-padding))",
-        paddingBottom: "max(env(safe-area-inset-bottom), var(--deck-padding))",
-        paddingLeft: "max(env(safe-area-inset-left), var(--deck-padding))",
-        paddingRight: "max(env(safe-area-inset-right), var(--deck-padding))",
+        paddingTop: "max(var(--viso-safe-top), var(--deck-padding))",
+        paddingBottom: "max(var(--viso-safe-bottom), var(--deck-padding))",
+        paddingLeft: "max(var(--viso-safe-left), var(--deck-padding))",
+        paddingRight: "max(var(--viso-safe-right), var(--deck-padding))",
       }}
     >
       <header className="flex items-center gap-2">
