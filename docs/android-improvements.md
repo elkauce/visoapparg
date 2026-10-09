@@ -35,8 +35,9 @@ El sitio estable y su APK anterior se conservan; no se cambia su proyecto, domin
 | APK | Firma v2 válida; mismo certificado y paquete que la versión estable; código de versión superior |
 | Contenido de la APK | Backend compartido correcto; endpoints locales de prueba ausentes |
 | Chromium y Convex locales | 110 comprobaciones aprobadas; cero errores JavaScript; fixture restaurado; ninguna consulta a Convex cloud |
+| Web candidata pública | Portada, inicio de sesión con cuenta de prueba existente, Deck e integraciones aprobados; cero errores JavaScript; sin modificar datos ni usar la cuenta del propietario |
 
-La prueba de interfaz usa vistas de 360×800 y 800×360, navegación por las seis integraciones, cuatro combinaciones de visibilidad, carga real de imagen, guardado, cambio de página, recarga y un segundo contexto autenticado de la misma cuenta. Verifica que la acción de estado y otra tecla no cambian. Los márgenes CSS de sistema se simulan: **no es una prueba de insets físicos ni del bridge Android**. La publicación contiene evidencia en [android-improvements/report.json](android-improvements/report.json).
+La prueba de interfaz usa vistas de 360×800 y 800×360, navegación por las seis integraciones, cuatro combinaciones de visibilidad, carga real de imagen, guardado, cambio de página, recarga y un segundo contexto autenticado de la misma cuenta. Verifica que la acción de estado y otra tecla no cambian. Los márgenes CSS de sistema se simulan: **no es una prueba de insets físicos ni del bridge Android**. La publicación contiene evidencia en [android-improvements/report.json](android-improvements/report.json). Las capturas desactivan animaciones de apertura para mostrar el diálogo terminado. La candidata pública se verificó además en Chromium con validación TLS normal y una cuenta de prueba anterior: ver [cloud-readonly-report.json](android-improvements/cloud-readonly-report.json).
 
 ## Qué necesita una prueba física o un recurso externo
 

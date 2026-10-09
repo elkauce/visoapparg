@@ -1,6 +1,6 @@
 {
   "environment": "Chromium web UI, local Convex only; simulated CSS safe areas",
-  "checkedAt": "2026-10-09T20:27:11.575Z",
+  "checkedAt": "2026-10-09T20:41:13.406Z",
   "checks": [
     "Backend de prueba responde en loopback",
     "Frontend de prueba responde en loopback",
@@ -322,7 +322,7 @@
     "key-editor-after-reload.png",
     "same-account-editor-landscape.png"
   ],
-  "blockedExternalRequests": 14,
+  "blockedExternalRequests": 15,
   "blockedCloudBackendAttempts": 0,
   "blockedExternalHosts": [
     "fonts.googleapis.com"
