@@ -1,0 +1,41 @@
+name: VISO Deck Android APK
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [feature/viso-deck-android]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  debug-apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '11.19.0'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+        with:
+          cmdline-tools-version: '13114758'
+          packages: 'platform-tools'
+      - uses: gradle/actions/setup-gradle@v4
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test && pnpm lint
+      - run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - run: pnpm android:build
+      - run: cd android && ./gradlew testDebugUnitTest --max-workers=4 --console=plain
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VISO-Deck-debug
+          path: artifacts/android/VISO-Deck-debug.apk
+          if-no-files-found: error
+          retention-days: 30

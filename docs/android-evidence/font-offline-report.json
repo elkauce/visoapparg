@@ -1,0 +1,49 @@
+{
+  "network": "All remote requests blocked; WOFF2 supplied from verified local build output",
+  "loadedFaces": [
+    {
+      "family": "Bricolage Grotesque",
+      "status": "loaded",
+      "weight": "300 800"
+    },
+    {
+      "family": "Bricolage Grotesque",
+      "status": "loaded",
+      "weight": "300 800"
+    },
+    {
+      "family": "Geist Mono",
+      "status": "loaded",
+      "weight": "100 900"
+    },
+    {
+      "family": "Geist Mono",
+      "status": "loaded",
+      "weight": "100 900"
+    }
+  ],
+  "requestedFonts": [
+    "bricolage-grotesque-latin-opsz-normal.woff2",
+    "geist-mono-latin-wght-normal.woff2",
+    "bricolage-grotesque-latin-ext-opsz-normal.woff2",
+    "geist-mono-latin-ext-wght-normal.woff2"
+  ],
+  "rendered": {
+    "sans": [
+      {
+        "familyName": "Bricolage Grotesque 96pt ExtraBold",
+        "postScriptName": "BricolageGrotesque96ptExtraBold-Regular",
+        "isCustomFont": true,
+        "glyphCount": 28
+      }
+    ],
+    "mono": [
+      {
+        "familyName": "Geist Mono",
+        "postScriptName": "GeistMono-Regular",
+        "isCustomFont": true,
+        "glyphCount": 9
+      }
+    ]
+  }
+}

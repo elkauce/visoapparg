@@ -2,9 +2,13 @@ import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel.d.ts";
-import { getCurrentUserOrNull, requireCurrentUser } from "./lib/current_user.ts";
+import {
+  getCurrentUserOrNull,
+  requireCurrentUser,
+} from "./lib/current_user.ts";
 import { getOwnedStatus } from "./lib/owned_status.ts";
-import { deleteDanglingKeys } from "./lib/deck_keys.ts";
+import { getDeckMedia } from "./lib/deck_appearance.ts";
+import { contentTargetsStatus, deleteDanglingKeys } from "./lib/deck_keys.ts";
 import { setActiveStatus } from "./lib/activate_status.ts";
 import { validateLight, validateWebhookUrl } from "./lib/light_validation.ts";
 
@@ -176,13 +180,14 @@ export const remove = mutation({
     if (user.activeStatusId === args.statusId) {
       await ctx.db.patch("users", user._id, { activeStatusId: undefined });
     }
-    if (status.mediaStorageId) {
+    if (
+      status.mediaStorageId &&
+      !(await getDeckMedia(ctx, status.mediaStorageId))
+    ) {
       await ctx.storage.delete(status.mediaStorageId);
     }
-    await deleteDanglingKeys(
-      ctx,
-      user._id,
-      (content) => content.kind === "status" && content.statusId === args.statusId,
+    await deleteDanglingKeys(ctx, user._id, (content) =>
+      contentTargetsStatus(content, args.statusId),
     );
     await ctx.db.delete("statuses", args.statusId);
     return null;
@@ -191,7 +196,10 @@ export const remove = mutation({
 
 // Intercambia el orden con el vecino (direction -1 = izquierda, 1 = derecha)
 export const move = mutation({
-  args: { statusId: v.id("statuses"), direction: v.union(v.literal(-1), v.literal(1)) },
+  args: {
+    statusId: v.id("statuses"),
+    direction: v.union(v.literal(-1), v.literal(1)),
+  },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
     const status = await getOwnedStatus(ctx, user._id, args.statusId);

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { deckAction } from "./deck_action_content.ts";
 
 // Contenido de una tecla del deck de pantalla completa
 export const deckKeyContent = v.union(
@@ -35,5 +36,12 @@ export const deckKeyContent = v.union(
   v.object({
     kind: v.literal("volume"),
     action: v.union(v.literal("up"), v.literal("down"), v.literal("mute")),
+  }),
+  v.object({
+    kind: v.literal("action"),
+    label: v.string(),
+    icon: v.string(),
+    color: v.string(),
+    action: deckAction,
   }),
 );

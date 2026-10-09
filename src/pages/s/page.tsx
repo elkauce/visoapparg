@@ -7,6 +7,7 @@ import { api } from "@/convex/_generated/api.js";
 import { Button } from "@/components/ui/button.tsx";
 import StatusIcon from "@/components/status-icon.tsx";
 import { readableTextColor } from "@/lib/color.ts";
+import { immersive, isAndroidNative } from "@/lib/android-native.ts";
 
 type PublicStatus = {
   id: string;
@@ -73,18 +74,41 @@ export default function PublicStatusPage() {
   }, []);
 
   const enterFullscreen = async () => {
+    if (isAndroidNative()) {
+      await immersive.enter();
+      setIsFullscreen(true);
+      return;
+    }
     if (!document.fullscreenElement) {
       await document.documentElement.requestFullscreen().catch(() => undefined);
     }
   };
 
   const toggleFullscreen = async () => {
+    if (isAndroidNative()) {
+      if (isFullscreen) { await immersive.exit(); setIsFullscreen(false); }
+      else await enterFullscreen();
+      return;
+    }
     if (document.fullscreenElement) {
       await document.exitFullscreen();
     } else {
       await enterFullscreen();
     }
   };
+
+  useEffect(() => {
+    if (!isAndroidNative()) return;
+    const back = (event: Event) => {
+      if (!isFullscreen) return;
+      event.preventDefault();
+      void immersive.exit().then(() => setIsFullscreen(false));
+    };
+    window.addEventListener("viso:android-back", back);
+    return () => window.removeEventListener("viso:android-back", back);
+  }, [isFullscreen]);
+
+  useEffect(() => () => { if (isAndroidNative()) void immersive.exit().catch(() => undefined); }, []);
 
   if (data === undefined) {
     return <div className="min-h-screen bg-background" />;

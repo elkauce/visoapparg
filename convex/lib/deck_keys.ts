@@ -1,13 +1,16 @@
 import { ConvexError } from "convex/values";
+import type { Infer } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel.d.ts";
 import type { MutationCtx } from "../_generated/server";
 import { getOwnedStatus } from "./owned_status.ts";
 import { isSportsLeague } from "./sports_leagues.ts";
+import { MAX_SLOTS_PER_PAGE } from "./deck_grid.ts";
+import type { deckAction, deckSimpleAction } from "./deck_action_content.ts";
 
 export const MAX_PAGES = 8;
 export const SLOTS_PER_PAGE = 15;
 // Tope de teclas de un usuario: páginas x posiciones
-export const MAX_KEYS = MAX_PAGES * SLOTS_PER_PAGE;
+export const MAX_KEYS = MAX_PAGES * MAX_SLOTS_PER_PAGE;
 
 const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 
@@ -32,7 +35,10 @@ export async function getOwnedPage(
 ): Promise<Doc<"deckPages">> {
   const page = await ctx.db.get("deckPages", pageId);
   if (!page) {
-    throw new ConvexError({ code: "NOT_FOUND", message: "Página no encontrada" });
+    throw new ConvexError({
+      code: "NOT_FOUND",
+      message: "Página no encontrada",
+    });
   }
   if (page.userId !== userId) {
     throw new ConvexError({ code: "FORBIDDEN", message: "No tienes permiso" });
@@ -49,7 +55,10 @@ function cleanUrl(raw: string): string {
   } catch {
     return bad("La dirección no es válida");
   }
-  if ((url.protocol !== "https:" && url.protocol !== "http:") || value.length > 500) {
+  if (
+    (url.protocol !== "https:" && url.protocol !== "http:") ||
+    value.length > 500
+  ) {
     bad("Usa una dirección que empiece por https://");
   }
   return url.toString();
@@ -59,6 +68,105 @@ function checkColor(color: string): void {
   if (!HEX_COLOR.test(color)) {
     bad("Color inválido");
   }
+}
+
+async function validateSimpleAction(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  action: Infer<typeof deckSimpleAction>,
+): Promise<Infer<typeof deckSimpleAction>> {
+  switch (action.type) {
+    case "status":
+      await getOwnedStatus(ctx, userId, action.statusId);
+      return action;
+    case "page":
+      await getOwnedPage(ctx, userId, action.pageId);
+      return action;
+    case "url":
+      return { ...action, url: cleanUrl(action.url) };
+    case "android-app":
+      if (
+        action.packageName.length > 200 ||
+        !/^[a-zA-Z][\w]*(?:\.[a-zA-Z][\w]*)+$/.test(action.packageName)
+      ) {
+        bad("Nombre de aplicación Android inválido");
+      }
+      return action;
+    case "rgb":
+      if (action.color !== undefined) checkColor(action.color);
+      if (
+        action.brightness !== undefined &&
+        (!Number.isFinite(action.brightness) ||
+          action.brightness < 0 ||
+          action.brightness > 100)
+      ) {
+        bad("El brillo debe estar entre 0 y 100");
+      }
+      if (
+        (action.command === "color" && action.color === undefined) ||
+        (action.command === "brightness" && action.brightness === undefined) ||
+        (action.command === "power" && action.on === undefined) ||
+        (action.command === "scene" && action.scene === undefined)
+      )
+        bad("Falta la configuración de la acción RGB");
+      return {
+        ...action,
+        deviceId: cleanLabel(action.deviceId, 200),
+        ...(action.scene !== undefined
+          ? { scene: cleanLabel(action.scene, 100) }
+          : {}),
+      };
+    case "off":
+    case "display":
+    case "media":
+      return action;
+  }
+}
+
+async function validateAction(
+  ctx: MutationCtx,
+  userId: Id<"users">,
+  action: Infer<typeof deckAction>,
+) {
+  if (action.type !== "automation")
+    return await validateSimpleAction(ctx, userId, action);
+  if (action.steps.length < 1 || action.steps.length > 16)
+    bad("Una automatización admite entre 1 y 16 acciones");
+  const steps = [];
+  for (const step of action.steps)
+    steps.push(await validateSimpleAction(ctx, userId, step));
+  return { ...action, steps };
+}
+
+function actionSteps(content: KeyContent): Infer<typeof deckSimpleAction>[] {
+  if (content.kind !== "action") return [];
+  return content.action.type === "automation"
+    ? content.action.steps
+    : [content.action];
+}
+
+export function contentTargetsStatus(
+  content: KeyContent,
+  statusId: Id<"statuses">,
+) {
+  return (
+    (content.kind === "status" && content.statusId === statusId) ||
+    actionSteps(content).some(
+      (action) => action.type === "status" && action.statusId === statusId,
+    )
+  );
+}
+
+export function contentTargetsPage(
+  content: KeyContent,
+  pageId: Id<"deckPages">,
+) {
+  return (
+    (content.kind === "folder" && content.targetPageId === pageId) ||
+    actionSteps(content).some(
+      (action) => action.type === "page" && action.pageId === pageId,
+    )
+  );
 }
 
 // Valida y limpia el contenido de una tecla antes de guardarlo
@@ -101,6 +209,14 @@ export async function validateKeyContent(
       checkColor(content.color);
       await getOwnedPage(ctx, userId, content.targetPageId);
       return { ...content, label: cleanLabel(content.label, 20) };
+    case "action":
+      checkColor(content.color);
+      return {
+        ...content,
+        label: cleanLabel(content.label, 20),
+        icon: cleanLabel(content.icon, 60),
+        action: await validateAction(ctx, userId, content.action),
+      };
   }
 }
 

@@ -34,3 +34,15 @@ tsconfig.tsbuildinfo
 # Version the public template, never local credentials.
 !.env.example
 .vercel
+
+# Android outputs and private release signing material
+/artifacts/
+*.apk
+*.aab
+*.jks
+*.keystore
+/android/local.properties
+/android/app/src/localTest/
+/android/app/src/main/assets/public/
+/android/app/src/main/assets/capacitor.config.json
+/android/app/src/main/assets/capacitor.plugins.json

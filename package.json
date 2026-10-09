@@ -12,9 +12,19 @@
     "prettier-fix": "prettier --write .",
     "prettier-check": "prettier --check .",
     "dev:backend": "convex dev --typecheck enable --tail-logs disable",
-    "setup:local-auth": "node scripts/setup-local-auth.mjs"
+    "setup:local-auth": "node scripts/setup-local-auth.mjs",
+    "android:build": "node scripts/build-android.mjs",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
+    "@auth/core": "0.41.1",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/network": "8.0.1",
+    "@capacitor/preferences": "8.0.1",
+    "@convex-dev/auth": "0.0.96",
     "@elgato-stream-deck/webhid": "^7.8.0",
     "@hookform/resolvers": "^5.7.1",
     "@tanstack/react-query": "^5.101.4",
@@ -40,11 +50,10 @@
     "tailwind-merge": "^3.6.0",
     "use-debounce": "^10.1.1",
     "vaul": "^1.1.2",
-    "zod": "^4.4.3",
-    "@convex-dev/auth": "0.0.96",
-    "@auth/core": "0.41.1"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.2",
     "@convex-dev/eslint-plugin": "^3.0.0",
     "@edge-runtime/vm": "^5.0.0",
     "@eslint/js": "^10.0.1",

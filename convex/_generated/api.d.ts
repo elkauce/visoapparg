@@ -9,12 +9,17 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as deck_actions from "../deck_actions.js";
 import type * as deck_api from "../deck_api.js";
 import type * as deck_layout from "../deck_layout.js";
+import type * as deck_media from "../deck_media.js";
 import type * as display from "../display.js";
 import type * as http from "../http.js";
 import type * as lib_activate_status from "../lib/activate_status.js";
 import type * as lib_current_user from "../lib/current_user.js";
+import type * as lib_deck_action_content from "../lib/deck_action_content.js";
+import type * as lib_deck_appearance from "../lib/deck_appearance.js";
+import type * as lib_deck_grid from "../lib/deck_grid.js";
 import type * as lib_deck_key_content from "../lib/deck_key_content.js";
 import type * as lib_deck_keys from "../lib/deck_keys.js";
 import type * as lib_deck_tokens from "../lib/deck_tokens.js";
@@ -38,12 +43,17 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  deck_actions: typeof deck_actions;
   deck_api: typeof deck_api;
   deck_layout: typeof deck_layout;
+  deck_media: typeof deck_media;
   display: typeof display;
   http: typeof http;
   "lib/activate_status": typeof lib_activate_status;
   "lib/current_user": typeof lib_current_user;
+  "lib/deck_action_content": typeof lib_deck_action_content;
+  "lib/deck_appearance": typeof lib_deck_appearance;
+  "lib/deck_grid": typeof lib_deck_grid;
   "lib/deck_key_content": typeof lib_deck_key_content;
   "lib/deck_keys": typeof lib_deck_keys;
   "lib/deck_tokens": typeof lib_deck_tokens;
