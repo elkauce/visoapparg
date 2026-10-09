@@ -22,9 +22,13 @@ la sesión de la misma cuenta VISO accede a los mismos estados y páginas desde
 la APK y desde la web completa. La web muestra la portada convencional mediante
 `VITE_ANDROID_PREVIEW=false`; la pantalla de inicio Android corresponde al
 contenedor nativo. La publicación comprobada quedó en estado `READY`
-(`dpl_4HM5J1SrziLEjoHU9kXbD82KqEen`).
-Compartir backend es una condición para vincularlos y no sustituye una prueba
-de sincronización entre dos clientes.
+(`dpl_F9vcPZCzexa6qNEHu4vNRcRC59jy`).
+Dos contextos de navegador independientes comprobaron la sincronización de
+nombre y color desde Deck y desde el panel completo hacia el Display público,
+sin iniciar sesión en ese Display. Los cambios llegaron sin recargar; una
+recarga posterior conservó el estado. El reporte está en
+[android-validation.md](android-validation.md). El flujo con Android físico
+continúa pendiente de validación.
 
 La web original [`https://visoapparg.vercel.app`](https://visoapparg.vercel.app/)
 conserva el backend estable `useful-egret-915` y las extensiones desactivadas.
