@@ -1,0 +1,94 @@
+{
+  "retrieved": "2026-10-09",
+  "license": "SIL Open Font License 1.1",
+  "packages": [
+    {
+      "package": "@fontsource-variable/bricolage-grotesque",
+      "version": "5.3.0",
+      "registryMetadata": "https://registry.npmjs.org/@fontsource-variable/bricolage-grotesque/5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource-variable/bricolage-grotesque/-/bricolage-grotesque-5.3.0.tgz",
+      "integrity": "sha512-TLi9Q4hJjS2UvoTMRSS2nHu6c4R56lAw60NR9QYtVRCHn0XtsFpiEhNffZ8Glsoxu6wEEwLKBP8lb94J52PNBA==",
+      "files": [
+        {
+          "path": "bricolage-grotesque-latin-opsz-normal.woff2",
+          "bytes": 76888,
+          "sha256": "a79fdb52d4a5c76552452f69202add96e287401fff03d3e8c0e38b4dcb5a99cd",
+          "axes": {
+            "opsz": {
+              "min": 12.0,
+              "default": 96.0,
+              "max": 96.0
+            },
+            "wght": {
+              "min": 200.0,
+              "default": 800.0,
+              "max": 800.0
+            }
+          },
+          "fontBinaryVersion": "Version 1.001;gftools[0.9.33.dev8+g029e19f]"
+        },
+        {
+          "path": "bricolage-grotesque-latin-ext-opsz-normal.woff2",
+          "bytes": 30736,
+          "sha256": "776f6dcaf03636cd69a5802c94808cc8896c0a66c8e9ce0fe147231b6ee01957",
+          "axes": {
+            "opsz": {
+              "min": 12.0,
+              "default": 96.0,
+              "max": 96.0
+            },
+            "wght": {
+              "min": 200.0,
+              "default": 800.0,
+              "max": 800.0
+            }
+          },
+          "fontBinaryVersion": "Version 1.001;gftools[0.9.33.dev8+g029e19f]"
+        }
+      ],
+      "upstreamSource": "https://github.com/google/fonts",
+      "upstreamFontVersion": "v9",
+      "upstreamLastModified": "2025-09-11",
+      "licenseFile": "bricolage-grotesque-OFL.txt"
+    },
+    {
+      "package": "@fontsource-variable/geist-mono",
+      "version": "5.3.0",
+      "registryMetadata": "https://registry.npmjs.org/@fontsource-variable/geist-mono/5.3.0",
+      "tarball": "https://registry.npmjs.org/@fontsource-variable/geist-mono/-/geist-mono-5.3.0.tgz",
+      "integrity": "sha512-vBbuwDEo9AkrqADMXOrlAR3DFcJi4/JxeuU43FoiQERnNwsfXNnvxvReZG02cQKmyk4DZkZdBZX3oTDvy2zBAw==",
+      "files": [
+        {
+          "path": "geist-mono-latin-wght-normal.woff2",
+          "bytes": 23128,
+          "sha256": "684ad5b531f81d43c1e8c7038262d5db7cdc1f68006e04d6c7769efa8d33c8cc",
+          "axes": {
+            "wght": {
+              "min": 100.0,
+              "default": 400.0,
+              "max": 900.0
+            }
+          },
+          "fontBinaryVersion": "Version 1.701"
+        },
+        {
+          "path": "geist-mono-latin-ext-wght-normal.woff2",
+          "bytes": 14696,
+          "sha256": "1a189eb997c3e2ece68373e387afaec9e8617424186c4b1ab3cff7c54ba6223b",
+          "axes": {
+            "wght": {
+              "min": 100.0,
+              "default": 400.0,
+              "max": 900.0
+            }
+          },
+          "fontBinaryVersion": "Version 1.701"
+        }
+      ],
+      "upstreamSource": "https://github.com/google/fonts",
+      "upstreamFontVersion": "v6",
+      "upstreamLastModified": "2026-06-08",
+      "licenseFile": "geist-mono-OFL.txt"
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist", "**/_generated/*"]),
+  globalIgnores(["dist", "**/_generated/*", "android/**/build/**", "android/app/src/main/assets/**", "artifacts/**"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [

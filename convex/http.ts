@@ -2,6 +2,7 @@ import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { auth } from "./auth.ts";
+import { MAX_DECK_MEDIA_BYTES, deckMediaType } from "./deck_media.ts";
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
@@ -23,6 +24,76 @@ const JSON_HEADERS = {
   "Cache-Control": "no-store",
   "Access-Control-Allow-Origin": "*",
 };
+
+// Subida autenticada: la propiedad deriva de la sesión, nunca de un id de cliente.
+http.route({
+  path: "/deck/media",
+  method: "OPTIONS",
+  handler: httpAction(
+    async () =>
+      new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Authorization, Content-Type",
+          "Access-Control-Max-Age": "600",
+          "Cache-Control": "no-store",
+        },
+      }),
+  ),
+});
+
+http.route({
+  path: "/deck/media",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const user = await ctx.runQuery(api.users.getCurrentUser, {});
+    if (!user) return json({ ok: false, error: "Debes iniciar sesión" }, 401);
+    const mediaType = deckMediaType(request.headers.get("Content-Type"));
+    if (!mediaType)
+      return json(
+        { ok: false, error: "Formato multimedia no compatible" },
+        400,
+      );
+    const length = Number(request.headers.get("Content-Length"));
+    if (Number.isFinite(length) && length > MAX_DECK_MEDIA_BYTES) {
+      return json({ ok: false, error: "El archivo supera los 60 MB" }, 413);
+    }
+    // El límite se aplica también a cuerpos sin Content-Length.
+    const chunks: ArrayBuffer[] = [];
+    const reader = request.body?.getReader();
+    if (!reader) return json({ ok: false, error: "Falta el archivo" }, 400);
+    let size = 0;
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > MAX_DECK_MEDIA_BYTES) {
+        await reader.cancel();
+        return json({ ok: false, error: "El archivo supera los 60 MB" }, 413);
+      }
+      chunks.push(new Uint8Array(chunk.value).buffer);
+    }
+    if (size === 0)
+      return json({ ok: false, error: "El archivo está vacío" }, 400);
+    const blob = new Blob(chunks, {
+      type: request.headers.get("Content-Type")!,
+    });
+    const storageId = await ctx.storage.store(blob);
+    try {
+      await ctx.runMutation(internal.deck_media.recordUpload, {
+        userId: user._id,
+        storageId,
+        mediaType,
+      });
+    } catch (error) {
+      await ctx.storage.delete(storageId);
+      throw error;
+    }
+    return json({ ok: true, storageId, mediaType }, 200);
+  }),
+});
 
 function json(
   body: Record<string, string | number | boolean | null>,

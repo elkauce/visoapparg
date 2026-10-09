@@ -2,6 +2,8 @@ import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 import { deckKeyContent } from "./lib/deck_key_content.ts";
+import { deckGrid } from "./lib/deck_grid.ts";
+import { deckAppearance, deckCanvas } from "./lib/deck_appearance.ts";
 
 export default defineSchema({
   ...authTables,
@@ -66,6 +68,9 @@ export default defineSchema({
     userId: v.id("users"),
     name: v.string(),
     order: v.number(),
+    // Ausente conserva la cuadrícula original de 5 × 3.
+    grid: v.optional(deckGrid),
+    canvas: v.optional(deckCanvas),
   }).index("by_user_and_order", ["userId", "order"]),
 
   // Teclas colocadas en una posición de una página
@@ -74,7 +79,28 @@ export default defineSchema({
     pageId: v.id("deckPages"),
     position: v.number(),
     content: deckKeyContent,
+    appearance: v.optional(deckAppearance),
   })
     .index("by_user", ["userId"])
     .index("by_page_and_position", ["pageId", "position"]),
+
+  // Solo el endpoint autenticado de subida crea estos enlaces de propiedad.
+  deckMedia: defineTable({
+    userId: v.id("users"),
+    storageId: v.id("_storage"),
+    mediaType: v.union(v.literal("image"), v.literal("video")),
+  })
+    .index("by_user", ["userId"])
+    .index("by_storage", ["storageId"]),
+
+  // Recibos de pulsaciones: deviceId es identificación no secreta, nunca autenticación.
+  deckActionRequests: defineTable({
+    userId: v.id("users"),
+    requestId: v.string(),
+    deviceId: v.string(),
+    fingerprint: v.string(),
+    completedAt: v.number(),
+  })
+    .index("by_user_and_request", ["userId", "requestId"])
+    .index("by_user_and_time", ["userId", "completedAt"]),
 });
