@@ -1,0 +1,11 @@
+{
+  "package": "com.viso.deck",
+  "versionName": "1.3.0",
+  "versionCode": 4,
+  "certificateSha1": "F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6",
+  "sha256": "8fa386e2f52d581de639137a83ee88ffb055979318e2718ac1ccc6ae84e13b80",
+  "bytes": 16548582,
+  "officialHomeSdkPresent": true,
+  "backend": "https://vivid-nightingale-785.convex.cloud",
+  "googleHomePhysicalTested": false
+}

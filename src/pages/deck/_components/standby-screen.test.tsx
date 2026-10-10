@@ -78,6 +78,46 @@ describe("Single Standby screen", () => {
     expect(screen.getByRole("img", { name: /^Reloj:/ })).toBeInTheDocument();
   });
 
+  it("opens personalization from the Deck settings control without another on-screen button", async () => {
+    const onSettingsOpenChange = vi.fn();
+    const { rerender } = render(
+      <StandbyScreen
+        {...props}
+        settingsOpen={false}
+        onSettingsOpenChange={onSettingsOpenChange}
+      />,
+    );
+    expect(screen.queryByRole("button", { name: "Personalizar" })).toBeNull();
+    expect(screen.queryByRole("dialog")).toBeNull();
+    rerender(
+      <StandbyScreen
+        {...props}
+        settingsOpen
+        onSettingsOpenChange={onSettingsOpenChange}
+      />,
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Personalizar Standby" }),
+    ).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Estilo" }), {
+      target: { value: "widgets" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Listo" }));
+    expect(onSettingsOpenChange).toHaveBeenCalledWith(false);
+    rerender(
+      <StandbyScreen
+        {...props}
+        settingsOpen={false}
+        onSettingsOpenChange={onSettingsOpenChange}
+      />,
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(
+      screen.getByRole("group", { name: /^Calendario de/ }),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(listStandbyPhotos).toHaveBeenCalled());
+  });
+
   it("uses supplied session metadata and only exposes supported playback commands", async () => {
     saveStandbySettings(props.userId, {
       ...DEFAULT_STANDBY_SETTINGS,

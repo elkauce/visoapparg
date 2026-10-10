@@ -22,7 +22,6 @@ function props(
     pending: false,
     connected: true,
     onSelect: vi.fn(),
-    onConfigureLights: vi.fn(),
     ...overrides,
   };
 }
@@ -140,12 +139,13 @@ describe("VISO state screen", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Guardando estado…");
   });
 
-  it("opens Google Home configuration without adding another state or navigating", () => {
-    const onConfigureLights = vi.fn();
+  it("keeps only the six state buttons in the main screen", () => {
     const onSelect = vi.fn();
-    render(<VisoStateScreen {...props({ onConfigureLights, onSelect })} />);
-    fireEvent.click(screen.getByRole("button", { name: "Luces Google Home" }));
-    expect(onConfigureLights).toHaveBeenCalledOnce();
+    render(<VisoStateScreen {...props({ onSelect })} />);
+    expect(
+      screen.queryByRole("button", { name: /Google Home/ }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button")).toHaveLength(6);
     expect(onSelect).not.toHaveBeenCalled();
     expect(stateButtons().getAllByRole("button")).toHaveLength(6);
   });

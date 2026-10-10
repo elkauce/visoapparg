@@ -14,9 +14,9 @@ import {
   Music2,
   Pause,
   Play,
-  Settings2,
   SkipBack,
   SkipForward,
+  Star,
   Trash2,
   Wifi,
   WifiOff,
@@ -58,6 +58,8 @@ export interface StandbyScreenProps {
   connected: boolean;
   onMediaCommand(command: MediaCommand): void;
   mediaBusy: boolean;
+  settingsOpen?: boolean;
+  onSettingsOpenChange?(open: boolean): void;
 }
 
 interface PhotoPreview {
@@ -100,6 +102,13 @@ function StandbyClock({
     serif: "font-serif",
   }[settings.clockFont];
   const colorful = settings.clockPalette !== "single";
+  const clockWidth = settings.showSeconds
+    ? settings.hour12
+      ? "18cqw"
+      : "20cqw"
+    : settings.hour12
+      ? "28cqw"
+      : "32cqw";
   const digitalStyle: CSSProperties =
     settings.clockPalette === "multicolor"
       ? {
@@ -109,25 +118,38 @@ function StandbyClock({
         }
       : accentStyle;
   return (
-    <div className="flex min-h-0 min-w-0 flex-col items-center justify-center gap-[min(3cqh,0.75rem)] text-center">
+    <div className="flex size-full min-h-0 min-w-0 flex-col items-center justify-center gap-[min(3cqh,1rem)] text-center [container-type:size]">
       {settings.clockStyle === "analog" ? (
         <div
           role="img"
           aria-label={`Reloj: ${label}`}
           className={cn(
-            "relative aspect-square rounded-full border-2 border-border bg-background/40",
-            compact
-              ? "size-[min(70cqw,70cqh,11rem)]"
-              : "size-[min(70cqw,70cqh,15rem)]",
+            "relative aspect-square shrink-0 rounded-full",
+            compact ? "size-[min(90cqw,82cqh)]" : "size-[min(94cqw,85cqh)]",
           )}
         >
+          {Array.from({ length: 60 }, (_, index) => (
+            <span
+              key={`tick-${index}`}
+              aria-hidden="true"
+              className="absolute top-0 left-1/2 h-1/2 w-px origin-bottom"
+              style={{ transform: `rotate(${index * 6}deg)` }}
+            >
+              <span
+                className={cn(
+                  "absolute top-[3%] left-1/2 -translate-x-1/2 bg-white/35",
+                  index % 5 === 0 ? "h-[10%] w-0.5" : "h-[4%] w-px",
+                )}
+              />
+            </span>
+          ))}
           {[12, 3, 6, 9].map((number, index) => (
             <span
               key={number}
-              className="absolute text-sm font-semibold text-muted-foreground"
+              className="absolute text-[length:min(9cqw,12cqh)] font-bold text-white/85"
               style={{
-                left: `${50 + Math.sin((index * Math.PI) / 2) * 39}%`,
-                top: `${50 - Math.cos((index * Math.PI) / 2) * 39}%`,
+                left: `${50 + Math.sin((index * Math.PI) / 2) * 36}%`,
+                top: `${50 - Math.cos((index * Math.PI) / 2) * 36}%`,
                 transform: "translate(-50%, -50%)",
               }}
             >
@@ -167,7 +189,7 @@ function StandbyClock({
           role="img"
           aria-label={`Reloj: ${label}`}
           className={cn(
-            "flex max-w-full items-center gap-1.5 font-semibold tabular-nums",
+            "flex max-w-full items-center gap-[min(2cqw,1rem)] font-black tabular-nums",
             fontClass,
           )}
           style={{ color: settings.flipColor }}
@@ -178,11 +200,11 @@ function StandbyClock({
                 key={index}
                 aria-hidden="true"
                 className={cn(
-                  "relative overflow-hidden rounded-xl border border-border bg-[#f4f4f0] px-[min(3cqw,0.5rem)] py-[min(3cqh,0.75rem)] leading-none",
-                  compact || settings.showSeconds
-                    ? "text-[length:min(20cqw,50cqh,4rem)]"
-                    : "text-[length:min(24cqw,50cqh,6rem)]",
+                  "relative overflow-hidden rounded-[min(4cqw,1.5rem)] bg-[#f4f4f0] px-[2cqw] py-[min(7cqh,2rem)] leading-none tracking-tighter",
                 )}
+                style={{
+                  fontSize: `min(${settings.showSeconds ? "20cqw" : "30cqw"}, ${compact ? "48cqh" : "64cqh"})`,
+                }}
               >
                 {value}
                 <span className="absolute inset-x-0 top-1/2 h-px bg-black/70" />
@@ -190,7 +212,10 @@ function StandbyClock({
             ),
           )}
           {period && (
-            <span aria-hidden="true" className="self-end pb-3 text-xs">
+            <span
+              aria-hidden="true"
+              className="self-end pb-3 text-[length:min(4cqw,7cqh)]"
+            >
               {period}
             </span>
           )}
@@ -200,15 +225,16 @@ function StandbyClock({
           dateTime={now.toISOString()}
           aria-label={`Reloj: ${label}`}
           className={cn(
-            "max-w-full leading-none font-semibold tracking-tight tabular-nums",
+            "max-w-full whitespace-nowrap leading-none font-black tracking-tighter tabular-nums",
             fontClass,
-            compact || settings.showSeconds
-              ? "text-[length:min(23cqw,50cqh,5rem)]"
-              : "text-[length:min(26cqw,56cqh,8rem)]",
           )}
-          style={digitalStyle}
+          style={{
+            ...digitalStyle,
+            fontSize: `min(${clockWidth}, ${compact ? "70cqh" : "78cqh"})`,
+          }}
         >
-          <span>{hours}</span>:
+          <span>{hours}</span>
+          <span className="inline-block px-[0.015em] text-white/65">:</span>
           <span
             style={
               settings.clockPalette === "pastel"
@@ -216,7 +242,16 @@ function StandbyClock({
                 : undefined
             }
           >
-            {minutes}
+            {settings.clockPalette === "pastel" ? (
+              <>
+                {minutes[0]}
+                <span style={{ color: settings.secondColor }}>
+                  {minutes[1]}
+                </span>
+              </>
+            ) : (
+              minutes
+            )}
           </span>
           {settings.showSeconds && (
             <span
@@ -231,12 +266,14 @@ function StandbyClock({
             </span>
           )}
           {period && (
-            <span className="ml-2 text-[0.2em] tracking-normal">{period}</span>
+            <span className="ml-[0.08em] text-[0.2em] tracking-normal">
+              {period}
+            </span>
           )}
         </time>
       )}
       {settings.showDate && (
-        <p className="max-w-full text-sm text-muted-foreground capitalize">
+        <p className="max-w-full text-[length:clamp(0.625rem,min(4cqw,6cqh),1.5rem)] text-white/65 capitalize">
           {DATE_FORMAT.format(now)}
         </p>
       )}
@@ -253,15 +290,17 @@ function CalendarWidget({ now }: { now: Date }) {
     year: "numeric",
   }).format(now);
   return (
-    <div className="flex h-full min-h-0 w-full max-w-xs flex-col gap-[min(3cqh,0.75rem)]">
+    <div className="flex h-full min-h-0 w-full flex-col gap-[min(3cqh,0.75rem)]">
       <div className="flex shrink-0 items-center justify-center gap-2">
         <CalendarDays className="size-4 text-muted-foreground" />
-        <p className="text-xs font-semibold capitalize">{monthLabel}</p>
+        <p className="truncate text-[length:clamp(0.625rem,min(5cqw,9cqh),1.2rem)] font-semibold capitalize">
+          {monthLabel}
+        </p>
       </div>
       <div
         role="group"
         aria-label={`Calendario de ${monthLabel}`}
-        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 gap-1 text-center text-[length:clamp(0.625rem,6cqh,0.75rem)] leading-none"
+        className="grid min-h-0 flex-1 auto-rows-fr grid-cols-7 gap-1 text-center text-[length:clamp(0.625rem,min(6cqw,10cqh),1.6rem)] leading-none"
       >
         {["L", "M", "M", "J", "V", "S", "D"].map((day, index) => (
           <span
@@ -302,14 +341,14 @@ function BatteryWidget({ device }: { device: StandbyDeviceState }) {
   )
     return null;
   return (
-    <div className="flex items-center justify-center gap-3">
+    <div className="flex size-full items-center justify-center gap-3">
       {device.charging ? (
         <BatteryCharging className="size-9 text-primary" aria-hidden="true" />
       ) : (
         <Battery className="size-9 text-primary" aria-hidden="true" />
       )}
       <div>
-        <p className="text-2xl font-semibold tabular-nums">
+        <p className="text-[length:clamp(1rem,min(14cqw,25cqh),3rem)] font-bold tabular-nums">
           {device.batteryPercentage}%
         </p>
         <p className="text-xs text-muted-foreground">
@@ -364,8 +403,8 @@ function MusicWidget({
   return (
     <div
       className={cn(
-        "flex min-h-0 min-w-0 items-center gap-[min(2cqh,1rem)]",
-        compact ? "flex-col text-center" : "flex-col sm:flex-row",
+        "flex size-full min-h-0 min-w-0 items-center justify-center gap-[min(2cqh,1.5rem)]",
+        compact ? "flex-col text-center" : "flex-col landscape:flex-row",
       )}
     >
       {artwork ? (
@@ -375,8 +414,8 @@ function MusicWidget({
           className={cn(
             "aspect-square shrink-0 rounded-2xl object-contain",
             compact
-              ? "size-[min(45cqw,28cqh,6rem)]"
-              : "size-[min(30cqw,65cqh,12rem)]",
+              ? "size-[min(45cqw,27cqh,8rem)]"
+              : "size-[min(85cqw,45cqh)] landscape:size-[min(45cqw,85cqh)]",
           )}
         />
       ) : (
@@ -385,27 +424,43 @@ function MusicWidget({
           className={cn(
             "flex aspect-square shrink-0 items-center justify-center rounded-2xl bg-background/60",
             compact
-              ? "size-[min(45cqw,28cqh,6rem)]"
-              : "size-[min(30cqw,65cqh,12rem)]",
+              ? "size-[min(45cqw,27cqh,8rem)]"
+              : "size-[min(85cqw,45cqh)] landscape:size-[min(45cqw,85cqh)]",
           )}
         >
           <Music2 className="size-10 text-muted-foreground" />
         </div>
       )}
-      <div className="min-w-0 flex-1 space-y-[min(2cqh,0.75rem)]">
+      <div
+        className={cn(
+          "min-w-0 space-y-[min(2cqh,1rem)]",
+          compact ? "w-full" : "w-full landscape:w-auto landscape:flex-1",
+        )}
+      >
         <div className="min-w-0 space-y-0.5">
-          <p className="truncate text-[0.625rem] text-muted-foreground">
-            {media.sourceName || "Reproducción Android"}
-          </p>
+          {!compact && (
+            <p className="truncate text-[0.625rem] text-muted-foreground">
+              {media.sourceName || "Reproducción Android"}
+            </p>
+          )}
           <p
             className={cn(
               "line-clamp-1 break-words font-semibold",
-              compact ? "text-sm" : "text-lg",
+              compact
+                ? "text-[length:clamp(0.625rem,min(8cqw,10cqh),1rem)]"
+                : "text-[length:clamp(1rem,min(8cqw,10cqh),2.5rem)]",
             )}
           >
             {media.title || "Sin título disponible"}
           </p>
-          <p className="line-clamp-1 break-words text-xs text-muted-foreground">
+          <p
+            className={cn(
+              "line-clamp-1 break-words text-muted-foreground",
+              compact
+                ? "text-xs"
+                : "text-[length:clamp(0.75rem,min(5cqw,6cqh),1.25rem)]",
+            )}
+          >
             {media.artist || "Artista no informado por la aplicación"}
           </p>
         </div>
@@ -426,14 +481,16 @@ function MusicWidget({
         )}
         <div
           className={cn(
-            "flex items-center gap-2",
-            compact ? "justify-center" : "justify-center sm:justify-start",
+            "flex items-center",
+            compact
+              ? "justify-center gap-1"
+              : "justify-center gap-2 landscape:justify-start",
           )}
         >
           <Button
             variant="outline"
             size="icon"
-            className="size-8"
+            className={compact ? "size-11 shrink-0" : "size-12 shrink-0"}
             aria-label="Canción anterior"
             disabled={mediaBusy || !media.canPrevious}
             onClick={() => onMediaCommand("previous")}
@@ -442,7 +499,7 @@ function MusicWidget({
           </Button>
           <Button
             size="icon"
-            className="size-8"
+            className={compact ? "size-11 shrink-0" : "size-12 shrink-0"}
             aria-label={media.state === "playing" ? "Pausar" : "Reproducir"}
             disabled={mediaBusy || !media.canPlayPause}
             onClick={() => onMediaCommand("play-pause")}
@@ -456,7 +513,7 @@ function MusicWidget({
           <Button
             variant="outline"
             size="icon"
-            className="size-8"
+            className={compact ? "size-11 shrink-0" : "size-12 shrink-0"}
             aria-label="Canción siguiente"
             disabled={mediaBusy || !media.canNext}
             onClick={() => onMediaCommand("next")}
@@ -516,7 +573,12 @@ function PreferenceToggle({
 function AccountStandby(props: StandbyScreenProps) {
   const { userId, activeStatus, connected } = props;
   const [settings, setSettings] = useState(() => loadStandbySettings(userId));
-  const [customizing, setCustomizing] = useState(false);
+  const [localCustomizing, setLocalCustomizing] = useState(false);
+  const customizing = props.settingsOpen ?? localCustomizing;
+  function setCustomizing(open: boolean) {
+    if (props.settingsOpen === undefined) setLocalCustomizing(open);
+    props.onSettingsOpenChange?.(open);
+  }
   const [photos, setPhotos] = useState<PhotoPreview[]>([]);
   const [photosLoading, setPhotosLoading] = useState(true);
   const [photosRevision, setPhotosRevision] = useState(0);
@@ -652,8 +714,11 @@ function AccountStandby(props: StandbyScreenProps) {
   const currentPhoto = photos.length
     ? photos[photoIndex % photos.length]
     : null;
-  const panelClass =
-    "min-h-0 min-w-0 rounded-2xl border border-border bg-card p-4 landscape:p-2 [container-type:size]";
+  const panelClass = "min-h-0 min-w-0 [container-type:size]";
+  const widgetClass = cn(
+    panelClass,
+    "rounded-3xl bg-white/[0.045] p-[min(2cqw,0.5rem)]",
+  );
   const stageClass = "min-h-0 flex-1";
   const widgetCount =
     1 +
@@ -666,22 +731,25 @@ function AccountStandby(props: StandbyScreenProps) {
   return (
     <section
       aria-label="Standby"
-      className="flex h-full min-h-0 min-w-0 flex-col gap-3"
-      style={accentStyle}
+      className="relative flex h-full min-h-0 min-w-0 flex-col text-white"
+      style={{ ...accentStyle, ...backgroundStyle }}
     >
-      <div className="flex shrink-0 items-center justify-between gap-3">
-        <span className="text-sm font-medium">Standby</span>
+      {props.settingsOpen === undefined && (
         <Button
-          variant="outline"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          className="absolute top-0 right-0 z-20 size-11"
+          aria-label="Personalizar"
           onClick={() => setCustomizing(true)}
         >
-          <Settings2 className="size-4" />
-          Personalizar
+          <Star className="size-4" />
         </Button>
-      </div>
-      {message && (
-        <p role="status" className="shrink-0 text-xs text-muted-foreground">
+      )}
+      {message && !customizing && (
+        <p
+          role="status"
+          className="absolute inset-x-4 bottom-2 z-20 rounded-lg bg-black/80 p-2 text-center text-xs text-white/75"
+        >
           {message}
         </p>
       )}
@@ -701,7 +769,7 @@ function AccountStandby(props: StandbyScreenProps) {
         <div
           className={cn(
             stageClass,
-            "grid min-w-0 grid-cols-1 grid-rows-[repeat(2,minmax(0,1fr))] gap-3 sm:grid-cols-2 sm:grid-rows-1 landscape:grid-cols-2 landscape:grid-rows-1",
+            "grid min-w-0 grid-cols-1 grid-rows-[repeat(2,minmax(0,1fr))] gap-3 p-3 landscape:grid-cols-2 landscape:grid-rows-1",
           )}
         >
           <div
@@ -710,7 +778,12 @@ function AccountStandby(props: StandbyScreenProps) {
           >
             <StandbyClock now={now} settings={settings} compact />
           </div>
-          <div className={cn(panelClass, "flex items-center justify-center")}>
+          <div
+            className={cn(
+              widgetClass,
+              "flex items-center justify-center overflow-hidden",
+            )}
+          >
             {settings.duoContent === "music" ? (
               <MusicWidget {...props} compact />
             ) : currentPhoto ? (
@@ -718,7 +791,7 @@ function AccountStandby(props: StandbyScreenProps) {
                 src={currentPhoto.url}
                 alt="Fotografía personal de Standby"
                 className={cn(
-                  "size-full rounded-xl",
+                  "size-full rounded-2xl",
                   settings.photoFit === "cover"
                     ? "object-cover"
                     : "object-contain",
@@ -728,7 +801,7 @@ function AccountStandby(props: StandbyScreenProps) {
               <div className="space-y-2 p-4 text-center">
                 <ImagePlus className="mx-auto size-8 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground">
-                  Agregá tus fotos desde Personalizar.
+                  Agregá tus fotos desde la estrella de ajustes.
                 </p>
               </div>
             )}
@@ -740,7 +813,7 @@ function AccountStandby(props: StandbyScreenProps) {
           className={cn(
             panelClass,
             stageClass,
-            "flex items-center justify-center",
+            "flex items-center justify-center p-4",
           )}
         >
           <MusicWidget {...props} />
@@ -751,7 +824,7 @@ function AccountStandby(props: StandbyScreenProps) {
           className={cn(
             panelClass,
             stageClass,
-            "relative flex items-center justify-center overflow-hidden p-0 landscape:p-0",
+            "relative flex items-center justify-center overflow-hidden",
           )}
         >
           {currentPhoto ? (
@@ -767,7 +840,7 @@ function AccountStandby(props: StandbyScreenProps) {
                 )}
               />
               {settings.photoClock && (
-                <div className="relative z-10 self-end rounded-t-2xl bg-black/65 px-4 py-3 backdrop-blur-sm">
+                <div className="absolute inset-x-[10%] bottom-4 z-10 h-[30%] rounded-3xl bg-black/50 p-3 backdrop-blur-sm">
                   <StandbyClock
                     now={now}
                     settings={{
@@ -783,7 +856,7 @@ function AccountStandby(props: StandbyScreenProps) {
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="absolute top-3 right-3 z-10"
+                  className="absolute right-3 bottom-3 z-20 min-h-11 min-w-11"
                   onClick={() =>
                     setPhotoIndex((index) => (index + 1) % photos.length)
                   }
@@ -798,7 +871,7 @@ function AccountStandby(props: StandbyScreenProps) {
               <p className="text-sm text-muted-foreground">
                 {photosLoading
                   ? "Cargando tus fotografías…"
-                  : "Agregá tus fotos desde Personalizar."}
+                  : "Agregá tus fotos desde la estrella de ajustes."}
               </p>
             </div>
           )}
@@ -808,12 +881,18 @@ function AccountStandby(props: StandbyScreenProps) {
         <div
           className={cn(
             stageClass,
-            "grid min-w-0 auto-rows-fr grid-cols-2 gap-3 landscape:grid-cols-[repeat(var(--standby-widgets),minmax(0,1fr))] landscape:grid-rows-1 landscape:gap-2",
+            "grid min-w-0 auto-rows-fr grid-cols-[repeat(var(--standby-columns),minmax(0,1fr))] gap-3 p-3 landscape:grid-cols-[repeat(var(--standby-landscape-columns),minmax(0,1fr))]",
           )}
-          style={{ "--standby-widgets": widgetCount } as CSSProperties}
+          style={
+            {
+              "--standby-columns": Math.min(2, widgetCount),
+              "--standby-landscape-columns":
+                widgetCount <= 3 ? widgetCount : Math.ceil(widgetCount / 2),
+            } as CSSProperties
+          }
         >
           <div
-            className={cn(panelClass, "flex items-center justify-center")}
+            className={cn(widgetClass, "flex items-center justify-center")}
             style={backgroundStyle}
           >
             <StandbyClock
@@ -823,19 +902,21 @@ function AccountStandby(props: StandbyScreenProps) {
             />
           </div>
           {settings.showDate && (
-            <div className={cn(panelClass, "flex items-center justify-center")}>
+            <div
+              className={cn(widgetClass, "flex items-center justify-center")}
+            >
               <CalendarWidget now={now} />
             </div>
           )}
           {settings.showMusic && (
-            <div className={panelClass}>
+            <div className={cn(widgetClass, "max-[359px]:col-span-2")}>
               <MusicWidget {...props} compact />
             </div>
           )}
           {(settings.showStatus || settings.showConnection) && (
             <div
               className={cn(
-                panelClass,
+                widgetClass,
                 "flex flex-col items-center justify-center gap-2",
               )}
             >
@@ -865,7 +946,7 @@ function AccountStandby(props: StandbyScreenProps) {
           {settings.showBattery &&
             device?.batteryPercentage !== null &&
             device && (
-              <div className={panelClass}>
+              <div className={widgetClass}>
                 <BatteryWidget device={device} />
               </div>
             )}
@@ -873,7 +954,7 @@ function AccountStandby(props: StandbyScreenProps) {
       )}
       {settings.style !== "widgets" &&
         (settings.showStatus || settings.showConnection) && (
-          <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-center gap-x-4 gap-y-1 px-3 py-2 text-white/60">
             {settings.showStatus && (
               <StatusWidget activeStatus={activeStatus} connected={connected} />
             )}

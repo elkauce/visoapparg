@@ -20,7 +20,7 @@ interface Snapshot {
 const errorMessage = (failure: unknown): string =>
   failure instanceof Error ? failure.message : "Google Home no pudo completar la operación.";
 
-/** Configuration stays inside the state screen; every listed light is an SDK result. */
+/** Configuration opens from Deck settings; every listed light is an SDK result. */
 export default function GoogleHomeColorsDialog({ userId, open, onOpenChange }: {
   userId: string;
   open: boolean;
