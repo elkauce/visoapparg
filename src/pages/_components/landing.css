@@ -1,0 +1,516 @@
+.viso-landing {
+  min-height: 100dvh;
+  background: #080b10;
+  color: #f4f6f8;
+  background-image: radial-gradient(#ffffff12 1px, transparent 1px);
+  background-size: 20px 20px;
+  padding: 24px max(24px, calc((100vw - 1152px) / 2)) 48px;
+}
+.viso-home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 52px;
+}
+.viso-mobile-copy,
+.viso-mobile-account,
+.viso-mobile-nav,
+.viso-mobile-entry {
+  display: none !important;
+}
+.viso-home-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.viso-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  color: #a7b0bc;
+}
+.viso-home-intro h1 {
+  font-size: clamp(36px, 4vw, 56px);
+  font-weight: 750;
+  line-height: 1.1;
+  margin: 20px 0;
+}
+.viso-home-intro > p:last-of-type {
+  color: #a7b0bc;
+  line-height: 1.7;
+}
+.viso-home-cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 28px;
+}
+.viso-home-cta > span {
+  font-size: 12px;
+  color: #a7b0bc;
+}
+.viso-desktop-status {
+  height: 190px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  border-radius: 20px;
+}
+.viso-demo-keys {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.viso-demo-caption {
+  font-size: 11px;
+  color: #98a2b2;
+  text-align: center;
+  margin-top: 10px;
+}
+.viso-home-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin: 56px 0;
+}
+.viso-home-features h2 {
+  font-weight: 650;
+  margin: 12px 0 6px;
+}
+.viso-home-features p {
+  font-size: 14px;
+  color: #a7b0bc;
+  line-height: 1.6;
+}
+.viso-home-lights {
+  display: flex;
+  gap: 28px;
+  padding: 32px;
+  border: 1px solid #ffffff18;
+  border-radius: 24px;
+  background: linear-gradient(110deg, #17211e, #0e1219);
+  margin: 36px 0;
+}
+.viso-bulb-art {
+  display: grid;
+  place-items: center;
+  flex: 0 0 120px;
+  background: radial-gradient(circle, #83eb7240, transparent 65%);
+}
+.viso-bulb-art svg {
+  width: 76px;
+  height: 76px;
+  color: #b8ff83;
+  filter: drop-shadow(0 0 15px #61ee81);
+}
+.viso-home-lights-copy h2 {
+  font-size: 28px;
+  font-weight: 700;
+}
+.viso-green {
+  color: #a9ff56;
+}
+.viso-home-lights-copy > p {
+  color: #a7b0bc;
+  margin: 8px 0;
+  font-size: 14px;
+}
+.viso-light-states,
+.viso-light-integrations {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 14px;
+}
+.viso-light-states span {
+  font-size: 11px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+.viso-light-integrations span {
+  border: 1px solid #ffffff24;
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 13px;
+  background: #ffffff08;
+}
+.viso-home-lights-copy .viso-lights-note {
+  font-size: 11px;
+}
+.viso-lights-connect {
+  padding-left: 0 !important;
+}
+.viso-products-heading h2 {
+  font-size: 28px;
+  font-weight: 700;
+}
+.viso-products-heading p {
+  font-size: 14px;
+  color: #a7b0bc;
+  margin-top: 6px;
+}
+.viso-product-cards {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 18px;
+  margin-top: 24px;
+  align-items: stretch;
+}
+.viso-product-card {
+  min-width: 0;
+  text-align: center;
+  border: 1px solid #ffffff18;
+  background: #10141bd9;
+  border-radius: 20px;
+  padding: 20px;
+  transition: border-color 0.2s;
+}
+.viso-product-card:hover {
+  border-color: #a9ff5680;
+}
+.viso-product-card img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+}
+.viso-card-display img {
+  transform: scale(1.08);
+}
+.viso-product-card h3 {
+  font-size: 20px;
+  font-weight: 650;
+  margin-top: 8px;
+}
+.viso-product-card p {
+  font-size: 13px;
+  color: #a7b0bc;
+  margin: 8px 0;
+}
+.viso-product-more {
+  display: block;
+  color: #a9ff56;
+  font-size: 13px;
+  margin-top: 18px;
+}
+.viso-product-hero {
+  position: relative;
+  border-radius: 22px;
+  border: 1px solid var(--viso-demo-color);
+  overflow: hidden;
+  background-image: linear-gradient(135deg, #00000055, #060b0df2 85%);
+  transition: background-color 0.2s;
+  isolation: isolate;
+}
+.viso-carousel-viewport {
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+.viso-carousel-track {
+  display: flex;
+}
+.viso-carousel-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  padding: 25px 32px 40px;
+  gap: 10px;
+}
+.viso-carousel-slide img {
+  width: 48%;
+  height: 155px;
+  object-fit: contain;
+}
+.viso-carousel-slide h2 {
+  font-size: 22px;
+  font-weight: 750;
+  line-height: 1.1;
+}
+.viso-carousel-slide p {
+  font-size: 12px;
+  color: #e0e4e5;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.viso-demo-label {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  font-size: 10px;
+  color: #d4dadc;
+  z-index: 1;
+}
+.viso-carousel-arrow {
+  position: absolute;
+  top: 40%;
+  height: 44px;
+  width: 32px;
+  display: grid;
+  place-items: center;
+  z-index: 1;
+}
+.viso-arrow-left {
+  left: 0;
+}
+.viso-arrow-right {
+  right: 0;
+}
+.viso-carousel-arrow svg {
+  width: 18px;
+}
+.viso-carousel-dots {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+}
+.viso-carousel-dots button {
+  width: 44px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+}
+.viso-carousel-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: #ffffff55;
+}
+.viso-carousel-dots button[aria-pressed="true"] span {
+  background: #fff;
+  width: 18px;
+}
+.viso-landing button:focus-visible {
+  outline: 2px solid #b6ff79;
+  outline-offset: 3px;
+}
+.viso-products-section,
+.viso-demo-deck {
+  scroll-margin-top: 16px;
+}
+@media (max-width: 767px) {
+  .viso-landing {
+    padding: 14px 16px calc(92px + env(safe-area-inset-bottom));
+    background: #080b0f;
+  }
+  .viso-desktop-copy {
+    display: none !important;
+  }
+  .viso-mobile-copy {
+    display: block !important;
+  }
+  .viso-mobile-account,
+  .viso-mobile-entry {
+    display: flex !important;
+  }
+  .viso-home-header {
+    margin-bottom: 14px;
+  }
+  .viso-home-header img {
+    height: 26px;
+  }
+  .viso-mobile-account {
+    height: 44px !important;
+    width: 64px;
+    padding: 0 !important;
+    border-radius: 99px !important;
+    background: #ffffff0b !important;
+  }
+  .viso-home-hero {
+    display: block;
+  }
+  .viso-demo-keys {
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .viso-demo-keys > button {
+    aspect-ratio: auto;
+    min-height: 84px;
+    padding: 10px 4px;
+    border-radius: 12px;
+  }
+  .viso-demo-keys > button svg {
+    width: 28px;
+    height: 28px;
+  }
+  .viso-demo-keys > button span {
+    font-size: 11px;
+  }
+  .viso-demo-caption {
+    font-size: 10px;
+    margin-top: 8px;
+  }
+  .viso-home-lights {
+    gap: 10px;
+    padding: 14px;
+    margin: 18px 0;
+    border-radius: 18px;
+  }
+  .viso-bulb-art {
+    flex-basis: 48px;
+  }
+  .viso-bulb-art svg {
+    width: 42px;
+    height: 42px;
+  }
+  .viso-home-lights-copy {
+    min-width: 0;
+  }
+  .viso-home-lights-copy h2 {
+    font-size: 18px;
+  }
+  .viso-home-lights-copy > p {
+    font-size: 11px;
+    line-height: 1.4;
+    margin: 5px 0;
+  }
+  .viso-light-integrations {
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .viso-light-integrations span {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+  .viso-home-lights-copy .viso-lights-note {
+    font-size: 10px;
+  }
+  .viso-lights-connect {
+    height: 32px !important;
+    font-size: 11px !important;
+  }
+  .viso-products-heading h2 {
+    font-size: 18px;
+  }
+  .viso-product-cards {
+    gap: 8px;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    margin-top: 10px;
+  }
+  .viso-product-card {
+    padding: 6px;
+    border-radius: 12px;
+  }
+  .viso-product-card img {
+    height: 85px;
+  }
+  .viso-product-card h3 {
+    font-size: 11px;
+    margin: 2px 0 4px;
+    white-space: nowrap;
+  }
+  .viso-mobile-entry {
+    margin-top: 14px;
+  }
+  .viso-mobile-entry > button {
+    width: 100%;
+    background: #acff4f;
+    color: #0b1404;
+    font-weight: 750;
+  }
+  .viso-mobile-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    background: #0d1118f5;
+    backdrop-filter: blur(16px);
+    border-top: 1px solid #ffffff12;
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom));
+    justify-content: space-around;
+  }
+  .viso-mobile-nav > button {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    min-width: 60px;
+    min-height: 52px;
+    font-size: 10px;
+    color: #a2aab7;
+    padding: 4px;
+    border-radius: 10px;
+  }
+  .viso-mobile-nav svg {
+    width: 22px;
+    height: 22px;
+  }
+  .viso-mobile-nav [aria-current="page"] {
+    color: #4bf09a;
+  }
+  .viso-nav-account {
+    font-size: 11px !important;
+  }
+  .viso-carousel-slide {
+    height: 205px;
+  }
+  .viso-carousel-slide h2 {
+    font-size: 21px;
+  }
+}
+@media (min-width: 768px) and (max-width: 1023px) {
+  .viso-home-hero {
+    gap: 28px;
+  }
+  .viso-home-intro h1 {
+    font-size: 38px;
+  }
+  .viso-home-cta {
+    flex-wrap: wrap;
+  }
+  .viso-product-card img {
+    height: 170px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viso-product-hero,
+  .viso-product-card {
+    transition: none;
+  }
+}
+
+.viso-mobile-account-wrap {
+  display: none;
+}
+.viso-nav-account-wrap {
+  position: relative;
+  min-width: 60px;
+  min-height: 52px;
+}
+.viso-nav-account-wrap > svg {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 11px);
+  pointer-events: none;
+  color: #a2aab7;
+}
+.viso-nav-account-wrap > button {
+  height: 52px;
+  width: 100%;
+  padding: 28px 4px 4px;
+  color: #a2aab7;
+}
+.viso-carousel-dots button {
+  height: 44px;
+}
+@media (max-width: 767px) {
+  .viso-mobile-account-wrap {
+    display: block;
+    position: relative;
+  }
+  .viso-mobile-account-wrap > svg {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    top: 11px;
+    left: 21px;
+    pointer-events: none;
+    z-index: 1;
+  }
+}
