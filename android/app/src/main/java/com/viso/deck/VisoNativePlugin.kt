@@ -1,5 +1,8 @@
 package com.viso.deck
 
+import android.app.Activity
+import androidx.activity.result.ActivityResult
+import com.getcapacitor.annotation.ActivityCallback
 import android.app.NotificationManager
 import android.content.ActivityNotFoundException
 import android.content.ComponentName
@@ -108,6 +111,34 @@ class VisoNativePlugin : Plugin() {
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url.toASCIIString())).addCategory(Intent.CATEGORY_BROWSABLE)
         activity.startActivity(intent)
         call.resolve()
+    }
+
+    @PluginMethod
+    fun exportDeckConfiguration(call: PluginCall) = ui(call, "No se pudo abrir el selector de archivos.") {
+        val contents = call.getString("contents") ?: ""
+        require(contents.toByteArray(Charsets.UTF_8).size <= 65536)
+        require(JSONObject(contents).getString("format") == "viso-streamdeck-v1")
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("application/json")
+            .putExtra(Intent.EXTRA_TITLE, "Mi-configuracion-VISO-Elgato.json")
+        startActivityForResult(call, intent, "configurationSaved")
+    }
+
+    @ActivityCallback
+    private fun configurationSaved(call: PluginCall?, result: ActivityResult) {
+        if (call == null) return
+        val uri = result.data?.data
+        if (result.resultCode != Activity.RESULT_OK || uri == null) {
+            call.reject("Guardado cancelado.", "EXPORT_CANCELLED")
+            return
+        }
+        background(call, "No se pudo guardar la configuración.") {
+            val contents = call.getString("contents") ?: ""
+            val stream = context.contentResolver.openOutputStream(uri) ?: error("Unavailable")
+            stream.use { it.write(contents.toByteArray(Charsets.UTF_8)) }
+            null
+        }
     }
 
     private fun allowedApps(): Set<String> = preferences.getStringSet("allowed_apps", emptySet())?.toSet() ?: emptySet()

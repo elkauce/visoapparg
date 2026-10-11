@@ -1,0 +1,3071 @@
+{
+  "generatedAt": "2026-10-11T03:30:15.345Z",
+  "scope": "Actual React Deck carousel with explicit external Convex/Android fixtures. Input.dispatchTouchEvent drives real Chromium touch and PointerEvents. No physical Android, OAuth or Google Home devices verified.",
+  "sizes": [
+    [
+      360,
+      800
+    ],
+    [
+      800,
+      360
+    ],
+    [
+      320,
+      568
+    ],
+    [
+      568,
+      320
+    ],
+    [
+      720,
+      1280
+    ],
+    [
+      1280,
+      720
+    ]
+  ],
+  "checks": 589,
+  "results": [
+    {
+      "label": "360x800-states",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 360,
+          "height": 800
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 316,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 360,
+          "bottom": 44,
+          "left": 316
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 8.271728515625,
+              "y": 45.48047637939453,
+              "width": 169.45654296875,
+              "height": 247.0390625,
+              "top": 45.48047637939453,
+              "right": 177.728271484375,
+              "bottom": 292.51953887939453,
+              "left": 8.271728515625
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 184,
+              "y": 48,
+              "width": 166,
+              "height": 242,
+              "top": 48,
+              "right": 350,
+              "bottom": 290,
+              "left": 184
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 10,
+              "y": 298,
+              "width": 166,
+              "height": 242,
+              "top": 298,
+              "right": 176,
+              "bottom": 540,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 184,
+              "y": 298,
+              "width": 166,
+              "height": 242,
+              "top": 298,
+              "right": 350,
+              "bottom": 540,
+              "left": 184
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 10,
+              "y": 548,
+              "width": 166,
+              "height": 242,
+              "top": 548,
+              "right": 176,
+              "bottom": 790,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 184,
+              "y": 548,
+              "width": 166,
+              "height": 242,
+              "top": 548,
+              "right": 350,
+              "bottom": 790,
+              "left": 184
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 354,
+              "bottom": 794,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -342,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 6,
+              "bottom": 794,
+              "left": -342
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 354,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 702,
+              "bottom": 794,
+              "left": 354
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "360x800-spotify",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 360,
+          "height": 800
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 316,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 360,
+          "bottom": 44,
+          "left": 316
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 68,
+              "y": 674,
+              "width": 56,
+              "height": 56,
+              "top": 674,
+              "right": 124,
+              "bottom": 730,
+              "left": 68
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 148,
+              "y": 670,
+              "width": 64,
+              "height": 64,
+              "top": 670,
+              "right": 212,
+              "bottom": 734,
+              "left": 148
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 236,
+              "y": 674,
+              "width": 56,
+              "height": 56,
+              "top": 674,
+              "right": 292,
+              "bottom": 730,
+              "left": 236
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 70.921875,
+              "y": 750,
+              "width": 44,
+              "height": 44,
+              "top": 750,
+              "right": 114.921875,
+              "bottom": 794,
+              "left": 70.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 189.0625,
+              "y": 750,
+              "width": 44,
+              "height": 44,
+              "top": 750,
+              "right": 233.0625,
+              "bottom": 794,
+              "left": 189.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 245.0625,
+              "y": 750,
+              "width": 44,
+              "height": 44,
+              "top": 750,
+              "right": 289.0625,
+              "bottom": 794,
+              "left": 245.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 354,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 702,
+              "bottom": 794,
+              "left": 354
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 354,
+              "bottom": 794,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -342,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 6,
+              "bottom": 794,
+              "left": -342
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "360x800-standby",
+      "viewport": {
+        "width": 360,
+        "height": 800
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 348,
+          "height": 750,
+          "top": 44,
+          "right": 354,
+          "bottom": 794,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 360,
+          "height": 800
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 316,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 360,
+          "bottom": 44,
+          "left": 316
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -342,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 6,
+              "bottom": 794,
+              "left": -342
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 354,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 702,
+              "bottom": 794,
+              "left": 354
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 348,
+              "height": 750,
+              "top": 44,
+              "right": 354,
+              "bottom": 794,
+              "left": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "800x360-states",
+      "viewport": {
+        "width": 800,
+        "height": 360
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 800,
+          "height": 360
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 756,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 800,
+          "bottom": 44,
+          "left": 756
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 7.51629638671875,
+              "y": 46.5662841796875,
+              "width": 259.6236572265625,
+              "height": 149.867431640625,
+              "top": 46.5662841796875,
+              "right": 267.13995361328125,
+              "bottom": 196.4337158203125,
+              "left": 7.51629638671875
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 272.65625,
+              "y": 48,
+              "width": 254.671875,
+              "height": 147,
+              "top": 48,
+              "right": 527.328125,
+              "bottom": 195,
+              "left": 272.65625
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 535.328125,
+              "y": 48,
+              "width": 254.671875,
+              "height": 147,
+              "top": 48,
+              "right": 790,
+              "bottom": 195,
+              "left": 535.328125
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 10,
+              "y": 203,
+              "width": 254.65625,
+              "height": 147,
+              "top": 203,
+              "right": 264.65625,
+              "bottom": 350,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 272.65625,
+              "y": 203,
+              "width": 254.671875,
+              "height": 147,
+              "top": 203,
+              "right": 527.328125,
+              "bottom": 350,
+              "left": 272.65625
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 535.328125,
+              "y": 203,
+              "width": 254.671875,
+              "height": 147,
+              "top": 203,
+              "right": 790,
+              "bottom": 350,
+              "left": 535.328125
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 794,
+              "bottom": 354,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -782,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 6,
+              "bottom": 354,
+              "left": -782
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 794,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 1582,
+              "bottom": 354,
+              "left": 794
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "800x360-spotify",
+      "viewport": {
+        "width": 800,
+        "height": 360
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 800,
+          "height": 360
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 756,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 800,
+          "bottom": 44,
+          "left": 756
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 517,
+              "y": 220,
+              "width": 44,
+              "height": 44,
+              "top": 220,
+              "right": 561,
+              "bottom": 264,
+              "left": 517
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 577,
+              "y": 218,
+              "width": 48,
+              "height": 48,
+              "top": 218,
+              "right": 625,
+              "bottom": 266,
+              "left": 577
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 641,
+              "y": 220,
+              "width": 44,
+              "height": 44,
+              "top": 220,
+              "right": 685,
+              "bottom": 264,
+              "left": 641
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 491.921875,
+              "y": 274,
+              "width": 44,
+              "height": 44,
+              "top": 274,
+              "right": 535.921875,
+              "bottom": 318,
+              "left": 491.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 610.0625,
+              "y": 274,
+              "width": 44,
+              "height": 44,
+              "top": 274,
+              "right": 654.0625,
+              "bottom": 318,
+              "left": 610.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 666.0625,
+              "y": 274,
+              "width": 44,
+              "height": 44,
+              "top": 274,
+              "right": 710.0625,
+              "bottom": 318,
+              "left": 666.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 794,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 1582,
+              "bottom": 354,
+              "left": 794
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 794,
+              "bottom": 354,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -782,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 6,
+              "bottom": 354,
+              "left": -782
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "800x360-standby",
+      "viewport": {
+        "width": 800,
+        "height": 360
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 788,
+          "height": 310,
+          "top": 44,
+          "right": 794,
+          "bottom": 354,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 800,
+          "height": 360
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 756,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 800,
+          "bottom": 44,
+          "left": 756
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -782,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 6,
+              "bottom": 354,
+              "left": -782
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 794,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 1582,
+              "bottom": 354,
+              "left": 794
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 788,
+              "height": 310,
+              "top": 44,
+              "right": 794,
+              "bottom": 354,
+              "left": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "320x568-states",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 320,
+          "height": 568
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 276,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 320,
+          "bottom": 44,
+          "left": 276
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 8.639457702636719,
+              "y": 46.465606689453125,
+              "width": 148.7210693359375,
+              "height": 167.72503662109375,
+              "top": 46.465606689453125,
+              "right": 157.36052703857422,
+              "bottom": 214.19064331054688,
+              "left": 8.639457702636719
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 164,
+              "y": 48,
+              "width": 146,
+              "height": 164.65625,
+              "top": 48,
+              "right": 310,
+              "bottom": 212.65625,
+              "left": 164
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 10,
+              "y": 220.65625,
+              "width": 146,
+              "height": 164.671875,
+              "top": 220.65625,
+              "right": 156,
+              "bottom": 385.328125,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 164,
+              "y": 220.65625,
+              "width": 146,
+              "height": 164.671875,
+              "top": 220.65625,
+              "right": 310,
+              "bottom": 385.328125,
+              "left": 164
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 10,
+              "y": 393.328125,
+              "width": 146,
+              "height": 164.671875,
+              "top": 393.328125,
+              "right": 156,
+              "bottom": 558,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 164,
+              "y": 393.328125,
+              "width": 146,
+              "height": 164.671875,
+              "top": 393.328125,
+              "right": 310,
+              "bottom": 558,
+              "left": 164
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 314,
+              "bottom": 562,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -302,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 6,
+              "bottom": 562,
+              "left": -302
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 314,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 622,
+              "bottom": 562,
+              "left": 314
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "320x568-spotify",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 320,
+          "height": 568
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 276,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 320,
+          "bottom": 44,
+          "left": 276
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 48,
+              "y": 442,
+              "width": 56,
+              "height": 56,
+              "top": 442,
+              "right": 104,
+              "bottom": 498,
+              "left": 48
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 128,
+              "y": 438,
+              "width": 64,
+              "height": 64,
+              "top": 438,
+              "right": 192,
+              "bottom": 502,
+              "left": 128
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 216,
+              "y": 442,
+              "width": 56,
+              "height": 56,
+              "top": 442,
+              "right": 272,
+              "bottom": 498,
+              "left": 216
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 50.921875,
+              "y": 518,
+              "width": 44,
+              "height": 44,
+              "top": 518,
+              "right": 94.921875,
+              "bottom": 562,
+              "left": 50.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 169.0625,
+              "y": 518,
+              "width": 44,
+              "height": 44,
+              "top": 518,
+              "right": 213.0625,
+              "bottom": 562,
+              "left": 169.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 225.0625,
+              "y": 518,
+              "width": 44,
+              "height": 44,
+              "top": 518,
+              "right": 269.0625,
+              "bottom": 562,
+              "left": 225.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 314,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 622,
+              "bottom": 562,
+              "left": 314
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 314,
+              "bottom": 562,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -302,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 6,
+              "bottom": 562,
+              "left": -302
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "320x568-standby",
+      "viewport": {
+        "width": 320,
+        "height": 568
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 308,
+          "height": 518,
+          "top": 44,
+          "right": 314,
+          "bottom": 562,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 320,
+          "height": 568
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 276,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 320,
+          "bottom": 44,
+          "left": 276
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -302,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 6,
+              "bottom": 562,
+              "left": -302
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 314,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 622,
+              "bottom": 562,
+              "left": 314
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 308,
+              "height": 518,
+              "top": 44,
+              "right": 314,
+              "bottom": 562,
+              "left": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "568x320-states",
+      "viewport": {
+        "width": 568,
+        "height": 320
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 568,
+          "height": 320
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 524,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 568,
+          "bottom": 44,
+          "left": 524
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 8.263664245605469,
+              "y": 46.75645446777344,
+              "width": 180.80078125,
+              "height": 129.48709106445312,
+              "top": 46.75645446777344,
+              "right": 189.06444549560547,
+              "bottom": 176.24354553222656,
+              "left": 8.263664245605469
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 195.328125,
+              "y": 48,
+              "width": 177.328125,
+              "height": 127,
+              "top": 48,
+              "right": 372.65625,
+              "bottom": 175,
+              "left": 195.328125
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 380.65625,
+              "y": 48,
+              "width": 177.328125,
+              "height": 127,
+              "top": 48,
+              "right": 557.984375,
+              "bottom": 175,
+              "left": 380.65625
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 10,
+              "y": 183,
+              "width": 177.328125,
+              "height": 127,
+              "top": 183,
+              "right": 187.328125,
+              "bottom": 310,
+              "left": 10
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 195.328125,
+              "y": 183,
+              "width": 177.328125,
+              "height": 127,
+              "top": 183,
+              "right": 372.65625,
+              "bottom": 310,
+              "left": 195.328125
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 380.65625,
+              "y": 183,
+              "width": 177.328125,
+              "height": 127,
+              "top": 183,
+              "right": 557.984375,
+              "bottom": 310,
+              "left": 380.65625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 562,
+              "bottom": 314,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -550,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 6,
+              "bottom": 314,
+              "left": -550
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 562,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 1118,
+              "bottom": 314,
+              "left": 562
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "568x320-spotify",
+      "viewport": {
+        "width": 568,
+        "height": 320
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 568,
+          "height": 320
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 524,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 568,
+          "bottom": 44,
+          "left": 524
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 343,
+              "y": 200,
+              "width": 44,
+              "height": 44,
+              "top": 200,
+              "right": 387,
+              "bottom": 244,
+              "left": 343
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 403,
+              "y": 198,
+              "width": 48,
+              "height": 48,
+              "top": 198,
+              "right": 451,
+              "bottom": 246,
+              "left": 403
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 467,
+              "y": 200,
+              "width": 44,
+              "height": 44,
+              "top": 200,
+              "right": 511,
+              "bottom": 244,
+              "left": 467
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 317.921875,
+              "y": 254,
+              "width": 44,
+              "height": 44,
+              "top": 254,
+              "right": 361.921875,
+              "bottom": 298,
+              "left": 317.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 436.0625,
+              "y": 254,
+              "width": 44,
+              "height": 44,
+              "top": 254,
+              "right": 480.0625,
+              "bottom": 298,
+              "left": 436.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 492.0625,
+              "y": 254,
+              "width": 44,
+              "height": 44,
+              "top": 254,
+              "right": 536.0625,
+              "bottom": 298,
+              "left": 492.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 562,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 1118,
+              "bottom": 314,
+              "left": 562
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 562,
+              "bottom": 314,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -550,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 6,
+              "bottom": 314,
+              "left": -550
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "568x320-standby",
+      "viewport": {
+        "width": 568,
+        "height": 320
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 556,
+          "height": 270,
+          "top": 44,
+          "right": 562,
+          "bottom": 314,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 568,
+          "height": 320
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 524,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 568,
+          "bottom": 44,
+          "left": 524
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -550,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 6,
+              "bottom": 314,
+              "left": -550
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 562,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 1118,
+              "bottom": 314,
+              "left": 562
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 556,
+              "height": 270,
+              "top": 44,
+              "right": 562,
+              "bottom": 314,
+              "left": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "720x1280-states",
+      "viewport": {
+        "width": 720,
+        "height": 1280
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 720,
+          "height": 1280
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 676,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 720,
+          "bottom": 44,
+          "left": 676
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 9.685333251953125,
+              "y": 47.10237121582031,
+              "width": 349.81683349609375,
+              "height": 408.0452880859375,
+              "top": 47.10237121582031,
+              "right": 359.5021667480469,
+              "bottom": 455.1476593017578,
+              "left": 9.685333251953125
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 364,
+              "y": 51.1875,
+              "width": 342.8125,
+              "height": 399.875,
+              "top": 51.1875,
+              "right": 706.8125,
+              "bottom": 451.0625,
+              "left": 364
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 13.1875,
+              "y": 459.0625,
+              "width": 342.8125,
+              "height": 399.875,
+              "top": 459.0625,
+              "right": 356,
+              "bottom": 858.9375,
+              "left": 13.1875
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 364,
+              "y": 459.0625,
+              "width": 342.8125,
+              "height": 399.875,
+              "top": 459.0625,
+              "right": 706.8125,
+              "bottom": 858.9375,
+              "left": 364
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 13.1875,
+              "y": 866.9375,
+              "width": 342.8125,
+              "height": 399.875,
+              "top": 866.9375,
+              "right": 356,
+              "bottom": 1266.8125,
+              "left": 13.1875
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 364,
+              "y": 866.9375,
+              "width": 342.8125,
+              "height": 399.875,
+              "top": 866.9375,
+              "right": 706.8125,
+              "bottom": 1266.8125,
+              "left": 364
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 714,
+              "bottom": 1274,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -702,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 6,
+              "bottom": 1274,
+              "left": -702
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 714,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 1422,
+              "bottom": 1274,
+              "left": 714
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "720x1280-spotify",
+      "viewport": {
+        "width": 720,
+        "height": 1280
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 720,
+          "height": 1280
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 676,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 720,
+          "bottom": 44,
+          "left": 676
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 248,
+              "y": 1154,
+              "width": 56,
+              "height": 56,
+              "top": 1154,
+              "right": 304,
+              "bottom": 1210,
+              "left": 248
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 328,
+              "y": 1150,
+              "width": 64,
+              "height": 64,
+              "top": 1150,
+              "right": 392,
+              "bottom": 1214,
+              "left": 328
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 416,
+              "y": 1154,
+              "width": 56,
+              "height": 56,
+              "top": 1154,
+              "right": 472,
+              "bottom": 1210,
+              "left": 416
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 250.921875,
+              "y": 1230,
+              "width": 44,
+              "height": 44,
+              "top": 1230,
+              "right": 294.921875,
+              "bottom": 1274,
+              "left": 250.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 369.0625,
+              "y": 1230,
+              "width": 44,
+              "height": 44,
+              "top": 1230,
+              "right": 413.0625,
+              "bottom": 1274,
+              "left": 369.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 425.0625,
+              "y": 1230,
+              "width": 44,
+              "height": 44,
+              "top": 1230,
+              "right": 469.0625,
+              "bottom": 1274,
+              "left": 425.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 714,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 1422,
+              "bottom": 1274,
+              "left": 714
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 714,
+              "bottom": 1274,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -702,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 6,
+              "bottom": 1274,
+              "left": -702
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "720x1280-standby",
+      "viewport": {
+        "width": 720,
+        "height": 1280
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 708,
+          "height": 1230,
+          "top": 44,
+          "right": 714,
+          "bottom": 1274,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 720,
+          "height": 1280
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 676,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 720,
+          "bottom": 44,
+          "left": 676
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -702,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 6,
+              "bottom": 1274,
+              "left": -702
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 714,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 1422,
+              "bottom": 1274,
+              "left": 714
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 708,
+              "height": 1230,
+              "top": 44,
+              "right": 714,
+              "bottom": 1274,
+              "left": 6
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "1280x720-states",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "mainLabel": "Estados VISO",
+        "body": {
+          "width": 1280,
+          "height": 720
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 1 de 3",
+            "text": "01",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 1236,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 1280,
+          "bottom": 44,
+          "left": 1236
+        },
+        "buttons": [
+          {
+            "label": "LIBRE",
+            "rect": {
+              "x": 8.760757446289062,
+              "y": 47.7127685546875,
+              "width": 421.384765625,
+              "height": 330.761962890625,
+              "top": 47.7127685546875,
+              "right": 430.14552307128906,
+              "bottom": 378.4747314453125,
+              "left": 8.760757446289062
+            },
+            "disabled": false
+          },
+          {
+            "label": "OCUPADO",
+            "rect": {
+              "x": 433.71875,
+              "y": 51.1875,
+              "width": 412.546875,
+              "height": 323.8125,
+              "top": 51.1875,
+              "right": 846.265625,
+              "bottom": 375,
+              "left": 433.71875
+            },
+            "disabled": false
+          },
+          {
+            "label": "REUNIÓN",
+            "rect": {
+              "x": 854.265625,
+              "y": 51.1875,
+              "width": 412.53125,
+              "height": 323.8125,
+              "top": 51.1875,
+              "right": 1266.796875,
+              "bottom": 375,
+              "left": 854.265625
+            },
+            "disabled": false
+          },
+          {
+            "label": "LLAMADA",
+            "rect": {
+              "x": 13.1875,
+              "y": 383,
+              "width": 412.53125,
+              "height": 323.8125,
+              "top": 383,
+              "right": 425.71875,
+              "bottom": 706.8125,
+              "left": 13.1875
+            },
+            "disabled": false
+          },
+          {
+            "label": "NO MOLESTAR",
+            "rect": {
+              "x": 433.71875,
+              "y": 383,
+              "width": 412.546875,
+              "height": 323.8125,
+              "top": 383,
+              "right": 846.265625,
+              "bottom": 706.8125,
+              "left": 433.71875
+            },
+            "disabled": false
+          },
+          {
+            "label": "AUSENTE",
+            "rect": {
+              "x": 854.265625,
+              "y": 383,
+              "width": 412.53125,
+              "height": 323.8125,
+              "top": 383,
+              "right": 1266.796875,
+              "bottom": 706.8125,
+              "left": 854.265625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 1274,
+              "bottom": 714,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -1262,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 6,
+              "bottom": 714,
+              "left": -1262
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 1274,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 2542,
+              "bottom": 714,
+              "left": 1274
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "1280x720-spotify",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "mainLabel": "Spotify",
+        "body": {
+          "width": 1280,
+          "height": 720
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 2 de 3",
+            "text": "02",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 1236,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 1280,
+          "bottom": 44,
+          "left": 1236
+        },
+        "buttons": [
+          {
+            "label": "Anterior",
+            "rect": {
+              "x": 853,
+              "y": 406,
+              "width": 56,
+              "height": 56,
+              "top": 406,
+              "right": 909,
+              "bottom": 462,
+              "left": 853
+            },
+            "disabled": false
+          },
+          {
+            "label": "Pausar",
+            "rect": {
+              "x": 933,
+              "y": 402,
+              "width": 64,
+              "height": 64,
+              "top": 402,
+              "right": 997,
+              "bottom": 466,
+              "left": 933
+            },
+            "disabled": false
+          },
+          {
+            "label": "Siguiente",
+            "rect": {
+              "x": 1021,
+              "y": 406,
+              "width": 56,
+              "height": 56,
+              "top": 406,
+              "right": 1077,
+              "bottom": 462,
+              "left": 1021
+            },
+            "disabled": false
+          },
+          {
+            "label": "Bajar volumen multimedia",
+            "rect": {
+              "x": 855.921875,
+              "y": 486,
+              "width": 44,
+              "height": 44,
+              "top": 486,
+              "right": 899.921875,
+              "bottom": 530,
+              "left": 855.921875
+            },
+            "disabled": false
+          },
+          {
+            "label": "Subir volumen multimedia",
+            "rect": {
+              "x": 974.0625,
+              "y": 486,
+              "width": 44,
+              "height": 44,
+              "top": 486,
+              "right": 1018.0625,
+              "bottom": 530,
+              "left": 974.0625
+            },
+            "disabled": false
+          },
+          {
+            "label": "Actualizar reproducción",
+            "rect": {
+              "x": 1030.0625,
+              "y": 486,
+              "width": 44,
+              "height": 44,
+              "top": 486,
+              "right": 1074.0625,
+              "bottom": 530,
+              "left": 1030.0625
+            },
+            "disabled": false
+          }
+        ],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 1274,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 2542,
+              "bottom": 714,
+              "left": 1274
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 1274,
+              "bottom": 714,
+              "left": 6
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -1262,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 6,
+              "bottom": 714,
+              "left": -1262
+            }
+          }
+        ]
+      }
+    },
+    {
+      "label": "1280x720-standby",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "data": {
+        "main": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "active": {
+          "x": 6,
+          "y": 44,
+          "width": 1268,
+          "height": 670,
+          "top": 44,
+          "right": 1274,
+          "bottom": 714,
+          "left": 6
+        },
+        "mainLabel": "Standby",
+        "body": {
+          "width": 1280,
+          "height": 720
+        },
+        "indicator": [
+          {
+            "tag": "SPAN",
+            "label": "Página 3 de 3",
+            "text": "03",
+            "rect": {
+              "x": 12,
+              "y": 14,
+              "width": 13.734375,
+              "height": 16,
+              "top": 14,
+              "right": 25.734375,
+              "bottom": 30,
+              "left": 12
+            },
+            "role": null,
+            "tabIndex": -1,
+            "pointerEvents": "none"
+          }
+        ],
+        "star": {
+          "x": 1236,
+          "y": 0,
+          "width": 44,
+          "height": 44,
+          "top": 0,
+          "right": 1280,
+          "bottom": 44,
+          "left": 1236
+        },
+        "buttons": [],
+        "slots": [
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": -1262,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 6,
+              "bottom": 714,
+              "left": -1262
+            }
+          },
+          {
+            "active": "false",
+            "inert": true,
+            "hidden": "true",
+            "rect": {
+              "x": 1274,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 2542,
+              "bottom": 714,
+              "left": 1274
+            }
+          },
+          {
+            "active": "true",
+            "inert": false,
+            "hidden": "false",
+            "rect": {
+              "x": 6,
+              "y": 44,
+              "width": 1268,
+              "height": 670,
+              "top": 44,
+              "right": 1274,
+              "bottom": 714,
+              "left": 6
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "failures": [],
+  "browserErrors": []
+}

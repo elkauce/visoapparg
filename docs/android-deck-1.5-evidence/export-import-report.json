@@ -1,0 +1,5 @@
+{
+  "checks": 8,
+  "passed": true,
+  "scope": "Account-owned state IDs exported through mocked Android document call, then actual plugin property inspector imports JSON and saves the selected key via websocket; no physical file chooser or Elgato hardware"
+}

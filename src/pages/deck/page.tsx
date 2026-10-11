@@ -77,7 +77,17 @@ function LiveTile({ content, editMode, onPress, canvas }: LiveTileProps) {
 
 // The original keys, status colours and page order come directly from Convex.
 // A press never marks a status active locally: only confirmed query data does.
-export default function DeckPage() {
+export default function DeckPage({
+  embeddedPageId,
+  onSelectPage,
+  initialPageId,
+  startEditing = false,
+}: {
+  embeddedPageId?: string;
+  initialPageId?: string;
+  onSelectPage?: (id: string) => void;
+  startEditing?: boolean;
+} = {}) {
   const layout = useQuery(api.deck_layout.get, {});
   const statusData = useQuery(api.statuses.list, {});
   const connection = useConvexConnectionState();
@@ -97,8 +107,8 @@ export default function DeckPage() {
   const advanced = deckExtensionsEnabled();
   const connected = connection.isWebSocketConnected;
 
-  const [pageId, setPageId] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState(false);
+  const [pageId, setPageId] = useState<string | null>(initialPageId ?? null);
+  const [editMode, setEditMode] = useState(startEditing);
   const [target, setTarget] = useState<EditTarget | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [sportsLeague, setSportsLeague] = useState<string | null>(null);
@@ -151,9 +161,10 @@ export default function DeckPage() {
   // Back gesture and navigation to configuration.
   useEffect(
     () => () => {
-      if (isAndroidNative()) void immersive.exit().catch(() => undefined);
+      if (!embeddedPageId && isAndroidNative())
+        void immersive.exit().catch(() => undefined);
     },
-    [],
+    [embeddedPageId],
   );
 
   useEffect(() => {
@@ -246,7 +257,8 @@ export default function DeckPage() {
   }
 
   const { pages, keys } = layout;
-  const currentPage = pages.find((page) => page._id === pageId) ?? pages[0];
+  const currentPage =
+    pages.find((page) => page._id === (embeddedPageId ?? pageId)) ?? pages[0];
   if (!currentPage) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-3 p-6 text-center">
@@ -357,7 +369,7 @@ export default function DeckPage() {
     const content = key.content;
     if (content.kind === "folder") {
       if (pages.some((page) => page._id === content.targetPageId))
-        setPageId(content.targetPageId);
+        (onSelectPage ?? setPageId)(content.targetPageId);
       else toast.error("La página de esta carpeta ya no está disponible");
     } else if (content.kind === "sports") {
       setSportsLeague(content.league);
@@ -387,7 +399,7 @@ export default function DeckPage() {
             selectPage: async (id) => {
               if (!pages.some((page) => page._id === id))
                 throw new Error("La página ya no está disponible");
-              setPageId(id);
+              (onSelectPage ?? setPageId)(id);
             },
             rgb: async (action) => {
               if (!isAndroidNative())
@@ -434,132 +446,144 @@ export default function DeckPage() {
     "--deck-widget-number-limit": `${Math.max(24, Math.min(grid.tileWidth, grid.tileHeight) * 0.25)}px`,
   } as CSSProperties;
   const canvas = currentPage.canvas?.mediaUrl ? currentPage.canvas : null;
+  const GridContainer = embeddedPageId ? "div" : "main";
 
   return (
     <div
-      className="flex h-dvh flex-col gap-3 bg-background p-3 [--deck-padding:0.75rem] sm:p-4 sm:[--deck-padding:1rem]"
-      style={{
-        paddingTop: "max(var(--viso-safe-top), var(--deck-padding))",
-        paddingBottom: "max(var(--viso-safe-bottom), var(--deck-padding))",
-        paddingLeft: "max(var(--viso-safe-left), var(--deck-padding))",
-        paddingRight: "max(var(--viso-safe-right), var(--deck-padding))",
-      }}
+      className={
+        embeddedPageId
+          ? "flex h-full min-h-0 flex-col gap-3 bg-black"
+          : "flex h-dvh flex-col gap-3 bg-background p-3 [--deck-padding:0.75rem] sm:p-4 sm:[--deck-padding:1rem]"
+      }
+      style={
+        embeddedPageId
+          ? undefined
+          : {
+              paddingTop: "max(var(--viso-safe-top), var(--deck-padding))",
+              paddingBottom:
+                "max(var(--viso-safe-bottom), var(--deck-padding))",
+              paddingLeft: "max(var(--viso-safe-left), var(--deck-padding))",
+              paddingRight: "max(var(--viso-safe-right), var(--deck-padding))",
+            }
+      }
     >
-      <header className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon" aria-label="Volver">
-          <Link to="/">
-            <ArrowLeft />
-          </Link>
-        </Button>
-        <nav
-          aria-label="Páginas del Deck"
-          className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto"
-        >
-          {pages.map((page) => (
-            <button
-              key={page._id}
-              type="button"
-              onClick={() => setPageId(page._id)}
-              aria-current={page._id === currentPage._id ? "page" : undefined}
-              className={cn(
-                "shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                page._id === currentPage._id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground hover:bg-accent",
-              )}
-            >
-              {page.name}
-            </button>
-          ))}
+      {!embeddedPageId && (
+        <header className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" aria-label="Volver">
+            <Link to="/">
+              <ArrowLeft />
+            </Link>
+          </Button>
+          <nav
+            aria-label="Páginas del Deck"
+            className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto"
+          >
+            {pages.map((page) => (
+              <button
+                key={page._id}
+                type="button"
+                onClick={() => setPageId(page._id)}
+                aria-current={page._id === currentPage._id ? "page" : undefined}
+                className={cn(
+                  "shrink-0 cursor-pointer rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                  page._id === currentPage._id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-secondary text-secondary-foreground hover:bg-accent",
+                )}
+              >
+                {page.name}
+              </button>
+            ))}
+            {editMode && (
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Nueva página"
+                disabled={pending || !connected}
+                onClick={() =>
+                  void run(async () => {
+                    const id = await createPage({
+                      name: `Página ${pages.length + 1}`,
+                    });
+                    setPageId(id);
+                  })
+                }
+              >
+                <Plus />
+              </Button>
+            )}
+          </nav>
+          <span
+            role="status"
+            aria-live="polite"
+            className={cn(
+              "size-1.5 shrink-0 rounded-full",
+              connected ? "bg-green-500" : "bg-amber-500",
+            )}
+            aria-label={
+              pending
+                ? "Esperando confirmación"
+                : connected
+                  ? "Conectado a VISO"
+                  : connection.hasEverConnected
+                    ? "Reconectando con VISO"
+                    : "Conectando con VISO"
+            }
+            title={
+              pending
+                ? "Esperando confirmación"
+                : connected
+                  ? "Conectado a VISO"
+                  : "Reconectando con VISO"
+            }
+          />
           {editMode && (
             <Button
               variant="ghost"
               size="icon"
-              aria-label="Nueva página"
+              aria-label="Página y cuadrícula"
+              disabled={pending}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Settings2 />
+            </Button>
+          )}
+          {editMode && pages.length > 1 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Borrar esta página"
               disabled={pending || !connected}
               onClick={() =>
                 void run(async () => {
-                  const id = await createPage({
-                    name: `Página ${pages.length + 1}`,
-                  });
-                  setPageId(id);
+                  await removePage({ pageId: currentPage._id });
+                  setPageId(null);
                 })
               }
             >
-              <Plus />
+              <Trash2 />
             </Button>
           )}
-        </nav>
-        <span
-          role="status"
-          aria-live="polite"
-          className={cn(
-            "size-1.5 shrink-0 rounded-full",
-            connected ? "bg-green-500" : "bg-amber-500",
-          )}
-          aria-label={
-            pending
-              ? "Esperando confirmación"
-              : connected
-                ? "Conectado a VISO"
-                : connection.hasEverConnected
-                  ? "Reconectando con VISO"
-                  : "Conectando con VISO"
-          }
-          title={
-            pending
-              ? "Esperando confirmación"
-              : connected
-                ? "Conectado a VISO"
-                : "Reconectando con VISO"
-          }
-        />
-        {editMode && (
           <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Página y cuadrícula"
-            disabled={pending}
-            onClick={() => setSettingsOpen(true)}
+            variant={editMode ? "default" : "secondary"}
+            size="sm"
+            onClick={() => setEditMode((editing) => !editing)}
           >
-            <Settings2 />
+            <Pencil /> {editMode ? "Listo" : "Editar"}
           </Button>
-        )}
-        {editMode && pages.length > 1 && (
           <Button
-            variant="ghost"
+            variant="secondary"
             size="icon"
-            aria-label="Borrar esta página"
-            disabled={pending || !connected}
-            onClick={() =>
-              void run(async () => {
-                await removePage({ pageId: currentPage._id });
-                setPageId(null);
-              })
+            aria-label={
+              isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"
             }
+            onClick={toggleFullscreen}
           >
-            <Trash2 />
+            {isFullscreen ? <Minimize /> : <Maximize />}
           </Button>
-        )}
-        <Button
-          variant={editMode ? "default" : "secondary"}
-          size="sm"
-          onClick={() => setEditMode((editing) => !editing)}
-        >
-          <Pencil /> {editMode ? "Listo" : "Editar"}
-        </Button>
-        <Button
-          variant="secondary"
-          size="icon"
-          aria-label={
-            isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"
-          }
-          onClick={toggleFullscreen}
-        >
-          {isFullscreen ? <Minimize /> : <Maximize />}
-        </Button>
-      </header>
-      <main
+        </header>
+      )}
+      <GridContainer
         ref={setGridElement}
         className="min-h-0 flex-1"
         style={{
@@ -632,7 +656,7 @@ export default function DeckPage() {
             );
           })}
         </div>
-      </main>
+      </GridContainer>
       {viewCount > 1 && (
         <nav
           aria-label="Vistas de la página"

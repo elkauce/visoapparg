@@ -2,12 +2,7 @@ import { Capacitor, registerPlugin } from "@capacitor/core";
 import type { TokenStorage } from "@convex-dev/auth/react";
 
 export type MediaCommand =
-  | "play-pause"
-  | "next"
-  | "previous"
-  | "volume-up"
-  | "volume-down"
-  | "mute";
+  "play-pause" | "next" | "previous" | "volume-up" | "volume-down" | "mute";
 
 /** A snapshot of a real Android MediaSession. Metadata stays on this device. */
 export interface AndroidMediaState {
@@ -86,11 +81,15 @@ export interface InstalledAndroidApp {
 }
 
 interface VisoNativePlugin {
+  exportDeckConfiguration(options: { contents: string }): Promise<void>;
   enterImmersive(): Promise<void>;
   exitImmersive(): Promise<void>;
   openUrl(options: { url: string }): Promise<void>;
   openApp(options: { packageName: string }): Promise<void>;
-  media(options: { command: MediaCommand; packageName?: string }): Promise<void>;
+  media(options: {
+    command: MediaCommand;
+    packageName?: string;
+  }): Promise<void>;
   getMediaState(options?: AndroidMediaOptions): Promise<AndroidMediaState>;
   getStandbyDeviceState(): Promise<StandbyDeviceState>;
   getToken(options: { key: string }): Promise<{ value: string | null }>;
@@ -102,11 +101,15 @@ interface VisoNativePlugin {
   configureAllowedApps(): Promise<{ packages: string[] }>;
   getAllowedApps(): Promise<{ packages: string[] }>;
   listInstalledApps(): Promise<{ apps: InstalledAndroidApp[] }>;
-  getAppIcon(options: { packageName: string }): Promise<{ icon: string | null }>;
+  getAppIcon(options: {
+    packageName: string;
+  }): Promise<{ icon: string | null }>;
   configureHomeAssistant(): Promise<IntegrationStatus>;
   homeAssistantStatus(): Promise<IntegrationStatus>;
   discoverLights(): Promise<{ lights: HomeAssistantLight[] }>;
-  controlLight(options: LightControl & { entityId: string }): Promise<{ success: boolean }>;
+  controlLight(
+    options: LightControl & { entityId: string },
+  ): Promise<{ success: boolean }>;
   disconnectHomeAssistant(): Promise<void>;
 }
 
@@ -172,8 +175,16 @@ const webCapabilities: NativeCapabilities = {
   mediaSession: false,
   mediaPermissionGranted: false,
   activeMediaSessions: 0,
-  homeAssistant: { status: "unavailable", configured: false, message: "Configuración segura disponible en la APK Android." },
-  googleHome: { status: "pending", message: "Pendiente: SDK oficial Home APIs y consentimiento Google en Android." },
+  homeAssistant: {
+    status: "unavailable",
+    configured: false,
+    message: "Configuración segura disponible en la APK Android.",
+  },
+  googleHome: {
+    status: "pending",
+    message:
+      "Pendiente: SDK oficial Home APIs y consentimiento Google en Android.",
+  },
 };
 
 async function capabilities(): Promise<NativeCapabilities> {
@@ -196,11 +207,17 @@ async function discoverLights(): Promise<HomeAssistantLight[]> {
 }
 
 export const nativeDeck = {
+  async exportDeckConfiguration(contents: string): Promise<void> {
+    requireAndroid();
+    await plugin.exportDeckConfiguration({ contents });
+  },
   capabilities,
   getCapabilities: capabilities,
   requestMediaAccess,
   openMediaPermissionSettings: requestMediaAccess,
-  async getMediaState(options?: AndroidMediaOptions): Promise<AndroidMediaState> {
+  async getMediaState(
+    options?: AndroidMediaOptions,
+  ): Promise<AndroidMediaState> {
     requireAndroid();
     return plugin.getMediaState(options ?? {});
   },
@@ -231,11 +248,16 @@ export const nativeDeck = {
     return plugin.configureHomeAssistant();
   },
   async homeAssistantStatus(): Promise<IntegrationStatus> {
-    return isAndroidNative() ? plugin.homeAssistantStatus() : webCapabilities.homeAssistant;
+    return isAndroidNative()
+      ? plugin.homeAssistantStatus()
+      : webCapabilities.homeAssistant;
   },
   discoverLights,
   getHomeAssistantLights: discoverLights,
-  async controlLight(entityId: string, options: LightControl): Promise<{ success: boolean }> {
+  async controlLight(
+    entityId: string,
+    options: LightControl,
+  ): Promise<{ success: boolean }> {
     requireAndroid();
     return plugin.controlLight({ ...options, entityId });
   },

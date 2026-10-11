@@ -354,3 +354,69 @@ describe("Deck real synchronisation and legacy compatibility", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 });
+
+describe("saved pages inside the Android carousel", () => {
+  it("renders the chosen account page without adding a page-name navigation menu", async () => {
+    const otherPage = { ...page, _id: "page2", name: "Personal" };
+    state.layout = {
+      ...fixture,
+      pages: [page, otherPage],
+      keys: [
+        {
+          _id: "custom",
+          pageId: "page2",
+          position: 0,
+          content: { kind: "status", statusId: "busy" },
+        },
+      ],
+    };
+    render(
+      <MemoryRouter>
+        <DeckPage embeddedPageId="page2" />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("navigation", { name: "Páginas del Deck" }),
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Ocupado" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Libre" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Ocupado" }));
+    await waitFor(() =>
+      expect(state.mutations["statuses:setActive"]).toHaveBeenCalledWith({
+        statusId: "busy",
+      }),
+    );
+    expect(state.mutations["deck_layout:createPage"]).not.toHaveBeenCalled();
+  });
+  it("sends folder navigation to the enclosing carousel and preserves Android immersion on unmount", () => {
+    state.native = true;
+    state.layout = {
+      ...fixture,
+      pages: [page, { ...page, _id: "page2", name: "Personal" }],
+      keys: [
+        {
+          _id: "folder",
+          pageId: "page1",
+          position: 0,
+          content: {
+            kind: "folder",
+            targetPageId: "page2",
+            label: "Carpeta",
+            icon: "folder",
+            color: "#00ff00",
+          },
+        },
+      ],
+    };
+    const select = vi.fn();
+    const view = render(
+      <MemoryRouter>
+        <DeckPage embeddedPageId="page1" onSelectPage={select} />
+      </MemoryRouter>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Carpeta" }));
+    expect(select).toHaveBeenCalledWith("page2");
+    view.unmount();
+    expect(state.exit).not.toHaveBeenCalled();
+  });
+});

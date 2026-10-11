@@ -130,7 +130,7 @@ export default function DeckSlide({
       clearFinishTimer();
       gesture.current = null;
     };
-  }, [index]);
+  }, [index, pageKeys.length]);
 
   const next = (index + 1) % pageKeys.length;
   const previous = (index + pageKeys.length - 1) % pageKeys.length;
@@ -285,7 +285,10 @@ export default function DeckSlide({
             aria-hidden={page !== index}
             inert={page !== index}
             className="absolute top-0 h-full w-full overflow-hidden"
-            style={{ left: `${order.indexOf(page) * 100}%` }}
+            style={{
+              left: `${(order.includes(page) ? order.indexOf(page) : 4) * 100}%`,
+              visibility: order.includes(page) ? "visible" : "hidden",
+            }}
           >
             {pages[page]}
           </div>

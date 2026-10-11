@@ -13,6 +13,8 @@ import {
   Maximize,
   Minimize,
   Pencil,
+  Plus,
+  Plug,
   Star,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +31,7 @@ import {
 import { immersive, isAndroidNative, nativeDeck } from "@/lib/android-native";
 import { cn } from "@/lib/utils";
 import DeckPage from "./page.tsx";
+import StreamDeckPanel from "../_components/stream-deck-panel.tsx";
 import VisoStateScreen from "./_components/viso-state-screen.tsx";
 import SpotifyScreen from "./_components/spotify-screen.tsx";
 import StandbyScreen from "./_components/standby-screen.tsx";
@@ -51,13 +54,15 @@ const SCREENS = [
   { id: "spotify", name: "Spotify" },
   { id: "standby", name: "Standby" },
 ] as const;
-type Screen = (typeof SCREENS)[number]["id"];
+type Screen = string;
 
-/** Three built-in Android views; saved pages and their editor remain untouched. */
+/** Three defaults followed by the account’s saved pages, with the original editor. */
 export default function AndroidDeck() {
   const convex = useConvex();
   const user = useQuery(api.users.getCurrentUser, {});
   const statusData = useQuery(api.statuses.list, {});
+  const layout = useQuery(api.deck_layout.get, {});
+  const createPage = useMutation(api.deck_layout.createPage);
   const connection = useConvexConnectionState();
   const createStatus = useMutation(api.statuses.create);
   const activateStatus = useMutation(api.deck_actions.activateStatus);
@@ -69,6 +74,7 @@ export default function AndroidDeck() {
   const [fullscreen, setFullscreen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [standbySettingsOpen, setStandbySettingsOpen] = useState(false);
+  const [elgatoOpen, setElgatoOpen] = useState(false);
   const [lightsOpen, setLightsOpen] = useState(false);
   const spotify = useAndroidMedia(
     screen === "spotify" && !editing,
@@ -80,6 +86,7 @@ export default function AndroidDeck() {
   useEffect(() => {
     const handleBack = (event: Event) => {
       if (
+        elgatoOpen ||
         settingsOpen ||
         standbySettingsOpen ||
         lightsOpen ||
@@ -87,7 +94,8 @@ export default function AndroidDeck() {
         fullscreen
       ) {
         event.preventDefault();
-        if (lightsOpen) setLightsOpen(false);
+        if (elgatoOpen) setElgatoOpen(false);
+        else if (lightsOpen) setLightsOpen(false);
         else if (standbySettingsOpen) setStandbySettingsOpen(false);
         else if (settingsOpen) setSettingsOpen(false);
         else if (editing) setEditing(false);
@@ -102,7 +110,14 @@ export default function AndroidDeck() {
     return () => {
       window.removeEventListener("viso:android-back", handleBack);
     };
-  }, [editing, fullscreen, settingsOpen, standbySettingsOpen, lightsOpen]);
+  }, [
+    editing,
+    fullscreen,
+    settingsOpen,
+    standbySettingsOpen,
+    lightsOpen,
+    elgatoOpen,
+  ]);
 
   useEffect(() => {
     if (!isAndroidNative()) return;
@@ -206,7 +221,7 @@ export default function AndroidDeck() {
   if (editing)
     return (
       <div className="relative h-dvh">
-        <DeckPage />
+        <DeckPage startEditing initialPageId={screen} />
         <Button
           className="fixed bottom-[max(var(--viso-safe-bottom),1rem)] left-1/2 z-40 -translate-x-1/2 shadow-lg"
           onClick={() => setEditing(false)}
@@ -219,7 +234,14 @@ export default function AndroidDeck() {
     statusData.statuses.find(
       (status) => status._id === statusData.activeStatusId,
     ) ?? null;
-  const pageIndex = SCREENS.findIndex((item) => item.id === screen);
+  const screens = [
+    ...SCREENS,
+    ...(layout?.pages ?? []).map((page) => ({ id: page._id, name: page.name })),
+  ];
+  const pageIndex = Math.max(
+    0,
+    screens.findIndex((item) => item.id === screen),
+  );
   return (
     <div
       className="viso-safe-screen relative flex h-dvh min-h-0 flex-col overflow-hidden bg-black p-1.5"
@@ -239,7 +261,10 @@ export default function AndroidDeck() {
         }}
       >
         <span className="flex h-11 min-w-11 items-center gap-1.5 px-3 text-xs font-medium text-white/70">
-          <span aria-label={`Página ${pageIndex + 1} de 3`} aria-live="polite">
+          <span
+            aria-label={`Página ${pageIndex + 1} de ${screens.length}`}
+            aria-live="polite"
+          >
             {String(pageIndex + 1).padStart(2, "0")}
           </span>
           <span
@@ -269,9 +294,9 @@ export default function AndroidDeck() {
       </header>
       <DeckSlide
         index={pageIndex}
-        pageKeys={SCREENS.map((item) => item.id)}
-        onIndexChange={(index) => setScreen(SCREENS[index].id)}
-        label={SCREENS[pageIndex].name}
+        pageKeys={screens.map((item) => item.id)}
+        onIndexChange={(index) => setScreen(screens[index].id)}
+        label={screens[pageIndex].name}
       >
         <VisoStateScreen
           statuses={statusData.statuses}
@@ -301,6 +326,13 @@ export default function AndroidDeck() {
           settingsOpen={standbySettingsOpen}
           onSettingsOpenChange={setStandbySettingsOpen}
         />
+        {(layout?.pages ?? []).map((page) => (
+          <DeckPage
+            key={page._id}
+            embeddedPageId={page._id}
+            onSelectPage={setScreen}
+          />
+        ))}
       </DeckSlide>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
@@ -311,6 +343,43 @@ export default function AndroidDeck() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-2">
+            <Button
+              variant="secondary"
+              className="min-h-11 justify-start"
+              disabled={!connected || pending || (layout?.pages.length ?? 0) >= 8}
+              onClick={() => {
+                if (pendingRef.current) return;
+                pendingRef.current = true;
+                setPending(true);
+                void createPage({
+                  name: `Página ${(layout?.pages.length ?? 0) + 4}`,
+                })
+                  .then((id) => {
+                    setScreen(id);
+                    setSettingsOpen(false);
+                    setEditing(true);
+                  })
+                  .catch((error: unknown) =>
+                    toast.error(deckErrorMessage(error)),
+                  )
+                  .finally(() => {
+                    pendingRef.current = false;
+                    setPending(false);
+                  });
+              }}
+            >
+              <Plus /> Agregar página
+            </Button>
+            <Button
+              variant="secondary"
+              className="min-h-11 justify-start"
+              onClick={() => {
+                setSettingsOpen(false);
+                setElgatoOpen(true);
+              }}
+            >
+              <Plug /> Elgato Stream Deck
+            </Button>
             <Button
               variant="secondary"
               className="min-h-11 justify-start"
@@ -343,7 +412,7 @@ export default function AndroidDeck() {
               }}
             >
               <Pencil />
-              Editar mis teclas guardadas
+              Editar mis páginas y teclas
             </Button>
             <Button
               variant="secondary"
@@ -360,6 +429,17 @@ export default function AndroidDeck() {
               </Link>
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={elgatoOpen} onOpenChange={setElgatoOpen}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Elgato Stream Deck</DialogTitle>
+            <DialogDescription>
+              Vinculá tus teclas a tu cuenta VISO.
+            </DialogDescription>
+          </DialogHeader>
+          {elgatoOpen && <StreamDeckPanel pluginOnly />}
         </DialogContent>
       </Dialog>
       <GoogleHomeColorsDialog

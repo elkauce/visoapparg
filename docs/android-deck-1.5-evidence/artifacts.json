@@ -1,0 +1,22 @@
+{
+  "apk": {
+    "package": "com.viso.deck",
+    "versionCode": 6,
+    "versionName": "1.5.0",
+    "bytes": 16182683,
+    "sha256": "389ed88ea18c3254def721e4defa8ff27b547de1881fdf7f89b17ec291cfec1a",
+    "certificateSha1": "F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6"
+  },
+  "plugin": {
+    "file": "com.viso.deck.streamDeckPlugin",
+    "version": "1.0.0.0",
+    "bytes": 103612,
+    "sha256": "74f43c83b8c80e0730ea63d2d068bfa45d8f27c3ae5000bd8c85f76cea75c2bf",
+    "minStreamDeck": "7.1",
+    "minWindows": "10",
+    "minMacOS": "12",
+    "physicalHardwareVerified": false
+  },
+  "downloads": "https://viso-deck-apk-downloads-netb4w55f.vercel.app/",
+  "websiteAndBackendProductionDeployment": false
+}

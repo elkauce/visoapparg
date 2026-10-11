@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.viso.deck",
+  "Name": "VISO Deck",
+  "Description": "Cambiá los estados de tu cuenta VISO desde Elgato Stream Deck.",
+  "Author": "VISO",
+  "Version": "1.0.0.0",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    },
+    {
+      "Platform": "mac",
+      "MinimumVersion": "12"
+    }
+  ],
+  "Nodejs": {
+    "Version": "24"
+  },
+  "CodePath": "bin/plugin.mjs",
+  "Icon": "imgs/viso",
+  "Category": "VISO Deck",
+  "CategoryIcon": "imgs/viso",
+  "Actions": [
+    {
+      "UUID": "com.viso.deck.state",
+      "Name": "Estado VISO",
+      "Tooltip": "Activa el estado configurado en tu cuenta VISO.",
+      "Icon": "imgs/viso",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/viso",
+          "Title": "VISO"
+        }
+      ]
+    }
+  ]
+}

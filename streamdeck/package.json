@@ -1,0 +1,19 @@
+{
+  "name": "viso-streamdeck",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test src/request.test.mjs && npm run build && node test/integration.mjs",
+    "pack": "npm run build && streamdeck pack com.viso.deck.sdPlugin --output ../downloads"
+  },
+  "dependencies": {
+    "@elgato/streamdeck": "3.0.2"
+  },
+  "devDependencies": {
+    "@elgato/cli": "1.10.2",
+    "esbuild": "0.25.12",
+    "ws": "8.22.0"
+  }
+}
