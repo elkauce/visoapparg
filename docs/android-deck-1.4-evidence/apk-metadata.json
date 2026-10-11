@@ -1,0 +1,12 @@
+{
+  "size": 16180648,
+  "sha256": "ec42b3fd86c14e9f12cd1d84e04ef6b256f62b43472734a0ddc228ab89085fba",
+  "package": "com.viso.deck",
+  "versionCode": 5,
+  "versionName": "1.4.0",
+  "certificateSha1": "F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6",
+  "officialGoogleHomeSdk": "1.10.1",
+  "packagedCarousel": true,
+  "horizontalTouchMoveCancellation": true,
+  "physicalAndroidAndGoogleHomeTested": false
+}

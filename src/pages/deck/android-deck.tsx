@@ -26,12 +26,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { immersive, isAndroidNative, nativeDeck } from "@/lib/android-native";
 import { cn } from "@/lib/utils";
 import DeckPage from "./page.tsx";
@@ -39,6 +33,7 @@ import VisoStateScreen from "./_components/viso-state-screen.tsx";
 import SpotifyScreen from "./_components/spotify-screen.tsx";
 import StandbyScreen from "./_components/standby-screen.tsx";
 import GoogleHomeColorsDialog from "./_components/google-home-colors-dialog.tsx";
+import DeckSlide from "./_components/deck-slide.tsx";
 import { useAndroidMedia } from "./_components/use-android-media.ts";
 import {
   findVisoStatus,
@@ -75,7 +70,6 @@ export default function AndroidDeck() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [standbySettingsOpen, setStandbySettingsOpen] = useState(false);
   const [lightsOpen, setLightsOpen] = useState(false);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
   const spotify = useAndroidMedia(
     screen === "spotify" && !editing,
     "com.spotify.music",
@@ -244,49 +238,25 @@ export default function AndroidDeck() {
           paddingRight: "var(--viso-safe-right, 0px)",
         }}
       >
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="pointer-events-auto h-11 min-w-11 gap-1.5 px-3 text-xs font-medium text-white/70 hover:bg-white/10 hover:text-white focus-visible:ring-1 focus-visible:ring-white/50"
-              aria-label={`Cambiar pantalla. Página ${pageIndex + 1} de 3: ${SCREENS[pageIndex].name}`}
-            >
-              {String(pageIndex + 1).padStart(2, "0")}
-              <span
-                role="status"
-                aria-label={
-                  pending
-                    ? "Esperando confirmación"
-                    : connected
-                      ? "Conectado a VISO"
-                      : "Sin conexión"
-                }
-                className={cn(
-                  "size-1 shrink-0 rounded-full",
-                  connected ? "bg-green-400" : "bg-amber-400",
-                )}
-              />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="start"
-            aria-label="Pantallas predeterminadas del Deck"
-          >
-            {SCREENS.map((item, index) => (
-              <DropdownMenuItem
-                key={item.id}
-                className="min-h-11 gap-3"
-                aria-current={screen === item.id ? "page" : undefined}
-                onSelect={() => setScreen(item.id)}
-              >
-                <span className="text-xs text-muted-foreground">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                {item.name}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <span className="flex h-11 min-w-11 items-center gap-1.5 px-3 text-xs font-medium text-white/70">
+          <span aria-label={`Página ${pageIndex + 1} de 3`} aria-live="polite">
+            {String(pageIndex + 1).padStart(2, "0")}
+          </span>
+          <span
+            role="status"
+            aria-label={
+              pending
+                ? "Esperando confirmación"
+                : connected
+                  ? "Conectado a VISO"
+                  : "Sin conexión"
+            }
+            className={cn(
+              "size-1 shrink-0 rounded-full",
+              connected ? "bg-green-400" : "bg-amber-400",
+            )}
+          />
+        </span>
         <Button
           variant="ghost"
           size="icon"
@@ -297,76 +267,41 @@ export default function AndroidDeck() {
           <Star className="size-4" />
         </Button>
       </header>
-      <main
-        className="min-h-0 min-w-0 flex-1 overflow-hidden"
-        aria-label={SCREENS[pageIndex].name}
-        onTouchStart={(event) => {
-          const target = event.target;
-          if (
-            event.touches.length !== 1 ||
-            (target instanceof Element &&
-              target.closest(
-                "button, input, select, textarea, a, [role='slider']",
-              ))
-          ) {
-            touchStart.current = null;
-            return;
-          }
-          touchStart.current = {
-            x: event.touches[0].clientX,
-            y: event.touches[0].clientY,
-          };
-        }}
-        onTouchEnd={(event) => {
-          const start = touchStart.current;
-          touchStart.current = null;
-          if (!start || !event.changedTouches[0]) return;
-          const dx = event.changedTouches[0].clientX - start.x;
-          const dy = event.changedTouches[0].clientY - start.y;
-          if (Math.abs(dx) > 64 && Math.abs(dx) > Math.abs(dy) * 1.5)
-            setScreen(
-              SCREENS[(pageIndex + (dx < 0 ? 1 : 2)) % SCREENS.length].id,
-            );
-        }}
-        onTouchCancel={() => {
-          touchStart.current = null;
-        }}
+      <DeckSlide
+        index={pageIndex}
+        pageKeys={SCREENS.map((item) => item.id)}
+        onIndexChange={(index) => setScreen(SCREENS[index].id)}
+        label={SCREENS[pageIndex].name}
       >
-        {screen === "estados" && (
-          <VisoStateScreen
-            statuses={statusData.statuses}
-            activeStatusId={statusData.activeStatusId}
-            pending={pending}
-            connected={connected}
-            onSelect={(definition, id) => void select(definition, id)}
-          />
-        )}
-        {screen === "spotify" && (
-          <SpotifyScreen
-            media={spotify.media}
-            loading={spotify.loading}
-            error={spotify.error}
-            pending={spotify.pending}
-            onCommand={spotify.command}
-            onRequestAccess={spotify.requestAccess}
-            onRefresh={spotify.refresh}
-          />
-        )}
-        {screen === "standby" && (
-          <StandbyScreen
-            key={user._id}
-            userId={user._id}
-            media={standby.media}
-            mediaLoading={standby.loading}
-            activeStatus={activeStatus}
-            connected={connected}
-            onMediaCommand={standby.command}
-            mediaBusy={standby.pending}
-            settingsOpen={standbySettingsOpen}
-            onSettingsOpenChange={setStandbySettingsOpen}
-          />
-        )}
-      </main>
+        <VisoStateScreen
+          statuses={statusData.statuses}
+          activeStatusId={statusData.activeStatusId}
+          pending={pending}
+          connected={connected}
+          onSelect={(definition, id) => void select(definition, id)}
+        />
+        <SpotifyScreen
+          media={spotify.media}
+          loading={spotify.loading}
+          error={spotify.error}
+          pending={spotify.pending}
+          onCommand={spotify.command}
+          onRequestAccess={spotify.requestAccess}
+          onRefresh={spotify.refresh}
+        />
+        <StandbyScreen
+          key={user._id}
+          userId={user._id}
+          media={standby.media}
+          mediaLoading={standby.loading}
+          activeStatus={activeStatus}
+          connected={connected}
+          onMediaCommand={standby.command}
+          mediaBusy={standby.pending}
+          settingsOpen={standbySettingsOpen}
+          onSettingsOpenChange={setStandbySettingsOpen}
+        />
+      </DeckSlide>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
           <DialogHeader>

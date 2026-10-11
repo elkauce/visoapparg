@@ -41,6 +41,7 @@ tsconfig.tsbuildinfo
 !/downloads/VISO-Deck-1.1-debug.apk
 !/downloads/VISO-Deck-1.2-debug.apk
 !/downloads/VISO-Deck-1.3-debug.apk
+!/downloads/VISO-Deck-1.4-debug.apk
 *.aab
 *.aar
 *.jks

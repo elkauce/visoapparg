@@ -1,0 +1,50 @@
+{
+  "scope": "Chromium 151 CDP trusted touch A/B on actual Deck source with external backend/native fixtures. Trace entry counts include scoped and instant entries, so they are not unique gesture counts. Physical Android was not verified.",
+  "finding": "The native browser fling controller consumes GestureTapDown, GestureShowPress and GestureTap after the prior horizontal drag. Cancelling default touchmove prevents the unwanted native fling and preserves normal trusted clicks.",
+  "appChanges": "None. Read-only diagnosis: style/listener changes existed only in the temporary test browser.",
+  "cases": [
+    {
+      "variant": "baseline",
+      "swipes": 3,
+      "settleAfterAriaMs": 60,
+      "tapHoldMs": 40,
+      "traceCategories": "input,latencyInfo,blink,cc,disabled-by-default-input",
+      "nativeDocumentClickCount": 0,
+      "stateWriteCount": 0,
+      "traceEntries": {
+        "InputLatency::GestureFlingStart": 6,
+        "ProgressFling": 72,
+        "FilterTapSuppression": 7
+      }
+    },
+    {
+      "variant": "none",
+      "swipes": 3,
+      "settleAfterAriaMs": 60,
+      "tapHoldMs": 40,
+      "traceCategories": "input,latencyInfo,blink,cc,disabled-by-default-input",
+      "nativeDocumentClickCount": 0,
+      "stateWriteCount": 0,
+      "traceEntries": {
+        "InputLatency::GestureFlingStart": 6,
+        "ProgressFling": 71,
+        "FilterTapSuppression": 7
+      }
+    },
+    {
+      "variant": "cancel-touchmove",
+      "swipes": 3,
+      "settleAfterAriaMs": 60,
+      "tapHoldMs": 40,
+      "traceCategories": "input,latencyInfo,blink,cc,disabled-by-default-input",
+      "nativeDocumentClickCount": 1,
+      "stateWriteCount": 1,
+      "traceEntries": {
+        "InputLatency::GestureFlingStart": 0,
+        "ProgressFling": 0,
+        "FilterTapSuppression": 0
+      }
+    }
+  ],
+  "recommendedFix": "Install mainElement.addEventListener(\"touchmove\", handler, { passive: false }); handler calls preventDefault only if gesture.current?.dragging && event.cancelable. Remove the listener on cleanup. Preserve normal native clicks; never manually activate a button on pointerup."
+}
