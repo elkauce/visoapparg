@@ -29,7 +29,7 @@ export default function GoogleHomeSync() {
     ) ?? null;
   const stateKey = googleHomeStateForStatusName(activeStatus?.name ?? null);
   const stateRevision = activeStatus
-    ? `${activeStatus._id}:${stateKey ?? "custom"}`
+    ? `${activeStatus._id}:${stateKey ?? `custom:${activeStatus.color}`}`
     : "none";
   const [controller] = useState(
     () =>
@@ -46,8 +46,20 @@ export default function GoogleHomeSync() {
 
   useEffect(() => {
     if (!android || !accountId || data === undefined) return;
-    controller.updateState(stateKey, stateRevision);
-  }, [accountId, android, controller, data, stateKey, stateRevision]);
+    controller.updateState(
+      stateKey,
+      stateRevision,
+      !stateKey ? activeStatus?.color : undefined,
+    );
+  }, [
+    accountId,
+    android,
+    controller,
+    data,
+    stateKey,
+    stateRevision,
+    activeStatus?.color,
+  ]);
 
   useEffect(() => {
     if (!android) return;

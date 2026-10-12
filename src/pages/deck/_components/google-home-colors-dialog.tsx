@@ -371,6 +371,10 @@ export default function GoogleHomeColorsDialog({
           ))}
         </fieldset>
         <p className="text-xs text-muted-foreground">
+          Los estados personalizados, como Jugando, usan el color RGB que elegís
+          al crearlos.
+        </p>
+        <p className="text-xs text-muted-foreground">
           Solo cambiará el color de las luces seleccionadas. La sincronización
           recibe cambios de tus otros dispositivos mientras VISO está abierto y
           al volver a la app. Android no garantiza controles con la app cerrada.

@@ -1,6 +1,6 @@
 package com.viso.deck
 
-/** Only VISO's six statuses may cause a selected light command. */
+/** Six preset mappings remain intact; personal statuses use validated RGB colors. */
 internal object GoogleHomePolicy {
     val stateKeys = linkedSetOf("libre", "ocupado", "reunion", "llamada", "no-molestar", "ausente")
     val defaultColors = linkedMapOf(
@@ -13,6 +13,11 @@ internal object GoogleHomePolicy {
             "La sesión VISO no es válida. Volvé a iniciar sesión."
         }
         return value
+    }
+
+    fun customColor(value: String): String {
+        require(Regex("^#[0-9a-fA-F]{6}$").matches(value)) { "El color personalizado debe ser RGB hexadecimal." }
+        return value.uppercase(java.util.Locale.ROOT)
     }
 
     fun colors(values: Map<String, String>): Map<String, String> {

@@ -269,3 +269,46 @@ it("never restores a logged-out account when Google returns an active event", as
   });
   expect(fixture.applyState).toHaveBeenCalledTimes(1);
 });
+
+it("receives the real custom status RGB from shared account data and resynchronizes a changed color", async () => {
+  fixture.data = {
+    activeStatusId: "playing",
+    statuses: [
+      {
+        _id: "playing",
+        userId: "owner-A",
+        name: "Jugando",
+        color: "#12abef",
+      } as (typeof fixture.data.statuses)[number] & { color: string },
+    ],
+  };
+  const view = render(<GoogleHomeSync />);
+  await waitFor(() =>
+    expect(fixture.applyState).toHaveBeenCalledWith({
+      accountId: "owner-A",
+      stateKey: null,
+      revision: "playing:custom:#12abef",
+      customColor: "#12abef",
+    }),
+  );
+  fixture.data = {
+    activeStatusId: "playing",
+    statuses: [
+      {
+        _id: "playing",
+        userId: "owner-A",
+        name: "Jugando",
+        color: "#fd2244",
+      } as (typeof fixture.data.statuses)[number] & { color: string },
+    ],
+  };
+  view.rerender(<GoogleHomeSync />);
+  await waitFor(() =>
+    expect(fixture.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: null,
+      revision: "playing:custom:#fd2244",
+      customColor: "#fd2244",
+    }),
+  );
+});

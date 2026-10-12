@@ -4,6 +4,13 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class GoogleHomePolicyTest {
+    @Test fun personalStatusesAcceptArbitraryRgbColorsWithoutInventingPresetKeys() {
+        assertEquals("#12ABEF", GoogleHomePolicy.customColor("#12abef"))
+        assertThrows(IllegalArgumentException::class.java) { GoogleHomePolicy.customColor("rgb(1,2,3)") }
+        assertThrows(IllegalArgumentException::class.java) { GoogleHomePolicy.customColor("#fff") }
+        assertEquals(6, GoogleHomePolicy.stateKeys.size)
+    }
+
     @Test fun translucentConsentPauseKeepsTheAccountButInvalidatesEveryOldCommand() {
         val scope = GoogleHomeOwnerScope()
         scope.activate("viso-owner")

@@ -100,7 +100,7 @@ class VisoGoogleHomePlugin : Plugin() {
                 val state = call.getString("stateKey")
                 val revision = call.getString("revision") ?: ""
                 val job = scope.launch {
-                    try { call.resolve(home.apply(ticket, state, revision)) }
+                    try { call.resolve(home.apply(ticket, state, revision, call.getString("customColor"))) }
                     catch (_: CancellationException) { call.resolve(home.skipped("account-or-visibility-changed")) }
                     catch (_: Exception) { call.reject("No se pudo aplicar el estado a Google Home. Revisá consentimiento, conexión y selección de luces.", "GOOGLE_HOME_ACTION_FAILED") }
                 }

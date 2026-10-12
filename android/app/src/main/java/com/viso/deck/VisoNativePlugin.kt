@@ -73,6 +73,16 @@ class VisoNativePlugin : Plugin() {
         activity.runOnUiThread { applyImmersive(activity, bridge.webView) }
     }
 
+    @PluginMethod
+    fun setKeepScreenOn(call: PluginCall) {
+        val enabled = call.getBoolean("enabled", false) == true
+        activity.runOnUiThread {
+            if (enabled) activity.window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            else activity.window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            call.resolve()
+        }
+    }
+
     private fun background(call: PluginCall, message: String, operation: () -> JSObject?) {
         worker.execute {
             try {

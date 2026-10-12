@@ -5,6 +5,7 @@ import AndroidDeck from "./pages/deck/android-deck.tsx";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import PublicStatusPage from "./pages/s/page.tsx";
+import DeckAwake from "./components/deck-awake.tsx";
 import AndroidRuntime from "./components/android-runtime.tsx";
 import GoogleHomeSync from "./pages/_components/google-home-sync.tsx";
 import AndroidHome from "./pages/android/home.tsx";
@@ -19,15 +20,42 @@ export default function App() {
     <DefaultProviders>
       <BrowserRouter>
         <AndroidRuntime />
+        <DeckAwake />
         <GoogleHomeSync />
         <Routes>
-          <Route path="/" element={isAndroidNative() || import.meta.env.VITE_ANDROID_PREVIEW === "true" ? <AndroidHome /> : <Index />} />
+          <Route
+            path="/"
+            element={
+              isAndroidNative() ||
+              import.meta.env.VITE_ANDROID_PREVIEW === "true" ? (
+                <AndroidHome />
+              ) : (
+                <Index />
+              )
+            }
+          />
           <Route path="/android" element={<AndroidHome />} />
           <Route path="/android/settings" element={<AndroidSettings />} />
           <Route path="/android/display" element={<AndroidDisplay />} />
-          <Route path="/android/integrations" element={<AndroidIntegrations />} />
-          <Route path="/android/integrations/:integration" element={<AndroidIntegrationDetails />} />
-          <Route path="/deck" element={isAndroidNative() || import.meta.env.VITE_ANDROID_DECK_PRESETS === "true" ? <AndroidDeck /> : <DeckPage />} />
+          <Route
+            path="/android/integrations"
+            element={<AndroidIntegrations />}
+          />
+          <Route
+            path="/android/integrations/:integration"
+            element={<AndroidIntegrationDetails />}
+          />
+          <Route
+            path="/deck"
+            element={
+              isAndroidNative() ||
+              import.meta.env.VITE_ANDROID_DECK_PRESETS === "true" ? (
+                <AndroidDeck />
+              ) : (
+                <DeckPage />
+              )
+            }
+          />
           <Route path="/s/:slug" element={<PublicStatusPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

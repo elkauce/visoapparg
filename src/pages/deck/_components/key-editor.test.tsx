@@ -16,7 +16,7 @@ vi.mock("convex/react", () => ({
   },
 }));
 vi.mock("@convex-dev/auth/react", () => ({ useAuthToken: () => "test-token" }));
-vi.mock("sonner", () => ({ toast: { error: state.error } }));
+vi.mock("sonner", () => ({ toast: { error: state.error, success: vi.fn() } }));
 vi.mock("@/lib/android-native.ts", () => ({
   isAndroidNative: () => false,
   nativeDeck: {},
@@ -197,3 +197,52 @@ describe("KeyEditor persisted visibility", () => {
     ).toMatchObject({ content: target.content, appearance: null });
   });
 });
+
+it.each([
+  { name: "Jugando", rgb: "#12abef", existing: statuses },
+  { name: "Pepe", rgb: "#ffff00", existing: [] },
+])(
+  "creates $name with its own RGB even without any preset",
+  async ({ name, rgb, existing }) => {
+    const onClose = vi.fn();
+    render(
+      <KeyEditor
+        target={{
+          ...target,
+          keyId: null,
+          content: null,
+          appearance: undefined,
+        }}
+        statuses={existing}
+        pages={pages}
+        advanced
+        onClose={onClose}
+      />,
+    );
+    state.mutations["statuses:create"].mockResolvedValue("playing");
+    fireEvent.change(screen.getByLabelText("O creá tu propio estado"), {
+      target: { value: name },
+    });
+    fireEvent.change(screen.getByLabelText("Color RGB"), {
+      target: { value: rgb },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Crear y usar" }));
+    await waitFor(() =>
+      expect(state.mutations["statuses:create"]).toHaveBeenCalledWith({
+        name,
+        color: rgb,
+        icon: "star",
+      }),
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Guardar" })).toBeEnabled(),
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    expect(state.mutations["deck_layout:setKey"]).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: { kind: "status", statusId: "playing" },
+      }),
+    );
+  },
+);

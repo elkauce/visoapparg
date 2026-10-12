@@ -283,15 +283,17 @@ internal class GoogleHomeAdapter(
         error("La luz no acepta un comando compatible para este color.")
     }
 
-    suspend fun apply(ticket: GoogleHomeOwnerScope.Ticket, state: String?, revision: String): JSObject = commandMutex.withLock {
+    suspend fun apply(ticket: GoogleHomeOwnerScope.Ticket, state: String?, revision: String, customColor: String? = null): JSObject = commandMutex.withLock {
         if (!isForeground()) return@withLock skipped("application-inactive")
         if (!owner.isCurrent(ticket)) return@withLock skipped("superseded")
-        if (state == null) return@withLock skipped("no-state")
-        require(state in GoogleHomePolicy.stateKeys) { "El estado VISO no es válido." }
+        if (state == null && customColor == null) return@withLock skipped("no-state")
+        require(state == null || state in GoogleHomePolicy.stateKeys) { "El estado VISO no es válido." }
+        val custom = if (state == null && customColor != null) GoogleHomePolicy.customColor(customColor) else null
         require(revision.length in 1..512 && revision.none(Char::isISOControl)) { "La revisión VISO no es válida." }
         val config = preferences.get(ticket.account)
         if (!config.enabled) return@withLock skipped("no-selected-lights")
-        val signature = "${ticket.account}|${ticket.generation}|$state|$revision|${config.revision}"
+        val color = custom ?: config.colorsByState.getValue(requireNotNull(state))
+        val signature = "${ticket.account}|${ticket.generation}|$state|$color|$revision|${config.revision}"
         if (signature == lastSuccessfulSignature) return@withLock skipped("already-applied")
         val devices = withTimeout(25_000) { permittedLights(ticket.account, false) }
         if (!owner.isCurrent(ticket)) return@withLock skipped("superseded")
@@ -304,7 +306,7 @@ internal class GoogleHomeAdapter(
                         checkCurrent(ticket, config.revision)
                         val target = devices[id] ?: error("La luz ya no está disponible o no admite color.")
                         withTimeout(20_000) {
-                            applyColor(ticket, config, target.second, target.first.structureId.toString(), config.colorsByState.getValue(state))
+                            applyColor(ticket, config, target.second, target.first.structureId.toString(), color)
                         }
                         // The API acknowledged the command; no physical observation is fabricated.
                         row.put("success", true).put("commanded", true)

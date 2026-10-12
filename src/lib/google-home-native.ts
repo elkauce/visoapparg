@@ -1,6 +1,10 @@
 import { registerPlugin } from "@capacitor/core";
 import { isAndroidNative } from "./android-native.ts";
-import { readGoogleHomeColors, saveGoogleHomeColors, type GoogleHomeColors } from "@/pages/deck/_lib/google-home-colors.ts";
+import {
+  readGoogleHomeColors,
+  saveGoogleHomeColors,
+  type GoogleHomeColors,
+} from "@/pages/deck/_lib/google-home-colors.ts";
 import type { VisoStateDefinition } from "@/pages/deck/_lib/viso-states.ts";
 
 export type GoogleHomeStateKey = VisoStateDefinition["key"];
@@ -30,16 +34,34 @@ export interface GoogleHomeApplyResult {
   applied: boolean;
   skipped: boolean;
   reason?: string;
-  results: { id: string; success: boolean; confirmed: boolean; error?: string }[];
+  results: {
+    id: string;
+    success: boolean;
+    confirmed: boolean;
+    error?: string;
+  }[];
 }
 export interface GoogleHomeBridge {
   setActiveAccount(options: { accountId: string | null }): Promise<void>;
   getStatus(options: { accountId: string }): Promise<GoogleHomeStatus>;
   authorize(options: { accountId: string }): Promise<GoogleHomeStatus>;
-  discoverLights(options: { accountId: string }): Promise<GoogleHomeStatus & { lights: GoogleHomeLight[] }>;
-  getConfiguration(options: { accountId: string }): Promise<GoogleHomeConfiguration>;
-  saveConfiguration(options: { accountId: string; selectedIds: string[]; colorsByState: GoogleHomeColors }): Promise<GoogleHomeConfiguration>;
-  applyState(options: { accountId: string; stateKey: GoogleHomeStateKey | null; revision: string }): Promise<GoogleHomeApplyResult>;
+  discoverLights(options: {
+    accountId: string;
+  }): Promise<GoogleHomeStatus & { lights: GoogleHomeLight[] }>;
+  getConfiguration(options: {
+    accountId: string;
+  }): Promise<GoogleHomeConfiguration>;
+  saveConfiguration(options: {
+    accountId: string;
+    selectedIds: string[];
+    colorsByState: GoogleHomeColors;
+  }): Promise<GoogleHomeConfiguration>;
+  applyState(options: {
+    accountId: string;
+    stateKey: GoogleHomeStateKey | null;
+    revision: string;
+    customColor?: string;
+  }): Promise<GoogleHomeApplyResult>;
   disconnect(options: { accountId: string }): Promise<void>;
 }
 
@@ -51,11 +73,13 @@ const webStatus: GoogleHomeStatus = {
   authorized: false,
   configured: false,
   selectedCount: 0,
-  message: "La autorización y las luces Google Home están disponibles en la APK Android. Los colores se guardan solo en este navegador.",
+  message:
+    "La autorización y las luces Google Home están disponibles en la APK Android. Los colores se guardan solo en este navegador.",
 };
 
 function requireAndroid(): void {
-  if (!isAndroidNative()) throw new Error("Para autorizar Google Home, abrí VISO Deck en Android.");
+  if (!isAndroidNative())
+    throw new Error("Para autorizar Google Home, abrí VISO Deck en Android.");
 }
 
 /** Devices and permissions come exclusively from the official Android SDK. */
@@ -77,13 +101,24 @@ export const googleHomeNative: GoogleHomeBridge = {
   async getConfiguration(options) {
     if (isAndroidNative()) return plugin.getConfiguration(options);
     const colorsByState = readGoogleHomeColors(options.accountId);
-    return { selectedIds: [], colorsByState, enabled: false, revision: JSON.stringify(colorsByState) };
+    return {
+      selectedIds: [],
+      colorsByState,
+      enabled: false,
+      revision: JSON.stringify(colorsByState),
+    };
   },
   async saveConfiguration(options) {
     if (isAndroidNative()) return plugin.saveConfiguration(options);
-    if (options.selectedIds.length) throw new Error("Las luces se seleccionan desde la APK Android.");
+    if (options.selectedIds.length)
+      throw new Error("Las luces se seleccionan desde la APK Android.");
     saveGoogleHomeColors(options.accountId, options.colorsByState);
-    return { selectedIds: [], colorsByState: options.colorsByState, enabled: false, revision: JSON.stringify(options.colorsByState) };
+    return {
+      selectedIds: [],
+      colorsByState: options.colorsByState,
+      enabled: false,
+      revision: JSON.stringify(options.colorsByState),
+    };
   },
   async applyState(options) {
     requireAndroid();
@@ -97,5 +132,7 @@ export const googleHomeNative: GoogleHomeBridge = {
 
 export const GOOGLE_HOME_CONFIGURATION_EVENT = "viso:google-home-configuration";
 export function notifyGoogleHomeConfigurationChanged(accountId: string): void {
-  window.dispatchEvent(new CustomEvent(GOOGLE_HOME_CONFIGURATION_EVENT, { detail: { accountId } }));
+  window.dispatchEvent(
+    new CustomEvent(GOOGLE_HOME_CONFIGURATION_EVENT, { detail: { accountId } }),
+  );
 }

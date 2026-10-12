@@ -27,6 +27,7 @@ export function googleHomeStateForStatusName(
 interface StateSnapshot {
   stateKey: GoogleHomeStateKey | null;
   revision: string;
+  customColor?: string;
 }
 
 /** One foreground worker. New snapshots replace queued work; owner changes invalidate it. */
@@ -77,8 +78,16 @@ export class GoogleHomeSyncController {
     if (active && this.accountId) void this.refreshConfiguration();
   }
 
-  updateState(stateKey: GoogleHomeStateKey | null, revision: string): void {
-    this.latest = { stateKey, revision };
+  updateState(
+    stateKey: GoogleHomeStateKey | null,
+    revision: string,
+    customColor?: string,
+  ): void {
+    const validColor =
+      !stateKey && customColor && /^#[0-9a-fA-F]{6}$/.test(customColor)
+        ? customColor
+        : undefined;
+    this.latest = { stateKey, revision, customColor: validColor };
     void this.drain();
   }
 
@@ -147,6 +156,7 @@ export class GoogleHomeSyncController {
       this.accountId,
       snapshot.stateKey,
       snapshot.revision,
+      snapshot.customColor,
       configuration.revision,
     ]);
   }
@@ -172,7 +182,13 @@ export class GoogleHomeSyncController {
         const snapshot = this.latest;
         const accountId = this.accountId;
         const configuration = this.configuration;
-        if (!snapshot?.stateKey || !accountId || !configuration) break;
+        if (
+          !snapshot ||
+          (!snapshot.stateKey && !snapshot.customColor) ||
+          !accountId ||
+          !configuration
+        )
+          break;
         const signature = this.signature(snapshot, configuration);
         if (signature === this.lastApplied || signature === this.lastAttempted)
           break;
@@ -188,6 +204,9 @@ export class GoogleHomeSyncController {
             accountId,
             stateKey: snapshot.stateKey,
             revision: snapshot.revision,
+            ...(snapshot.customColor
+              ? { customColor: snapshot.customColor }
+              : {}),
           });
           if (!this.current(accountId, generation)) break;
           const resultIds = new Set(result.results.map((light) => light.id));
@@ -225,7 +244,7 @@ export class GoogleHomeSyncController {
       this.running = false;
       if (
         this.ready() &&
-        this.latest?.stateKey &&
+        (this.latest?.stateKey || this.latest?.customColor) &&
         this.configuration &&
         this.signature(this.latest, this.configuration) !==
           this.lastAttempted &&

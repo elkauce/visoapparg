@@ -145,6 +145,14 @@ function KeyForm({
   onClose: () => void;
 }) {
   const setKey = useMutation(api.deck_layout.setKey);
+  const createStatus = useMutation(api.statuses.create);
+  const [customName, setCustomName] = useState("");
+  const [customColor, setCustomColor] = useState("#a855f7");
+  const [createdStatus, setCreatedStatus] = useState<{
+    _id: string;
+    name: string;
+  } | null>(null);
+  const [creatingStatus, setCreatingStatus] = useState(false);
   const removeKey = useMutation(api.deck_layout.removeKey);
   const moveKey = useMutation(api.deck_layout.moveKey);
   const token = useAuthToken();
@@ -267,6 +275,7 @@ function KeyForm({
       toast.error("Sin conexión. Espera la reconexión para guardar.");
       return;
     }
+    if (creatingStatus) return;
     const content = buildContent();
     if (!content) {
       toast.error("Completa los datos de la tecla");
@@ -463,13 +472,73 @@ function KeyForm({
                 <SelectValue placeholder="Elige un estado" />
               </SelectTrigger>
               <SelectContent>
-                {statuses.map((s) => (
+                {[
+                  ...statuses,
+                  ...(createdStatus &&
+                  !statuses.some((s) => s._id === createdStatus._id)
+                    ? [createdStatus]
+                    : []),
+                ].map((s) => (
                   <SelectItem key={s._id} value={s._id}>
                     {s.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <div className="space-y-2 rounded-xl border p-3">
+              <Label htmlFor="custom-state-name">O creá tu propio estado</Label>
+              <Input
+                id="custom-state-name"
+                placeholder="Por ejemplo: Jugando"
+                maxLength={20}
+                value={customName}
+                onChange={(event) => setCustomName(event.target.value)}
+              />
+              <div className="flex items-center gap-3">
+                <Label htmlFor="custom-state-color">Color RGB</Label>
+                <input
+                  id="custom-state-color"
+                  type="color"
+                  value={customColor}
+                  onChange={(event) => setCustomColor(event.target.value)}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={!connected || creatingStatus || !customName.trim()}
+                  onClick={() =>
+                    void (async () => {
+                      setCreatingStatus(true);
+                      onBusyChange(true);
+                      try {
+                        const id = await createStatus({
+                          name: customName.trim(),
+                          color: customColor,
+                          icon: "star",
+                        });
+                        setCreatedStatus({ _id: id, name: customName.trim() });
+                        setStatusId(id);
+                        setCustomName("");
+                        toast.success(
+                          "Estado personalizado creado. Guardá la tecla para usarlo.",
+                        );
+                      } catch (failure) {
+                        toast.error(deckErrorMessage(failure));
+                      } finally {
+                        setCreatingStatus(false);
+                        onBusyChange(false);
+                      }
+                    })()
+                  }
+                >
+                  Crear y usar
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Nombre y color libres. Las luces seleccionadas usarán este color
+                al activar tu estado.
+              </p>
+            </div>
           </div>
         )}
 
