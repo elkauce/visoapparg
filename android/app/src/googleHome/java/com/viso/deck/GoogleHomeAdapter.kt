@@ -24,6 +24,7 @@ import com.google.home.matter.standard.ExtendedColorLightDevice
 import com.google.home.matter.standard.LevelControl
 import com.google.home.matter.standard.OnOff
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -72,6 +73,19 @@ internal class GoogleHomeAdapter(
         catch (_: Exception) { initializationFailed = true }
     }
 
+    /** Consent resumes before the JS lifecycle has rebound the signed-in owner.
+     * Wait for that binding; never reactivate an account or permit a light command here. */
+    suspend fun awaitActiveOwner(account: String) {
+        val ready = withTimeoutOrNull(5_000) {
+            while (!owner.isOwner(account) || !isForeground()) {
+                check(!owner.isDifferentOwner(account)) { "La cuenta VISO cambió. Volvé a abrir la configuración." }
+                delay(50)
+            }
+            true
+        }
+        check(ready == true) { "VISO todavía no recuperó la sesión después de Google. Volvé a la app y tocá Comprobar de nuevo." }
+    }
+
     fun accountChanged() { lastSuccessfulSignature = null }
     private fun runtimeAvailable(): Boolean = Build.VERSION.SDK_INT >= 29 &&
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
@@ -87,10 +101,16 @@ internal class GoogleHomeAdapter(
 
     suspend fun status(account: String, messageOverride: String? = null): JSObject {
         val available = runtimeAvailable() && client != null && !initializationFailed
-        val state = if (available) permission() else null
-        val structures = if (state == PermissionsState.GRANTED) withTimeoutOrNull(8_000) {
-            requireClient().structures().list()
-        } else null
+        var queryError: String? = null
+        val state = if (available) try { permission() }
+            catch (cancelled: CancellationException) { throw cancelled }
+            catch (failure: Exception) { queryError = GoogleHomeFailure.describe("Consultar permisos", failure); null }
+        else null
+        val structures = if (state == PermissionsState.GRANTED) try {
+            withTimeoutOrNull(8_000) { requireClient().structures().list() }
+        } catch (cancelled: CancellationException) { throw cancelled }
+          catch (failure: Exception) { queryError = GoogleHomeFailure.describe("Consultar casa", failure); null }
+        else null
         val accessRevoked = state == PermissionsState.NOT_GRANTED ||
             (state == PermissionsState.GRANTED && structures != null && structures.isEmpty())
         if (accessRevoked && owner.isOwner(account)) {
@@ -102,7 +122,7 @@ internal class GoogleHomeAdapter(
         // Google documents GRANTED + no structures after revocation in Home.
         val authorized = state == PermissionsState.GRANTED && !structures.isNullOrEmpty()
         val config = preferences.get(account)
-        val message = messageOverride ?: when {
+        val message = queryError ?: messageOverride ?: when {
             Build.VERSION.SDK_INT < 29 -> "Google Home necesita Android 10 o posterior."
             !runtimeAvailable() -> "Google Home necesita servicios Google Play actualizados en este teléfono."
             !available -> "No se pudo iniciar Home APIs. Volvé a abrir VISO."
@@ -143,6 +163,7 @@ internal class GoogleHomeAdapter(
     }
 
     private suspend fun permittedLights(account: String, refresh: Boolean): Map<String, Pair<HomeDevice, ExtendedColorLightDevice>> {
+        awaitActiveOwner(account)
         owner.requireOwner(account)
         check(permission() == PermissionsState.GRANTED) { "Google Home requiere consentimiento oficial antes de buscar o controlar luces." }
         owner.requireOwner(account)

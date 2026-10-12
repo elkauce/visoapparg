@@ -36,7 +36,7 @@ class VisoGoogleHomePlugin : Plugin() {
             try { call.resolve(action(account(call))) }
             catch (_: CancellationException) { call.reject("La sesión o solicitud VISO cambió.", "GOOGLE_HOME_CANCELLED") }
             catch (invalid: IllegalArgumentException) { call.reject(invalid.message ?: message, "GOOGLE_HOME_INVALID_CONFIGURATION") }
-            catch (_: Exception) { call.reject(message, "GOOGLE_HOME_ACTION_FAILED") }
+            catch (failure: Exception) { call.reject(GoogleHomeFailure.describe(message, failure), "GOOGLE_HOME_ACTION_FAILED") }
         }
     }
 
@@ -57,6 +57,7 @@ class VisoGoogleHomePlugin : Plugin() {
 
     @PluginMethod
     fun getStatus(call: PluginCall) = operation(call, "No se pudo comprobar Google Home. Revisá conexión y Google Play.") { account ->
+        home.awaitActiveOwner(account)
         owner.requireOwner(account)
         val result = home.status(account)
         owner.requireOwner(account)
@@ -75,6 +76,7 @@ class VisoGoogleHomePlugin : Plugin() {
 
     @PluginMethod
     fun getConfiguration(call: PluginCall) = operation(call, "No se pudo leer la configuración Google Home.") { account ->
+        home.awaitActiveOwner(account)
         owner.requireOwner(account)
         preferences.get(account).json()
     }

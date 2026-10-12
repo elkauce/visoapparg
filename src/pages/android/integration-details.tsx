@@ -15,6 +15,7 @@ import {
   type HomeAssistantLight,
   type MediaCommand,
 } from "@/lib/android-native.ts";
+import GoogleHomeColorsDialog from "../deck/_components/google-home-colors-dialog.tsx";
 import { AndroidScreen } from "./shared.tsx";
 import { VisoDevicesPanel } from "./_components/viso-devices-panel.tsx";
 import {
@@ -72,25 +73,24 @@ function Panel({ children }: { children: React.ReactNode }) {
 }
 
 function GoogleHomePanel() {
+  const user = useQuery(api.users.getCurrentUser);
+  const [open, setOpen] = useState(false);
   return (
     <Panel>
-      <p role="status" className="text-sm font-medium text-primary">
-        Pendiente de habilitación
-      </p>
       <p className="text-sm text-muted-foreground">
-        La conexión directa con Google Home todavía no está disponible en esta
-        versión. No hay una cuenta Google vinculada ni dispositivos autorizados
-        desde VISO.
+        Usá la misma configuración de luces del Deck: autorizá Google y elegí
+        únicamente las luces que seguirán tus estados.
       </p>
-      <p className="text-sm text-muted-foreground">
-        Cuando esté disponible, podrás elegir tu cuenta y dar permiso para
-        acceder a tu casa.
-      </p>
-      <Button asChild variant="outline">
-        <Link to="/android/integrations/home-assistant">
-          Usar Home Assistant
-        </Link>
+      <Button disabled={!user?._id} onClick={() => setOpen(true)}>
+        Configurar luces Google Home
       </Button>
+      {user?._id && (
+        <GoogleHomeColorsDialog
+          userId={user._id}
+          open={open}
+          onOpenChange={setOpen}
+        />
+      )}
     </Panel>
   );
 }

@@ -44,7 +44,10 @@ vi.mock("convex/react", () => ({
     hasEverConnected: true,
     hasInflightRequests: state.inflight,
   }),
-  useQuery: () => state.settings,
+  useQuery: (reference: Parameters<typeof getFunctionName>[0]) =>
+    getFunctionName(reference) === "users:getCurrentUser"
+      ? { _id: "owner-A" }
+      : state.settings,
   useMutation: (reference: Parameters<typeof getFunctionName>[0]) =>
     getFunctionName(reference) === "lights:setHomeWebhook"
       ? state.setWebhook
@@ -73,6 +76,11 @@ vi.mock("@/lib/android-native.ts", () => ({
 }));
 vi.mock("./_components/viso-devices-panel.tsx", () => ({
   VisoDevicesPanel: () => <p>Administrar dispositivos VISO</p>,
+}));
+
+vi.mock("../deck/_components/google-home-colors-dialog.tsx", () => ({
+  default: ({ userId, open }: { userId: string; open: boolean }) =>
+    open ? <p>Configuración del Deck: {userId}</p> : null,
 }));
 
 const androidCapabilities: NativeCapabilities = {
@@ -199,19 +207,19 @@ describe("Android integration navigation", () => {
     expect(state.capabilities).not.toHaveBeenCalled();
   });
 
-  it("keeps Google Home pending without a fake account-link button", () => {
+  it("routes Google Home to the shared Deck light configuration instead of the obsolete pending panel", () => {
     open("/android/integrations/google-home");
-    expect(screen.getByText("Pendiente de habilitación")).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /Conectar|Vincular|Autorizar/ }),
+      screen.getByRole("button", { name: "Configurar luces Google Home" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Pendiente de habilitación"),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Usar Home Assistant" }),
-    ).toHaveAttribute("href", "/android/integrations/home-assistant");
+      screen.queryByRole("link", { name: "Usar Home Assistant" }),
+    ).not.toBeInTheDocument();
   });
-});
 
-describe("multimedia permissions and real native operations", () => {
   it("requires actual media permission for playback but preserves volume without it", async () => {
     state.capabilities.mockResolvedValue({
       ...androidCapabilities,
