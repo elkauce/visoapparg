@@ -19,3 +19,9 @@ La web incorpora acceso Elgato dentro del Deck y bloquea pulsaciones repetidas m
 Comprobar más que HTTP 200: iniciar sesión con una cuenta técnica, abrir Deck → Elgato → Descargar mi plugin configurado, esperar el evento real de descarga y leer el ZIP. Verificar account.json, las URLs HTTPS de la instalación y una acción personalizada por ID real. No imprimir tokens ni guardar instaladores personales dentro del repositorio. Elgato físico requiere una prueba independiente.
 
 Validación de la corrección: build TypeScript/Vite y 14 pruebas del Deck y personalización. La publicación en producción queda sujeta a la autorización previa del usuario; el despliegue de revisión conserva el backend existente.
+
+La prueba real también detectó incompatibilidad del lector ZIP del navegador con los campos ZIP64 por entrada del archivo producido por la CLI. `scripts/export-elgato-template.py` convierte la plantilla a ZIP32, verifica CRCs y compara todos los archivos antes/después sin modificar sus bytes. Rechaza paquetes personalizados para impedir publicarlos por error. Ejecutar después de empaquetar con la CLI y antes del build web. La personalización y sus pruebas importan explícitamente `fflate/browser`, evitando comprobar accidentalmente otra implementación Node.
+
+```sh
+python scripts/export-elgato-template.py /ruta/al/com.viso.deck.streamDeckPlugin
+```

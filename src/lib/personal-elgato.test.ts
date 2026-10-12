@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
-import { strFromU8, unzipSync } from "fflate";
+import { strFromU8, unzipSync } from "fflate/browser";
 import { personalizeElgato, type ElgatoConfiguration } from "./personal-elgato";
 const fixture: ElgatoConfiguration = {
   format: "viso-streamdeck-v1",
@@ -38,6 +38,13 @@ describe("Personal Elgato installer", () => {
     expect(files[root + "bin/plugin.mjs"]).toBeDefined();
     expect(original).toEqual(before);
     expect(unzipSync(original)[root + "account.json"]).toBeUndefined();
+  });
+  it("public template is readable by the browser ZIP parser", () => {
+    const files = unzipSync(installer());
+    expect(Object.keys(files).length).toBeGreaterThan(10);
+    expect(
+      Object.keys(files).some((path) => path.endsWith("/manifest.json")),
+    ).toBe(true);
   });
   it("rejects a mixed account or insecure endpoint", () => {
     for (const url of [
