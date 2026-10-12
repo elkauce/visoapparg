@@ -4,6 +4,20 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class GoogleHomePolicyTest {
+    @Test fun translucentConsentPauseKeepsTheAccountButInvalidatesEveryOldCommand() {
+        val scope = GoogleHomeOwnerScope()
+        scope.activate("viso-owner")
+        val oldCommand = scope.begin("viso-owner")
+        scope.invalidate()
+        assertTrue(scope.isOwner("viso-owner"))
+        assertFalse(scope.isCurrent(oldCommand))
+        assertTrue(scope.isCurrent(scope.begin("viso-owner")))
+        scope.activate(null)
+        scope.invalidate()
+        assertFalse(scope.isOwner("viso-owner"))
+        assertThrows(IllegalStateException::class.java) { scope.begin("viso-owner") }
+    }
+
     @Test fun consentPauseDoesNotReactivateOldCommandsWhenTheSameAccountReturns() {
         val scope = GoogleHomeOwnerScope()
         scope.activate("viso-owner")

@@ -1,12 +1,27 @@
-import type { GoogleHomeApplyResult, GoogleHomeBridge, GoogleHomeConfiguration, GoogleHomeStateKey, GoogleHomeStatus } from "./google-home-native.ts";
-import { normalizeVisoStatusName, VISO_STATES } from "@/pages/deck/_lib/viso-states.ts";
+import type {
+  GoogleHomeApplyResult,
+  GoogleHomeBridge,
+  GoogleHomeConfiguration,
+  GoogleHomeStateKey,
+  GoogleHomeStatus,
+} from "./google-home-native.ts";
+import {
+  normalizeVisoStatusName,
+  VISO_STATES,
+} from "@/pages/deck/_lib/viso-states.ts";
 
-export function googleHomeStateForStatusName(name: string | null): GoogleHomeStateKey | null {
+export function googleHomeStateForStatusName(
+  name: string | null,
+): GoogleHomeStateKey | null {
   if (!name) return null;
   const normalized = normalizeVisoStatusName(name);
-  return VISO_STATES.find((state) =>
-    [state.name, ...state.aliases].some((candidate) => normalizeVisoStatusName(candidate) === normalized),
-  )?.key ?? null;
+  return (
+    VISO_STATES.find((state) =>
+      [state.name, ...state.aliases].some(
+        (candidate) => normalizeVisoStatusName(candidate) === normalized,
+      ),
+    )?.key ?? null
+  );
 }
 
 interface StateSnapshot {
@@ -47,8 +62,10 @@ export class GoogleHomeSyncController {
     if (accountId && this.foreground) void this.refreshConfiguration();
   }
 
-  setForeground(active: boolean): void {
-    if (this.foreground === active) return;
+  setForeground(active: boolean, reconcile = false): void {
+    // Google may return from a translucent activity without a preceding inactive event.
+    // An explicit native resume must rebind ownership and refresh SDK permissions.
+    if (this.foreground === active && !reconcile) return;
     this.foreground = active;
     this.generation += 1;
     this.status = null;
@@ -68,7 +85,10 @@ export class GoogleHomeSyncController {
   async refreshConfiguration(forAccountId?: string): Promise<void> {
     if (forAccountId && forAccountId !== this.accountId) return;
     if (!this.accountId || !this.foreground) return;
-    if (this.refreshing) { this.refreshRequested = true; return; }
+    if (this.refreshing) {
+      this.refreshRequested = true;
+      return;
+    }
     this.refreshing = true;
     const accountId = this.accountId;
     const generation = this.generation;
@@ -88,7 +108,11 @@ export class GoogleHomeSyncController {
       if (this.current(accountId, generation)) {
         this.status = null;
         this.configuration = null;
-        this.reportError(failure instanceof Error ? failure.message : "No se pudieron verificar los permisos de Google Home.");
+        this.reportError(
+          failure instanceof Error
+            ? failure.message
+            : "No se pudieron verificar los permisos de Google Home.",
+        );
       }
     } finally {
       this.refreshing = false;
@@ -100,23 +124,44 @@ export class GoogleHomeSyncController {
   }
 
   private bindOwner(): void {
-    this.ownerReady = this.bridge.setActiveAccount({ accountId: this.foreground ? this.accountId : null });
+    this.ownerReady = this.bridge.setActiveAccount({
+      accountId: this.foreground ? this.accountId : null,
+    });
     // A bridge unavailable in this build must never enable synchronization.
     void this.ownerReady.catch(() => undefined);
   }
 
   private current(accountId: string, generation: number): boolean {
-    return this.accountId === accountId && this.foreground && this.generation === generation;
+    return (
+      this.accountId === accountId &&
+      this.foreground &&
+      this.generation === generation
+    );
   }
 
-  private signature(snapshot: StateSnapshot, configuration: GoogleHomeConfiguration): string {
-    return JSON.stringify([this.accountId, snapshot.stateKey, snapshot.revision, configuration.revision]);
+  private signature(
+    snapshot: StateSnapshot,
+    configuration: GoogleHomeConfiguration,
+  ): string {
+    return JSON.stringify([
+      this.accountId,
+      snapshot.stateKey,
+      snapshot.revision,
+      configuration.revision,
+    ]);
   }
 
   private ready(): boolean {
-    return !!(this.accountId && this.foreground && this.status?.available &&
-      this.status.authorized && this.status.configured && this.status.selectedCount > 0 &&
-      this.configuration?.enabled && this.configuration.selectedIds.length > 0);
+    return !!(
+      this.accountId &&
+      this.foreground &&
+      this.status?.available &&
+      this.status.authorized &&
+      this.status.configured &&
+      this.status.selectedCount > 0 &&
+      this.configuration?.enabled &&
+      this.configuration.selectedIds.length > 0
+    );
   }
 
   private async drain(): Promise<void> {
@@ -129,14 +174,16 @@ export class GoogleHomeSyncController {
         const configuration = this.configuration;
         if (!snapshot?.stateKey || !accountId || !configuration) break;
         const signature = this.signature(snapshot, configuration);
-        if (signature === this.lastApplied || signature === this.lastAttempted) break;
+        if (signature === this.lastApplied || signature === this.lastAttempted)
+          break;
         const generation = this.generation;
         this.lastAttempted = signature;
         try {
           await this.ownerReady;
           if (!this.current(accountId, generation) || !this.ready()) break;
           // If a newer status arrived before the SDK call, coalesce straight to it.
-          if (this.latest !== snapshot || this.configuration !== configuration) continue;
+          if (this.latest !== snapshot || this.configuration !== configuration)
+            continue;
           const result: GoogleHomeApplyResult = await this.bridge.applyState({
             accountId,
             stateKey: snapshot.stateKey,
@@ -144,26 +191,47 @@ export class GoogleHomeSyncController {
           });
           if (!this.current(accountId, generation)) break;
           const resultIds = new Set(result.results.map((light) => light.id));
-          const covered = result.results.length === configuration.selectedIds.length &&
+          const covered =
+            result.results.length === configuration.selectedIds.length &&
             resultIds.size === configuration.selectedIds.length &&
             configuration.selectedIds.every((id) => resultIds.has(id));
-          if (result.applied && covered && result.results.every((light) => light.success)) {
+          if (
+            result.applied &&
+            covered &&
+            result.results.every((light) => light.success)
+          ) {
             this.lastApplied = signature;
           } else if (!result.skipped) {
-            const failure = result.results.find((light) => !light.success)?.error;
-            this.reportError(failure ?? result.reason ?? "Google Home no pudo aplicar el color a alguna luz seleccionada.");
+            const failure = result.results.find(
+              (light) => !light.success,
+            )?.error;
+            this.reportError(
+              failure ??
+                result.reason ??
+                "Google Home no pudo aplicar el color a alguna luz seleccionada.",
+            );
           }
         } catch (failure) {
           if (this.current(accountId, generation)) {
-            this.reportError(failure instanceof Error ? failure.message : "No se pudo aplicar el estado a Google Home.");
+            this.reportError(
+              failure instanceof Error
+                ? failure.message
+                : "No se pudo aplicar el estado a Google Home.",
+            );
           }
         }
       }
     } finally {
       this.running = false;
-      if (this.ready() && this.latest?.stateKey && this.configuration &&
-        this.signature(this.latest, this.configuration) !== this.lastAttempted &&
-        this.signature(this.latest, this.configuration) !== this.lastApplied) void this.drain();
+      if (
+        this.ready() &&
+        this.latest?.stateKey &&
+        this.configuration &&
+        this.signature(this.latest, this.configuration) !==
+          this.lastAttempted &&
+        this.signature(this.latest, this.configuration) !== this.lastApplied
+      )
+        void this.drain();
     }
   }
 }

@@ -124,10 +124,12 @@ class VisoGoogleHomePlugin : Plugin() {
     override fun handleOnResume() { foreground = true }
 
     override fun handleOnPause() {
-        // Android's lifecycle closes the command gate before delayed JS events.
-        // The Google consent coroutine remains alive while its official UI opens.
+        // A translucent Google activity can pause us without an appStateChange(false).
+        // Pause commands immediately, but keep the authenticated account binding.
+        // Logout/account switches still clear it through setActiveAccount; resume
+        // alone never reactivates a logged-out account or an old command ticket.
         foreground = false
-        owner.activate(null)
+        owner.invalidate()
         commandJobs.toList().forEach { it.cancel() }
         commandJobs.clear()
         home.accountChanged()
