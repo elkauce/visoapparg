@@ -115,6 +115,7 @@ function UrlSection() {
   const ensureMine = useMutation(api.deck_api.ensureMine);
   const regenerate = useMutation(api.deck_api.regenerate);
   const statuses = useQuery(api.statuses.list, {});
+  const [preparingPlugin, setPreparingPlugin] = useState(false);
 
   useEffect(() => {
     if (token === null) {
@@ -129,6 +130,8 @@ function UrlSection() {
   const base = `${getSiteUrl()}/deck/set?token=${token}&status=`;
 
   const downloadPersonalPlugin = async () => {
+    if (preparingPlugin) return;
+    setPreparingPlugin(true);
     try {
       const response = await fetch(
         "/downloads/VISO-Elgato-1.2.streamDeckPlugin",
@@ -166,6 +169,8 @@ function UrlSection() {
       toast.error(
         "No se pudo preparar el plugin. Intentá de nuevo desde la web en tu computadora.",
       );
+    } finally {
+      setPreparingPlugin(false);
     }
   };
 
@@ -223,8 +228,11 @@ function UrlSection() {
         </p>
       </div>
       <div className="space-y-2">
-        <Button onClick={downloadPersonalPlugin}>
-          <Download /> Descargar mi plugin configurado
+        <Button onClick={downloadPersonalPlugin} disabled={preparingPlugin}>
+          <Download />{" "}
+          {preparingPlugin
+            ? "Preparando tu plugin…"
+            : "Descargar mi plugin configurado"}
         </Button>
         <p className="text-xs text-muted-foreground">
           No necesitás importar archivos ni pegar enlaces. Este instalador es

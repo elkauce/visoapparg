@@ -15,6 +15,7 @@ import {
   Minimize,
   Pencil,
   Plus,
+  Plug,
   Settings2,
   Trash2,
 } from "lucide-react";
@@ -30,6 +31,13 @@ import {
   nativeDeck,
 } from "@/lib/android-native.ts";
 import { cn } from "@/lib/utils.ts";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.tsx";
+import StreamDeckPanel from "../_components/stream-deck-panel.tsx";
 import DeckKey from "./_components/deck-key.tsx";
 import CanvasBackdrop from "./_components/canvas-backdrop.tsx";
 import KeyEditor, { type EditTarget } from "./_components/key-editor.tsx";
@@ -119,6 +127,7 @@ export default function DeckPage({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [sportsLeague, setSportsLeague] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [elgatoOpen, setElgatoOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const pendingRef = useRef(false);
   const [view, setView] = useState({ pageId: "", index: 0 });
@@ -579,6 +588,13 @@ export default function DeckPage({
             </Button>
           )}
           <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setElgatoOpen(true)}
+          >
+            <Plug /> Elgato
+          </Button>
+          <Button
             variant={editMode ? "default" : "secondary"}
             size="sm"
             onClick={() => setEditMode((editing) => !editing)}
@@ -774,6 +790,14 @@ export default function DeckPage({
           }}
         />
       )}
+      <Dialog open={elgatoOpen} onOpenChange={setElgatoOpen}>
+        <DialogContent className="max-h-[85dvh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Elgato Stream Deck</DialogTitle>
+          </DialogHeader>
+          {elgatoOpen && <StreamDeckPanel pluginOnly />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
