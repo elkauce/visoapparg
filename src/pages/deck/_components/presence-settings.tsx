@@ -163,7 +163,8 @@ export default function PresenceSettings({
               La llamada tiene prioridad sobre la agenda. Al terminar se
               recupera el estado anterior si no lo cambiaste manualmente. Activá
               el detector en un dispositivo por cuenta. Android puede detenerlo
-              si cierra VISO; las luces se sincronizan con VISO en primer plano.
+              si cierra VISO. Mientras el Deck siga activo, la sincronización
+              mantiene tus luces seleccionadas aunque una llamada cubra la app.
             </p>
           </>
         )}

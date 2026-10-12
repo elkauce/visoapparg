@@ -43,6 +43,10 @@ export interface GoogleHomeApplyResult {
 }
 export interface GoogleHomeBridge {
   setActiveAccount(options: { accountId: string | null }): Promise<void>;
+  setBackgroundSync?(options: {
+    accountId: string | null;
+    enabled: boolean;
+  }): Promise<void>;
   getStatus(options: { accountId: string }): Promise<GoogleHomeStatus>;
   authorize(options: { accountId: string }): Promise<GoogleHomeStatus>;
   discoverLights(options: {
@@ -65,7 +69,14 @@ export interface GoogleHomeBridge {
   disconnect(options: { accountId: string }): Promise<void>;
 }
 
-const plugin = registerPlugin<GoogleHomeBridge>("VisoGoogleHome");
+const plugin = registerPlugin<
+  GoogleHomeBridge & {
+    setBackgroundSync(options: {
+      accountId: string | null;
+      enabled: boolean;
+    }): Promise<void>;
+  }
+>("VisoGoogleHome");
 const webStatus: GoogleHomeStatus = {
   sdkPresent: false,
   available: false,
@@ -86,6 +97,9 @@ function requireAndroid(): void {
 export const googleHomeNative: GoogleHomeBridge = {
   async setActiveAccount(options) {
     if (isAndroidNative()) await plugin.setActiveAccount(options);
+  },
+  async setBackgroundSync(options) {
+    if (isAndroidNative()) await plugin.setBackgroundSync(options);
   },
   async getStatus(options) {
     return isAndroidNative() ? plugin.getStatus(options) : { ...webStatus };

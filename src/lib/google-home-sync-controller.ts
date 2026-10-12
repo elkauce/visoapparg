@@ -30,10 +30,14 @@ interface StateSnapshot {
   customColor?: string;
 }
 
-/** One foreground worker. New snapshots replace queued work; owner changes invalidate it. */
+/** One owner-scoped worker. An opted-in Deck may keep signaling while covered by a call. */
 export class GoogleHomeSyncController {
   private accountId: string | null = null;
   private foreground = true;
+  private backgroundEnabled = false;
+  private retryTimer: ReturnType<typeof setTimeout> | null = null;
+  private retrySignature: string | null = null;
+  private retryCount = 0;
   private generation = 0;
   private latest: StateSnapshot | null = null;
   private configuration: GoogleHomeConfiguration | null = null;
@@ -53,6 +57,8 @@ export class GoogleHomeSyncController {
   setAccount(accountId: string | null): void {
     if (accountId === this.accountId) return;
     this.accountId = accountId;
+    this.backgroundEnabled = false;
+    this.cancelRetry();
     this.generation += 1;
     this.latest = null;
     this.configuration = null;
@@ -60,14 +66,17 @@ export class GoogleHomeSyncController {
     this.lastApplied = null;
     this.lastAttempted = null;
     this.bindOwner();
-    if (accountId && this.foreground) void this.refreshConfiguration();
+    if (accountId && this.permitted()) void this.refreshConfiguration();
   }
 
   setForeground(active: boolean, reconcile = false): void {
     // Google may return from a translucent activity without a preceding inactive event.
     // An explicit native resume must rebind ownership and refresh SDK permissions.
     if (this.foreground === active && !reconcile) return;
+    const wasPermitted = this.permitted();
     this.foreground = active;
+    if (wasPermitted && this.permitted() && !reconcile) return;
+    this.cancelRetry();
     this.generation += 1;
     this.status = null;
     this.configuration = null;
@@ -75,7 +84,56 @@ export class GoogleHomeSyncController {
     this.lastAttempted = null;
     // Native invalidation also stops an SDK read from issuing commands after pause/logout.
     this.bindOwner();
-    if (active && this.accountId) void this.refreshConfiguration();
+    if (this.permitted() && this.accountId) void this.refreshConfiguration();
+  }
+
+  setBackgroundEnabled(enabled: boolean): void {
+    const next = enabled && !!this.accountId && !!this.bridge.setBackgroundSync;
+    if (this.backgroundEnabled === next) return;
+    this.backgroundEnabled = next;
+    this.cancelRetry();
+    this.generation += 1;
+    this.status = null;
+    this.configuration = null;
+    this.lastApplied = null;
+    this.lastAttempted = null;
+    this.bindOwner();
+    if (this.permitted() && this.accountId) void this.refreshConfiguration();
+  }
+
+  private permitted(): boolean {
+    return this.foreground || this.backgroundEnabled;
+  }
+
+  private cancelRetry(): void {
+    if (this.retryTimer !== null) clearTimeout(this.retryTimer);
+    this.retryTimer = null;
+    this.retrySignature = null;
+    this.retryCount = 0;
+  }
+
+  private retry(signature: string): void {
+    if (!this.backgroundEnabled || !this.accountId || !this.permitted()) return;
+    if (this.retrySignature !== signature) {
+      this.cancelRetry();
+      this.retrySignature = signature;
+    }
+    if (this.retryTimer !== null || this.retryCount >= 2) return;
+    const accountId = this.accountId;
+    const generation = this.generation;
+    this.retryCount += 1;
+    this.retryTimer = setTimeout(() => {
+      this.retryTimer = null;
+      if (
+        !this.current(accountId, generation) ||
+        !this.latest ||
+        !this.configuration ||
+        this.signature(this.latest, this.configuration) !== signature
+      )
+        return;
+      // Recheck real permission and the selected subset before retrying this latest state.
+      void this.refreshConfiguration();
+    }, this.retryCount * 1000);
   }
 
   updateState(
@@ -87,13 +145,19 @@ export class GoogleHomeSyncController {
       !stateKey && customColor && /^#[0-9a-fA-F]{6}$/.test(customColor)
         ? customColor
         : undefined;
+    if (
+      this.latest?.stateKey !== stateKey ||
+      this.latest?.revision !== revision ||
+      this.latest?.customColor !== validColor
+    )
+      this.cancelRetry();
     this.latest = { stateKey, revision, customColor: validColor };
     void this.drain();
   }
 
   async refreshConfiguration(forAccountId?: string): Promise<void> {
     if (forAccountId && forAccountId !== this.accountId) return;
-    if (!this.accountId || !this.foreground) return;
+    if (!this.accountId || !this.permitted()) return;
     if (this.refreshing) {
       this.refreshRequested = true;
       return;
@@ -133,8 +197,20 @@ export class GoogleHomeSyncController {
   }
 
   private bindOwner(): void {
-    this.ownerReady = this.bridge.setActiveAccount({
-      accountId: this.foreground ? this.accountId : null,
+    const accountId = this.accountId;
+    const generation = this.generation;
+    const enabled = this.backgroundEnabled;
+    const bound = this.bridge.setActiveAccount({
+      accountId: this.permitted() ? accountId : null,
+    });
+    this.ownerReady = bound.then(async () => {
+      if (accountId !== this.accountId || generation !== this.generation)
+        return;
+      if (this.bridge.setBackgroundSync)
+        await this.bridge.setBackgroundSync({
+          accountId: this.permitted() ? accountId : null,
+          enabled,
+        });
     });
     // A bridge unavailable in this build must never enable synchronization.
     void this.ownerReady.catch(() => undefined);
@@ -143,7 +219,7 @@ export class GoogleHomeSyncController {
   private current(accountId: string, generation: number): boolean {
     return (
       this.accountId === accountId &&
-      this.foreground &&
+      this.permitted() &&
       this.generation === generation
     );
   }
@@ -164,7 +240,7 @@ export class GoogleHomeSyncController {
   private ready(): boolean {
     return !!(
       this.accountId &&
-      this.foreground &&
+      this.permitted() &&
       this.status?.available &&
       this.status.authorized &&
       this.status.configured &&
@@ -193,13 +269,13 @@ export class GoogleHomeSyncController {
         if (signature === this.lastApplied || signature === this.lastAttempted)
           break;
         const generation = this.generation;
-        this.lastAttempted = signature;
         try {
           await this.ownerReady;
           if (!this.current(accountId, generation) || !this.ready()) break;
           // If a newer status arrived before the SDK call, coalesce straight to it.
           if (this.latest !== snapshot || this.configuration !== configuration)
             continue;
+          this.lastAttempted = signature;
           const result: GoogleHomeApplyResult = await this.bridge.applyState({
             accountId,
             stateKey: snapshot.stateKey,
@@ -220,6 +296,7 @@ export class GoogleHomeSyncController {
             result.results.every((light) => light.success)
           ) {
             this.lastApplied = signature;
+            this.cancelRetry();
           } else if (!result.skipped) {
             const failure = result.results.find(
               (light) => !light.success,
@@ -229,9 +306,21 @@ export class GoogleHomeSyncController {
                 result.reason ??
                 "Google Home no pudo aplicar el color a alguna luz seleccionada.",
             );
+            this.retry(signature);
+          } else if (
+            [
+              "application-inactive",
+              "account-or-visibility-changed",
+              "inactive-account",
+              "superseded",
+            ].includes(result.reason ?? "")
+          ) {
+            this.retry(signature);
           }
         } catch (failure) {
           if (this.current(accountId, generation)) {
+            this.lastAttempted = signature;
+            this.retry(signature);
             this.reportError(
               failure instanceof Error
                 ? failure.message

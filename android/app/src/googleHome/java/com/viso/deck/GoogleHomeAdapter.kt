@@ -60,7 +60,7 @@ internal class GoogleHomeAdapter(
     private val context: Context,
     private val owner: GoogleHomeOwnerScope,
     private val preferences: GoogleHomePreferences,
-    private val isForeground: () -> Boolean
+    private val canSynchronize: () -> Boolean
 ) {
     private var client: HomeClient? = null
     private var initializationFailed = false
@@ -77,7 +77,7 @@ internal class GoogleHomeAdapter(
      * Wait for that binding; never reactivate an account or permit a light command here. */
     suspend fun awaitActiveOwner(account: String) {
         val ready = withTimeoutOrNull(5_000) {
-            while (!owner.isOwner(account) || !isForeground()) {
+            while (!owner.isOwner(account) || !canSynchronize()) {
                 check(!owner.isDifferentOwner(account)) { "La cuenta VISO cambió. Volvé a abrir la configuración." }
                 delay(50)
             }
@@ -155,6 +155,7 @@ internal class GoogleHomeAdapter(
     }
 
     private fun colorCapable(light: ExtendedColorLightDevice): Boolean {
+        var commandFailure: Exception? = null
         val matter = light.standardTraits.colorControl
         val google = light.googleTraits.extendedColorControl
         return matter?.supports(ColorControl.Command.MoveToHueAndSaturation) == true ||
@@ -221,14 +222,14 @@ internal class GoogleHomeAdapter(
     }
 
     private suspend fun checkCurrent(ticket: GoogleHomeOwnerScope.Ticket, configRevision: String, structureId: String? = null) {
-        check(isForeground()) { "VISO debe estar activa para sincronizar luces." }
+        check(canSynchronize()) { "La sincronización de luces VISO está pausada." }
         check(owner.isCurrent(ticket) && preferences.get(ticket.account).revision == configRevision) { "La solicitud VISO fue reemplazada." }
         check(permission() == PermissionsState.GRANTED) { "Google Home revocó o perdió el consentimiento." }
         val grantedStructures = withTimeout(8_000) { requireClient().structures().list().map { it.id.toString() }.toSet() }
         check(grantedStructures.isNotEmpty() && (structureId == null || structureId in grantedStructures)) {
             "Google Home ya no concede acceso a una casa."
         }
-        check(isForeground()) { "VISO debe estar activa para sincronizar luces." }
+        check(canSynchronize()) { "La sincronización de luces VISO está pausada." }
         check(owner.isCurrent(ticket) && preferences.get(ticket.account).revision == configRevision) { "La solicitud VISO fue reemplazada." }
     }
 
@@ -240,6 +241,7 @@ internal class GoogleHomeAdapter(
         val rgb = Color.parseColor(hex)
         val hsv = FloatArray(3)
         Color.colorToHSV(rgb, hsv)
+        var commandFailure: Exception? = null
         val matter = light.standardTraits.colorControl
         val google = light.googleTraits.extendedColorControl
         val supportsHs = hsv[2] > 0f && matter?.supports(ColorControl.Command.MoveToHueAndSaturation) == true
@@ -265,7 +267,10 @@ internal class GoogleHomeAdapter(
                 )
                 return
             } catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { checkCurrent(ticket, config.revision, structureId) }
+            catch (failure: Exception) {
+                checkCurrent(ticket, config.revision, structureId)
+                commandFailure = failure
+            }
         }
         if (supportsHsv && google != null) {
             try {
@@ -273,18 +278,21 @@ internal class GoogleHomeAdapter(
                 google.moveToColorHsv(hsv[0], hsv[1], hsv[2])
                 return
             } catch (cancelled: CancellationException) { throw cancelled }
-            catch (_: Exception) { checkCurrent(ticket, config.revision, structureId) }
+            catch (failure: Exception) {
+                checkCurrent(ticket, config.revision, structureId)
+                commandFailure = failure
+            }
         }
         if (supportsRgb && google != null) {
             checkCurrent(ticket, config.revision, structureId)
             google.moveToColorRgb(Color.red(rgb).toUByte(), Color.green(rgb).toUByte(), Color.blue(rgb).toUByte())
             return
         }
-        error("La luz no acepta un comando compatible para este color.")
+        throw commandFailure ?: IllegalStateException("La luz no acepta un comando compatible para este color.")
     }
 
     suspend fun apply(ticket: GoogleHomeOwnerScope.Ticket, state: String?, revision: String, customColor: String? = null): JSObject = commandMutex.withLock {
-        if (!isForeground()) return@withLock skipped("application-inactive")
+        if (!canSynchronize()) return@withLock skipped("application-inactive")
         if (!owner.isCurrent(ticket)) return@withLock skipped("superseded")
         if (state == null && customColor == null) return@withLock skipped("no-state")
         require(state == null || state in GoogleHomePolicy.stateKeys) { "El estado VISO no es válido." }
@@ -311,9 +319,9 @@ internal class GoogleHomeAdapter(
                         // The API acknowledged the command; no physical observation is fabricated.
                         row.put("success", true).put("commanded", true)
                     } catch (cancelled: CancellationException) { throw cancelled }
-                    catch (_: Exception) {
+                    catch (failure: Exception) {
                         row.put("error", if (!owner.isCurrent(ticket)) "La solicitud fue reemplazada."
-                            else "Google Home no aceptó el color. Revisá permisos, conexión y compatibilidad de esta luz.")
+                            else GoogleHomeFailure.describe("Google Home no aceptó el color. Revisá permisos, conexión y compatibilidad de esta luz", failure))
                     }
                     row
                 }

@@ -4,6 +4,7 @@ import GoogleHomeSync from "./google-home-sync.tsx";
 
 const fixture = vi.hoisted(() => ({
   android: true,
+  pathname: "/deck",
   authenticated: true,
   loading: false,
   user: { _id: "owner-A" } as { _id: string } | null,
@@ -21,6 +22,9 @@ const fixture = vi.hoisted(() => ({
       icon?: string;
     }[];
   },
+  pauseListener: null as (() => void) | null,
+  resumeListener: null as (() => void) | null,
+  setBackgroundSync: vi.fn(),
   appListener: null as ((event: { isActive: boolean }) => void) | null,
   listenerRemoved: vi.fn(),
   getState: vi.fn(),
@@ -29,6 +33,9 @@ const fixture = vi.hoisted(() => ({
   getConfiguration: vi.fn(),
   setActiveAccount: vi.fn(),
   applyState: vi.fn(),
+}));
+vi.mock("react-router-dom", () => ({
+  useLocation: () => ({ pathname: fixture.pathname }),
 }));
 vi.mock("convex/react", () => ({
   useConvexAuth: () => ({
@@ -60,6 +67,7 @@ vi.mock("@/lib/google-home-native.ts", () => ({
     getStatus: fixture.getStatus,
     getConfiguration: fixture.getConfiguration,
     setActiveAccount: fixture.setActiveAccount,
+    setBackgroundSync: fixture.setBackgroundSync,
     applyState: fixture.applyState,
   },
 }));
@@ -88,6 +96,11 @@ async function settle() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  localStorage.clear();
+  fixture.pathname = "/deck";
+  fixture.pauseListener = null;
+  fixture.resumeListener = null;
+  fixture.setBackgroundSync.mockResolvedValue(undefined);
   fixture.android = true;
   fixture.authenticated = true;
   fixture.loading = false;
@@ -104,7 +117,11 @@ beforeEach(() => {
       _event: string,
       callback: (event: { isActive: boolean }) => void,
     ) => {
-      fixture.appListener = callback;
+      if (_event === "appStateChange") fixture.appListener = callback;
+      if (_event === "pause")
+        fixture.pauseListener = () => callback({ isActive: false });
+      if (_event === "resume")
+        fixture.resumeListener = () => callback({ isActive: true });
       return { remove: fixture.listenerRemoved };
     },
   );
@@ -231,7 +248,7 @@ describe("Google Home global Android state observer", () => {
     expect(fixture.setActiveAccount).toHaveBeenLastCalledWith({
       accountId: null,
     });
-    expect(fixture.addListener).toHaveBeenCalledTimes(1);
+    expect(fixture.addListener).toHaveBeenCalledTimes(3);
     act(() => fixture.appListener?.({ isActive: true }));
     await waitFor(() =>
       expect(fixture.applyState).toHaveBeenLastCalledWith({
@@ -336,6 +353,63 @@ it("receives the real custom status RGB from shared account data and resynchroni
       stateKey: null,
       revision: "playing:custom:#fd2244",
       customColor: "#fd2244",
+    }),
+  );
+});
+
+it("recovers the latest call from an Android overlay without an appStateChange event", async () => {
+  const view = render(<GoogleHomeSync />);
+  await waitFor(() => expect(fixture.applyState).toHaveBeenCalledTimes(1));
+  act(() => fixture.pauseListener?.());
+  fixture.data = {
+    activeStatusId: "phone-call",
+    activeStatusRevision: 2,
+    statuses: [{ _id: "phone-call", userId: "owner-A", name: "Llamada" }],
+  };
+  view.rerender(<GoogleHomeSync />);
+  await settle();
+  expect(fixture.applyState).toHaveBeenCalledTimes(1);
+  act(() => fixture.resumeListener?.());
+  await waitFor(() =>
+    expect(fixture.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "llamada",
+      revision: "phone-call:llamada:2",
+    }),
+  );
+});
+
+it("keeps Google Home enabled only for a Deck account with automatic presence opted in", async () => {
+  localStorage.setItem(
+    "viso:presence:owner-A",
+    JSON.stringify({ calls: true, calendarIds: [], allBusyEvents: false }),
+  );
+  const view = render(<GoogleHomeSync />);
+  await waitFor(() =>
+    expect(fixture.setBackgroundSync).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      enabled: true,
+    }),
+  );
+  act(() => fixture.pauseListener?.());
+  fixture.data = {
+    activeStatusId: "auto-call",
+    activeStatusRevision: 2,
+    statuses: [{ _id: "auto-call", userId: "owner-A", name: "Llamada" }],
+  };
+  view.rerender(<GoogleHomeSync />);
+  await waitFor(() =>
+    expect(fixture.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "llamada",
+      revision: "auto-call:llamada:2",
+    }),
+  );
+  fixture.pathname = "/android/display";
+  view.rerender(<GoogleHomeSync />);
+  await waitFor(() =>
+    expect(fixture.setActiveAccount).toHaveBeenLastCalledWith({
+      accountId: null,
     }),
   );
 });

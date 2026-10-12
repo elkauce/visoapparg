@@ -53,6 +53,9 @@ function bridge() {
     setActiveAccount: vi
       .fn<GoogleHomeBridge["setActiveAccount"]>()
       .mockResolvedValue(undefined),
+    setBackgroundSync: vi
+      .fn<NonNullable<GoogleHomeBridge["setBackgroundSync"]>>()
+      .mockResolvedValue(undefined),
     getStatus: vi
       .fn<GoogleHomeBridge["getStatus"]>()
       .mockResolvedValue(connected),
@@ -328,5 +331,208 @@ it("keeps preset colors configured by the user and rejects invalid custom colors
     accountId: "owner-A",
     stateKey: "libre",
     revision: "preset",
+  });
+});
+
+describe("Google Home automatic Deck while covered", () => {
+  it("keeps the opted-in owner and selected-light synchronization during a call", async () => {
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    sync.setAccount("owner-A");
+    sync.setBackgroundEnabled(true);
+    sync.updateState("libre", "before-call");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(1));
+    sync.setForeground(false);
+    sync.updateState("llamada", "automatic-call");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(2));
+    expect(native.setActiveAccount).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+    });
+    expect(native.setBackgroundSync).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      enabled: true,
+    });
+    expect(native.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "llamada",
+      revision: "automatic-call",
+    });
+    sync.updateState("reunion", "automatic-meeting");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(3));
+    sync.setAccount(null);
+  });
+
+  it("pauses again when the user disables the detector while covered", async () => {
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    sync.setAccount("owner-A");
+    sync.setBackgroundEnabled(true);
+    sync.setForeground(false);
+    sync.updateState("llamada", "call");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(1));
+    sync.setBackgroundEnabled(false);
+    sync.updateState("reunion", "meeting");
+    await settle();
+    expect(native.applyState).toHaveBeenCalledTimes(1);
+    expect(native.setActiveAccount).toHaveBeenLastCalledWith({
+      accountId: null,
+    });
+    sync.setForeground(true);
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(2));
+    expect(native.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "reunion",
+      revision: "meeting",
+    });
+    sync.setAccount(null);
+  });
+
+  it("does not carry background permission across VISO accounts", async () => {
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    sync.setAccount("owner-A");
+    sync.setBackgroundEnabled(true);
+    sync.setForeground(false);
+    sync.updateState("llamada", "A-call");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(1));
+    sync.setAccount("owner-B");
+    sync.updateState("reunion", "B-meeting");
+    await settle();
+    expect(native.applyState).toHaveBeenCalledTimes(1);
+    expect(native.setActiveAccount).toHaveBeenLastCalledWith({
+      accountId: null,
+    });
+    sync.setForeground(true);
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(2));
+    expect(native.setBackgroundSync).toHaveBeenLastCalledWith({
+      accountId: "owner-B",
+      enabled: false,
+    });
+    sync.setAccount(null);
+  });
+
+  it("does not lose a call when Convex repeats the identical snapshot before the SDK dispatch", async () => {
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    sync.setAccount("owner-A");
+    sync.updateState("libre", "initial");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(1));
+    sync.updateState("llamada", "same-call");
+    sync.updateState("llamada", "same-call");
+    await vi.waitFor(() => expect(native.applyState).toHaveBeenCalledTimes(2));
+    expect(native.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "llamada",
+      revision: "same-call",
+    });
+    sync.setAccount(null);
+  });
+
+  it("retries a transient lifecycle skip after checking permission again", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.applyState.mockResolvedValueOnce({
+        applied: false,
+        skipped: true,
+        reason: "application-inactive",
+        results: [],
+      });
+      sync.setAccount("owner-A");
+      sync.setBackgroundEnabled(true);
+      sync.updateState("llamada", "call");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      const reads = native.getStatus.mock.calls.length;
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(native.getStatus.mock.calls.length).toBeGreaterThan(reads);
+      expect(native.applyState).toHaveBeenCalledTimes(2);
+      expect(native.applyState.mock.calls[0]).toEqual(
+        native.applyState.mock.calls[1],
+      );
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("bounds retries and never repeats an old call after a newer meeting arrives", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.applyState.mockResolvedValueOnce({
+        applied: false,
+        skipped: true,
+        reason: "application-inactive",
+        results: [],
+      });
+      sync.setAccount("owner-A");
+      sync.setBackgroundEnabled(true);
+      sync.updateState("llamada", "old-call");
+      await vi.advanceTimersByTimeAsync(0);
+      sync.updateState("reunion", "new-meeting");
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.applyState).toHaveBeenCalledTimes(2);
+      expect(native.applyState).toHaveBeenLastCalledWith({
+        accountId: "owner-A",
+        stateKey: "reunion",
+        revision: "new-meeting",
+      });
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops after two retries instead of polling lights indefinitely", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.applyState.mockResolvedValue({
+        applied: false,
+        skipped: true,
+        reason: "application-inactive",
+        results: [],
+      });
+      sync.setAccount("owner-A");
+      sync.setBackgroundEnabled(true);
+      sync.updateState("llamada", "call");
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.applyState).toHaveBeenCalledTimes(3);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels the retry on logout and stops when Google revokes permission", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.applyState.mockResolvedValueOnce({
+        applied: false,
+        skipped: true,
+        reason: "inactive-account",
+        results: [],
+      });
+      sync.setAccount("owner-A");
+      sync.setBackgroundEnabled(true);
+      sync.updateState("llamada", "call");
+      await vi.advanceTimersByTimeAsync(0);
+      native.getStatus.mockResolvedValue({ ...connected, authorized: false });
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      sync.setAccount(null);
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
   });
 });

@@ -29,6 +29,10 @@ class VisoGoogleHomePlugin : Plugin() {
         try { owner.activate(call.getString("accountId")); call.resolve() }
         catch (_: Exception) { call.reject("La sesión VISO no es válida.", "GOOGLE_HOME_INVALID_ACCOUNT") }
     }
+    @PluginMethod fun setBackgroundSync(call: PluginCall) {
+        if (call.getBoolean("enabled", false) == true) call.reject("Esta APK no incluye el SDK oficial Google Home.", "GOOGLE_HOME_SDK_NOT_INCLUDED")
+        else call.resolve()
+    }
     @PluginMethod fun getStatus(call: PluginCall) = local(call) { owner.requireOwner(it); status(it) }
     @PluginMethod fun authorize(call: PluginCall) { call.reject("Esta APK no incluye el SDK oficial Google Home; no puede abrir su consentimiento.", "GOOGLE_HOME_SDK_NOT_INCLUDED") }
     @PluginMethod fun discoverLights(call: PluginCall) = local(call) { owner.requireOwner(it); status(it).put("lights", JSArray()) }

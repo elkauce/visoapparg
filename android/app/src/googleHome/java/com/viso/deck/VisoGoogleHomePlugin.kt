@@ -20,11 +20,11 @@ class VisoGoogleHomePlugin : Plugin() {
     private val commandJobs = mutableSetOf<Job>()
     private lateinit var preferences: GoogleHomePreferences
     private lateinit var home: GoogleHomeAdapter
-    @Volatile private var foreground = false
+    private val execution = GoogleHomeExecutionScope(owner)
 
     override fun load() {
         preferences = GoogleHomePreferences(context)
-        home = GoogleHomeAdapter(context, owner, preferences) { foreground }
+        home = GoogleHomeAdapter(context, owner, preferences) { execution.canSynchronize() }
         // Called by BridgeActivity.onCreate, before the activity is STARTED.
         home.register(activity)
     }
@@ -46,6 +46,7 @@ class VisoGoogleHomePlugin : Plugin() {
             try {
                 val account = call.getString("accountId")
                 if (owner.activate(account)) {
+                    execution.clearBackground()
                     commandJobs.toList().forEach { it.cancel() }
                     commandJobs.clear()
                     home.accountChanged()
@@ -53,6 +54,24 @@ class VisoGoogleHomePlugin : Plugin() {
                 call.resolve()
             } catch (_: Exception) { call.reject("La sesión VISO no es válida.", "GOOGLE_HOME_INVALID_ACCOUNT") }
         }
+    }
+
+    @PluginMethod
+    fun setBackgroundSync(call: PluginCall) {
+        activity.runOnUiThread {
+            try {
+                execution.setBackground(call.getString("accountId"), call.getBoolean("enabled", false) == true)
+                if (!execution.canSynchronize()) pauseCommands()
+                call.resolve()
+            } catch (_: Exception) { call.reject("La cuenta VISO no permite sincronizar luces en segundo plano.", "GOOGLE_HOME_INVALID_ACCOUNT") }
+        }
+    }
+
+    private fun pauseCommands() {
+        owner.invalidate()
+        commandJobs.toList().forEach { it.cancel() }
+        commandJobs.clear()
+        home.accountChanged()
     }
 
     @PluginMethod
@@ -102,7 +121,7 @@ class VisoGoogleHomePlugin : Plugin() {
                 val job = scope.launch {
                     try { call.resolve(home.apply(ticket, state, revision, call.getString("customColor"))) }
                     catch (_: CancellationException) { call.resolve(home.skipped("account-or-visibility-changed")) }
-                    catch (_: Exception) { call.reject("No se pudo aplicar el estado a Google Home. Revisá consentimiento, conexión y selección de luces.", "GOOGLE_HOME_ACTION_FAILED") }
+                    catch (failure: Exception) { call.reject(GoogleHomeFailure.describe("No se pudo aplicar el estado a Google Home. Revisá consentimiento, conexión y selección de luces", failure), "GOOGLE_HOME_ACTION_FAILED") }
                 }
                 commandJobs.add(job)
                 job.invokeOnCompletion { commandJobs.remove(job) }
@@ -116,22 +135,19 @@ class VisoGoogleHomePlugin : Plugin() {
     }
 
     override fun handleOnDestroy() {
-        foreground = false
+        execution.setForeground(false)
+        execution.clearBackground()
         owner.activate(null)
         scope.cancel()
     }
 
-    override fun handleOnResume() { foreground = true }
+    override fun handleOnResume() { execution.setForeground(true) }
 
     override fun handleOnPause() {
-        // A translucent Google activity can pause us without an appStateChange(false).
-        // Pause commands immediately, but keep the authenticated account binding.
-        // Logout/account switches still clear it through setActiveAccount; resume
-        // alone never reactivates a logged-out account or an old command ticket.
-        foreground = false
-        owner.invalidate()
-        commandJobs.toList().forEach { it.cancel() }
-        commandJobs.clear()
-        home.accountChanged()
+        // Calls and meeting apps can cover an opted-in Deck. Its account and
+        // selected-light permission checks remain valid while this process lives.
+        // Otherwise pause immediately; resume never reactivates a logged-out owner.
+        execution.setForeground(false)
+        if (!execution.canSynchronize()) pauseCommands()
     }
 }

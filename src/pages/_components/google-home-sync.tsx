@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { useConvexAuth, useQuery } from "convex/react";
 import { App as CapacitorApp } from "@capacitor/app";
 import type { PluginListenerHandle } from "@capacitor/core";
@@ -10,12 +11,17 @@ import {
   googleHomeNative,
 } from "@/lib/google-home-native.ts";
 import {
+  PRESENCE_SETTINGS_EVENT,
+  readPresencePreferences,
+} from "@/lib/presence-native";
+import {
   googleHomeStateForStatusName,
   GoogleHomeSyncController,
 } from "@/lib/google-home-sync-controller.ts";
 
 /** Observes the existing shared state throughout Android, including remote changes. */
 export default function GoogleHomeSync() {
+  const { pathname } = useLocation();
   const android = isAndroidNative();
   const { isAuthenticated, isLoading } = useConvexAuth();
   const authenticated = android && isAuthenticated && !isLoading;
@@ -50,6 +56,26 @@ export default function GoogleHomeSync() {
   }, [accountId, android, controller]);
 
   useEffect(() => {
+    if (!android || !accountId) return;
+    const update = () => {
+      const preferences = readPresencePreferences(accountId);
+      controller.setBackgroundEnabled(
+        pathname === "/deck" &&
+          (preferences.calls || preferences.calendarIds.length > 0),
+      );
+    };
+    const changed = (event: Event) => {
+      if ((event as CustomEvent).detail === accountId) update();
+    };
+    update();
+    window.addEventListener(PRESENCE_SETTINGS_EVENT, changed);
+    return () => {
+      window.removeEventListener(PRESENCE_SETTINGS_EVENT, changed);
+      controller.setBackgroundEnabled(false);
+    };
+  }, [android, accountId, controller, pathname]);
+
+  useEffect(() => {
     if (!android || !accountId || data === undefined) return;
     controller.updateState(
       stateKey,
@@ -71,7 +97,7 @@ export default function GoogleHomeSync() {
     let alive = true;
     let foreground = false;
     let stateEvents = 0;
-    let appListener: PluginListenerHandle | undefined;
+    const appListeners: PluginListenerHandle[] = [];
     const visibility = (reconcile = false) =>
       controller.setForeground(foreground && !document.hidden, reconcile);
     const visibilityChanged = () => visibility();
@@ -92,17 +118,28 @@ export default function GoogleHomeSync() {
       GOOGLE_HOME_CONFIGURATION_EVENT,
       configurationChanged,
     );
-    void CapacitorApp.addListener("appStateChange", ({ isActive }) => {
+    const listen = (promise: Promise<PluginListenerHandle>) => {
+      void promise
+        .then((handle) => {
+          if (alive) appListeners.push(handle);
+          else void handle.remove();
+        })
+        .catch(() => undefined);
+    };
+    const appState = (isActive: boolean) => {
       if (!alive) return;
       stateEvents += 1;
       foreground = isActive;
       visibility(isActive);
-    })
-      .then((handle) => {
-        if (alive) appListener = handle;
-        else void handle.remove();
-      })
-      .catch(() => undefined);
+    };
+    listen(
+      CapacitorApp.addListener("appStateChange", ({ isActive }) =>
+        appState(isActive),
+      ),
+    );
+    // Pause/resume also cover phone/Google overlays which never stop the activity.
+    listen(CapacitorApp.addListener("pause", () => appState(false)));
+    listen(CapacitorApp.addListener("resume", () => appState(true)));
     void CapacitorApp.getState()
       .then(({ isActive }) => {
         if (!alive || stateEvents > 0) return;
@@ -117,7 +154,7 @@ export default function GoogleHomeSync() {
         GOOGLE_HOME_CONFIGURATION_EVENT,
         configurationChanged,
       );
-      void appListener?.remove();
+      appListeners.forEach((handle) => void handle.remove());
     };
   }, [android, controller]);
 

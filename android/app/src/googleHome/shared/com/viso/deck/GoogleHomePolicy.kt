@@ -72,3 +72,22 @@ internal class GoogleHomeOwnerScope {
     @Synchronized fun isCurrent(ticket: Ticket): Boolean =
         owner == ticket.account && generation == ticket.generation && request == ticket.request
 }
+
+/** Background access exists only for the currently bound, opted-in Deck owner. */
+internal class GoogleHomeExecutionScope(private val owner: GoogleHomeOwnerScope) {
+    @Volatile private var foreground = false
+    @Volatile private var backgroundAccount: String? = null
+    fun setForeground(active: Boolean) { foreground = active }
+    fun clearBackground() { backgroundAccount = null }
+    fun setBackground(account: String?, enabled: Boolean) {
+        if (enabled) {
+            val validAccount = GoogleHomePolicy.account(account)
+            owner.requireOwner(validAccount)
+            backgroundAccount = validAccount
+        } else {
+            if (account != null) owner.requireOwner(GoogleHomePolicy.account(account))
+            backgroundAccount = null
+        }
+    }
+    fun canSynchronize(): Boolean = foreground || backgroundAccount?.let(owner::isOwner) == true
+}
