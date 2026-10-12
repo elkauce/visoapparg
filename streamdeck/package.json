@@ -1,11 +1,11 @@
 {
   "name": "viso-streamdeck",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test src/*.test.mjs && npm run build && node test/integration.mjs",
+    "test": "node --test src/*.test.mjs && npm run build && node test/integration.mjs && node test/personal-install.mjs",
     "pack": "npm run build && streamdeck pack com.viso.deck.sdPlugin --output ../downloads",
     "test:ui": "npm run build && node test/property-inspector.mjs"
   },

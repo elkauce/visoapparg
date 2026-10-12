@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { usePhysicalDeck } from "@/hooks/use-physical-deck.ts";
 
 import { isAndroidNative, nativeDeck } from "@/lib/android-native.ts";
+import { personalizeElgato } from "@/lib/personal-elgato.ts";
 import { getSiteUrl } from "@/lib/site-url.ts";
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -127,6 +128,47 @@ function UrlSection() {
 
   const base = `${getSiteUrl()}/deck/set?token=${token}&status=`;
 
+  const downloadPersonalPlugin = async () => {
+    try {
+      const response = await fetch(
+        "/downloads/VISO-Elgato-1.2.streamDeckPlugin",
+        { cache: "no-store" },
+      );
+      if (!response.ok) throw new Error("Download failed");
+      const bytes = personalizeElgato(
+        new Uint8Array(await response.arrayBuffer()),
+        {
+          format: "viso-streamdeck-v1",
+          actions: [
+            ...statuses.statuses.map((status) => ({
+              name: status.name,
+              color: status.color,
+              url: `${base}${encodeURIComponent(status._id)}`,
+            })),
+            { name: "Apagar", url: `${base}off` },
+          ],
+        },
+      );
+      const objectUrl = URL.createObjectURL(
+        new Blob([new Uint8Array(bytes).buffer], {
+          type: "application/octet-stream",
+        }),
+      );
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = "Mi-VISO.streamDeckPlugin";
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 10000);
+      toast.success(
+        "Plugin listo con tu cuenta y tus estados. Abrilo en Elgato en tu computadora.",
+      );
+    } catch {
+      toast.error(
+        "No se pudo preparar el plugin. Intentá de nuevo desde la web en tu computadora.",
+      );
+    }
+  };
+
   const downloadConfiguration = async () => {
     const actions = [
       ...statuses.statuses.map((status) => ({
@@ -176,33 +218,45 @@ function UrlSection() {
       <div>
         <h3 className="text-sm font-semibold">Plugin VISO para Elgato</h3>
         <p className="text-xs text-muted-foreground">
-          Instalá el plugin en tu computadora. Arrastrá «Estado VISO» a una
-          tecla, importá tu configuración personal y elegí el estado.
+          Descargá tu plugin listo para usar: incluye tu cuenta y tus estados.
+          Abrilo en Elgato y arrastrá tus controles a las teclas que prefieras.
         </p>
       </div>
       <div className="space-y-2">
-        <Button onClick={downloadConfiguration}>
-          <Download /> Descargar mi configuración para el plugin
+        <Button onClick={downloadPersonalPlugin}>
+          <Download /> Descargar mi plugin configurado
         </Button>
         <p className="text-xs text-muted-foreground">
-          Importá este archivo en la acción «Estado VISO» del plugin. Es
-          personal: no lo compartas. Renovar el token revoca las configuraciones
-          anteriores.
+          No necesitás importar archivos ni pegar enlaces. Este instalador es
+          personal: no lo compartas. Abrilo en tu computadora.
         </p>
-      </div>
-      <p className="text-xs text-muted-foreground">
-        Alternativa: pegá una de estas URLs en el plugin o en la acción «Sitio
-        web» de Elgato con «Acceder en segundo plano».
-      </p>
-      <div className="space-y-2">
-        {statuses.statuses.map((status) => (
-          <CopyField
-            key={status._id}
-            label={status.name}
-            value={`${base}${encodeURIComponent(status.name)}`}
-          />
-        ))}
-        <CopyField label="Apagar" value={`${base}off`} />
+        <details>
+          <summary className="text-xs cursor-pointer">
+            Opciones avanzadas y plugin anterior
+          </summary>
+          <Button onClick={downloadConfiguration}>
+            <Download /> Descargar mi configuración para el plugin
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Importá este archivo en la acción «Estado VISO» del plugin. Es
+            personal: no lo compartas. Renovar el token revoca las
+            configuraciones anteriores.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Alternativa: pegá una de estas URLs en el plugin o en la acción
+            «Sitio web» de Elgato con «Acceder en segundo plano».
+          </p>
+          <div className="space-y-2">
+            {statuses.statuses.map((status) => (
+              <CopyField
+                key={status._id}
+                label={status.name}
+                value={`${base}${encodeURIComponent(status.name)}`}
+              />
+            ))}
+            <CopyField label="Apagar" value={`${base}off`} />
+          </div>
+        </details>
       </div>
       <Button variant="ghost" size="sm" onClick={handleRegenerate}>
         <RefreshCw /> Renovar token

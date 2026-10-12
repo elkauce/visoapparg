@@ -14,17 +14,19 @@
       Arrastrá los estados desde la categoría <strong>VISO Deck</strong> a tus
       teclas. No se colocan automáticamente en el tablero.
     </p>
-    <label
-      >Vincular tu cuenta — importar una sola vez<input
-        id="file"
-        type="file"
-        accept=".json,application/json"
-    /></label>
-    <p>
-      En la app o web VISO: estrella → Elgato Stream Deck → «Descargar mi
-      configuración para el plugin». Ese archivo vincula todos los controles de
-      estados nuevos. No lo compartas: contiene tu acceso personal.
-    </p>
+    <div id="linking">
+      <label
+        >Vincular tu cuenta — importar una sola vez<input
+          id="file"
+          type="file"
+          accept=".json,application/json"
+      /></label>
+      <p>
+        En la app o web VISO: estrella → Elgato Stream Deck → «Descargar mi
+        configuración para el plugin». Ese archivo vincula todos los controles
+        de estados nuevos. No lo compartas: contiene tu acceso personal.
+      </p>
+    </div>
     <label id="state-field"
       >Estado de esta tecla<select id="state">
         <option value="">Importá tu configuración</option>

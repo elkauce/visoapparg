@@ -14,7 +14,17 @@ const file = document.getElementById("file"),
   url = document.getElementById("url"),
   message = document.getElementById("message"),
   heading = document.getElementById("heading");
-const preset = () => PRESETS.find((p) => actionId === `com.viso.deck.${p.key}`);
+const preset = () => {
+  const match = /^com\.viso\.deck\.personal-([a-z0-9-]+)$/.exec(actionId || "");
+  const entry =
+    match &&
+    configuration?.actions.find(
+      (entry) => new URL(entry.url).searchParams.get("status") === match[1],
+    );
+  return entry
+    ? { name: entry.name, aliases: [entry.name], key: match[1] }
+    : PRESETS.find((p) => actionId === `com.viso.deck.${p.key}`);
+};
 function send(event, payload) {
   if (socket?.readyState !== WebSocket.OPEN) {
     message.textContent = "Esperá la conexión con el programa Stream Deck.";
@@ -32,6 +42,7 @@ function send(event, payload) {
 }
 function render() {
   const fixed = preset();
+  document.getElementById("linking").hidden = Boolean(configuration);
   heading.textContent = fixed?.name || "Estado personalizado";
   document.getElementById("state-field").hidden = Boolean(fixed);
   state.replaceChildren(new Option("Elegí un estado", ""));

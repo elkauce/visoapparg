@@ -4,7 +4,7 @@
   "Name": "VISO Deck",
   "Description": "Cambiá los estados de tu cuenta VISO desde Elgato Stream Deck.",
   "Author": "VISO",
-  "Version": "1.1.0.0",
+  "Version": "1.2.0.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "7.1"

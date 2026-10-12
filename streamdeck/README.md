@@ -1,4 +1,18 @@
-# VISO para Elgato Stream Deck 1.1
+# VISO para Elgato Stream Deck 1.2
+
+## Descarga personal lista para usar
+
+En la web VISO, ingresá con tu cuenta y abrí Deck → estrella → Elgato Stream Deck → **Descargar mi plugin configurado**. La descarga se prepara en tu navegador con tus estados, nombres y acceso personal. No se envía el token a un servicio de empaquetado.
+
+Abrí Mi-VISO.streamDeckPlugin en tu computadora y aceptá actualizar VISO. La categoría VISO Deck incluye tus controles personales ya vinculados: arrastralos a las posiciones que prefieras. No tenés que importar JSON, pegar URLs ni seleccionar otra vez el estado de cada tecla. El instalador conserva las acciones anteriores para perfiles existentes; no reemplaza la distribución de teclas del usuario.
+
+**El instalador personal contiene acceso revocable a tu cuenta: no lo compartas.** Renovar el token requiere descargar e instalar uno nuevo. Para cambios en tus estados, descargá nuevamente tu plugin. La versión pública es una plantilla sin credenciales y no vincula cuentas por sí sola.
+
+El instalador lee account.json al iniciar, valida los estados, persiste la configuración con el SDK oficial y recuerda la huella de esa descarga. Los controles personales usan el ID real del estado, evitando confusiones entre estados con el mismo nombre. El paquete requiere Stream Deck 7.1+, Windows 10+ o macOS 12+. Node24 viene incluido con Elgato. La prueba física sigue pendiente.
+
+El botón de descarga requiere la nueva web. La APK actual conserva su exportación anterior hasta una actualización; por ahora usá la web desde la computadora. No se desplegaron cambios de backend ni se cambió Google Home.
+
+## Compatibilidad: flujo anterior 1.1
 
 Instalador: `downloads/VISO-Elgato-1.1.streamDeckPlugin`. Requiere Stream Deck **7.1 o posterior**, Windows 10+ o macOS 12+. Usa el SDK oficial Elgato 3.0.2 y Node.js 24 incorporado en Stream Deck.
 

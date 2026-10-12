@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import streamDeck, { action, SingletonAction } from "@elgato/streamdeck";
 import { activate } from "./request.mjs";
 import {
@@ -14,10 +16,23 @@ class VisoState extends SingletonAction {
     super();
     this.preset = preset;
   }
+  control(settings) {
+    return this.preset?.statusId
+      ? resolveControl(
+          null,
+          {
+            ...settings,
+            selectedStatus: this.preset.statusId,
+            label: settings.label || this.preset.name,
+          },
+          configuration,
+        )
+      : resolveControl(this.preset, settings, configuration);
+  }
   async render(key, settings) {
     let label = settings.label || this.preset?.name || "VISO\nConfigurar";
     try {
-      label = resolveControl(this.preset, settings, configuration).label;
+      label = this.control(settings).label;
     } catch {
       /* Keep a visible control; no fake URL. */
     }
@@ -45,7 +60,11 @@ class VisoState extends SingletonAction {
     if (ev.payload?.type === "configuration") {
       try {
         const next = parseConfiguration(ev.payload.configuration);
-        await streamDeck.settings.setGlobalSettings({ configuration: next });
+        const existing = await streamDeck.settings.getGlobalSettings();
+        await streamDeck.settings.setGlobalSettings({
+          ...existing,
+          configuration: next,
+        });
         await receive({ configuration: next });
       } catch {
         await streamDeck.ui.sendToPropertyInspector({
@@ -71,11 +90,7 @@ class VisoState extends SingletonAction {
     if (this.pending.has(ev.action.id)) return;
     this.pending.add(ev.action.id);
     try {
-      const control = resolveControl(
-        this.preset,
-        ev.payload.settings,
-        configuration,
-      );
+      const control = this.control(ev.payload.settings);
       await activate(control.url);
       await ev.action.showOk();
     } catch {
@@ -98,6 +113,30 @@ function register(uuid, preset) {
   instances.push(instance);
   streamDeck.actions.registerAction(instance);
 }
+let installerConfiguration = null;
+try {
+  installerConfiguration = parseConfiguration(
+    JSON.parse(
+      await readFile(new URL("../account.json", import.meta.url), "utf8"),
+    ),
+  );
+} catch {
+  /* Generic public installer. */
+}
+if (installerConfiguration) {
+  installerConfiguration.actions.forEach((entry, index) =>
+    register(
+      `com.viso.deck.personal-${new URL(entry.url).searchParams.get("status")}`,
+      {
+        key: `personal-${index}`,
+        name: entry.name,
+        aliases: [entry.name],
+        color: entry.color,
+        statusId: new URL(entry.url).searchParams.get("status"),
+      },
+    ),
+  );
+}
 register("com.viso.deck.state", null);
 for (const preset of PRESETS) register(`com.viso.deck.${preset.key}`, preset);
 const receive = async (settings) => {
@@ -118,7 +157,28 @@ streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
 });
 streamDeck.logger.setLevel("warn");
 await streamDeck.connect();
-void streamDeck.settings
-  .getGlobalSettings()
-  .then(receive)
-  .catch(() => undefined);
+async function initialize() {
+  const settings = await streamDeck.settings.getGlobalSettings();
+  try {
+    const contents = await readFile(
+      new URL("../account.json", import.meta.url),
+      "utf8",
+    );
+    const next = parseConfiguration(JSON.parse(contents));
+    const fingerprint = createHash("sha256").update(contents).digest("hex");
+    if (settings.installerFingerprint !== fingerprint) {
+      const updated = {
+        ...settings,
+        configuration: next,
+        installerFingerprint: fingerprint,
+      };
+      await streamDeck.settings.setGlobalSettings(updated);
+      await receive(updated);
+      return;
+    }
+  } catch {
+    /* Public installer has no personal account; retain existing settings. */
+  }
+  await receive(settings);
+}
+void initialize().catch(() => undefined);
