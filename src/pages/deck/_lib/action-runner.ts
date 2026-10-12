@@ -1,3 +1,5 @@
+export const GOOGLE_HOME_SELECTED_LIGHTS = "viso:google-home:selected";
+
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 
 export type SimpleDeckAction =

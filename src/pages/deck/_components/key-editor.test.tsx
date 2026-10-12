@@ -246,3 +246,55 @@ it.each([
     );
   },
 );
+
+it("saves Pepe as an independent yellow RGB key without creating or selecting a status", async () => {
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    configurable: true,
+    value: vi.fn(),
+  });
+  const onClose = vi.fn();
+  render(
+    <KeyEditor
+      target={{ ...target, keyId: null, content: null, appearance: undefined }}
+      statuses={statuses}
+      pages={pages}
+      advanced
+      onClose={onClose}
+    />,
+  );
+  fireEvent.keyDown(screen.getAllByRole("combobox")[0], { key: "ArrowDown" });
+  fireEvent.click(
+    await screen.findByRole("option", { name: "Tecla personalizada RGB" }),
+  );
+  fireEvent.change(screen.getByLabelText("Nombre"), {
+    target: { value: "Pepe" },
+  });
+  fireEvent.change(screen.getByLabelText("Color personalizado"), {
+    target: { value: "#ffff00" },
+  });
+  expect(screen.queryByText("O creá tu propio estado")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalled());
+  expect(state.mutations["statuses:create"]).not.toHaveBeenCalled();
+  expect(state.mutations["deck_layout:setKey"]).toHaveBeenCalledWith(
+    expect.objectContaining({
+      content: {
+        kind: "action",
+        label: "Pepe",
+        icon: "star",
+        color: "#ffff00",
+        action: {
+          type: "rgb",
+          command: "color",
+          deviceId: "viso:google-home:selected",
+          color: "#ffff00",
+        },
+      },
+      appearance: expect.objectContaining({
+        label: "Pepe",
+        color: "#ffff00",
+        icon: "viso1:star:10",
+      }),
+    }),
+  );
+});

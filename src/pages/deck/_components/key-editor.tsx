@@ -41,7 +41,10 @@ import {
 import { deckErrorMessage } from "../_lib/deck-options.ts";
 import { uploadKeyMedia, validateKeyMedia } from "../_lib/upload-media.ts";
 import ActionEditor, { getActionValidationMessage } from "./action-editor.tsx";
-import type { DeckAction } from "../_lib/action-runner.ts";
+import {
+  GOOGLE_HOME_SELECTED_LIGHTS,
+  type DeckAction,
+} from "../_lib/action-runner.ts";
 import { encodeKeyVisibility } from "../_lib/key-visibility.ts";
 import DeckKey from "./deck-key.tsx";
 
@@ -163,6 +166,11 @@ function KeyForm({
   const otherPages = pages.filter((p) => p._id !== target.pageId);
 
   const [kind, setKind] = useState<Kind>(initial?.kind ?? "status");
+  const [personal, setPersonal] = useState(
+    initial?.kind === "action" &&
+      initial.action.type === "rgb" &&
+      initial.action.deviceId === GOOGLE_HOME_SELECTED_LIGHTS,
+  );
   const [statusId, setStatusId] = useState(
     initial?.kind === "status" ? initial.statusId : (statuses[0]?._id ?? ""),
   );
@@ -265,7 +273,20 @@ function KeyForm({
             }
           : null;
       case "action":
-        return { kind, label, icon, color, action };
+        return {
+          kind,
+          label,
+          icon,
+          color,
+          action: personal
+            ? {
+                type: "rgb",
+                command: "color",
+                deviceId: GOOGLE_HOME_SELECTED_LIGHTS,
+                color,
+              }
+            : action,
+        };
     }
   };
 
@@ -438,8 +459,23 @@ function KeyForm({
         <div className="space-y-2">
           <Label>Tipo</Label>
           <Select
-            value={kind}
+            value={personal ? "personal" : kind}
             onValueChange={(value) => {
+              setPersonal(value === "personal");
+              if (value === "personal") {
+                setKind("action");
+                setLabel("");
+                setIcon("star");
+                setShowIcon(false);
+                setAppearanceTouched(true);
+                setAction({
+                  type: "rgb",
+                  command: "color",
+                  deviceId: GOOGLE_HOME_SELECTED_LIGHTS,
+                  color,
+                });
+                return;
+              }
               setKind(value as Kind);
               if (value === "folder" || value === "link") {
                 setIcon(value === "folder" ? "folder" : "globe");
@@ -450,6 +486,11 @@ function KeyForm({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              {advanced && (
+                <SelectItem value="personal">
+                  Tecla personalizada RGB
+                </SelectItem>
+              )}
               {(Object.keys(KIND_LABELS) as Kind[])
                 .filter(
                   (k) =>
@@ -593,7 +634,14 @@ function KeyForm({
           </div>
         )}
 
-        {kind === "action" && (
+        {personal && (
+          <p className="text-sm text-muted-foreground">
+            Nombre, color e icono propios, sin asociar un estado. Al tocarla en
+            Android, cambia el RGB de tus luces Google Home seleccionadas; el
+            estado de VISO no cambia.
+          </p>
+        )}
+        {kind === "action" && !personal && (
           <ActionEditor
             value={action}
             onChange={(next) => {

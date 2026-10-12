@@ -42,7 +42,12 @@ import {
   deckExtensionsEnabled,
   getDeckDeviceId,
 } from "./_lib/deck-options.ts";
-import { runDeckAction } from "./_lib/action-runner.ts";
+import {
+  runDeckAction,
+  GOOGLE_HOME_SELECTED_LIGHTS,
+} from "./_lib/action-runner.ts";
+import { applyGoogleHomeKeyColor } from "./_lib/google-home-key";
+import { googleHomeNative } from "@/lib/google-home-native.ts";
 import {
   getGridPreferenceStorage,
   readSavedGridPreference,
@@ -90,6 +95,7 @@ export default function DeckPage({
 } = {}) {
   const layout = useQuery(api.deck_layout.get, {});
   const statusData = useQuery(api.statuses.list, {});
+  const currentUser = useQuery(api.users.getCurrentUser);
   const connection = useConvexConnectionState();
   const ensureDefault = useMutation(api.deck_layout.ensureDefault);
   const createDefaults = useMutation(api.statuses.createDefaults);
@@ -402,6 +408,14 @@ export default function DeckPage({
               (onSelectPage ?? setPageId)(id);
             },
             rgb: async (action) => {
+              if (action.deviceId === GOOGLE_HOME_SELECTED_LIGHTS) {
+                return applyGoogleHomeKeyColor(
+                  action,
+                  currentUser?._id ?? null,
+                  isAndroidNative(),
+                  googleHomeNative,
+                );
+              }
               if (!isAndroidNative())
                 throw new Error(
                   "Esta acción RGB requiere Android y una integración Home Assistant autorizada.",
