@@ -1,11 +1,16 @@
 package com.viso.deck
 
 import com.google.android.gms.common.api.ApiException
+import com.google.home.HomeException
 
 /** Only exception class/status codes are exposed: no accounts, tokens or device IDs. */
 internal object GoogleHomeFailure {
     fun describe(stage: String, failure: Exception): String {
         val chain = generateSequence(failure as Throwable) { it.cause }.take(8).toList()
+        val home = chain.filterIsInstance<HomeException>().firstOrNull()
+        if (home != null) {
+            return "$stage. Código Home: ${home.error.code}; dominio: ${home.error.domain}. Tocá Comprobar de nuevo."
+        }
         val google = chain.filterIsInstance<ApiException>().firstOrNull()
         if (google != null) {
             val hint = when (google.statusCode) {

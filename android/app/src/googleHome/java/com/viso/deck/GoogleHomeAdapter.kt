@@ -168,12 +168,15 @@ internal class GoogleHomeAdapter(
         check(permission() == PermissionsState.GRANTED) { "Google Home requiere consentimiento oficial antes de buscar o controlar luces." }
         owner.requireOwner(account)
         val home = requireClient()
-        if (refresh) home.syncLinkedDevices()
+        if (refresh) GoogleHomeDiscoveryPolicy.refreshIfAvailable {
+            // Match STATUS: failure of provider refresh must not prevent SDK listing.
+            withTimeoutOrNull(5_000) { home.syncLinkedDevices() }
+        }
         owner.requireOwner(account)
         val structures = home.structures().list().map { it.id.toString() }.toSet()
         check(structures.isNotEmpty()) { "Google Home no concedió acceso a una casa." }
         val result = linkedMapOf<String, Pair<HomeDevice, ExtendedColorLightDevice>>()
-        for (device in home.devices(false).list()) {
+        for (device in home.devices(true).list()) {
             owner.requireOwner(account)
             if (device.structureId.toString() !in structures) continue
             if (!device.has(ExtendedColorLightDevice)) continue
