@@ -23,6 +23,11 @@ const configuration = {
   ],
 };
 await mkdir(join(directory, "bin"));
+await mkdir(join(directory, "imgs"));
+await copyFile(
+  new URL("../com.viso.deck.sdPlugin/imgs/libre.png", import.meta.url),
+  join(directory, "imgs/personal-owned-pepe.png"),
+);
 const manifest = JSON.parse(
   await readFile(
     new URL("../com.viso.deck.sdPlugin/manifest.json", import.meta.url),
@@ -143,6 +148,22 @@ try {
   await wait(() =>
     messages.some((m) => m.event === "setTitle" && m.payload.title === "Pepe"),
   );
+  await wait(() => messages.some((m) => m.event === "setImage"));
+  const image = messages.find((m) => m.event === "setImage");
+  assert.ok(image.payload.image.startsWith("data:image/png;base64,"));
+  await wait(() => messages.some((m) => m.event === "setSettings"));
+  const saved = messages.find((m) => m.event === "setSettings").payload;
+  assert.ok(saved.visoIconDigest);
+  const before = messages.filter((m) => m.event === "setImage").length;
+  socket.send(
+    JSON.stringify({
+      ...ev,
+      event: "willAppear",
+      payload: { ...ev.payload, settings: saved },
+    }),
+  );
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  assert.equal(messages.filter((m) => m.event === "setImage").length, before);
   socket.send(JSON.stringify({ ...ev, event: "keyDown" }));
   await wait(() => messages.some((m) => m.event === "showOk"));
   assert.equal(requested, "owned-pepe");

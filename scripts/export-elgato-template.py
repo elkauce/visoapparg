@@ -16,7 +16,7 @@ with zipfile.ZipFile(source) as archive:
     entries = [(item.filename, archive.read(item)) for item in archive.infolist()]
     assert not any(name.endswith("account.json") for name, _ in entries), "Personal package cannot be published"
     manifest = json.loads(next(data for name, data in entries if name.endswith("/manifest.json")))
-    assert manifest["UUID"] == "com.viso.deck" and manifest["Version"] == "1.2.0.0"
+    assert manifest["UUID"] == "com.viso.deck" and manifest["Version"] == "1.2.1.0"
     assert sum(len(data) for _, data in entries) < 4 * 1024 * 1024
 buffer = io.BytesIO()
 with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED, allowZip64=False) as archive:

@@ -39,12 +39,30 @@ class VisoState extends SingletonAction {
     await key.setTitle(label);
     // Default images come from the manifest; retain icons personalized in Elgato.
   }
+  async applyPersonalIcon(key, settings) {
+    if (!this.preset?.statusId) return;
+    try {
+      const png = await readFile(
+        new URL(
+          `../imgs/personal-${this.preset.statusId}.png`,
+          import.meta.url,
+        ),
+      );
+      const digest = createHash("sha256").update(png).digest("hex");
+      if (settings.visoIconDigest === digest) return;
+      await key.setImage(`data:image/png;base64,${png.toString("base64")}`);
+      await key.setSettings({ ...settings, visoIconDigest: digest });
+    } catch {
+      /* Older installers have no personal image; keep their existing icon. */
+    }
+  }
   async onWillAppear(ev) {
     this.visible.set(ev.action.id, {
       key: ev.action,
       settings: ev.payload.settings,
     });
     await this.render(ev.action, ev.payload.settings);
+    await this.applyPersonalIcon(ev.action, ev.payload.settings);
   }
   async onWillDisappear(ev) {
     this.visible.delete(ev.action.id);

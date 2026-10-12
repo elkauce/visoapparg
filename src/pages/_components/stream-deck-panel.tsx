@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { usePhysicalDeck } from "@/hooks/use-physical-deck.ts";
 
 import { isAndroidNative, nativeDeck } from "@/lib/android-native.ts";
+import { createElgatoKeyImages } from "@/lib/elgato-key-images";
 import { personalizeElgato } from "@/lib/personal-elgato.ts";
 import { getSiteUrl } from "@/lib/site-url.ts";
 
@@ -138,19 +139,31 @@ function UrlSection() {
         { cache: "no-store" },
       );
       if (!response.ok) throw new Error("Download failed");
+      const configuration = {
+        format: "viso-streamdeck-v1" as const,
+        actions: [
+          ...statuses.statuses.map((status) => ({
+            name: status.name,
+            color: status.color,
+            icon: status.icon,
+            url: `${base}${encodeURIComponent(status._id)}`,
+          })),
+          {
+            name: "Apagar",
+            color: "#64748b",
+            icon: "power",
+            url: `${base}off`,
+          },
+        ],
+      };
+      const images = [];
+      for (const entry of configuration.actions) {
+        images.push(await createElgatoKeyImages(entry.icon, entry.color));
+      }
       const bytes = personalizeElgato(
         new Uint8Array(await response.arrayBuffer()),
-        {
-          format: "viso-streamdeck-v1",
-          actions: [
-            ...statuses.statuses.map((status) => ({
-              name: status.name,
-              color: status.color,
-              url: `${base}${encodeURIComponent(status._id)}`,
-            })),
-            { name: "Apagar", url: `${base}off` },
-          ],
-        },
+        configuration,
+        images,
       );
       const objectUrl = URL.createObjectURL(
         new Blob([new Uint8Array(bytes).buffer], {

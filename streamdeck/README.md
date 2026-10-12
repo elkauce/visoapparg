@@ -1,3 +1,11 @@
+# Actualización 1.2.1: iconos personales
+
+La descarga desde VISO genera un PNG de 72 y 144 px por estado, usando el mismo símbolo y color del estado en la app. APAGAR usa el símbolo de encendido. La plantilla pública continúa sin cuenta y se convierte a ZIP32 verificado antes del build.
+
+El manifest personal asigna cada PNG a la acción por ID estable. Al actualizar, el plugin corrige imágenes de teclas existentes una vez por cambio del PNG; guarda una huella en sus ajustes, conserva los demás ajustes y no vuelve a sobrescribir una personalización manual si el PNG del instalador sigue igual. Instalar la actualización y reiniciar Stream Deck conserva las acciones y posiciones.
+
+Verificado con el SDK oficial: migración del icono en teclas existentes y ausencia de sobrescritura en apariciones posteriores; los estados siguen activándose con sus IDs. La descarga real en Chromium verifica PNGs de 72/144 px dentro del paquete generado. La apariencia en el hardware queda pendiente de prueba del usuario. La versión anterior queda como `downloads/VISO-Elgato-1.2.0-recovery.streamDeckPlugin`.
+
 # VISO para Elgato Stream Deck 1.2
 
 ## Descarga personal lista para usar

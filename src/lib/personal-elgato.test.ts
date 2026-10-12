@@ -39,6 +39,31 @@ describe("Personal Elgato installer", () => {
     expect(original).toEqual(before);
     expect(unzipSync(original)[root + "account.json"]).toBeUndefined();
   });
+  it("assigns distinct personalized PNGs instead of the shared VISO logo", () => {
+    const images = [
+      { normal: new Uint8Array([1, 2]), retina: new Uint8Array([3, 4]) },
+      { normal: new Uint8Array([5, 6]), retina: new Uint8Array([7, 8]) },
+    ];
+    const files = unzipSync(personalizeElgato(installer(), fixture, images));
+    const path = Object.keys(files).find((p) => p.endsWith("/manifest.json"))!;
+    const root = path.slice(0, -"manifest.json".length);
+    const actions = JSON.parse(strFromU8(files[path])).Actions.slice(0, 2);
+    expect(actions[0].States[0].Image).not.toBe(actions[1].States[0].Image);
+    actions.forEach(
+      (
+        action: { Icon: string; States: { Image: string }[] },
+        index: number,
+      ) => {
+        expect(action.Icon).toBe(action.States[0].Image);
+        expect(files[root + action.Icon + ".png"]).toEqual(
+          images[index].normal,
+        );
+        expect(files[root + action.Icon + "@2x.png"]).toEqual(
+          images[index].retina,
+        );
+      },
+    );
+  });
   it("public template is readable by the browser ZIP parser", () => {
     const files = unzipSync(installer());
     expect(Object.keys(files).length).toBeGreaterThan(10);
