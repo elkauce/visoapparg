@@ -4,7 +4,7 @@
   "Name": "VISO Deck",
   "Description": "Cambiá los estados de tu cuenta VISO desde Elgato Stream Deck.",
   "Author": "VISO",
-  "Version": "1.0.0.0",
+  "Version": "1.1.0.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "7.1"
@@ -30,7 +30,7 @@
     {
       "UUID": "com.viso.deck.state",
       "Name": "Estado VISO",
-      "Tooltip": "Activa el estado configurado en tu cuenta VISO.",
+      "Tooltip": "Elegí cualquier estado personalizado de tu cuenta VISO.",
       "Icon": "imgs/viso",
       "PropertyInspectorPath": "ui/settings.html",
       "Controllers": [
@@ -40,6 +40,132 @@
         {
           "Image": "imgs/viso",
           "Title": "VISO"
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.libre",
+      "Name": "LIBRE",
+      "Tooltip": "Activa LIBRE en tu cuenta VISO.",
+      "Icon": "imgs/libre",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/libre",
+          "Title": "LIBRE",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.ocupado",
+      "Name": "OCUPADO",
+      "Tooltip": "Activa OCUPADO en tu cuenta VISO.",
+      "Icon": "imgs/ocupado",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/ocupado",
+          "Title": "OCUPADO",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.reunion",
+      "Name": "REUNIÓN",
+      "Tooltip": "Activa REUNIÓN en tu cuenta VISO.",
+      "Icon": "imgs/reunion",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/reunion",
+          "Title": "REUNIÓN",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.llamada",
+      "Name": "LLAMADA",
+      "Tooltip": "Activa LLAMADA en tu cuenta VISO.",
+      "Icon": "imgs/llamada",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/llamada",
+          "Title": "LLAMADA",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.no-molestar",
+      "Name": "NO MOLESTAR",
+      "Tooltip": "Activa NO MOLESTAR en tu cuenta VISO.",
+      "Icon": "imgs/no-molestar",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/no-molestar",
+          "Title": "NO MOLESTAR",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.ausente",
+      "Name": "AUSENTE",
+      "Tooltip": "Activa AUSENTE en tu cuenta VISO.",
+      "Icon": "imgs/ausente",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/ausente",
+          "Title": "AUSENTE",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.viso.deck.off",
+      "Name": "APAGAR",
+      "Tooltip": "Quita el estado VISO activo de tu cuenta.",
+      "Icon": "imgs/off",
+      "PropertyInspectorPath": "ui/settings.html",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/off",
+          "Title": "APAGAR",
+          "TitleAlignment": "bottom",
+          "FontSize": 12
         }
       ]
     }

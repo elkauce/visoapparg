@@ -1,20 +1,27 @@
-# VISO para Elgato Stream Deck 1.0
+# VISO para Elgato Stream Deck 1.1
 
-Instalador: `downloads/com.viso.deck.streamDeckPlugin`. Requiere Elgato Stream Deck **7.1 o posterior**, Windows 10+ o macOS 12+. Usa el SDK oficial de Elgato 3.0.2 y el Node.js 24 que provee Stream Deck; el usuario no necesita instalar Node.js.
+Instalador: `downloads/VISO-Elgato-1.1.streamDeckPlugin`. Requiere Stream Deck **7.1 o posterior**, Windows 10+ o macOS 12+. Usa el SDK oficial Elgato 3.0.2 y Node.js 24 incorporado en Stream Deck.
 
-1. Descargá el instalador en tu computadora y abrilo con el programa Stream Deck.
-2. En VISO Deck 1.5, iniciá sesión con **tu cuenta**. Abrí la estrella → **Elgato Stream Deck** → **Descargar mi configuración para el plugin**. Android permite elegir dónde guardar el JSON; transferilo a tu computadora.
-3. En el programa Elgato, arrastrá **VISO Deck → Estado VISO** a una tecla. Importá tu JSON y elegí el estado. Repetí en las teclas que quieras. Podés cambiar sus nombres y usar páginas/perfiles del propio programa Elgato.
-4. Pulsá la tecla: la confirmación aparece solamente cuando el servidor VISO acepta el estado. Tu app y tus displays reciben el cambio por la sincronización existente.
+## Instalación y vinculación
 
-Alternativa sin transferir JSON: desde la web VISO compatible con tu cuenta, copiá la URL de un estado de la sección Stream Deck y pegala en «Configurar con una URL de VISO» del plugin. La URL debe pertenecer al mismo backend de tu app: no mezcles cuentas o enlaces de otra instalación.
+1. Abrí el instalador en tu computadora y aceptá actualizar VISO Deck.
+2. En el programa Elgato, expandí **VISO Deck** y arrastrá LIBRE, OCUPADO, REUNIÓN, LLAMADA, NO MOLESTAR o AUSENTE a las teclas que quieras. También están APAGAR y **Estado VISO**, para tus estados personalizados. Instalar el plugin no rellena ni reemplaza tu distribución de teclas.
+3. Entrá con tu cuenta en https://viso-deck-android.vercel.app, abrí el Deck y la estrella → **Elgato Stream Deck** → **Descargar mi configuración para el plugin**. También podés exportar desde la app y transferir el JSON a tu computadora.
+4. Seleccioná una tecla VISO en Elgato e importá ese JSON **una sola vez**. Los controles nuevos comparten la configuración. En Estado VISO elegí tu estado personal y, opcionalmente, cambiá el nombre visible de la tecla.
+5. Pulsá una tecla. La confirmación aparece cuando el servidor acepta el cambio; la app y los displays usan la sincronización existente. APAGAR quita el estado activo de tu cuenta.
 
-El instalador público no contiene usuarios, contraseñas ni tokens. El JSON y los ajustes/perfiles Elgato contienen tu **token personal revocable**: no los compartas ni los subas a GitHub. «Renovar token» en VISO revoca las configuraciones anteriores; después descargá/importá la nueva configuración.
+Los estados deben existir en tu cuenta. Si falta uno, agregalo en VISO y volvé a exportar/importar la configuración. El plugin no inventa estados ni URLs. Podés personalizar imágenes, nombres, páginas y perfiles desde Elgato.
 
-No se escanean redes ni se modifican dispositivos. El plugin activa estados de la cuenta configurada mediante el endpoint existente HTTPS `/deck/set`; no proporciona luces o autorizaciones Google Home nuevas. Google Home conserva sus requisitos y pruebas físicas pendientes. No importa acciones Android, videos ni toda la distribución del Deck al hardware: cada tecla del plugin controla un estado elegido por el usuario.
+La acción Estado VISO anterior conserva su identidad y sus URLs configuradas. Renovar el token exige importar el nuevo JSON; las teclas antiguas con URL explícita necesitan actualizar esa URL o elegir un estado desde la configuración compartida.
 
-## Desarrollo
+El instalador público no contiene credenciales. El JSON y los perfiles contienen acceso personal revocable: no los compartas. Solo se aceptan URLs HTTPS del endpoint VISO existente y una misma cuenta/backend por importación. No modifica dispositivos ni permisos Google Home. No requiere otra APK ni cambios de la web. No incluye todavía controles OBS.
 
-Desde `streamdeck/`: `npm ci`, `npm test`, `npm run pack`. Versiones y dependencias están fijadas en `package-lock.json`; no modifica el lockfile del proyecto React. La compilación genera el bundle en `com.viso.deck.sdPlugin/bin/`. En entornos con proxy, usar `NODE_USE_ENV_PROXY=1` al validar/empaquetar con la CLI de Elgato; conservar la validación oficial de esquemas.
+La versión 1.0 queda disponible en `downloads/VISO-Elgato-1.0.streamDeckPlugin` como recuperación.
 
-Se validó el paquete con la CLI oficial, la política de peticiones y el bundle mediante WebSocket con eventos de registro, título, pulsación confirmada y alerta. El servidor Elgato y HTTP de esas pruebas son fixtures explícitos. **La instalación en Windows/macOS y un Stream Deck físico todavía requieren una prueba del usuario.**
+## Desarrollo y verificación
+
+Desde `streamdeck/`: `npm ci`, `npm test`, `npm run pack`. Dependencias fijadas en package-lock.json. El build genera bin/plugin.mjs y ui/configuration.js. Para validación oficial con proxy, usar NODE_USE_ENV_PROXY=1; no omitir validación.
+
+Verificado: 10 pruebas unitarias, 31 comprobaciones del bundle con el SDK oficial y 8 comprobaciones del inspector en Chromium. Los protocolos Elgato de estas pruebas son fixtures. Además, los seis estados y APAGAR se comprobaron contra el servidor real con una cuenta técnica aislada y se restauró su estado inicial. El instalador fue validado con la CLI oficial. **Queda pendiente probar la instalación y las teclas en Elgato físico.**
+
+Opcional: `npm run test:ui` y `node generate-icons.mjs` requieren Playwright/Chromium. VISO_PLAYWRIGHT_MODULE permite indicar el módulo instalado y VISO_CHROMIUM_EXECUTABLE el ejecutable. Son herramientas de desarrollo; el usuario no las necesita.

@@ -1,12 +1,13 @@
 {
   "name": "viso-streamdeck",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
-    "test": "node --test src/request.test.mjs && npm run build && node test/integration.mjs",
-    "pack": "npm run build && streamdeck pack com.viso.deck.sdPlugin --output ../downloads"
+    "test": "node --test src/*.test.mjs && npm run build && node test/integration.mjs",
+    "pack": "npm run build && streamdeck pack com.viso.deck.sdPlugin --output ../downloads",
+    "test:ui": "npm run build && node test/property-inspector.mjs"
   },
   "dependencies": {
     "@elgato/streamdeck": "3.0.2"

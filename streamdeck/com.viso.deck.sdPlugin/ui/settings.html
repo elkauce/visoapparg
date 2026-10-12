@@ -1,7 +1,55 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src ws://127.0.0.1:*; script-src 'self'; style-src 'self'"><link rel="stylesheet" href="settings.css"></head><body>
-<h3>Tu cuenta VISO</h3><p>En VISO → Ajustes → Elgato, descargá tu configuración e importala aquí. No compartas ese archivo ni tus perfiles de Elgato: contienen tu acceso personal.</p>
-<label>Importar configuración VISO<input id="file" type="file" accept=".json,application/json"></label>
-<label>Estado de esta tecla<select id="state"><option value="">Importá tu configuración</option></select></label>
-<label>Nombre de la tecla<input id="label" maxlength="40"></label>
-<details><summary>Configurar con una URL de VISO</summary><label>URL personal<input id="url" type="password" autocomplete="off"></label><p>También podés pegar la URL de un estado desde VISO. Renovar el token en VISO invalida los accesos anteriores.</p></details>
-<p id="message" role="status"></p><script src="settings.js"></script></body></html>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; connect-src ws://127.0.0.1:*; script-src 'self'; style-src 'self'"
+    />
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <h3 id="heading">Control VISO</h3>
+    <p>
+      Arrastrá los estados desde la categoría <strong>VISO Deck</strong> a tus
+      teclas. No se colocan automáticamente en el tablero.
+    </p>
+    <label
+      >Vincular tu cuenta — importar una sola vez<input
+        id="file"
+        type="file"
+        accept=".json,application/json"
+    /></label>
+    <p>
+      En la app o web VISO: estrella → Elgato Stream Deck → «Descargar mi
+      configuración para el plugin». Ese archivo vincula todos los controles de
+      estados nuevos. No lo compartas: contiene tu acceso personal.
+    </p>
+    <label id="state-field"
+      >Estado de esta tecla<select id="state">
+        <option value="">Importá tu configuración</option>
+      </select></label
+    >
+    <label
+      >Nombre de la tecla<input
+        id="label"
+        maxlength="40"
+        placeholder="Usar el nombre del estado"
+    /></label>
+    <details>
+      <summary>
+        URL personalizada / compatibilidad con el plugin anterior
+      </summary>
+      <label
+        >URL personal<input id="url" type="password" autocomplete="off"
+      /></label>
+      <p>
+        Las teclas anteriores conservan su URL. Renovar el token en VISO
+        requiere importar una configuración nueva; las URLs antiguas dejan de
+        funcionar.
+      </p>
+    </details>
+    <p id="message" role="status"></p>
+    <script src="settings.js" type="module"></script>
+  </body>
+</html>
