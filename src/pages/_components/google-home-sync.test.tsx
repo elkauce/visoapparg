@@ -10,6 +10,16 @@ const fixture = vi.hoisted(() => ({
   data: {
     activeStatusId: "status-libre",
     statuses: [{ _id: "status-libre", userId: "owner-A", name: "Libre" }],
+  } as {
+    activeStatusId: string;
+    activeStatusRevision?: number;
+    statuses: {
+      _id: string;
+      userId: string;
+      name: string;
+      color?: string;
+      icon?: string;
+    }[];
   },
   appListener: null as ((event: { isActive: boolean }) => void) | null,
   listenerRemoved: vi.fn(),
@@ -83,6 +93,7 @@ beforeEach(() => {
   fixture.loading = false;
   fixture.user = { _id: "owner-A" };
   fixture.data = {
+    activeStatusRevision: undefined,
     activeStatusId: "status-libre",
     statuses: [{ _id: "status-libre", userId: "owner-A", name: "Libre" }],
   };
@@ -121,6 +132,20 @@ beforeEach(() => {
 });
 
 describe("Google Home global Android state observer", () => {
+  it("reapplies the same state after a new manual or automatic revision", async () => {
+    fixture.data.activeStatusRevision = 1;
+    const view = render(<GoogleHomeSync />);
+    await waitFor(() => expect(fixture.applyState).toHaveBeenCalledTimes(1));
+    fixture.data = { ...fixture.data, activeStatusRevision: 2 };
+    view.rerender(<GoogleHomeSync />);
+    await waitFor(() => expect(fixture.applyState).toHaveBeenCalledTimes(2));
+    expect(fixture.applyState).toHaveBeenLastCalledWith({
+      accountId: "owner-A",
+      stateKey: "libre",
+      revision: "status-libre:libre:2",
+    });
+  });
+
   it("receives remote Convex changes without a local button click", async () => {
     const view = render(<GoogleHomeSync />);
     await waitFor(() =>
@@ -272,6 +297,7 @@ it("never restores a logged-out account when Google returns an active event", as
 
 it("receives the real custom status RGB from shared account data and resynchronizes a changed color", async () => {
   fixture.data = {
+    activeStatusRevision: undefined,
     activeStatusId: "playing",
     statuses: [
       {
@@ -292,6 +318,7 @@ it("receives the real custom status RGB from shared account data and resynchroni
     }),
   );
   fixture.data = {
+    activeStatusRevision: undefined,
     activeStatusId: "playing",
     statuses: [
       {

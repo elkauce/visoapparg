@@ -27,8 +27,10 @@ export async function setActiveStatus(
   userId: Id<"users">,
   statusId: Id<"statuses"> | null,
 ): Promise<void> {
+  const previous = await ctx.db.get("users", userId);
   await ctx.db.patch("users", userId, {
     activeStatusId: statusId ?? undefined,
+    activeStatusRevision: (previous?.activeStatusRevision ?? 0) + 1,
   });
   const user = await ctx.db.get("users", userId);
   const status = statusId ? await ctx.db.get("statuses", statusId) : null;

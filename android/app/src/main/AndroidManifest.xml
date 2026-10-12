@@ -48,9 +48,14 @@
         </service>
     </application>
 
+    <!-- Calls are optional: Deck and Display also run on tablets. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
+
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <!-- Discover launcher applications only; no broad installed-apps permission. -->

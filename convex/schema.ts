@@ -13,6 +13,7 @@ export default defineSchema({
     tokenIdentifier: v.optional(v.string()),
     // Estado que el usuario tiene marcado ahora mismo
     activeStatusId: v.optional(v.id("statuses")),
+    activeStatusRevision: v.optional(v.number()),
     // Dirección (IP) de la Key Light de Elgato en la red local del usuario
     keyLightIp: v.optional(v.string()),
     // URL general (IFTTT, Home Assistant, Voice Monkey) que avisa en cada cambio de estado

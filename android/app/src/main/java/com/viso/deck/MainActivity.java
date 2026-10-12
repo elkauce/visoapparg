@@ -14,6 +14,7 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(VisoNativePlugin.class);
+        registerPlugin(VisoPresencePlugin.class);
         // Plugin.load runs while creating the bridge, before Activity STARTED.
         // Home APIs can therefore register the official permission launcher.
         registerPlugin(VisoGoogleHomePlugin.class);

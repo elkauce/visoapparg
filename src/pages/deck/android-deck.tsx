@@ -35,6 +35,7 @@ import StreamDeckPanel from "../_components/stream-deck-panel.tsx";
 import VisoStateScreen from "./_components/viso-state-screen.tsx";
 import SpotifyScreen from "./_components/spotify-screen.tsx";
 import StandbyScreen from "./_components/standby-screen.tsx";
+import PresenceSettings from "./_components/presence-settings";
 import GoogleHomeColorsDialog from "./_components/google-home-colors-dialog.tsx";
 import DeckSlide from "./_components/deck-slide.tsx";
 import { useAndroidMedia } from "./_components/use-android-media.ts";
@@ -67,6 +68,7 @@ export default function AndroidDeck() {
   const createStatus = useMutation(api.statuses.create);
   const activateStatus = useMutation(api.deck_actions.activateStatus);
   const setActive = useMutation(api.statuses.setActive);
+  const [presenceOpen, setPresenceOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("estados");
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
@@ -346,7 +348,9 @@ export default function AndroidDeck() {
             <Button
               variant="secondary"
               className="min-h-11 justify-start"
-              disabled={!connected || pending || (layout?.pages.length ?? 0) >= 8}
+              disabled={
+                !connected || pending || (layout?.pages.length ?? 0) >= 8
+              }
               onClick={() => {
                 if (pendingRef.current) return;
                 pendingRef.current = true;
@@ -390,6 +394,17 @@ export default function AndroidDeck() {
             >
               <Lightbulb />
               Google Home
+            </Button>
+            <Button
+              variant="secondary"
+              className="min-h-11 justify-start"
+              onClick={() => {
+                setSettingsOpen(false);
+                setPresenceOpen(true);
+              }}
+            >
+              <Clock />
+              Estado automático: llamadas y agenda
             </Button>
             <Button
               variant="secondary"
@@ -442,6 +457,12 @@ export default function AndroidDeck() {
           {elgatoOpen && <StreamDeckPanel pluginOnly />}
         </DialogContent>
       </Dialog>
+      <PresenceSettings
+        key={`presence:${user._id}`}
+        accountId={user._id}
+        open={presenceOpen}
+        onOpenChange={setPresenceOpen}
+      />
       <GoogleHomeColorsDialog
         key={user._id}
         userId={user._id}

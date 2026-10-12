@@ -76,7 +76,11 @@ export const list = query({
           : null,
       })),
     );
-    return { statuses: withMedia, activeStatusId: user.activeStatusId ?? null };
+    return {
+      statuses: withMedia,
+      activeStatusId: user.activeStatusId ?? null,
+      activeStatusRevision: user.activeStatusRevision ?? 0,
+    };
   },
 });
 
@@ -178,7 +182,10 @@ export const remove = mutation({
     const user = await requireCurrentUser(ctx);
     const status = await getOwnedStatus(ctx, user._id, args.statusId);
     if (user.activeStatusId === args.statusId) {
-      await ctx.db.patch("users", user._id, { activeStatusId: undefined });
+      await ctx.db.patch("users", user._id, {
+        activeStatusId: undefined,
+        activeStatusRevision: (user.activeStatusRevision ?? 0) + 1,
+      });
     }
     if (
       status.mediaStorageId &&

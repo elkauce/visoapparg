@@ -5,6 +5,7 @@ import AndroidDeck from "./pages/deck/android-deck.tsx";
 import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import PublicStatusPage from "./pages/s/page.tsx";
+import AutomaticPresence from "./components/automatic-presence";
 import DeckAwake from "./components/deck-awake.tsx";
 import AndroidRuntime from "./components/android-runtime.tsx";
 import GoogleHomeSync from "./pages/_components/google-home-sync.tsx";
@@ -21,6 +22,7 @@ export default function App() {
       <BrowserRouter>
         <AndroidRuntime />
         <DeckAwake />
+        <AutomaticPresence />
         <GoogleHomeSync />
         <Routes>
           <Route

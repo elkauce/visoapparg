@@ -28,9 +28,14 @@ export default function GoogleHomeSync() {
         status._id === data.activeStatusId && status.userId === accountId,
     ) ?? null;
   const stateKey = googleHomeStateForStatusName(activeStatus?.name ?? null);
-  const stateRevision = activeStatus
+  const baseRevision = activeStatus
     ? `${activeStatus._id}:${stateKey ?? `custom:${activeStatus.color}`}`
     : "none";
+  const stateRevision =
+    baseRevision +
+    (typeof data?.activeStatusRevision === "number"
+      ? `:${data.activeStatusRevision}`
+      : "");
   const [controller] = useState(
     () =>
       new GoogleHomeSyncController(googleHomeNative, (message) => {
