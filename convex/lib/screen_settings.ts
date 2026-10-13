@@ -20,6 +20,10 @@ export type ScreenSettings = {
   sensitivity: number;
   leagues: string[];
   favorite: string;
+  sportsLeague: string;
+  sportsDate: string;
+  sportsView: string;
+  sportsFilter: string;
 };
 export const defaultScreenSettings: ScreenSettings = {
   city: "Buenos Aires",
@@ -43,7 +47,16 @@ export const defaultScreenSettings: ScreenSettings = {
     "f1",
   ],
   favorite: "",
+  sportsLeague: "",
+  sportsDate: "",
+  sportsView: "matches",
+  sportsFilter: "all",
 };
+const validDate = (value: string) =>
+  value === "" ||
+  (/^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    Number.isFinite(Date.parse(value)) &&
+    new Date(value).toISOString().slice(0, 10) === value);
 export function normalizeScreenSettings(value: unknown): ScreenSettings {
   const s =
     value && typeof value === "object"
@@ -82,6 +95,24 @@ export function normalizeScreenSettings(value: unknown): ScreenSettings {
           ),
         ].slice(0, 24)
       : defaultScreenSettings.leagues,
+    sportsLeague:
+      typeof s.sportsLeague === "string" && isSportsLeague(s.sportsLeague)
+        ? s.sportsLeague
+        : "",
+    sportsDate:
+      typeof s.sportsDate === "string" && validDate(s.sportsDate)
+        ? s.sportsDate
+        : "",
+    sportsView: ["matches", "history", "table", "favorite"].includes(
+      String(s.sportsView),
+    )
+      ? String(s.sportsView)
+      : "matches",
+    sportsFilter: ["all", "in", "pre", "post", "favorite"].includes(
+      String(s.sportsFilter),
+    )
+      ? String(s.sportsFilter)
+      : "all",
     favorite:
       typeof s.favorite === "string" ? s.favorite.trim().slice(0, 60) : "",
   };
@@ -108,6 +139,23 @@ export function validateScreenSettingsPatch(
     });
   };
   for (const [key, item] of Object.entries(patch)) {
+    if (
+      key === "sportsLeague" &&
+      (typeof item !== "string" || (item !== "" && !isSportsLeague(item)))
+    )
+      invalid();
+    if (key === "sportsDate" && (typeof item !== "string" || !validDate(item)))
+      invalid();
+    if (
+      key === "sportsView" &&
+      !["matches", "history", "table", "favorite"].includes(String(item))
+    )
+      invalid();
+    if (
+      key === "sportsFilter" &&
+      !["all", "in", "pre", "post", "favorite"].includes(String(item))
+    )
+      invalid();
     if (
       key === "city" &&
       (typeof item !== "string" || !item.trim() || item.length > 100)

@@ -687,3 +687,58 @@ it("preserves a full existing status library during catalogue migration", async 
   }))!.pages.find((page) => page.name === "Estados VISO")!;
   expect(page.grid).toEqual({ columns: 3, rows: 2 });
 });
+
+it("shares sports content selection between sessions without overwriting teams and rejects foreign changes", async () => {
+  const { t, alice, aliceId, bob } = await fixture();
+  await alice.mutation(api.deck_layout.ensureCatalogue, {});
+  const pageId = await alice.mutation(api.deck_layout.createPage, {
+    name: "Deportes",
+  });
+  await alice.mutation(api.deck_layout.configureScreen, {
+    pageId,
+    kind: "sports",
+    screenSettings: { leagues: ["ligaarg", "nba"], favorite: "River" },
+  });
+  await alice.mutation(api.deck_layout.configureScreen, {
+    pageId,
+    screenSettings: {
+      sportsLeague: "nba",
+      sportsDate: "2025-11-09",
+      sportsView: "history",
+      sportsFilter: "post",
+    },
+  });
+  const mobile = t.withIdentity({ subject: `${aliceId}|mobile` });
+  const layout = await mobile.query(api.deck_layout.get, { unified: true });
+  expect(
+    layout?.pages.find((p) => p._id === pageId)?.screenSettings,
+  ).toMatchObject({
+    leagues: ["ligaarg", "nba"],
+    favorite: "River",
+    sportsLeague: "nba",
+    sportsDate: "2025-11-09",
+    sportsView: "history",
+    sportsFilter: "post",
+  });
+  await mobile.mutation(api.deck_layout.configureScreen, {
+    pageId,
+    screenSettings: { sportsView: "table" },
+  });
+  expect(
+    (await alice.query(api.deck_layout.get, { unified: true }))?.pages.find(
+      (p) => p._id === pageId,
+    )?.screenSettings,
+  ).toMatchObject({ sportsView: "table", sportsDate: "2025-11-09" });
+  await expect(
+    bob.mutation(api.deck_layout.configureScreen, {
+      pageId,
+      screenSettings: { sportsLeague: "ligaarg" },
+    }),
+  ).rejects.toThrow();
+  await expect(
+    alice.mutation(api.deck_layout.configureScreen, {
+      pageId,
+      screenSettings: { sportsDate: "2025-02-31" },
+    }),
+  ).rejects.toThrow();
+});

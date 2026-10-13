@@ -56,7 +56,21 @@ export default function ExtendedScreen({
   const save = async () => {
     setBusy(true);
     try {
-      await configure({ pageId: page._id, screenSettings: draft });
+      const {
+        sportsLeague,
+        sportsDate,
+        sportsView,
+        sportsFilter,
+        ...appearanceDraft
+      } = draft;
+      void sportsLeague;
+      void sportsDate;
+      void sportsView;
+      void sportsFilter;
+      await configure({
+        pageId: page._id,
+        screenSettings: page.kind === "sports" ? appearanceDraft : draft,
+      });
       setOpen(false);
     } catch {
       toast.error("No se pudieron guardar los ajustes de la página");
@@ -105,6 +119,15 @@ export default function ExtendedScreen({
             active={active}
             controlHost={controlHost}
             editing={editing}
+            onSelectionChange={async (patch) => {
+              try {
+                await configure({ pageId: page._id, screenSettings: patch });
+              } catch {
+                toast.error(
+                  "No se pudo sincronizar el contenido deportivo. Revisá la conexión.",
+                );
+              }
+            }}
           />
         ) : (
           <VisualizerScreen

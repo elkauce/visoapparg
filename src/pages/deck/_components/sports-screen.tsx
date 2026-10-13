@@ -39,19 +39,27 @@ export default function SportsScreen({
   active,
   controlHost,
   editing = false,
+  onSelectionChange,
 }: {
   settings: ScreenSettings;
   active: boolean;
   controlHost?: HTMLElement | null;
   editing?: boolean;
+  onSelectionChange?(patch: Partial<ScreenSettings>): Promise<void>;
 }) {
-  const [selected, setSelected] = useState(settings.leagues[0] ?? "ligaarg");
+  const selected = settings.sportsLeague || settings.leagues[0] || "ligaarg";
+  const persist = (patch: Partial<ScreenSettings>) => {
+    void onSelectionChange?.(patch);
+  };
+  const setSelected = (sportsLeague: string) => persist({ sportsLeague });
   const league = settings.leagues.includes(selected)
     ? selected
     : (settings.leagues[0] ?? "ligaarg");
-  const [date, setDate] = useState(() => dateString(new Date()));
-  const [filter, setFilter] = useState("all");
-  const [view, setView] = useState("matches");
+  const date = settings.sportsDate || dateString(new Date());
+  const filter = settings.sportsFilter;
+  const view = settings.sportsView;
+  const setDate = (sportsDate: string) => persist({ sportsDate });
+  const setFilter = (sportsFilter: string) => persist({ sportsFilter });
   const [expanded, setExpanded] = useState<string | null>(null);
   const action = useAction(api.sports.screenScoreboard);
   const query = useQuery({
@@ -67,22 +75,26 @@ export default function SportsScreen({
     setDate(dateString(d));
   };
   const chooseView = (next: string) => {
-    setView(next);
-    setFilter(
-      next === "favorite" ? "favorite" : next === "history" ? "post" : "all",
-    );
+    const patch: Partial<ScreenSettings> = {
+      sportsView: next,
+      sportsFilter:
+        next === "favorite" ? "favorite" : next === "history" ? "post" : "all",
+    };
     if (next === "history" && date >= dateString(new Date())) {
       const previous = new Date();
       previous.setDate(previous.getDate() - 1);
-      setDate(dateString(previous));
+      patch.sportsDate = dateString(previous);
     }
+    persist(patch);
   };
   const previousDate = (days: number) => {
     const previous = new Date();
     previous.setDate(previous.getDate() - days);
-    setDate(dateString(previous));
-    setView("history");
-    setFilter("post");
+    persist({
+      sportsDate: dateString(previous),
+      sportsView: "history",
+      sportsFilter: "post",
+    });
   };
   const favorite = (e: NonNullable<typeof query.data>[number]) =>
     Boolean(settings.favorite) &&
@@ -431,8 +443,11 @@ export default function SportsScreen({
               <button
                 className="rounded border p-2"
                 onClick={() => {
-                  setDate(dateString(new Date()));
-                  chooseView("matches");
+                  persist({
+                    sportsDate: "",
+                    sportsView: "matches",
+                    sportsFilter: "all",
+                  });
                 }}
               >
                 Hoy
