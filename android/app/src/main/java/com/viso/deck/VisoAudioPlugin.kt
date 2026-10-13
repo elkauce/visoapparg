@@ -58,18 +58,18 @@ class VisoAudioPlugin : Plugin() {
                     override fun onWaveFormDataCapture(v: Visualizer?, bytes: ByteArray?, rate: Int) {
                         if (!running || epoch != generation || bytes == null) return
                         val waveform = FloatArray(64) { i -> ((bytes[i * bytes.size / 64].toInt() and 255) - 128) / 128f }
-                        emit(null, waveform)
+                        val values=bytes.map { ((it.toInt() and 255)-128)/128.0 }
+                        emit(null, waveform, null, sqrt(values.map { it*it }.average()),values.maxOf { abs(it) })
                     }
                     override fun onFftDataCapture(v: Visualizer?, bytes: ByteArray?, rate: Int) {
                         if (!running || epoch != generation || bytes == null) return
+                        val sampleRate = (rate / 1000).coerceAtLeast(1)
+                        val frequencies = frequencies(sampleRate, bytes.size)
                         val bands = FloatArray(32) { i ->
-                            val start = 2 + i * (bytes.size - 2) / 32
-                            val end = 2 + (i + 1) * (bytes.size - 2) / 32
-                            var energy = 0.0
-                            for (k in start until end - 1 step 2) energy += sqrt((bytes[k].toInt() * bytes[k].toInt() + bytes[k+1].toInt() * bytes[k+1].toInt()).toDouble())
-                            (energy / ((end-start)/2).coerceAtLeast(1) / 128).toFloat().coerceIn(0f,1f)
+                            val bin = (frequencies[i] * bytes.size / sampleRate).toInt().coerceIn(1, bytes.size/2-1)
+                            sqrt((bytes[2*bin].toInt()*bytes[2*bin].toInt()+bytes[2*bin+1].toInt()*bytes[2*bin+1].toInt()).toDouble()).toFloat()/128f
                         }
-                        emit(bands, null)
+                        emit(bands, null, frequencies)
                     }
                 }, (Visualizer.getMaxCaptureRate() / 2).coerceAtMost(20000), true, true)
                 if (result != Visualizer.SUCCESS || effect.setEnabled(true) != Visualizer.SUCCESS) throw IllegalStateException("La salida musical no está disponible")
@@ -90,13 +90,20 @@ class VisoAudioPlugin : Plugin() {
                             break
                         }
                         val wave = FloatArray(64) { i -> buffer[i * count / 64] / 32768f }
+                        val frequencies = frequencies(16000,count)
+                        val windowed = FloatArray(count) { j -> (buffer[j]/32768f)*(0.5-0.5*kotlin.math.cos(2*Math.PI*j/(count-1).coerceAtLeast(1))).toFloat() }
                         val bands = FloatArray(32) { i ->
-                            var energy = 0f
-                            val start = i * count / 32; val end = (i+1)*count/32
-                            for (j in start until end) energy += abs(buffer[j].toFloat()) / 32768f
-                            energy / (end-start).coerceAtLeast(1)
+                            val step = 2*Math.PI*frequencies[i]/16000
+                            val cs=kotlin.math.cos(step); val sn=kotlin.math.sin(step)
+                            var re=0.0;var im=0.0;var co=1.0;var si=0.0
+                            for(j in 0 until count){re+=windowed[j]*co;im-=windowed[j]*si;val next=co*cs-si*sn;si=si*cs+co*sn;co=next}
+                            (4*sqrt(re*re+im*im)/count).toFloat().coerceIn(0f,1f)
                         }
-                        if (running && generation == epoch) emit(bands, wave)
+                        if (running && generation == epoch) {
+                            var sum=0.0;var peak=0.0
+                            for(j in 0 until count){val value=buffer[j]/32768.0;sum+=value*value;peak=kotlin.math.max(peak,abs(value))}
+                            emit(bands, wave, frequencies,sqrt(sum/count),peak)
+                        }
                     }
                 }.also { it.name = "VISO-vumeter"; it.start() }
             }
@@ -106,12 +113,18 @@ class VisoAudioPlugin : Plugin() {
             call.reject(if (call.getString("source") == "music") "Android no permite medir esta salida musical en este dispositivo. Probá la fuente Micrófono." else "No se pudo iniciar el micrófono. Revisá el permiso de audio y otras aplicaciones que lo usen.")
         }
     }
-    private fun emit(bands: FloatArray?, wave: FloatArray?) {
+    private fun frequencies(rate: Int,size: Int) = FloatArray(32) { i ->
+        val desired = 32*kotlin.math.exp(kotlin.math.ln(kotlin.math.min(16000.0,rate/2.0)/32)*i/31)
+        kotlin.math.round(desired*size/rate).coerceIn(1.0,(size/2-1).coerceAtLeast(1).toDouble()).toFloat()*rate/size
+    }
+    private fun emit(bands: FloatArray?, wave: FloatArray?, frequencies: FloatArray? = null, level: Double? = null, peak: Double? = null) {
         val data = JSObject()
         if (bands != null) data.put("bands",JSArray(bands.toList()))
+        if (frequencies != null) data.put("bandFrequencies",JSArray(frequencies.toList()))
         if (wave != null) {
             data.put("wave",JSArray(wave.toList()))
-            val rms = sqrt(wave.map { it*it }.average()).coerceAtLeast(0.000001)
+            val rms = (level ?: sqrt(wave.map { it*it }.average())).coerceAtLeast(0.000001)
+            data.put("peak",peak ?: wave.maxOf { abs(it.toDouble()) });
             data.put("level",rms.coerceAtMost(1.0)); data.put("db",20*log10(rms))
         }
         notifyListeners("audioFrame",data)

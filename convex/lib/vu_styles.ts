@@ -1,0 +1,31 @@
+export const VU_STYLES = [
+  "bars",
+  "mirror",
+  "radial",
+  "wave",
+  "levels",
+  "analog-amber",
+  "analog-blue",
+  "analog-white",
+  "analog-bronze",
+  "analog-green",
+  "dual-led",
+  "spectrum",
+  "spectrum-led",
+] as const;
+export type VuStyle = (typeof VU_STYLES)[number];
+export const VU_STYLE_LABELS: Record<VuStyle, string> = {
+  bars: "Barras con picos",
+  mirror: "Barras reflejadas",
+  radial: "Radial",
+  wave: "Onda",
+  levels: "Medidor LED",
+  "analog-amber": "Aguja ámbar",
+  "analog-blue": "Aguja azul",
+  "analog-white": "Doble aguja blanca",
+  "analog-bronze": "Doble aguja dorada",
+  "analog-green": "Doble aguja verde",
+  "dual-led": "Doble barra LED",
+  spectrum: "Espectro multicolor",
+  "spectrum-led": "Espectro LED multicolor",
+};

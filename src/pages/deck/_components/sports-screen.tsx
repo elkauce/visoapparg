@@ -7,12 +7,31 @@ import {
   type SportsLeagueKey,
 } from "@/convex/lib/sports_leagues";
 import type { ScreenSettings } from "@/convex/lib/screen_settings";
-import { RefreshCw, Trophy } from "lucide-react";
+import { ChevronLeft, ChevronRight, RefreshCw, Star } from "lucide-react";
 import FormulaOnePanel from "./formula-one-panel";
-const localDate = () => {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-};
+const dateString = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function Crest({ name, logo }: { name: string; logo?: string | null }) {
+  const [failed, setFailed] = useState(false);
+  return (
+    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#f4f4f6] text-sm font-bold text-[#777]">
+      {logo && !failed ? (
+        <img
+          src={logo}
+          alt=""
+          className="size-9 object-contain"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        name
+          .split(" ")
+          .map((w) => w[0])
+          .slice(0, 2)
+          .join("")
+      )}
+    </span>
+  );
+}
 export default function SportsScreen({
   settings,
   active,
@@ -24,8 +43,9 @@ export default function SportsScreen({
   const league = settings.leagues.includes(selected)
     ? selected
     : (settings.leagues[0] ?? "ligaarg");
-  const [date, setDate] = useState(localDate);
+  const [date, setDate] = useState(() => dateString(new Date()));
   const [filter, setFilter] = useState("all");
+  const [expanded, setExpanded] = useState<string | null>(null);
   const action = useAction(api.sports.screenScoreboard);
   const query = useQuery({
     queryKey: ["sports-full", league, date],
@@ -34,177 +54,259 @@ export default function SportsScreen({
     refetchInterval: 60000,
     queryFn: () => action({ league, date }),
   });
-  const title = SPORTS_LEAGUES[league as SportsLeagueKey]?.name ?? "Deportes";
-  const shown = query.data?.filter((e) => {
-    if (filter === "favorite")
-      return (
-        Boolean(settings.favorite) &&
-        [e.name, ...e.competitors.map((c) => c.name)].some((name) =>
-          name
-            .toLocaleLowerCase()
-            .includes(settings.favorite.toLocaleLowerCase()),
-        )
-      );
-    return filter === "all" || e.state === filter;
-  });
+  const shift = (delta: number) => {
+    const d = new Date(`${date}T12:00:00`);
+    d.setDate(d.getDate() + delta);
+    setDate(dateString(d));
+  };
+  const favorite = (e: NonNullable<typeof query.data>[number]) =>
+    Boolean(settings.favorite) &&
+    [e.name, ...e.competitors.map((c) => c.name)].some((n) =>
+      n.toLocaleLowerCase().includes(settings.favorite.toLocaleLowerCase()),
+    );
+  const shown = query.data?.filter((e) =>
+    filter === "favorite"
+      ? favorite(e)
+      : filter === "all" || e.state === filter,
+  );
   return (
-    <section className="h-full overflow-y-auto rounded-3xl bg-gradient-to-br from-slate-900 to-black p-4 sm:p-6 text-white">
-      <header className="flex flex-wrap items-center justify-between gap-3">
+    <section
+      className="h-full overflow-y-auto bg-[#f2f2f7] px-4 pb-24 pt-12 text-[#171719] sm:px-7"
+      aria-label="Deportes a pantalla completa"
+    >
+      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3">
         <div>
-          <h2 className="flex items-center gap-2 text-2xl font-semibold">
-            <Trophy className="text-amber-300" />
-            {title}
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#8a8a8f]">
+            VISO
+          </p>
+          <h2 className="mt-1 text-[clamp(28px,4vw,42px)] font-bold leading-tight tracking-tight">
+            {filter === "favorite" ? "Mis equipos" : "Deportes"}
           </h2>
-          <p className="text-xs text-white/50">
-            Agenda, resultados y marcadores · Hora de tu dispositivo
-          </p>
         </div>
-        {league !== "f1" && (
-          <div className="flex items-center gap-2">
-            <input
-              aria-label="Fecha deportiva"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="rounded-lg border border-white/15 bg-black p-2 text-sm"
-            />
-            <button
-              aria-label="Actualizar deportes"
-              onClick={() => void query.refetch()}
-            >
-              <RefreshCw
-                className={query.isFetching ? "size-5 animate-spin" : "size-5"}
-              />
-            </button>
-          </div>
-        )}
+        <button
+          aria-label="Actualizar deportes"
+          className="grid size-10 place-items-center rounded-full bg-white text-[#7352d6]"
+          onClick={() => void query.refetch()}
+        >
+          <RefreshCw
+            className={query.isFetching ? "size-4 animate-spin" : "size-4"}
+          />
+        </button>
       </header>
-      <nav className="my-4 flex flex-wrap gap-2" aria-label="Competiciones">
-        {settings.leagues.map((key) => (
-          <button
-            key={key}
-            className={`rounded-full px-3 py-2 text-sm ${league === key ? "bg-amber-300 text-black" : "bg-white/5 text-white/70"}`}
-            onClick={() => setSelected(key)}
-          >
-            {SPORTS_LEAGUES[key as SportsLeagueKey].name}
-          </button>
-        ))}
-      </nav>
-      {league === "f1" ? (
-        <FormulaOnePanel active={active} favorite={settings.favorite} />
-      ) : (
-        <>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {[
-              ["all", "Todos"],
-              ["in", "En juego"],
-              ["pre", "Próximos"],
-              ["post", "Finalizados"],
-              ["favorite", "Mi favorito"],
-            ].map(([value, label]) => (
-              <button
-                key={value}
-                aria-pressed={filter === value}
-                className={`rounded-lg px-3 py-2 text-xs ${filter === value ? "bg-white/20" : "bg-white/5"}`}
-                onClick={() => setFilter(value)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          {!settings.leagues.length ? (
-            <p>Elegí competiciones en los ajustes de esta página.</p>
-          ) : query.isPending ? (
-            <p>Cargando eventos…</p>
-          ) : null}
-          {query.isError && (
-            <p
-              role="alert"
-              className="mb-3 rounded-xl border border-amber-500/20 p-3 text-sm text-amber-300"
+      <div className="mx-auto max-w-6xl">
+        <nav
+          className="my-5 flex gap-2 overflow-x-auto pb-1"
+          aria-label="Competiciones"
+        >
+          {settings.leagues.map((key) => (
+            <button
+              key={key}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${league === key ? "bg-[#252529] text-white" : "bg-white text-[#73737b]"}`}
+              aria-pressed={league === key}
+              onClick={() => {
+                setSelected(key);
+                setExpanded(null);
+              }}
             >
-              La fuente deportiva no respondió. Probá actualizar; no se muestran
-              resultados simulados.
-              {query.data
-                ? " Los datos anteriores pueden estar desactualizados."
-                : ""}
-            </p>
-          )}
-          {filter === "favorite" && !settings.favorite && (
-            <p>
-              Guardá el nombre de un equipo o piloto en los ajustes para filtrar
-              sus eventos.
-            </p>
-          )}
-          {shown?.length === 0 && (
-            <p className="py-10 text-center text-white/50">
-              No hay eventos para esta fecha y filtro.
-            </p>
-          )}
-          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {shown?.map((event) => (
-              <article
-                key={event.id}
-                className="rounded-2xl border border-white/10 bg-white/5 p-4"
-              >
-                <div className="mb-3 flex justify-between gap-3 text-xs">
-                  <span
-                    className={
-                      event.state === "in" ? "text-green-400" : "text-white/50"
-                    }
-                  >
-                    {event.state === "in"
-                      ? "● En juego"
-                      : event.state === "post"
-                        ? "Finalizado"
-                        : new Date(event.date).toLocaleString("es", {
-                            day: "2-digit",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                  </span>
-                  <span className="text-white/50">{event.detail}</span>
-                </div>
-                {league === "f1" && (
-                  <h3 className="mb-3 font-semibold">{event.name}</h3>
-                )}
-                <div className="space-y-2">
-                  {event.competitors
-                    .slice(0, league === "f1" ? 20 : 2)
-                    .map((c, i) => (
-                      <div
-                        key={`${c.name}-${i}`}
-                        className="flex items-center justify-between gap-3"
-                      >
-                        <span className="text-sm">
-                          {league === "f1" && c.position
-                            ? `${c.position}. `
-                            : ""}
-                          {c.name}
-                        </span>
-                        <strong className="text-xl tabular-nums">
-                          {c.score || (event.state === "pre" ? "—" : "")}
-                        </strong>
-                      </div>
-                    ))}
-                </div>
-                {event.venue && (
-                  <p className="mt-3 text-xs text-white/40">{event.venue}</p>
-                )}
-              </article>
-            ))}
+              {SPORTS_LEAGUES[key as SportsLeagueKey].name}
+            </button>
+          ))}
+        </nav>
+        {league === "f1" ? (
+          <div className="rounded-3xl bg-[#171719] p-5 text-white">
+            <FormulaOnePanel active={active} favorite={settings.favorite} />
           </div>
-          <p className="mt-5 text-xs text-white/40">
-            Datos ESPN · Actualización cada minuto mientras esta página está
-            visible.
-            {query.dataUpdatedAt
-              ? ` Última consulta: ${new Date(query.dataUpdatedAt).toLocaleTimeString("es")}.`
-              : ""}{" "}
-            La cobertura y las demoras dependen de la competición y de la
-            fuente.
-          </p>
-        </>
-      )}
+        ) : (
+          <>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl bg-[#e5e5eb] p-1">
+                {[
+                  ["all", "Todos"],
+                  ["in", "En vivo"],
+                  ["pre", "Próximos"],
+                  ["post", "Finalizados"],
+                  ["favorite", "Favoritos"],
+                ].map(([v, n]) => (
+                  <button
+                    key={v}
+                    aria-pressed={filter === v}
+                    className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold ${filter === v ? "bg-white text-black shadow-sm" : "text-[#777780]"}`}
+                    onClick={() => setFilter(v)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  aria-label="Día anterior"
+                  className="p-2"
+                  onClick={() => shift(-1)}
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <label className="text-sm font-semibold">
+                  <input
+                    aria-label="Fecha deportiva"
+                    type="date"
+                    value={date}
+                    onChange={(e) => {
+                      if (e.target.value) setDate(e.target.value);
+                    }}
+                    className="max-w-36 bg-transparent text-sm"
+                  />
+                </label>
+                <button
+                  aria-label="Día siguiente"
+                  className="p-2"
+                  onClick={() => shift(1)}
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+                <button
+                  className="text-xs font-semibold text-[#7352d6]"
+                  onClick={() => setDate(dateString(new Date()))}
+                >
+                  Hoy
+                </button>
+              </div>
+            </div>
+            <div className="mb-3 flex justify-between text-xs font-semibold uppercase tracking-wider text-[#8c8c95]">
+              <span>{SPORTS_LEAGUES[league as SportsLeagueKey]?.name}</span>
+              <span>
+                {new Date(`${date}T12:00:00`).toLocaleDateString("es", {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "short",
+                })}
+              </span>
+            </div>
+            {query.isError && (
+              <p
+                role="alert"
+                className="mb-3 rounded-2xl bg-white p-4 text-sm text-[#90622b]"
+              >
+                No se pudo actualizar el marcador.
+                {query.data
+                  ? " Se conservan los últimos resultados recibidos."
+                  : " Probá actualizar."}
+              </p>
+            )}
+            {query.isPending && settings.leagues.length > 0 && (
+              <div className="grid gap-4 md:grid-cols-2">
+                {[0, 1].map((n) => (
+                  <div
+                    key={n}
+                    className="h-44 animate-pulse rounded-3xl bg-white"
+                  />
+                ))}
+                <p className="sr-only">Cargando eventos…</p>
+              </div>
+            )}
+            {!settings.leagues.length && (
+              <p className="rounded-3xl bg-white p-6">
+                Elegí las competiciones que querés seguir en los ajustes.
+              </p>
+            )}
+            {filter === "favorite" && !settings.favorite && (
+              <p className="mb-3 rounded-3xl bg-white p-6">
+                Guardá tu equipo o piloto favorito en los ajustes de Deportes.
+              </p>
+            )}
+            {shown?.length === 0 && (
+              <div className="rounded-3xl bg-white p-10 text-center">
+                <p className="font-semibold">Sin eventos para mostrar</p>
+                <p className="mt-2 text-sm text-[#8c8c95]">
+                  Elegí otra fecha, competición o filtro.
+                </p>
+              </div>
+            )}
+            <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {shown?.map((e) => (
+                <article
+                  key={e.id}
+                  className="overflow-hidden rounded-[26px] bg-white shadow-[0_2px_12px_#00000003]"
+                >
+                  <button
+                    className="block w-full p-5 text-left"
+                    aria-expanded={expanded === e.id}
+                    aria-label={`Ver partido ${e.name || e.competitors.map((c) => c.name).join(" contra ")}`}
+                    onClick={() => setExpanded(expanded === e.id ? null : e.id)}
+                  >
+                    <div className="mb-4 flex justify-between gap-2 text-xs font-medium">
+                      <span
+                        className={
+                          e.state === "in"
+                            ? "flex items-center gap-1 text-[#32a060]"
+                            : "text-[#909099]"
+                        }
+                      >
+                        {e.state === "in"
+                          ? "● En vivo"
+                          : e.state === "post"
+                            ? "Finalizado"
+                            : new Date(e.date).toLocaleTimeString("es", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                      </span>
+                      <span className="flex items-center gap-2 text-[#909099]">
+                        {e.detail}
+                        {favorite(e) && (
+                          <Star className="size-3 fill-[#7653d8] text-[#7653d8]" />
+                        )}
+                      </span>
+                    </div>
+                    <div className="space-y-4">
+                      {e.competitors.slice(0, 2).map((c, i) => (
+                        <div
+                          key={`${c.name}-${i}`}
+                          className="flex items-center gap-3"
+                        >
+                          <Crest
+                            name={c.name}
+                            logo={
+                              "logo" in c
+                                ? (c.logo as string | null)
+                                : undefined
+                            }
+                          />
+                          <span className="min-w-0 flex-1 text-[17px] font-semibold tracking-tight">
+                            {c.name}
+                          </span>
+                          <strong className="text-[32px] font-bold tabular-nums tracking-tight">
+                            {e.state === "pre" ? "—" : c.score || "—"}
+                          </strong>
+                        </div>
+                      ))}
+                    </div>
+                  </button>
+                  {expanded === e.id && (
+                    <div className="border-t border-[#f0f0f5] px-5 py-4 text-sm text-[#8a8a95]">
+                      <p>
+                        {new Date(e.date).toLocaleString("es", {
+                          day: "numeric",
+                          month: "long",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                      {e.venue && <p className="mt-1">{e.venue}</p>}
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+            <p className="mt-5 text-[11px] text-[#9d9da6]">
+              ESPN ·{" "}
+              {query.dataUpdatedAt
+                ? `Actualizado ${new Date(query.dataUpdatedAt).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}`
+                : "Marcadores reales"}{" "}
+              · Horarios locales
+            </p>
+          </>
+        )}
+      </div>
     </section>
   );
 }

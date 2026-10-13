@@ -1,3 +1,4 @@
+import { drawReferenceMeter } from "../_lib/vu-renderer";
 import { useEffect, useRef, useState } from "react";
 import {
   Capacitor,
@@ -10,7 +11,9 @@ type AudioFrame = {
   bands?: number[];
   wave?: number[];
   level?: number;
+  peak?: number;
   db?: number;
+  bandFrequencies?: number[];
 };
 const audio = registerPlugin<{
   start(options: { source: string }): Promise<void>;
@@ -132,35 +135,65 @@ export default function VisualizerScreen({
         };
         const source = context.createMediaStreamSource(stream);
         const analyser = context.createAnalyser();
-        analyser.fftSize = 1024;
+        analyser.fftSize = 4096;
         source.connect(analyser);
 
-        const frequency = new Uint8Array(analyser.frequencyBinCount);
+        const frequency = new Float32Array(analyser.frequencyBinCount);
+        const bandFrequencies = Array.from(
+          { length: 32 },
+          (_, i) =>
+            (Math.min(
+              analyser.frequencyBinCount - 1,
+              Math.max(
+                1,
+                Math.round(
+                  (32 *
+                    Math.pow(
+                      Math.min(16000, context.sampleRate / 2) / 32,
+                      i / 31,
+                    ) *
+                    analyser.fftSize) /
+                    context.sampleRate,
+                ),
+              ),
+            ) *
+              context.sampleRate) /
+            analyser.fftSize,
+        );
         const wave = new Uint8Array(analyser.fftSize);
         let timer = 0;
         const sample = () => {
           if (!current()) return;
-          analyser.getByteFrequencyData(frequency);
+          analyser.getFloatFrequencyData(frequency);
           analyser.getByteTimeDomainData(wave);
           const waveform = Array.from(
             { length: 64 },
             (_, i) => (wave[Math.floor((i * wave.length) / 64)] - 128) / 128,
           );
-          const level = Math.sqrt(
-            waveform.reduce((sum, v) => sum + v * v, 0) / waveform.length,
-          );
+          let sum = 0,
+            peak = 0;
+          for (const sample of wave) {
+            const value = (sample - 128) / 128;
+            sum += value * value;
+            peak = Math.max(peak, Math.abs(value));
+          }
+          const level = Math.sqrt(sum / wave.length);
           frame.current = {
-            bands: Array.from({ length: 32 }, (_, i) => {
-              const from = Math.floor((i * frequency.length) / 32);
-              const to = Math.floor(((i + 1) * frequency.length) / 32);
-              return (
-                frequency.slice(from, to).reduce((s, v) => s + v, 0) /
-                (to - from) /
-                255
+            bands: bandFrequencies.map((hz) => {
+              const bin = Math.min(
+                frequency.length - 1,
+                Math.max(
+                  1,
+                  Math.round((hz * analyser.fftSize) / context.sampleRate),
+                ),
               );
+              const db = frequency[bin];
+              return Number.isFinite(db) ? Math.pow(10, db / 20) : 0;
             }),
+            bandFrequencies,
             wave: waveform,
             level,
+            peak,
             db: 20 * Math.log10(Math.max(0.000001, level)),
           };
           timer = requestAnimationFrame(sample);
@@ -201,7 +234,8 @@ export default function VisualizerScreen({
     if (!active) return;
     let id = 0;
     let previous = 0;
-    let peaks = Array(32).fill(0) as number[];
+    const peaks = Array(32).fill(0) as number[];
+    const smooth = [0, 0];
     const draw = (time: number) => {
       const c = canvas.current;
       const ctx = c?.getContext("2d");
@@ -226,7 +260,20 @@ export default function VisualizerScreen({
           peaks[i] = Math.max(value, (peaks[i] ?? 0) * 0.92);
           return value;
         });
-        if (settings.visualizerStyle === "wave") {
+        const reference = drawReferenceMeter(
+          ctx,
+          width,
+          height,
+          settings.visualizerStyle,
+          frame.current,
+          settings.sensitivity,
+          settings.color,
+          peaks,
+          smooth,
+        );
+        if (reference) {
+          /* complete reference face drawn above */
+        } else if (settings.visualizerStyle === "wave") {
           ctx.lineWidth = 3 * ratio;
           ctx.beginPath();
           (frame.current.wave ?? Array(64).fill(0)).forEach((v, i, a) => {
@@ -309,46 +356,36 @@ export default function VisualizerScreen({
     return () => cancelAnimationFrame(id);
   }, [active, settings.color, settings.sensitivity, settings.visualizerStyle]);
   return (
-    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-3xl bg-black p-4 text-white">
-      <header className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <h2 className="text-xl font-semibold">Vúmetro</h2>
-          <p className="text-xs text-white/50">
-            {settings.audioSource === "music"
-              ? "Música del dispositivo"
-              : "Micrófono"}{" "}
-            · {running ? "Audio activo" : "Detenido"}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="tabular-nums text-white/60">
-            {running ? `${Math.round(db)} dBFS` : "—"}
-          </span>
-          <Button
-            disabled={busy || !active}
-            onClick={() => (running ? stop() : void start())}
-          >
-            {busy ? "Iniciando…" : running ? "Detener" : "Activar audio"}
-          </Button>
-        </div>
-      </header>
+    <section className="relative h-full min-h-0 overflow-hidden bg-black text-white">
       <canvas
         ref={canvas}
-        className="min-h-0 w-full flex-1"
+        className="absolute inset-0 size-full"
         aria-label="Vúmetro de audio en tiempo real"
       />
+      <div className="absolute bottom-4 left-4 z-20 flex items-center gap-3 rounded-full border border-white/10 bg-black/60 px-3 py-2 backdrop-blur-md">
+        <Button
+          className="h-8 rounded-full text-xs"
+          disabled={busy || !active}
+          onClick={() => (running ? stop() : void start())}
+        >
+          {busy ? "Iniciando…" : running ? "Detener" : "Activar audio"}
+        </Button>
+        <span className="text-xs tabular-nums text-white/60">
+          {running
+            ? `${Math.round(db)} dBFS`
+            : settings.audioSource === "music"
+              ? "Música"
+              : "Micrófono"}
+        </span>
+      </div>
       {error && (
-        <p role="alert" className="text-sm text-amber-300">
+        <p
+          role="alert"
+          className="absolute inset-x-4 bottom-20 z-20 rounded-2xl bg-black/90 p-3 text-sm text-amber-300"
+        >
           {error}
         </p>
       )}
-      <p className="mt-2 text-xs text-white/40">
-        Audio local, sin grabación. Se detiene al salir de esta página. dBFS
-        indica nivel digital, no decibelios ambientales.
-        {settings.audioSource === "music"
-          ? " La fuente musical depende de los permisos del dispositivo y del reproductor."
-          : ""}
-      </p>
     </section>
   );
 }

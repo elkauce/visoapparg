@@ -1,3 +1,4 @@
+import { VU_STYLES, VU_STYLE_LABELS } from "../_lib/vu-renderer";
 import { useState } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
@@ -64,11 +65,11 @@ export default function ExtendedScreen({
     }
   };
   return (
-    <div className="relative flex h-full min-h-0 flex-col gap-2">
-      <div className="flex shrink-0 justify-end">
+    <div className="relative h-full min-h-0">
+      <div className="pointer-events-none absolute bottom-4 right-4 z-30 flex justify-end">
         <button
           aria-label={`Configurar ${title}`}
-          className="flex items-center gap-2 rounded-lg p-2 text-sm text-white/70"
+          className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/50 p-3 text-sm text-white backdrop-blur-md"
           onClick={() => {
             setDraft(settings);
             setOpen(true);
@@ -78,7 +79,7 @@ export default function ExtendedScreen({
           {editing ? `Personalizar ${title}` : ""}
         </button>
       </div>
-      <div className="min-h-0 flex-1">
+      <div className="h-full min-h-0">
         {page.kind === "weather" ? (
           <WeatherScreen settings={settings} active={active} />
         ) : page.kind === "sports" ? (
@@ -189,30 +190,31 @@ export default function ExtendedScreen({
                     })
                   }
                 >
-                  {[
-                    ["bars", "Barras con picos"],
-                    ["mirror", "Barras reflejadas"],
-                    ["radial", "Radial"],
-                    ["wave", "Onda"],
-                    ["levels", "Medidor LED"],
-                  ].map(([v, n]) => (
-                    <option key={v} value={v}>
-                      {n}
-                    </option>
-                  ))}
+                  {VU_STYLES.map((v) => {
+                    const n = VU_STYLE_LABELS[v];
+                    return (
+                      <option key={v} value={v}>
+                        {n}
+                      </option>
+                    );
+                  })}
                 </select>
               </label>
-              <label className="flex items-center gap-3">
-                Color
-                <input
-                  aria-label="Color del vúmetro"
-                  type="color"
-                  value={draft.color}
-                  onChange={(e) =>
-                    setDraft({ ...draft, color: e.target.value })
-                  }
-                />
-              </label>
+              {["bars", "mirror", "radial", "wave", "levels"].includes(
+                draft.visualizerStyle,
+              ) && (
+                <label className="flex items-center gap-3">
+                  Color
+                  <input
+                    aria-label="Color del vúmetro"
+                    type="color"
+                    value={draft.color}
+                    onChange={(e) =>
+                      setDraft({ ...draft, color: e.target.value })
+                    }
+                  />
+                </label>
+              )}
               <label className="block">
                 Sensibilidad ({draft.sensitivity}×)
                 <input

@@ -170,17 +170,30 @@ export default function AndroidDeck() {
     0,
     screens.findIndex((item) => item.id === screen),
   );
+  const fullBleed = ["visualizer", "sports"].includes(
+    layout?.pages[pageIndex]?.kind ?? "",
+  );
+  const lightSurface = layout?.pages[pageIndex]?.kind === "sports";
   return (
     <div
       className="viso-safe-screen relative flex h-dvh min-h-0 flex-col overflow-hidden bg-black p-1.5"
       style={{
-        paddingTop: "calc(var(--viso-safe-top, 0px) + 2.75rem)",
-        paddingBottom: "max(var(--viso-safe-bottom, 0px),0.375rem)",
-        paddingLeft: "max(var(--viso-safe-left, 0px),0.375rem)",
-        paddingRight: "max(var(--viso-safe-right, 0px),0.375rem)",
+        paddingTop: fullBleed
+          ? "var(--viso-safe-top, 0px)"
+          : "calc(var(--viso-safe-top, 0px) + 2.75rem)",
+        paddingBottom: fullBleed
+          ? "var(--viso-safe-bottom, 0px)"
+          : "max(var(--viso-safe-bottom, 0px),0.375rem)",
+        paddingLeft: fullBleed
+          ? "var(--viso-safe-left, 0px)"
+          : "max(var(--viso-safe-left, 0px),0.375rem)",
+        paddingRight: fullBleed
+          ? "var(--viso-safe-right, 0px)"
+          : "max(var(--viso-safe-right, 0px),0.375rem)",
       }}
     >
       <header
+        data-light-surface={lightSurface}
         className="pointer-events-none absolute inset-x-0 z-20 flex items-center justify-between"
         style={{
           top: "var(--viso-safe-top, 0px)",
@@ -188,7 +201,12 @@ export default function AndroidDeck() {
           paddingRight: "var(--viso-safe-right, 0px)",
         }}
       >
-        <span className="flex h-11 min-w-11 items-center gap-1.5 px-3 text-xs font-medium text-white/70">
+        <span
+          className={cn(
+            "flex h-11 min-w-11 items-center gap-1.5 px-3 text-xs font-medium",
+            lightSurface ? "text-zinc-700" : "text-white/70",
+          )}
+        >
           <span
             aria-label={`Página ${pageIndex + 1} de ${screens.length}`}
             aria-live="polite"
@@ -213,7 +231,12 @@ export default function AndroidDeck() {
         <Button
           variant="ghost"
           size="icon"
-          className="pointer-events-auto size-11 text-white/70 hover:bg-white/10 hover:text-white focus-visible:ring-1 focus-visible:ring-white/50"
+          className={cn(
+            "pointer-events-auto size-11 focus-visible:ring-1",
+            lightSurface
+              ? "text-zinc-700 hover:bg-black/5"
+              : "text-white/70 hover:bg-white/10 hover:text-white",
+          )}
           aria-label="Ajustes"
           onClick={() => setSettingsOpen(true)}
         >

@@ -187,6 +187,7 @@ export const screenScoreboard = action({
       competitors: (e.competitions[0]?.competitors ?? []).map((c) => ({
         name: c.team?.displayName ?? c.athlete?.displayName ?? "Participante",
         score: c.score ?? "",
+        logo: c.team?.logo?.startsWith("https://") ? c.team.logo : null,
         homeAway: c.homeAway ?? "",
         position: c.order ?? null,
       })),

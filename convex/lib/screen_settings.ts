@@ -1,3 +1,4 @@
+import { VU_STYLES, type VuStyle } from "./vu_styles";
 import { v, ConvexError } from "convex/values";
 import { isSportsLeague } from "./sports_leagues";
 export const screenKind = v.union(
@@ -14,7 +15,7 @@ export type ScreenSettings = {
   longitude: number;
   units: "celsius" | "fahrenheit";
   audioSource: "microphone" | "music";
-  visualizerStyle: "bars" | "mirror" | "radial" | "wave" | "levels";
+  visualizerStyle: VuStyle;
   color: string;
   sensitivity: number;
   leagues: string[];
@@ -61,9 +62,7 @@ export function normalizeScreenSettings(value: unknown): ScreenSettings {
     longitude: number("longitude", -180, 180),
     units: s.units === "fahrenheit" ? "fahrenheit" : "celsius",
     audioSource: s.audioSource === "music" ? "music" : "microphone",
-    visualizerStyle: ["bars", "mirror", "radial", "wave", "levels"].includes(
-      String(s.visualizerStyle),
-    )
+    visualizerStyle: VU_STYLES.includes(String(s.visualizerStyle) as VuStyle)
       ? (s.visualizerStyle as ScreenSettings["visualizerStyle"])
       : "bars",
     color:
@@ -137,7 +136,7 @@ export function validateScreenSettingsPatch(
       invalid();
     if (
       key === "visualizerStyle" &&
-      !["bars", "mirror", "radial", "wave", "levels"].includes(String(item))
+      !VU_STYLES.includes(String(item) as VuStyle)
     )
       invalid();
     if (
