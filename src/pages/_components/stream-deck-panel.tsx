@@ -241,7 +241,11 @@ function UrlSection() {
         </p>
       </div>
       <div className="space-y-2">
-        <Button onClick={downloadPersonalPlugin} disabled={preparingPlugin}>
+        <Button
+          onClick={downloadPersonalPlugin}
+          disabled={preparingPlugin}
+          className="h-auto max-w-full whitespace-normal py-2 text-center"
+        >
           <Download />{" "}
           {preparingPlugin
             ? "Preparando tu plugin…"

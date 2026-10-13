@@ -17,7 +17,7 @@ import { VisoBrand } from "@/components/viso-brand.tsx";
 function DeckScreen() {
   return (
     <div className="min-h-screen">
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
+      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-5">
         <VisoBrand className="h-8 max-w-36" />
         <div className="flex items-center gap-2">
           <Button asChild size="sm">
