@@ -170,7 +170,7 @@ export default function AndroidDeck() {
     0,
     screens.findIndex((item) => item.id === screen),
   );
-  const fullBleed = ["visualizer", "sports"].includes(
+  const fullBleed = ["visualizer", "sports", "weather"].includes(
     layout?.pages[pageIndex]?.kind ?? "",
   );
   const lightSurface = layout?.pages[pageIndex]?.kind === "sports";
