@@ -66,6 +66,24 @@ export default function SportsScreen({
     d.setDate(d.getDate() + delta);
     setDate(dateString(d));
   };
+  const chooseView = (next: string) => {
+    setView(next);
+    setFilter(
+      next === "favorite" ? "favorite" : next === "history" ? "post" : "all",
+    );
+    if (next === "history" && date >= dateString(new Date())) {
+      const previous = new Date();
+      previous.setDate(previous.getDate() - 1);
+      setDate(dateString(previous));
+    }
+  };
+  const previousDate = (days: number) => {
+    const previous = new Date();
+    previous.setDate(previous.getDate() - days);
+    setDate(dateString(previous));
+    setView("history");
+    setFilter("post");
+  };
   const favorite = (e: NonNullable<typeof query.data>[number]) =>
     Boolean(settings.favorite) &&
     [e.name, ...e.competitors.map((c) => c.name)].some((n) =>
@@ -89,7 +107,11 @@ export default function SportsScreen({
             VISO
           </p>
           <h2 className="mt-1 text-[clamp(28px,4vw,42px)] font-bold leading-tight tracking-tight">
-            {filter === "favorite" ? "Mis equipos" : "VISO Deportes"}
+            {view === "history"
+              ? "Resultados anteriores"
+              : filter === "favorite"
+                ? "Mis equipos"
+                : "VISO Deportes"}
           </h2>
           <p className="mt-2 text-sm text-white/75">
             Argentina y Latinoamérica
@@ -109,16 +131,14 @@ export default function SportsScreen({
         <div className="sports-toolbar my-4 flex gap-2">
           {[
             ["matches", "Partidos"],
+            ["history", "Resultados anteriores"],
             ["table", "Tabla"],
             ["favorite", "Mis equipos"],
           ].map(([key, label]) => (
             <button
               key={key}
               className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold ${view === key ? "bg-[#6a3ce4] text-white" : "bg-white text-slate-500"}`}
-              onClick={() => {
-                setView(key);
-                setFilter(key === "favorite" ? "favorite" : "all");
-              }}
+              onClick={() => chooseView(key)}
             >
               {label}
             </button>
@@ -369,16 +389,55 @@ export default function SportsScreen({
                 aria-label="Vista deportiva"
                 className="ml-2 rounded border bg-background p-2"
                 value={view}
-                onChange={(e) => {
-                  setView(e.target.value);
-                  setFilter(e.target.value === "favorite" ? "favorite" : "all");
-                }}
+                onChange={(e) => chooseView(e.target.value)}
               >
                 <option value="matches">Partidos</option>
+                <option value="history">Resultados anteriores</option>
                 <option value="table">Tabla</option>
                 <option value="favorite">Mis equipos</option>
               </select>
             </label>
+            <p className="text-sm text-muted-foreground">
+              Elegí una fecha para consultar los resultados que ofrece la
+              competición.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                className="rounded border p-2"
+                onClick={() => previousDate(1)}
+              >
+                Ayer
+              </button>
+              <button
+                className="rounded border p-2"
+                onClick={() => previousDate(7)}
+              >
+                Hace una semana
+              </button>
+              <button
+                className="rounded border p-2"
+                aria-label="Día anterior"
+                onClick={() => shift(-1)}
+              >
+                Día anterior
+              </button>
+              <button
+                className="rounded border p-2"
+                aria-label="Día siguiente"
+                onClick={() => shift(1)}
+              >
+                Día siguiente
+              </button>
+              <button
+                className="rounded border p-2"
+                onClick={() => {
+                  setDate(dateString(new Date()));
+                  chooseView("matches");
+                }}
+              >
+                Hoy
+              </button>
+            </div>
             <input
               aria-label="Fecha deportiva"
               className="rounded border bg-background p-2"
