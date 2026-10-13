@@ -9,8 +9,6 @@ import Landing from "./_components/landing.tsx";
 import AndroidDownloadPanel from "./_components/android-download-panel";
 import SharePanel from "./_components/share-panel.tsx";
 import StreamDeckPanel from "./_components/stream-deck-panel.tsx";
-import LightsPanel from "./_components/lights-panel.tsx";
-import DevicesPanel from "./_components/devices-panel.tsx";
 import LightSync from "./_components/light-sync.tsx";
 import { VisoBrand } from "@/components/viso-brand.tsx";
 
@@ -33,15 +31,6 @@ function DeckScreen() {
         <SharePanel />
         <AndroidDownloadPanel />
         <StreamDeckPanel />
-        <LightsPanel />
-        <details className="rounded-2xl border bg-card/60 p-5">
-          <summary className="cursor-pointer text-sm font-medium">
-            Ajustes de dispositivos
-          </summary>
-          <div className="mt-4">
-            <DevicesPanel />
-          </div>
-        </details>
         <LightSync />
       </main>
     </div>
