@@ -61,12 +61,14 @@ export default function ExtendedScreen({
         sportsDate,
         sportsView,
         sportsFilter,
+        sportsTeams,
         ...appearanceDraft
       } = draft;
       void sportsLeague;
       void sportsDate;
       void sportsView;
       void sportsFilter;
+      void sportsTeams;
       await configure({
         pageId: page._id,
         screenSettings: page.kind === "sports" ? appearanceDraft : draft,

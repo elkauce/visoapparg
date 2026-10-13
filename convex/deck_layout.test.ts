@@ -722,7 +722,10 @@ it("shares sports content selection between sessions without overwriting teams a
   });
   await mobile.mutation(api.deck_layout.configureScreen, {
     pageId,
-    screenSettings: { sportsView: "table" },
+    screenSettings: {
+      sportsView: "table",
+      sportsTeams: ["River Plate", "Boca Juniors"],
+    },
   });
   expect(
     (await alice.query(api.deck_layout.get, { unified: true }))?.pages.find(

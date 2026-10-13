@@ -1,5 +1,5 @@
 import { createPortal } from "react-dom";
-import { SportsTable, MatchStatistics } from "./sports-details";
+import { SportsTable, MatchStatistics, MatchLineups } from "./sports-details";
 import { useState } from "react";
 import { useAction } from "convex/react";
 import { useQuery } from "@tanstack/react-query";
@@ -9,19 +9,38 @@ import {
   type SportsLeagueKey,
 } from "@/convex/lib/sports_leagues";
 import type { ScreenSettings } from "@/convex/lib/screen_settings";
-import { ChevronLeft, ChevronRight, RefreshCw, Star } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  Star,
+  Search,
+  List,
+  Trophy,
+  CalendarDays,
+} from "lucide-react";
 import FormulaOnePanel from "./formula-one-panel";
 const dateString = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-function Crest({ name, logo }: { name: string; logo?: string | null }) {
+function Crest({
+  name,
+  logo,
+  large = false,
+}: {
+  name: string;
+  logo?: string | null;
+  large?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   return (
-    <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[#f4f4f6] text-sm font-bold text-[#777]">
+    <span
+      className={`${large ? "size-12" : "size-8"} grid shrink-0 place-items-center rounded-full bg-[#363238] text-xs font-bold text-[#d5d0d2]`}
+    >
       {logo && !failed ? (
         <img
           src={logo}
           alt=""
-          className="size-9 object-contain"
+          className={`${large ? "size-10" : "size-7"} object-contain`}
           onError={() => setFailed(true)}
         />
       ) : (
@@ -60,6 +79,8 @@ export default function SportsScreen({
   const view = settings.sportsView;
   const setDate = (sportsDate: string) => persist({ sportsDate });
   const setFilter = (sportsFilter: string) => persist({ sportsFilter });
+  const [search, setSearch] = useState("");
+  const [detailView, setDetailView] = useState<"stats" | "lineups">("stats");
   const [expanded, setExpanded] = useState<string | null>(null);
   const action = useAction(api.sports.screenScoreboard);
   const query = useQuery({
@@ -97,41 +118,57 @@ export default function SportsScreen({
     });
   };
   const favorite = (e: NonNullable<typeof query.data>[number]) =>
-    Boolean(settings.favorite) &&
-    [e.name, ...e.competitors.map((c) => c.name)].some((n) =>
-      n.toLocaleLowerCase().includes(settings.favorite.toLocaleLowerCase()),
+    e.competitors.some(
+      (c) =>
+        settings.sportsTeams.includes(c.name) ||
+        (Boolean(settings.favorite) &&
+          c.name
+            .toLocaleLowerCase()
+            .includes(settings.favorite.toLocaleLowerCase())),
     );
-  const shown = query.data?.filter((e) =>
-    filter === "favorite"
-      ? favorite(e)
-      : filter === "all" || e.state === filter,
+  const toggleFavorite = (name: string) =>
+    persist({
+      sportsTeams: settings.sportsTeams.includes(name)
+        ? settings.sportsTeams.filter((n) => n !== name)
+        : [...settings.sportsTeams, name].slice(0, 50),
+    });
+  const shown = query.data?.filter(
+    (e) =>
+      (filter === "favorite"
+        ? favorite(e)
+        : filter === "all" || e.state === filter) &&
+      (!search ||
+        [e.name, ...e.competitors.map((c) => c.name)].some((n) =>
+          n.toLocaleLowerCase().includes(search.toLocaleLowerCase()),
+        )),
   );
+  const hero = shown?.find((e) => e.state === "in") ?? shown?.[0];
   return (
     <section
-      className="h-full overflow-y-auto bg-[#f2f2f7] px-4 pb-6 pt-0 text-[#171719] sm:px-7"
+      className="h-full flex flex-col overflow-hidden bg-[#141316] px-4 pb-3 pt-0 text-[#f5f4f4] sm:px-7"
       data-passive={!editing}
       aria-label="Deportes a pantalla completa"
     >
       <style>{`[data-passive=true] .sports-toolbar {display:none!important}`}</style>
-      <header className="mx-auto flex max-w-[520px] items-center justify-between gap-3 rounded-b-3xl bg-gradient-to-br from-[#5535ef] via-[#9c42cf] to-[#eea547] px-5 py-8 text-white">
+      <header className="mx-auto flex w-full shrink-0 max-w-[520px] items-center justify-between gap-3 border-b border-white/10 bg-gradient-to-br from-[#151417] via-[#21191c] to-[#321d23] px-3 py-3 text-white">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/65">
+          <p className="text-xs font-bold uppercase tracking-[.2em] text-[#f34054]">
             VISO
           </p>
-          <h2 className="mt-1 text-[clamp(28px,4vw,42px)] font-bold leading-tight tracking-tight">
+          <h2 className="mt-1 text-[clamp(22px,4vw,32px)] font-bold leading-tight tracking-tight">
             {view === "history"
               ? "Resultados anteriores"
               : filter === "favorite"
                 ? "Mis equipos"
                 : "VISO Deportes"}
           </h2>
-          <p className="mt-2 text-sm text-white/75">
+          <p className="mt-1 text-xs text-white/50">
             Argentina y Latinoamérica
           </p>
         </div>
         <button
           aria-label="Actualizar deportes"
-          className="sports-toolbar grid size-10 place-items-center rounded-full bg-white text-[#7352d6]"
+          className="grid size-10 place-items-center rounded-full border border-white/10 bg-[#302c2e] text-white"
           onClick={() => void query.refetch()}
         >
           <RefreshCw
@@ -139,7 +176,83 @@ export default function SportsScreen({
           />
         </button>
       </header>
-      <div className="mx-auto max-w-[520px]">
+      <div className="mx-auto w-full max-w-[520px] min-h-0 flex-1 overflow-y-auto pb-4">
+        <div className="my-4 flex items-center justify-between rounded-2xl border border-white/10 bg-[#262327] px-2 py-2">
+          <span className="rounded bg-[#21b647] px-2 py-1 text-[10px] font-bold text-white">
+            {shown?.some((e) => e.state === "in") ? "EN VIVO" : "PARTIDOS"}
+          </span>
+          <button
+            aria-label="Día anterior"
+            className="p-2"
+            onClick={() => shift(-1)}
+          >
+            <ChevronLeft className="size-4" />
+          </button>
+          <div className="border-b-2 border-[#f13c52] px-3 py-1 text-center text-sm font-semibold">
+            {new Date(`${date}T12:00:00`).toLocaleDateString("es-AR", {
+              weekday: "short",
+              day: "numeric",
+              month: "short",
+            })}
+          </div>
+          <button
+            aria-label="Día siguiente"
+            className="p-2"
+            onClick={() => shift(1)}
+          >
+            <ChevronRight className="size-4" />
+          </button>
+          <CalendarDays className="size-4 text-white/60" />
+        </div>
+        <label className="mb-4 flex items-center gap-2 rounded-xl border border-white/10 bg-[#232125] px-3 py-2 text-white/50">
+          <Search className="size-4" />
+          <input
+            aria-label="Buscar equipo o partido"
+            placeholder="Buscar equipo o partido"
+            className="w-full bg-transparent text-sm text-white outline-none"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </label>
+        {hero && view !== "table" && (
+          <button
+            onClick={() => setExpanded(hero.id)}
+            aria-label="Abrir partido destacado"
+            className="mb-5 w-full overflow-hidden rounded-[24px] border border-white/15 bg-gradient-to-b from-[#454145] to-[#292a27] px-4 py-5 text-center shadow-lg"
+          >
+            <p className="text-xs text-white/50">
+              {hero.venue || SPORTS_LEAGUES[league as SportsLeagueKey]?.name}
+            </p>
+            <div className="my-4 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+              {hero.competitors.slice(0, 2).map((c, i) => (
+                <div key={c.name} className="contents">
+                  {i === 1 && (
+                    <strong className="text-4xl font-semibold tabular-nums">
+                      {hero.state === "pre"
+                        ? "— : —"
+                        : `${hero.competitors[0].score || "—"} : ${c.score || "—"}`}
+                    </strong>
+                  )}
+                  <span className="flex flex-col items-center gap-2">
+                    <Crest
+                      large
+                      name={c.name}
+                      logo={"logo" in c ? (c.logo as string | null) : undefined}
+                    />
+                    <span className="text-xs font-semibold">{c.name}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-xs ${hero.state === "in" ? "bg-green-500/15 text-green-400" : "bg-white/5 text-white/60"}`}
+            >
+              {hero.detail ||
+                (hero.state === "pre" ? "Próximo partido" : "Finalizado")}
+            </span>
+          </button>
+        )}
+
         <div className="sports-toolbar my-4 flex gap-2">
           {[
             ["matches", "Partidos"],
@@ -149,7 +262,7 @@ export default function SportsScreen({
           ].map(([key, label]) => (
             <button
               key={key}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold ${view === key ? "bg-[#6a3ce4] text-white" : "bg-white text-slate-500"}`}
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold ${view === key ? "bg-[#d82e43] text-white" : "bg-[#29272b] text-slate-500"}`}
               onClick={() => chooseView(key)}
             >
               {label}
@@ -163,7 +276,7 @@ export default function SportsScreen({
           {settings.leagues.map((key) => (
             <button
               key={key}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${league === key ? "bg-[#252529] text-white" : "bg-white text-[#73737b]"}`}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold ${league === key ? "bg-[#252529] text-white" : "bg-[#29272b] text-[#73737b]"}`}
               aria-pressed={league === key}
               onClick={() => {
                 setSelected(key);
@@ -188,7 +301,7 @@ export default function SportsScreen({
         ) : (
           <>
             <div className="sports-toolbar mb-5 flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl bg-[#e5e5eb] p-1">
+              <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl bg-[#242226] p-1">
                 {[
                   ["all", "Todos"],
                   ["in", "En vivo"],
@@ -199,7 +312,7 @@ export default function SportsScreen({
                   <button
                     key={v}
                     aria-pressed={filter === v}
-                    className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold ${filter === v ? "bg-white text-black shadow-sm" : "text-[#777780]"}`}
+                    className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold ${filter === v ? "bg-[#29272b] text-white shadow-sm" : "text-[#777780]"}`}
                     onClick={() => setFilter(v)}
                   >
                     {n}
@@ -233,7 +346,7 @@ export default function SportsScreen({
                   <ChevronRight className="size-4" />
                 </button>
                 <button
-                  className="text-xs font-semibold text-[#7352d6]"
+                  className="text-xs font-semibold text-[#f3485d]"
                   onClick={() => setDate(dateString(new Date()))}
                 >
                   Hoy
@@ -253,7 +366,7 @@ export default function SportsScreen({
             {query.isError && (
               <p
                 role="alert"
-                className="mb-3 rounded-2xl bg-white p-4 text-sm text-[#90622b]"
+                className="mb-3 rounded-2xl bg-[#29272b] p-4 text-sm text-[#90622b]"
               >
                 No se pudo actualizar el marcador.
                 {query.data
@@ -266,24 +379,26 @@ export default function SportsScreen({
                 {[0, 1].map((n) => (
                   <div
                     key={n}
-                    className="h-44 animate-pulse rounded-3xl bg-white"
+                    className="h-44 animate-pulse rounded-3xl bg-[#29272b]"
                   />
                 ))}
                 <p className="sr-only">Cargando eventos…</p>
               </div>
             )}
             {!settings.leagues.length && (
-              <p className="rounded-3xl bg-white p-6">
+              <p className="rounded-3xl bg-[#29272b] p-6">
                 Elegí las competiciones que querés seguir en los ajustes.
               </p>
             )}
-            {filter === "favorite" && !settings.favorite && (
-              <p className="mb-3 rounded-3xl bg-white p-6">
-                Guardá tu equipo o piloto favorito en los ajustes de Deportes.
-              </p>
-            )}
+            {filter === "favorite" &&
+              !settings.favorite &&
+              !settings.sportsTeams.length && (
+                <p className="mb-3 rounded-3xl bg-[#29272b] p-6">
+                  Guardá tu equipo o piloto favorito en los ajustes de Deportes.
+                </p>
+              )}
             {shown?.length === 0 && (
-              <div className="rounded-3xl bg-white p-10 text-center">
+              <div className="rounded-3xl bg-[#29272b] p-10 text-center">
                 <p className="font-semibold">Sin eventos para mostrar</p>
                 <p className="mt-2 text-sm text-[#8c8c95]">
                   Elegí otra fecha, competición o filtro.
@@ -294,15 +409,15 @@ export default function SportsScreen({
               {shown?.map((e) => (
                 <article
                   key={e.id}
-                  className="overflow-hidden rounded-[26px] bg-white shadow-[0_2px_12px_#00000003]"
+                  className="relative overflow-hidden rounded-[22px] border border-white/10 bg-gradient-to-br from-[#302d30] to-[#242226] shadow-[0_8px_24px_#0004]"
                 >
                   <button
-                    className="block w-full p-5 text-left"
+                    className="block w-full p-3 pr-10 text-left"
                     aria-expanded={expanded === e.id}
                     aria-label={`Ver partido ${e.name || e.competitors.map((c) => c.name).join(" contra ")}`}
                     onClick={() => setExpanded(expanded === e.id ? null : e.id)}
                   >
-                    <div className="mb-4 flex justify-between gap-2 text-xs font-medium">
+                    <div className="mb-2 flex justify-between gap-2 text-[10px] font-medium">
                       <span
                         className={
                           e.state === "in"
@@ -322,11 +437,11 @@ export default function SportsScreen({
                       <span className="flex items-center gap-2 text-[#909099]">
                         {e.detail}
                         {favorite(e) && (
-                          <Star className="size-3 fill-[#7653d8] text-[#7653d8]" />
+                          <Star className="size-3 fill-[#ffd34d] text-[#ffd34d]" />
                         )}
                       </span>
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {e.competitors.slice(0, 2).map((c, i) => (
                         <div
                           key={`${c.name}-${i}`}
@@ -340,18 +455,34 @@ export default function SportsScreen({
                                 : undefined
                             }
                           />
-                          <span className="min-w-0 flex-1 text-[17px] font-semibold tracking-tight">
+                          <span className="min-w-0 flex-1 text-[14px] font-semibold tracking-tight">
                             {c.name}
                           </span>
-                          <strong className="text-[32px] font-bold tabular-nums tracking-tight">
+                          <strong className="text-[20px] font-bold tabular-nums tracking-tight">
                             {e.state === "pre" ? "—" : c.score || "—"}
                           </strong>
                         </div>
                       ))}
                     </div>
                   </button>
+                  <div className="absolute right-3 top-12 flex flex-col gap-3">
+                    {e.competitors.slice(0, 2).map((c) => (
+                      <button
+                        key={c.name}
+                        aria-label={`Favorito ${c.name}`}
+                        aria-pressed={settings.sportsTeams.includes(c.name)}
+                        onClick={() => toggleFavorite(c.name)}
+                        className="rounded-full p-1"
+                      >
+                        <Star
+                          className={`size-4 ${settings.sportsTeams.includes(c.name) ? "fill-[#ffd34d] text-[#ffd34d]" : "text-white/35"}`}
+                        />
+                        <span className="sr-only">{c.name}</span>
+                      </button>
+                    ))}
+                  </div>
                   {expanded === e.id && (
-                    <div className="border-t border-[#f0f0f5] px-5 py-4 text-sm text-[#8a8a95]">
+                    <div className="border-t border-white/10 px-5 py-4 text-sm text-[#8a8a95]">
                       <p>
                         {new Date(e.date).toLocaleString("es", {
                           day: "numeric",
@@ -361,7 +492,25 @@ export default function SportsScreen({
                         })}
                       </p>
                       {e.venue && <p className="mt-1">{e.venue}</p>}
-                      <MatchStatistics league={league} eventId={e.id} />
+                      <div className="my-3 flex gap-2 border-b border-white/10">
+                        <button
+                          className={`px-3 py-2 ${detailView === "stats" ? "border-b-2 border-[#f13c52] text-white" : "text-white/50"}`}
+                          onClick={() => setDetailView("stats")}
+                        >
+                          Estadísticas
+                        </button>
+                        <button
+                          className={`px-3 py-2 ${detailView === "lineups" ? "border-b-2 border-[#f13c52] text-white" : "text-white/50"}`}
+                          onClick={() => setDetailView("lineups")}
+                        >
+                          Alineaciones
+                        </button>
+                      </div>
+                      {detailView === "lineups" ? (
+                        <MatchLineups league={league} eventId={e.id} />
+                      ) : (
+                        <MatchStatistics league={league} eventId={e.id} />
+                      )}
                     </div>
                   )}
                 </article>
@@ -377,6 +526,31 @@ export default function SportsScreen({
           </>
         )}
       </div>
+      <nav
+        aria-label="Vistas deportivas"
+        className="mx-auto mt-3 flex w-full shrink-0 max-w-[520px] items-center justify-around rounded-[24px] border border-white/10 bg-[#1d1b1f] p-2 shadow-xl"
+      >
+        {[
+          ["matches", "Marcadores", List],
+          ["favorite", "Favoritos", Star],
+          ["table", "Tabla", Trophy],
+          ["history", "Historial", CalendarDays],
+        ].map(([key, label, Icon]) => {
+          const Symbol = Icon as typeof Star;
+          return (
+            <button
+              key={key as string}
+              onClick={() => chooseView(key as string)}
+              className={`flex flex-col items-center gap-1 rounded-xl px-3 py-2 text-[10px] ${view === key ? "border-b-2 border-[#f13c52] text-white" : "text-white/50"}`}
+            >
+              <Symbol
+                className={`size-4 ${key === "favorite" ? "text-[#ffd34d]" : ""}`}
+              />
+              {label as string}
+            </button>
+          );
+        })}
+      </nav>
       {controlHost &&
         createPortal(
           <div className="space-y-3">

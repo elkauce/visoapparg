@@ -188,3 +188,67 @@ it("keeps Latin American tables and match detail authenticated and bounded to su
     "https://site.api.espn.com/apis/v2/sports/soccer/arg.1/standings",
   );
 });
+
+it("returns only provider lineups and rejects unsafe event identifiers", async () => {
+  const t = convexTest(schema, modules);
+  const id = await t.run((ctx) => ctx.db.insert("users", { name: "Fan" }));
+  const signed = t.withIdentity({ subject: `${id}|s` });
+  const request = vi
+    .fn()
+    .mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          rosters: [
+            {
+              team: { displayName: "River Plate" },
+              formation: "4-3-3",
+              roster: [
+                {
+                  athlete: { displayName: "Provider Player" },
+                  jersey: "9",
+                  starter: true,
+                  position: { name: "Forward" },
+                },
+              ],
+            },
+          ],
+        }),
+      ),
+    );
+  vi.stubGlobal("fetch", request);
+  await expect(
+    t.action(api.sports.matchLineups, { league: "ligaarg", eventId: "123" }),
+  ).rejects.toThrow(/UNAUTHENTICATED/);
+  await expect(
+    signed.action(api.sports.matchLineups, {
+      league: "ligaarg",
+      eventId: "123&other=1",
+    }),
+  ).rejects.toThrow(/BAD_REQUEST/);
+  expect(request).not.toHaveBeenCalled();
+  const lineups = await signed.action(api.sports.matchLineups, {
+    league: "ligaarg",
+    eventId: "123",
+  });
+  expect(lineups).toEqual([
+    {
+      name: "River Plate",
+      formation: "4-3-3",
+      players: [
+        {
+          name: "Provider Player",
+          number: "9",
+          starter: true,
+          position: "Forward",
+        },
+      ],
+    },
+  ]);
+  request.mockResolvedValueOnce(new Response(JSON.stringify({})));
+  expect(
+    await signed.action(api.sports.matchLineups, {
+      league: "ligaarg",
+      eventId: "123",
+    }),
+  ).toEqual([]);
+});

@@ -455,3 +455,87 @@ export const matchStatistics = action({
     }));
   },
 });
+
+export const matchLineups = action({
+  args: { league: v.string(), eventId: v.string() },
+  handler: async (ctx, args) => {
+    if (!(await ctx.auth.getUserIdentity()))
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
+    if (!isSportsLeague(args.league) || !/^\d{1,15}$/.test(args.eventId))
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Partido inválido",
+      });
+    const response = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[args.league].path}/summary?event=${args.eventId}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!response.ok)
+      throw new ConvexError({
+        code: "EXTERNAL_SERVICE_ERROR",
+        message: "Alineaciones no disponibles",
+      });
+    const parsed = z
+      .object({
+        rosters: z
+          .array(
+            z.object({
+              team: z.object({ displayName: z.string() }),
+              formation: z.string().optional(),
+              roster: z
+                .array(
+                  z.object({
+                    athlete: z.object({
+                      displayName: z.string(),
+                      position: z
+                        .object({
+                          displayName: z.string().optional(),
+                          name: z.string().optional(),
+                          abbreviation: z.string().optional(),
+                        })
+                        .optional(),
+                    }),
+                    jersey: z.union([z.string(), z.number()]).optional(),
+                    starter: z.boolean().optional(),
+                    position: z
+                      .object({
+                        displayName: z.string().optional(),
+                        name: z.string().optional(),
+                        abbreviation: z.string().optional(),
+                      })
+                      .optional(),
+                  }),
+                )
+                .optional(),
+            }),
+          )
+          .optional(),
+      })
+      .safeParse(await response.json());
+    if (!parsed.success) return [];
+    return (parsed.data.rosters ?? [])
+      .slice(0, 2)
+      .map((team) => ({
+        name: team.team.displayName,
+        formation: team.formation ?? null,
+        players: (team.roster ?? [])
+          .slice(0, 40)
+          .map((p) => ({
+            name: p.athlete.displayName,
+            number: p.jersey === undefined ? null : String(p.jersey),
+            starter: p.starter ?? null,
+            position:
+              p.position?.displayName ??
+              p.position?.name ??
+              p.position?.abbreviation ??
+              p.athlete.position?.displayName ??
+              p.athlete.position?.name ??
+              p.athlete.position?.abbreviation ??
+              null,
+          })),
+      }));
+  },
+});

@@ -24,6 +24,7 @@ export type ScreenSettings = {
   sportsDate: string;
   sportsView: string;
   sportsFilter: string;
+  sportsTeams: string[];
 };
 export const defaultScreenSettings: ScreenSettings = {
   city: "Buenos Aires",
@@ -51,6 +52,7 @@ export const defaultScreenSettings: ScreenSettings = {
   sportsDate: "",
   sportsView: "matches",
   sportsFilter: "all",
+  sportsTeams: [],
 };
 const validDate = (value: string) =>
   value === "" ||
@@ -95,6 +97,16 @@ export function normalizeScreenSettings(value: unknown): ScreenSettings {
           ),
         ].slice(0, 24)
       : defaultScreenSettings.leagues,
+    sportsTeams: Array.isArray(s.sportsTeams)
+      ? [
+          ...new Set(
+            s.sportsTeams.filter(
+              (x): x is string =>
+                typeof x === "string" && x.trim().length > 0 && x.length <= 60,
+            ),
+          ),
+        ].slice(0, 50)
+      : [],
     sportsLeague:
       typeof s.sportsLeague === "string" && isSportsLeague(s.sportsLeague)
         ? s.sportsLeague
@@ -139,6 +151,13 @@ export function validateScreenSettingsPatch(
     });
   };
   for (const [key, item] of Object.entries(patch)) {
+    if (
+      key === "sportsTeams" &&
+      (!Array.isArray(item) ||
+        item.length > 50 ||
+        item.some((x) => typeof x !== "string" || !x.trim() || x.length > 60))
+    )
+      invalid();
     if (
       key === "sportsLeague" &&
       (typeof item !== "string" || (item !== "" && !isSportsLeague(item)))
