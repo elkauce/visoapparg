@@ -321,6 +321,7 @@ export function drawReferenceMeter(
         );
         c.stroke();
       } else if (style === "mirror") {
+        c.fillStyle = `hsl(${(i / bands.length) * 360} 100% 60%)`;
         c.fillRect(
           i * bw + bw * 0.12,
           h / 2 - value * h * 0.46,

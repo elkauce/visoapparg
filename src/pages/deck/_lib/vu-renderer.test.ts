@@ -133,7 +133,11 @@ it("draws visible bars and mirrored bars from quiet real input", () => {
       [],
       [],
     );
-    const bars = rectangles.filter((r) => r.color === "#00ff00");
+    const bars = rectangles.filter((r) =>
+      style === "mirror"
+        ? String(r.color).startsWith("hsl(")
+        : r.color === "#00ff00",
+    );
     expect(bars).toHaveLength(2);
     expect(bars.every((r) => r.args[3] > 200)).toBe(true);
   }

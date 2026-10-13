@@ -19,7 +19,17 @@ type PublicStatus = {
 };
 
 // Imagen o video que cubre toda la pantalla
-function MediaBackground({ status, volume }: { status: PublicStatus; volume: number }) {
+function MediaBackground({
+  status,
+  volume,
+  fit = "cover",
+  overlay = true,
+}: {
+  status: Pick<PublicStatus, "mediaUrl" | "mediaType">;
+  volume: number;
+  fit?: "cover" | "contain";
+  overlay?: boolean;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // El volumen se aplica por propiedad: React no actualiza "muted" de forma fiable
@@ -45,18 +55,22 @@ function MediaBackground({ status, volume }: { status: PublicStatus; volume: num
           muted
           loop
           playsInline
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 size-full"
+          style={{ objectFit: fit }}
         />
       ) : (
         <img
           key={status.mediaUrl}
           src={status.mediaUrl}
           alt=""
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 size-full"
+          style={{ objectFit: fit }}
         />
       )}
       {/* Degradado para que el texto se lea sobre cualquier imagen */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
+      {overlay && (
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/30" />
+      )}
     </>
   );
 }
@@ -86,8 +100,10 @@ export default function PublicStatusPage() {
 
   const toggleFullscreen = async () => {
     if (isAndroidNative()) {
-      if (isFullscreen) { await immersive.exit(); setIsFullscreen(false); }
-      else await enterFullscreen();
+      if (isFullscreen) {
+        await immersive.exit();
+        setIsFullscreen(false);
+      } else await enterFullscreen();
       return;
     }
     if (document.fullscreenElement) {
@@ -108,7 +124,12 @@ export default function PublicStatusPage() {
     return () => window.removeEventListener("viso:android-back", back);
   }, [isFullscreen]);
 
-  useEffect(() => () => { if (isAndroidNative()) void immersive.exit().catch(() => undefined); }, []);
+  useEffect(
+    () => () => {
+      if (isAndroidNative()) void immersive.exit().catch(() => undefined);
+    },
+    [],
+  );
 
   if (data === undefined) {
     return <div className="min-h-screen bg-background" />;
@@ -127,9 +148,15 @@ export default function PublicStatusPage() {
   }
 
   const { status, ownerName } = data;
-  const hasMedia = status?.mediaUrl != null;
-  const background = status?.color ?? "#0b0c10";
-  const textColor = hasMedia ? "#ffffff" : status ? readableTextColor(status.color) : "#ffffff";
+  const brand = data.background?.mediaUrl ? data.background : null;
+  const showStatus = !brand || brand.showStatus;
+  const hasMedia = brand != null || status?.mediaUrl != null;
+  const background = brand ? "#000000" : (status?.color ?? "#0b0c10");
+  const textColor = hasMedia
+    ? "#ffffff"
+    : status
+      ? readableTextColor(status.color)
+      : "#ffffff";
 
   return (
     // El navegador solo permite pantalla completa tras un toque: un toque en cualquier parte la activa
@@ -140,6 +167,14 @@ export default function PublicStatusPage() {
       style={{ color: textColor }}
       onClick={() => void enterFullscreen()}
     >
+      {brand && (
+        <MediaBackground
+          status={brand}
+          volume={data.volume}
+          fit={brand.fit}
+          overlay={showStatus}
+        />
+      )}
       <AnimatePresence mode="wait">
         <motion.div
           key={status?.id ?? "none"}
@@ -149,54 +184,58 @@ export default function PublicStatusPage() {
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="viso-display-safe-content absolute inset-0 flex flex-col items-center justify-center p-8"
         >
-          {status && <MediaBackground status={status} volume={data.volume} />}
+          {!brand && status && (
+            <MediaBackground status={status} volume={data.volume} />
+          )}
           {!hasMedia && (
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgb(255_255_255/0.18),transparent_65%)]" />
           )}
 
-          <div
-            className={
-              hasMedia
-                ? "relative mt-auto flex flex-col items-center gap-3 pb-6"
-                : "relative flex flex-col items-center gap-8"
-            }
-          >
-            {status ? (
-              <>
-                <StatusIcon
-                  name={status.icon}
-                  strokeWidth={1.25}
-                  className={
-                    hasMedia
-                      ? "size-[clamp(3rem,8vw,6rem)]"
-                      : "size-[clamp(6rem,22vw,16rem)]"
-                  }
-                />
-                <h1
-                  className={
-                    hasMedia
-                      ? "text-balance text-[clamp(2rem,7vw,5rem)] font-bold uppercase leading-none tracking-tight drop-shadow-lg"
-                      : "text-balance text-[clamp(3rem,13vw,11rem)] font-bold uppercase leading-none tracking-tight"
-                  }
-                >
-                  {status.name}
-                </h1>
-              </>
-            ) : (
-              <>
-                <MoonStar
-                  strokeWidth={1.25}
-                  className="size-[clamp(5rem,16vw,12rem)] opacity-60"
-                />
-                <h1 className="text-[clamp(2rem,8vw,6rem)] font-semibold opacity-60">
-                  Sin estado
-                </h1>
-              </>
-            )}
-            {ownerName && (
-              <p className="text-lg opacity-80 sm:text-2xl">{ownerName}</p>
-            )}
-          </div>
+          {showStatus && (
+            <div
+              className={
+                hasMedia
+                  ? "relative mt-auto flex flex-col items-center gap-3 pb-6"
+                  : "relative flex flex-col items-center gap-8"
+              }
+            >
+              {status ? (
+                <>
+                  <StatusIcon
+                    name={status.icon}
+                    strokeWidth={1.25}
+                    className={
+                      hasMedia
+                        ? "size-[clamp(3rem,8vw,6rem)]"
+                        : "size-[clamp(6rem,22vw,16rem)]"
+                    }
+                  />
+                  <h1
+                    className={
+                      hasMedia
+                        ? "text-balance text-[clamp(2rem,7vw,5rem)] font-bold uppercase leading-none tracking-tight drop-shadow-lg"
+                        : "text-balance text-[clamp(3rem,13vw,11rem)] font-bold uppercase leading-none tracking-tight"
+                    }
+                  >
+                    {status.name}
+                  </h1>
+                </>
+              ) : (
+                <>
+                  <MoonStar
+                    strokeWidth={1.25}
+                    className="size-[clamp(5rem,16vw,12rem)] opacity-60"
+                  />
+                  <h1 className="text-[clamp(2rem,8vw,6rem)] font-semibold opacity-60">
+                    Sin estado
+                  </h1>
+                </>
+              )}
+              {ownerName && (
+                <p className="text-lg opacity-80 sm:text-2xl">{ownerName}</p>
+              )}
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
 
@@ -213,7 +252,9 @@ export default function PublicStatusPage() {
           e.stopPropagation();
           void toggleFullscreen();
         }}
-        aria-label={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+        aria-label={
+          isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"
+        }
         className="viso-display-fullscreen absolute bottom-5 right-5 opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100"
       >
         {isFullscreen ? <Minimize /> : <Maximize />}

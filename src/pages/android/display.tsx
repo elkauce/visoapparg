@@ -1,3 +1,4 @@
+import DisplayBackgroundSettings from "../_components/display-background";
 import { useState } from "react";
 import { useMutation, useQuery, useConvexConnectionState } from "convex/react";
 import { Link } from "react-router-dom";
@@ -14,10 +15,42 @@ export default function AndroidDisplay() {
   const prepare = async () => {
     if (pending || !connection.isWebSocketConnected) return;
     setPending(true);
-    try { await ensure({}); } catch { toast.error("No se pudo preparar el Display. Inténtalo de nuevo."); }
-    finally { setPending(false); }
+    try {
+      await ensure({});
+    } catch {
+      toast.error("No se pudo preparar el Display. Inténtalo de nuevo.");
+    } finally {
+      setPending(false);
+    }
   };
-  return <AndroidScreen title="Display"><p className="text-muted-foreground">Muestra el estado de tu cuenta a pantalla completa. Los cambios del Deck se reciben en tiempo real.</p>
-    {slug ? <><Button asChild size="lg"><Link to={`/s/${slug}`}>Abrir mi Display</Link></Button>{import.meta.env.VITE_VISO_WEB_URL && <p className="break-all text-sm text-muted-foreground">Enlace público: {import.meta.env.VITE_VISO_WEB_URL}/s/{slug}</p>}</> : <Button disabled={slug === undefined || pending || !connection.isWebSocketConnected} onClick={() => void prepare()}>{pending ? "Preparando…" : "Preparar mi Display"}</Button>}
-  </AndroidScreen>;
+  return (
+    <AndroidScreen title="Display">
+      <p className="text-muted-foreground">
+        Muestra el estado de tu cuenta a pantalla completa. Los cambios del Deck
+        se reciben en tiempo real.
+      </p>
+      {slug ? (
+        <>
+          <Button asChild size="lg">
+            <Link to={`/s/${slug}`}>Abrir mi Display</Link>
+          </Button>
+          {import.meta.env.VITE_VISO_WEB_URL && (
+            <p className="break-all text-sm text-muted-foreground">
+              Enlace público: {import.meta.env.VITE_VISO_WEB_URL}/s/{slug}
+            </p>
+          )}
+        </>
+      ) : (
+        <Button
+          disabled={
+            slug === undefined || pending || !connection.isWebSocketConnected
+          }
+          onClick={() => void prepare()}
+        >
+          {pending ? "Preparando…" : "Preparar mi Display"}
+        </Button>
+      )}
+      <DisplayBackgroundSettings />
+    </AndroidScreen>
+  );
 }

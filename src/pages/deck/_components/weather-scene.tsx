@@ -23,6 +23,7 @@ export default function WeatherScene({
   return (
     <div
       aria-hidden="true"
+      data-weather-active={active}
       className="pointer-events-none absolute inset-0 overflow-hidden"
       style={{
         background: `linear-gradient(180deg,${sky[0]},${sky[1]} 50%,${sky[2]})`,
@@ -43,13 +44,19 @@ export default function WeatherScene({
           </linearGradient>
         </defs>
         {cloudy ? (
-          <g fill="white" opacity=".17" filter={`url(#${id}-cloud)`}>
+          <g
+            className="viso-weather-clouds"
+            fill="white"
+            opacity=".17"
+            filter={`url(#${id}-cloud)`}
+          >
             <ellipse cx="90" cy="80" rx="200" ry="72" />
             <ellipse cx="400" cy="170" rx="140" ry="62" />
             <ellipse cx="590" cy="65" rx="200" ry="72" />
           </g>
         ) : (
           <circle
+            className="viso-weather-sun"
             cx="535"
             cy="110"
             r={isDay ? 45 : 30}
@@ -69,7 +76,7 @@ export default function WeatherScene({
             opacity=".6"
           />
           <path d="M0 490 H700 V600 H0Z" fill={`url(#${id}-water)`} />
-          <g stroke="#c9e0dc" opacity=".28">
+          <g className="viso-weather-water" stroke="#c9e0dc" opacity=".28">
             {[514, 530, 545, 565, 581].map((y, i) => (
               <path key={y} d={`M${20 + i * 37} ${y} h${590 - i * 22}`} />
             ))}
@@ -80,48 +87,56 @@ export default function WeatherScene({
           />
           <path d="M0 621 Q260 596 450 620 T700 615 V640 H0Z" fill="#688552" />
           <g transform="translate(472 453)">
-            <ellipse
-              cx="0"
-              cy="137"
-              rx="31"
-              ry="6"
-              fill="#324c43"
-              opacity=".3"
-            />
-            <path
-              d="M-12 75 L-7 131 H1 L3 72 M10 74 L18 131 H27 L23 69"
-              fill="#566162"
-            />
-            <path d="M-15 18 Q4 2 19 19 L25 77 H-19Z" fill="#cee5df" />
-            <path
-              d="M-13 22 L-25 56 L-21 70 L-17 69 L-16 54 L-4 28"
-              fill="#cfdfd6"
-            />
-            <path
-              d="M13 20 L29 43 L36 22"
-              fill="none"
-              stroke="#c4ded8"
-              strokeWidth="9"
-              strokeLinecap="round"
-            />
-            <ellipse cx="1" cy="0" rx="11" ry="14" fill="#d8b7a1" />
-            <path d="M-10 -6 Q0 -21 12 -3 L11 17 Q-3 16-10 4Z" fill="#344553" />
-            {rain || snow ? (
-              <g>
-                <path
-                  d="M36 -43 V29 q0 9-8 8"
-                  fill="none"
-                  stroke="#727b87"
-                  strokeWidth="3"
-                />
-                <path
-                  d="M-11 -36 Q28 -87 77 -29 Q58 -44 44 -28 Q23 -44 8 -29Z"
-                  fill="#333a67"
-                />
-                <path d="M8 -29 Q25 -75 36 -62 Q50 -59 44 -28" fill="#4b558b" />
-                <path d="M36 -62 L34 -69" stroke="#5b607f" strokeWidth="2" />
-              </g>
-            ) : null}
+            <g className="viso-weather-person">
+              <ellipse
+                cx="0"
+                cy="137"
+                rx="31"
+                ry="6"
+                fill="#324c43"
+                opacity=".3"
+              />
+              <path
+                d="M-12 75 L-7 131 H1 L3 72 M10 74 L18 131 H27 L23 69"
+                fill="#566162"
+              />
+              <path d="M-15 18 Q4 2 19 19 L25 77 H-19Z" fill="#cee5df" />
+              <path
+                d="M-13 22 L-25 56 L-21 70 L-17 69 L-16 54 L-4 28"
+                fill="#cfdfd6"
+              />
+              <path
+                d="M13 20 L29 43 L36 22"
+                fill="none"
+                stroke="#c4ded8"
+                strokeWidth="9"
+                strokeLinecap="round"
+              />
+              <ellipse cx="1" cy="0" rx="11" ry="14" fill="#d8b7a1" />
+              <path
+                d="M-10 -6 Q0 -21 12 -3 L11 17 Q-3 16-10 4Z"
+                fill="#344553"
+              />
+              {rain || snow ? (
+                <g>
+                  <path
+                    d="M36 -43 V29 q0 9-8 8"
+                    fill="none"
+                    stroke="#727b87"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="M-11 -36 Q28 -87 77 -29 Q58 -44 44 -28 Q23 -44 8 -29Z"
+                    fill="#333a67"
+                  />
+                  <path
+                    d="M8 -29 Q25 -75 36 -62 Q50 -59 44 -28"
+                    fill="#4b558b"
+                  />
+                  <path d="M36 -62 L34 -69" stroke="#5b607f" strokeWidth="2" />
+                </g>
+              ) : null}
+            </g>
           </g>
         </g>
       </svg>
@@ -157,7 +172,17 @@ export default function WeatherScene({
           ))}
         </div>
       )}
-      <style>{`@keyframes viso-weather-rain { from { transform:translateY(-10vh) rotate(12deg); } to { transform:translateY(120vh) rotate(12deg); } }`}</style>
+      <style>{`.viso-weather-clouds {animation:viso-cloud-drift 14s ease-in-out infinite alternate;}
+.viso-weather-sun {transform-origin:535px 110px;animation:viso-sun-glow 5s ease-in-out infinite alternate;}
+.viso-weather-water {animation:viso-water-flow 4s ease-in-out infinite alternate;}
+.viso-weather-person {transform-origin:0px 137px;animation:viso-person-sway 5s ease-in-out infinite alternate;}
+[data-weather-active=false] svg g, [data-weather-active=false] svg circle {animation-play-state:paused;}
+@media(prefers-reduced-motion:reduce) {.viso-weather-clouds,.viso-weather-sun,.viso-weather-water,.viso-weather-person {animation:none;}}
+@keyframes viso-cloud-drift {from {transform:translateX(-28px);} to {transform:translateX(32px);}}
+@keyframes viso-sun-glow {from {opacity:.65;transform:scale(.96);} to {opacity:1;transform:scale(1.08);}}
+@keyframes viso-water-flow {from {transform:translateX(-12px);opacity:.2;} to {transform:translateX(14px);opacity:.5;}}
+@keyframes viso-person-sway {from {transform:rotate(-1deg);} to {transform:rotate(1deg);}}
+@keyframes viso-weather-rain { from { transform:translateY(-10vh) rotate(12deg); } to { transform:translateY(120vh) rotate(12deg); } }`}</style>
     </div>
   );
 }

@@ -327,6 +327,7 @@ describe("User data isolation", () => {
       found: true,
       ownerName: "Alice",
       volume: 35,
+      background: null,
       status: {
         ...aliceStatus,
         id: aliceStatusId,
@@ -341,6 +342,7 @@ describe("User data isolation", () => {
       found: true,
       ownerName: "Bob",
       volume: 60,
+      background: null,
       status: {
         ...bobStatus,
         id: bobStatusId,

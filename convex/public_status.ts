@@ -63,6 +63,16 @@ export const getPublicStatus = query({
       found: true as const,
       ownerName: user?.name ?? null,
       volume: user?.displayVolume ?? 0,
+      background: user?.displayBackground
+        ? {
+            mediaUrl: await ctx.storage.getUrl(
+              user.displayBackground.mediaStorageId,
+            ),
+            mediaType: user.displayBackground.mediaType,
+            fit: user.displayBackground.fit,
+            showStatus: user.displayBackground.showStatus,
+          }
+        : null,
       status: status
         ? {
             id: status._id,

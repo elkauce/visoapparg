@@ -1,3 +1,4 @@
+import DisplayBackgroundSettings from "./display-background";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Check, Copy, ExternalLink, RefreshCw } from "lucide-react";
@@ -108,6 +109,7 @@ export default function SharePanel() {
           </AlertDialog>
         </div>
       </div>
+      <DisplayBackgroundSettings />
     </section>
   );
 }

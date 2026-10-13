@@ -22,6 +22,14 @@ export default defineSchema({
     homeWebhookUrl: v.optional(v.string()),
     // Volumen (0-100) de los videos del Display público. 0 = silencio
     displayVolume: v.optional(v.number()),
+    displayBackground: v.optional(
+      v.object({
+        mediaStorageId: v.id("_storage"),
+        mediaType: v.union(v.literal("image"), v.literal("video")),
+        fit: v.union(v.literal("cover"), v.literal("contain")),
+        showStatus: v.boolean(),
+      }),
+    ),
   })
     .index("email", ["email"])
     .index("phone", ["phone"])
