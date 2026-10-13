@@ -271,3 +271,80 @@ function PublishedPitch({
     </div>
   );
 }
+
+export function MatchLeaguePosition({
+  league,
+  teams,
+}: {
+  league: string;
+  teams: string[];
+}) {
+  const action = useAction(api.sports.leagueTable);
+  const query = useQuery({
+    queryKey: ["league-table", league],
+    queryFn: () => action({ league }),
+    staleTime: 300000,
+  });
+  const entries = query.data?.flatMap((group) => group.entries) ?? [];
+  return (
+    <div className="relative mb-4 overflow-hidden rounded-[24px] border border-white/10 bg-gradient-to-br from-[#363237] to-[#242226] px-5 py-6">
+      <p className="mb-5 text-center text-xs text-white/60">
+        Posición actual en la liga
+      </p>
+      {query.isPending ? (
+        <p className="text-center text-xs text-white/40">Consultando tabla…</p>
+      ) : (
+        <div className="grid grid-cols-2 gap-7">
+          {teams.slice(0, 2).map((name) => {
+            const row = entries.find((entry) => entry.name === name);
+            const played = Number(row?.played),
+              wins = Number(row?.wins);
+            const rate =
+              row &&
+              Number.isFinite(played) &&
+              played > 0 &&
+              Number.isFinite(wins)
+                ? Math.round((wins / played) * 100)
+                : null;
+            return (
+              <div key={name}>
+                <p className="mb-3 truncate text-center text-xs text-white/70">
+                  {name}
+                </p>
+                <div className="flex items-center justify-center gap-4">
+                  <div className="relative h-24 w-2 overflow-hidden rounded-full bg-white/10">
+                    <div
+                      className="absolute inset-x-0 bottom-0 rounded-full bg-white/70"
+                      style={{
+                        height:
+                          rate === null
+                            ? "0%"
+                            : `${Math.max(0, Math.min(100, rate))}%`,
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <strong className="block text-xl text-white">
+                      {rate === null ? "—" : `${rate}%`}
+                    </strong>
+                    <span className="block text-[10px] text-white/40">
+                      Victorias
+                    </span>
+                    <span className="mt-2 block text-xs text-white/70">
+                      Posición {row?.rank ?? "—"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {query.isError && (
+        <p className="mt-3 text-xs text-white/45">
+          La fuente no ofrece la tabla en este momento.
+        </p>
+      )}
+    </div>
+  );
+}

@@ -4,7 +4,7 @@ Versión preparada, no publicada. Nubes más contrastadas, desplazamiento ±85 p
 
 TypeScript y compilación APK pasaron. Verificación real en Chromium: matriz de transformación de nubes cambia entre cuadros separados por un segundo y se pausa al desactivar la escena. Pruebas existentes de presentación meteorológica pasaron. Falta prueba física en teléfonos y confirmación perceptual del usuario.
 
-APK versionCode 21, com.viso.deck, versión 1.11.4. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SHA256 e98d1a16ab615c41786eff8f3489e7a68efdb8599d0b5ef05a557a3edaf75308.
+APK versionCode 21, com.viso.deck, versión 1.11.4. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SHA256 5858c8c9239f86d801c1464da76945d97ac08515c1f82fa0953a0058a2fc19cc.
 
 ## Contenido deportivo compartido
 
@@ -21,3 +21,11 @@ Datos: conserva ESPN y Jolpica reales, añade búsqueda de equipos/partidos dent
 Verificación final: 377 pruebas en 39 archivos; TypeScript frontend/backend y APK compilada. Dos sesiones de navegador verifican selección compartida. Vista aislada y controles de búsqueda/favoritos probados en Chromium con respuesta histórica real de ESPN registrada (liga argentina, 2025-11-09); esa captura no es una conexión en vivo ni prueba Android. Descarga de imágenes del proveedor bloqueada en entorno de pruebas: las capturas muestran iniciales de respaldo. Prueba física del teléfono pendiente. Evidencias en android-deck-1.11.4-evidence/.
 
 Servidor y web de producción todavía 1.11.3. Publicación requiere autorización explícita. SDK, paquete, firma y funciones existentes conservados.
+
+## Corrección de curvas según fotografías ampliadas
+
+El usuario rechazó la adaptación de rectángulos redondeados. Ahora SportsScoreCard usa una silueta SVG con hendidura superior y recorte inferior central, metadatos sobre fondo oscuro, score centrado y equipos a los lados. Escudos reales del proveedor con iniciales de respaldo si fallan. Selector de tres días; filas compactas con celdas laterales en punta para el tiempo/estado real; navegación inferior de cinco acciones funcionales (Agenda, Favoritos, Marcadores, Tabla, Actualizar). Mantiene VISO y contenido propio, no simula barras de teléfono ni funciones de noticias/watch sin fuente.
+
+Detalle del partido se muestra dentro de la misma página Deck con Información, Alineaciones, Tabla y Estadísticas. Información combina tarjeta curva con posiciones actuales de la tabla y porcentaje de victorias calculado solo cuando el proveedor publica PJ/G válidos; no se lo presenta como forma histórica ni clasificación live del partido. Los desconocidos se muestran como —. El campo de alineación solo se dibuja con once titulares publicados con posiciones reconocibles; la lista fuente se conserva.
+
+TypeScript y APK compilados; verificada presencia del código final de tarjetas curvas y detalle en el paquete APK. Vista de referencia y búsqueda/favoritos verificados en Chromium con respuesta histórica registrada real; pruebas Android físicas y endpoint nuevo de alineaciones live siguen pendientes. Capturas actualizadas en android-deck-1.11.4-evidence/. Publicación detenida para revisión visual del usuario.
