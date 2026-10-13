@@ -16,6 +16,7 @@ import type * as deck_media from "../deck_media.js";
 import type * as display from "../display.js";
 import type * as http from "../http.js";
 import type * as lib_activate_status from "../lib/activate_status.js";
+import type * as lib_clock_settings from "../lib/clock_settings.js";
 import type * as lib_current_user from "../lib/current_user.js";
 import type * as lib_deck_action_content from "../lib/deck_action_content.js";
 import type * as lib_deck_appearance from "../lib/deck_appearance.js";
@@ -26,7 +27,9 @@ import type * as lib_deck_tokens from "../lib/deck_tokens.js";
 import type * as lib_light_validation from "../lib/light_validation.js";
 import type * as lib_owned_status from "../lib/owned_status.js";
 import type * as lib_public_links from "../lib/public_links.js";
+import type * as lib_screen_settings from "../lib/screen_settings.js";
 import type * as lib_sports_leagues from "../lib/sports_leagues.js";
+import type * as lib_viso_preset_states from "../lib/viso_preset_states.js";
 import type * as lib_webhook_payload from "../lib/webhook_payload.js";
 import type * as lights from "../lights.js";
 import type * as media from "../media.js";
@@ -34,6 +37,7 @@ import type * as public_status from "../public_status.js";
 import type * as sports from "../sports.js";
 import type * as statuses from "../statuses.js";
 import type * as users from "../users.js";
+import type * as weather from "../weather.js";
 
 import type {
   ApiFromModules,
@@ -50,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   display: typeof display;
   http: typeof http;
   "lib/activate_status": typeof lib_activate_status;
+  "lib/clock_settings": typeof lib_clock_settings;
   "lib/current_user": typeof lib_current_user;
   "lib/deck_action_content": typeof lib_deck_action_content;
   "lib/deck_appearance": typeof lib_deck_appearance;
@@ -60,7 +65,9 @@ declare const fullApi: ApiFromModules<{
   "lib/light_validation": typeof lib_light_validation;
   "lib/owned_status": typeof lib_owned_status;
   "lib/public_links": typeof lib_public_links;
+  "lib/screen_settings": typeof lib_screen_settings;
   "lib/sports_leagues": typeof lib_sports_leagues;
+  "lib/viso_preset_states": typeof lib_viso_preset_states;
   "lib/webhook_payload": typeof lib_webhook_payload;
   lights: typeof lights;
   media: typeof media;
@@ -68,6 +75,7 @@ declare const fullApi: ApiFromModules<{
   sports: typeof sports;
   statuses: typeof statuses;
   users: typeof users;
+  weather: typeof weather;
 }>;
 
 /**

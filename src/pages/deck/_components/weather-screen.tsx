@@ -1,3 +1,5 @@
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { useQuery } from "@tanstack/react-query";
 import {
   RefreshCw,
@@ -18,6 +20,7 @@ export default function WeatherScreen({
   settings: ScreenSettings;
   active: boolean;
 }) {
+  const fullForecast = useAction(api.weather.fullForecast);
   const query = useQuery({
     queryKey: [
       "full-weather",
@@ -28,67 +31,12 @@ export default function WeatherScreen({
     enabled: active,
     refetchInterval: 600000,
     staleTime: 300000,
-    queryFn: async ({ signal }) => {
-      const params = new URLSearchParams({
-        latitude: String(settings.latitude),
-        longitude: String(settings.longitude),
-        temperature_unit: settings.units,
-        timezone: "auto",
-        forecast_days: "7",
-        current:
-          "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,pressure_msl",
-        hourly:
-          "temperature_2m,precipitation_probability,weather_code,visibility",
-        daily:
-          "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,uv_index_max,precipitation_probability_max",
-      });
-      const response = await fetch(
-        `https://api.open-meteo.com/v1/forecast?${params}`,
-        { signal },
-      );
-      if (!response.ok) throw new Error("No se pudo actualizar el clima");
-      const d = await response.json();
-      if (
-        !d.current ||
-        !d.hourly ||
-        !d.daily ||
-        !Number.isFinite(d.current.temperature_2m)
-      )
-        throw new Error("Datos meteorológicos incompletos");
-      return d as {
-        current: {
-          time: string;
-          temperature_2m: number;
-          relative_humidity_2m: number;
-          apparent_temperature: number;
-          is_day: number;
-          precipitation: number;
-          weather_code: number;
-          cloud_cover: number;
-          wind_speed_10m: number;
-          wind_direction_10m: number;
-          pressure_msl: number;
-        };
-        hourly: {
-          time: string[];
-          temperature_2m: number[];
-          precipitation_probability: number[];
-          weather_code: number[];
-          visibility: number[];
-        };
-        daily: {
-          time: string[];
-          weather_code: number[];
-          temperature_2m_max: number[];
-          temperature_2m_min: number[];
-          sunrise: string[];
-          sunset: string[];
-          uv_index_max: number[];
-          precipitation_probability_max: number[];
-        };
-        timezone: string;
-      };
-    },
+    queryFn: () =>
+      fullForecast({
+        latitude: settings.latitude,
+        longitude: settings.longitude,
+        units: settings.units,
+      }),
   });
   const d = query.data;
   const unit = settings.units === "fahrenheit" ? "°F" : "°C";

@@ -629,6 +629,7 @@ export default function DeckPage({
           Tipo de página
           <select
             aria-label="Tipo de página"
+            disabled={pending || !connected}
             className="rounded-md border bg-background p-2"
             value={currentPage.kind ?? "grid"}
             onChange={(event) =>
