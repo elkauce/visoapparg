@@ -36,7 +36,7 @@ export default function WeatherScene({
       >
         <defs>
           <filter id={`${id}-cloud`}>
-            <feGaussianBlur stdDeviation="20" />
+            <feGaussianBlur stdDeviation="12" />
           </filter>
           <linearGradient id={`${id}-water`} x2="0" y2="1">
             <stop stopColor="#83bcc2" />
@@ -47,7 +47,7 @@ export default function WeatherScene({
           <g
             className="viso-weather-clouds"
             fill="white"
-            opacity=".17"
+            opacity=".38"
             filter={`url(#${id}-cloud)`}
           >
             <ellipse cx="90" cy="80" rx="200" ry="72" />
@@ -64,6 +64,19 @@ export default function WeatherScene({
             opacity=".8"
           />
         )}
+        {!cloudy && isDay && (
+          <g
+            className="viso-weather-rays"
+            transform="translate(535 110)"
+            stroke="#ffeaa0"
+            strokeWidth="4"
+            opacity=".5"
+          >
+            {Array.from({ length: 12 }, (_, i) => (
+              <path key={i} transform={`rotate(${i * 30})`} d="M0 -58 L0 -92" />
+            ))}
+          </g>
+        )}
         <g className="portrait:-translate-y-[200px]">
           <path
             d="M0 442 Q90 390 175 428 Q270 370 360 415 Q500 372 700 430 L700 560 L0 560Z"
@@ -76,9 +89,18 @@ export default function WeatherScene({
             opacity=".6"
           />
           <path d="M0 490 H700 V600 H0Z" fill={`url(#${id}-water)`} />
-          <g className="viso-weather-water" stroke="#c9e0dc" opacity=".28">
+          <g
+            className="viso-weather-water"
+            stroke="#e0f6f2"
+            strokeWidth="3"
+            opacity=".65"
+          >
             {[514, 530, 545, 565, 581].map((y, i) => (
-              <path key={y} d={`M${20 + i * 37} ${y} h${590 - i * 22}`} />
+              <path
+                key={y}
+                d={`M-100 ${y} Q-50 ${y - 7} 0 ${y} T100 ${y} T200 ${y} T300 ${y} T400 ${y} T500 ${y} T600 ${y} T800 ${y}`}
+                fill="none"
+              />
             ))}
           </g>
           <path
@@ -141,7 +163,7 @@ export default function WeatherScene({
         </g>
       </svg>
       {rain && (
-        <div className="absolute inset-0 opacity-35">
+        <div className="absolute inset-0 opacity-65">
           {Array.from({ length: 35 }, (_, i) => (
             <i
               key={i}
@@ -157,11 +179,11 @@ export default function WeatherScene({
         </div>
       )}
       {snow && (
-        <div className="absolute inset-0 opacity-45">
+        <div className="absolute inset-0 opacity-75">
           {Array.from({ length: 24 }, (_, i) => (
             <i
               key={i}
-              className="absolute top-[-10%] size-1 rounded-full bg-white motion-reduce:opacity-0"
+              className="absolute top-[-10%] size-2 rounded-full bg-white motion-reduce:opacity-0"
               style={{
                 left: `${(i * 37) % 101}%`,
                 animation: `viso-weather-rain ${5 + (i % 4)}s linear infinite`,
@@ -172,15 +194,17 @@ export default function WeatherScene({
           ))}
         </div>
       )}
-      <style>{`.viso-weather-clouds {animation:viso-cloud-drift 14s ease-in-out infinite alternate;}
-.viso-weather-sun {transform-origin:535px 110px;animation:viso-sun-glow 5s ease-in-out infinite alternate;}
-.viso-weather-water {animation:viso-water-flow 4s ease-in-out infinite alternate;}
+      <style>{`.viso-weather-clouds {animation:viso-cloud-drift 7s ease-in-out infinite alternate;}
+.viso-weather-sun {transform-origin:535px 110px;animation:viso-sun-glow 3s ease-in-out infinite alternate;}
+.viso-weather-water {animation:viso-water-flow 2.5s ease-in-out infinite alternate;}
+ .viso-weather-rays {transform-box:fill-box;transform-origin:center;animation:viso-ray-rotate 18s linear infinite;}
 .viso-weather-person {transform-origin:0px 137px;animation:viso-person-sway 5s ease-in-out infinite alternate;}
 [data-weather-active=false] svg g, [data-weather-active=false] svg circle {animation-play-state:paused;}
-@media(prefers-reduced-motion:reduce) {.viso-weather-clouds,.viso-weather-sun,.viso-weather-water,.viso-weather-person {animation:none;}}
-@keyframes viso-cloud-drift {from {transform:translateX(-28px);} to {transform:translateX(32px);}}
+@media(prefers-reduced-motion:reduce) {.viso-weather-clouds,.viso-weather-sun,.viso-weather-water,.viso-weather-person,.viso-weather-rays {animation:none;}}
+@keyframes viso-ray-rotate {from {rotate:0deg;} to {rotate:360deg;}}
+@keyframes viso-cloud-drift {from {transform:translateX(-85px);} to {transform:translateX(85px);}}
 @keyframes viso-sun-glow {from {opacity:.65;transform:scale(.96);} to {opacity:1;transform:scale(1.08);}}
-@keyframes viso-water-flow {from {transform:translateX(-12px);opacity:.2;} to {transform:translateX(14px);opacity:.5;}}
+@keyframes viso-water-flow {from {transform:translateX(-40px);opacity:.4;} to {transform:translateX(40px);opacity:.85;}}
 @keyframes viso-person-sway {from {transform:rotate(-1deg);} to {transform:rotate(1deg);}}
 @keyframes viso-weather-rain { from { transform:translateY(-10vh) rotate(12deg); } to { transform:translateY(120vh) rotate(12deg); } }`}</style>
     </div>
