@@ -4,7 +4,7 @@ Versión preparada, no publicada. Nubes más contrastadas, desplazamiento ±85 p
 
 TypeScript y compilación APK pasaron. Verificación real en Chromium: matriz de transformación de nubes cambia entre cuadros separados por un segundo y se pausa al desactivar la escena. Pruebas existentes de presentación meteorológica pasaron. Falta prueba física en teléfonos y confirmación perceptual del usuario.
 
-APK versionCode 21, com.viso.deck, versión 1.11.4. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SHA256 5858c8c9239f86d801c1464da76945d97ac08515c1f82fa0953a0058a2fc19cc.
+APK versionCode 21, com.viso.deck, versión 1.11.4. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SHA256 48bf6828b74f96efe5f99f6a050b0cad6ac437f997ef3b8e696359b82c8940d3.
 
 ## Contenido deportivo compartido
 
@@ -29,3 +29,5 @@ El usuario rechazó la adaptación de rectángulos redondeados. Ahora SportsScor
 Detalle del partido se muestra dentro de la misma página Deck con Información, Alineaciones, Tabla y Estadísticas. Información combina tarjeta curva con posiciones actuales de la tabla y porcentaje de victorias calculado solo cuando el proveedor publica PJ/G válidos; no se lo presenta como forma histórica ni clasificación live del partido. Los desconocidos se muestran como —. El campo de alineación solo se dibuja con once titulares publicados con posiciones reconocibles; la lista fuente se conserva.
 
 TypeScript y APK compilados; verificada presencia del código final de tarjetas curvas y detalle en el paquete APK. Vista de referencia y búsqueda/favoritos verificados en Chromium con respuesta histórica registrada real; pruebas Android físicas y endpoint nuevo de alineaciones live siguen pendientes. Capturas actualizadas en android-deck-1.11.4-evidence/. Publicación detenida para revisión visual del usuario.
+
+Validación cloud tras autorización: partido argentino 2025-11-09 devuelve dos plantillas, 46 jugadores; posiciones publicadas incluyen Left Back/Right Back, incorporadas a agrupación defensiva. NBA ofrece marcadores pero este endpoint no publica plantillas: se informa ausencia de cobertura. APK recompilada con ajuste de posición.

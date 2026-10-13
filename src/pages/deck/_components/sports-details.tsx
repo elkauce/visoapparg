@@ -202,7 +202,7 @@ function PublishedPitch({
     const position = (p.position ?? "").toLowerCase();
     const row = /goalkeeper|arquero|portero|^g$/.test(position)
       ? 0
-      : /defend|defensor|defensa|^d$/.test(position)
+      : /defend|defensor|defensa|back|^d$/.test(position)
         ? 1
         : /midfield|mediocamp|centrocamp|^m$/.test(position)
           ? 2
