@@ -20,7 +20,7 @@ Los ajustes nuevos están ligados al propietario de cada página y se comparten 
 - SDK oficial Home, adaptador existente y plugin nativo de audio comprobados dentro de los DEX de la APK. Se conserva paquete com.viso.deck y firma SHA-1 F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6.
 - La captura física de micrófono y mezclador musical de Android sigue pendiente en el teléfono; no se afirma que todos los reproductores permitan esa fuente. Google Home se conserva, pero esta APK nueva no se probó con luces físicas en el entorno.
 
-Versión 1.9.0, código 15. APK: downloads/VISO-Deck-1.9.0-debug.apk. Tamaño 19973108 bytes. SHA256: 1cf348890e470c4867fa5b1eb4412ce902b670ad48939f62f6c85e86d8f9be2b.
+Versión 1.9.0, código 15. APK: downloads/VISO-Deck-1.9.0-debug.apk. Tamaño 19973125 bytes. SHA256: 989e65171eedd45115413d9ffa0972ceb4e7380a3f53e8b8686f11256a0ab566.
 
 ## Publicación
 

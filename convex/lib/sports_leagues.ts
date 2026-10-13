@@ -20,5 +20,5 @@ export const SPORTS_LEAGUES = {
 export type SportsLeagueKey = keyof typeof SPORTS_LEAGUES;
 
 export function isSportsLeague(key: string): key is SportsLeagueKey {
-  return Object.hasOwn(SPORTS_LEAGUES, key);
+  return Object.prototype.hasOwnProperty.call(SPORTS_LEAGUES, key);
 }
