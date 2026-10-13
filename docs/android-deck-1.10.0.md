@@ -1,6 +1,6 @@
 # VISO Deck 1.10.0 — diseño de medidores y Deportes
 
-Se continúa sobre fix/viso-deck-reference-layout, sin modificar main. Versión 1.9.0 de recuperación conservada. No se publicó esta nueva versión en producción.
+Se continúa sobre fix/viso-deck-reference-layout, sin modificar main. Versión 1.9.0 de recuperación conservada. Publicación autorizada por el usuario y completada en https://viso-deck-android.vercel.app.
 
 ## Diseño
 
@@ -18,11 +18,11 @@ Deportes adopta una composición inspirada en Apple Sports: superficie clara, fi
 
 APK 1.10.0, código 16, paquete com.viso.deck. SHA256 fa8c17639aa62b020360e4e28c8b02a2281278cd50fd04745993a52efb56414f, 19984531 bytes. Firma SHA-1 F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SDK Home oficial, adaptador existente y plugin de audio verificados en DEX. Sigue pendiente la prueba física en Android de captura del mezclador/micrófono y de Google Home en esta APK; no se cambiaron las integraciones de llamadas, calendario ni Google Home.
 
-Los estilos nuevos requieren actualizar la validación del backend antes de usar esta APK con la cuenta real. El usuario pidió no publicar en producción sin autorización: servidor y web quedan preparados para pedir autorización sobre esta versión concreta.
+Los estilos nuevos requieren actualizar la validación del backend antes de usar esta APK con la cuenta real. El usuario autorizó publicar la 1.10 con Vúmetro, Deportes y Clima. Servidor vivid-nightingale-785 actualizado, web publicada y verificada con dos sesiones autenticadas: estilos nuevos guardados, captura Web Audio de prueba, preferencias compartidas, eliminación de página, pronóstico y calendario F1 reales. Descarga inmutable HTTP 200 y SHA256 verificados: https://raw.githubusercontent.com/elkauce/visoapparg/f230cdd/downloads/VISO-Deck-1.10.0-debug.apk.
 
 
 ## Ampliación de Clima solicitada antes de publicar
 
 Clima ahora ocupa el viewport y adopta las referencias Samsung del usuario: temperatura grande, ubicación, sensación térmica y extremos diarios, paisaje ilustrado original con lago/persona/paraguas y lluvia/nieve visual según códigos reales WMO, tarjetas translúcidas, horas desplazables con curva de temperatura y probabilidades de lluvia, selección 24/48 horas, siete días y métricas originales. °C/°F y ciudad permanecen compartidos. El icono día/noche usa amanecer y atardecer de la ciudad consultada, sin asumir horarios fijos. Animación se pausa con la página inactiva y respeta movimiento reducido. No se copiaron recursos propietarios de Samsung ni se inventó una hora de finalización de lluvia; se presenta precipitación actual y probabilidad del pronóstico disponible.
 
-Las capturas weather-samsung-portrait/landscape son pruebas visuales del componente real con datos de fixture explícitos (13°, Don Torcuato), no un pronóstico actual. Ese HTML de prueba está en artifacts, ignorado por Git, no forma parte de dist ni de la APK. La aplicación usa exclusivamente la acción autenticada weather:fullForecast existente. Playwright comprobó viewport 390×844/1280×590 y 48 puntos de curva al elegir 48 horas. Tests específicos distinguieron WMO llovizna/lluvia/nieve/noche y curvas constantes/variables. Esta ampliación se incluye en la 1.10 preparada, sin publicación en producción.
+Las capturas weather-samsung-portrait/landscape son pruebas visuales del componente real con datos de fixture explícitos (13°, Don Torcuato), no un pronóstico actual. Ese HTML de prueba está en artifacts, ignorado por Git, no forma parte de dist ni de la APK. La aplicación usa exclusivamente la acción autenticada weather:fullForecast existente. Playwright comprobó viewport 390×844/1280×590 y 48 puntos de curva al elegir 48 horas. Tests específicos distinguieron WMO llovizna/lluvia/nieve/noche y curvas constantes/variables. Esta ampliación de Clima se incluye en la 1.10 publicada y autorizada.
