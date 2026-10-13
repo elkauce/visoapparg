@@ -24,7 +24,7 @@ Versión 1.9.0, código 15. APK: downloads/VISO-Deck-1.9.0-debug.apk. Tamaño 19
 
 ## Publicación
 
-El usuario autorizó actualizar servidor y web. El servidor compartido vivid-nightingale-785 está actualizado. La web de revisión verificada es https://viso-deck-android-5pg1ws06y-manuelhaguilar8-4981s-projects.vercel.app; se comprobó con dos sesiones autenticadas, pronóstico real, calendario F1 real, configuración compartida y eliminación de página. Se corrigió además el selector de tipo para deshabilitarlo mientras se crea o guarda una página: evita que una elección rápida sea ignorada por la protección existente contra operaciones simultáneas. La verificación de la URL de producción se registra al completar la promoción.
+El usuario autorizó actualizar servidor y web. El servidor compartido vivid-nightingale-785 está actualizado. La web de revisión verificada es https://viso-deck-android-5pg1ws06y-manuelhaguilar8-4981s-projects.vercel.app; se comprobó con dos sesiones autenticadas, pronóstico real, calendario F1 real, configuración compartida y eliminación de página. Se corrigió además el selector de tipo para deshabilitarlo mientras se crea o guarda una página: evita que una elección rápida sea ignorada por la protección existente contra operaciones simultáneas. Producción publicada y verificada en https://viso-deck-android.vercel.app: dos sesiones autenticadas comprobaron creación/cambio/eliminación de páginas, ajustes compartidos, renderizado del pronóstico real de Open-Meteo y calendario F1 real. Descarga final inmutable: https://raw.githubusercontent.com/elkauce/visoapparg/6d3410a/downloads/VISO-Deck-1.9.0-debug.apk (HTTP 200 y SHA256 comprobados).
 
 Build reproducible:
 
