@@ -1,33 +1,34 @@
-# VISO Deck 1.11.4 — movimiento visible en clima
+# VISO Deck 1.11.4 — publicación verificada
 
-Versión preparada, no publicada. Nubes más contrastadas, desplazamiento ±85 px en 7 segundos; ondas de agua curvas, más contrastadas y desplazamiento ±40 px; sol con rayos giratorios y pulsación; lluvia y nieve más visibles. Datos de clima existentes sin cambio. Movimiento reducido del sistema y pausa de páginas inactivas conservados.
+Publicada con autorización explícita del usuario el 13 de octubre de 2026 en https://viso-deck-android.vercel.app. Backend compartido vivid-nightingale-785 actualizado. main no modificada; APKs anteriores conservadas.
 
-TypeScript y compilación APK pasaron. Verificación real en Chromium: matriz de transformación de nubes cambia entre cuadros separados por un segundo y se pausa al desactivar la escena. Pruebas existentes de presentación meteorológica pasaron. Falta prueba física en teléfonos y confirmación perceptual del usuario.
+## Resultado
 
-APK versionCode 21, com.viso.deck, versión 1.11.4. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6. SHA256 48bf6828b74f96efe5f99f6a050b0cad6ac437f997ef3b8e696359b82c8940d3.
+Deportes sigue las referencias ampliadas: tarjeta con hendidura superior y recorte inferior central, selector de tres días, escudos del proveedor e iniciales de respaldo, filas compactas con celdas laterales para tiempo/estado real y navegación inferior de cinco acciones. Marca VISO conservada; no simula barra de teléfono ni funciones de noticias/video sin fuente.
 
-## Contenido deportivo compartido
+Contenido deportivo compartido: competición, fecha, vista, filtro y favoritos múltiples persistidos por página en la cuenta. Parches parciales, validación y propiedad; guardar apariencia no pisa la selección. El cambio de página con gestos sigue local a cada Deck. La APK debe actualizarse para utilizar la nueva selección compartida.
 
-La competición seleccionada, fecha, vista y filtro eran estado React local y no se persistían. Ahora forman parte de screenSettings por página en la cuenta. Cambios se guardan mediante configureScreen con parches parciales, validación de competiciones/fechas/vistas/filtros y control de propiedad ya existente. Guardar preferencias del diálogo no pisa la selección hecha desde los controles de contenido. Equipos y competiciones configuradas se conservan. El gesto de pasar a otra página sigue siendo local a cada Deck; este cambio comparte el contenido de la misma página deportiva, no obliga a todos los dispositivos a cambiar de pantalla.
+Marcadores, historial, tablas y estadísticas provienen de ESPN; F1 conserva Jolpica y se actualiza desde su consulta al refrescar. Búsqueda filtra equipos/partidos de competición y fecha actuales. Detalle incluye Información, Alineaciones, Tabla y Estadísticas. Información muestra posición actual y porcentaje de victorias calculado de PJ/G publicados, con — cuando faltan; no lo presenta como forma histórica ni posición live de aquel partido.
 
-Validación final: 376 pruebas en 39 archivos, TypeScript frontend/backend y APK compilada. Prueba real de dos sesiones de navegador aisladas (escritorio y tamaño móvil) mostró cambios de competición/fecha/vista en ambas direcciones. Test servidor verifica lectura desde otra sesión, conservar equipos, rechazo de cuenta ajena y fecha imposible. Prueba física Android todavía pendiente. Web/backend publicados siguen 1.11.3: la nueva sincronización requiere autorización y actualización del servidor, web y APK.
+Alineaciones leen rosters del summary oficial autenticado con liga e identificador numérico validados. Campo solo con once titulares y posiciones reconocibles; agrupación por posición, sin inventar coordenadas tácticas ni seguimiento en vivo. Lista fuente conservada. Posiciones Left Back/Right Back reconocidas como defensores. Ausencia de cobertura informada.
 
-## Diseño deportivo final
+Clima: nubes más contrastadas con desplazamiento ±85 px, ondas curvas de agua ±40 px, rayos solares giratorios y pulsación, lluvia/nieve más visibles. Datos existentes conservados. Pausa cuando página inactiva y respeto a movimiento reducido del sistema.
 
-Referencia del usuario aplicada: fondo negro/carbón, tarjetas gris oscuro con degradado, acentos rojos, favoritos amarillos, cabecera compacta, barra de fecha, marcador destacado, listado compacto y navegación inferior. No agrega marcos de teléfono ni barra de sistema simulada. Adaptación vertical en escritorio y móvil; panel central hasta 520 px.
+## Evidencia
 
-Datos: conserva ESPN y Jolpica reales, añade búsqueda de equipos/partidos dentro de la competición/fecha actual, favoritos múltiples guardados por cuenta, historial/tabla/marcadores y estadísticas. Favoritos y selección sincronizan por parches del servidor. Nueva acción autenticada matchLineups lee roster del summary oficial, valida liga e identificador numérico, limita tamaño y no inventa jugadores. Vista de campo solo aparece si la fuente publica once titulares con posiciones reconocibles: agrupación por posición, no coordenadas tácticas ni seguimiento en vivo. Si falta cobertura muestra mensaje explícito. Alineaciones contractualmente probadas con fixtures; verificación del endpoint nuevo en cloud pendiente de autorización de publicación. No se afirma cobertura universal.
+- 377 pruebas en 39 archivos; TypeScript frontend/backend y compilación APK/web correctas.
+- Chromium: movimiento de nubes entre cuadros y pausa en página inactiva.
+- Dos sesiones de navegador en revisión y producción: competición/fecha/vista sincronizadas en ambas direcciones. Campo de alineación renderizado con fuente real.
+- Proveedor cloud autenticado: liga argentina 2025-11-09 devuelve cinco partidos, dos plantillas del partido probado y 46 jugadores entre titulares/suplentes. NBA siete partidos; sin plantillas publicadas en este endpoint.
+- Archivos web en producción idénticos a compilación verificada; descarga APK con hash coincidente.
+- Cuenta técnica aislada; no se modificaron cuentas ni luces del usuario. Prueba física Android pendiente; no se afirma resuelto Play Protect S26.
 
-Verificación final: 377 pruebas en 39 archivos; TypeScript frontend/backend y APK compilada. Dos sesiones de navegador verifican selección compartida. Vista aislada y controles de búsqueda/favoritos probados en Chromium con respuesta histórica real de ESPN registrada (liga argentina, 2025-11-09); esa captura no es una conexión en vivo ni prueba Android. Descarga de imágenes del proveedor bloqueada en entorno de pruebas: las capturas muestran iniciales de respaldo. Prueba física del teléfono pendiente. Evidencias en android-deck-1.11.4-evidence/.
+Capturas en android-deck-1.11.4-evidence/: sports-portrait/desktop usan respuesta histórica real registrada para revisión visual (no conexión en vivo); iniciales por bloqueo de imágenes en entorno de pruebas. lineups-online corresponde a prueba real del proveedor después de publicar backend.
 
-Servidor y web de producción todavía 1.11.3. Publicación requiere autorización explícita. SDK, paquete, firma y funciones existentes conservados.
+## APK
 
-## Corrección de curvas según fotografías ampliadas
+com.viso.deck, versión 1.11.4, versionCode 21, Google Home SDK oficial 1.10.1. Firma SHA1 conservada F3:E3:92:AE:D0:8C:29:51:4F:1D:6D:25:17:61:20:21:3C:5A:77:A6.
 
-El usuario rechazó la adaptación de rectángulos redondeados. Ahora SportsScoreCard usa una silueta SVG con hendidura superior y recorte inferior central, metadatos sobre fondo oscuro, score centrado y equipos a los lados. Escudos reales del proveedor con iniciales de respaldo si fallan. Selector de tres días; filas compactas con celdas laterales en punta para el tiempo/estado real; navegación inferior de cinco acciones funcionales (Agenda, Favoritos, Marcadores, Tabla, Actualizar). Mantiene VISO y contenido propio, no simula barras de teléfono ni funciones de noticias/watch sin fuente.
+SHA256: 48bf6828b74f96efe5f99f6a050b0cad6ac437f997ef3b8e696359b82c8940d3.
 
-Detalle del partido se muestra dentro de la misma página Deck con Información, Alineaciones, Tabla y Estadísticas. Información combina tarjeta curva con posiciones actuales de la tabla y porcentaje de victorias calculado solo cuando el proveedor publica PJ/G válidos; no se lo presenta como forma histórica ni clasificación live del partido. Los desconocidos se muestran como —. El campo de alineación solo se dibuja con once titulares publicados con posiciones reconocibles; la lista fuente se conserva.
-
-TypeScript y APK compilados; verificada presencia del código final de tarjetas curvas y detalle en el paquete APK. Vista de referencia y búsqueda/favoritos verificados en Chromium con respuesta histórica registrada real; pruebas Android físicas y endpoint nuevo de alineaciones live siguen pendientes. Capturas actualizadas en android-deck-1.11.4-evidence/. Publicación detenida para revisión visual del usuario.
-
-Validación cloud tras autorización: partido argentino 2025-11-09 devuelve dos plantillas, 46 jugadores; posiciones publicadas incluyen Left Back/Right Back, incorporadas a agrupación defensiva. NBA ofrece marcadores pero este endpoint no publica plantillas: se informa ausencia de cobertura. APK recompilada con ajuste de posición.
+Descarga: https://raw.githubusercontent.com/elkauce/visoapparg/c1a71cc/downloads/VISO-Deck-1.11.4-debug.apk
