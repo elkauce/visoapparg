@@ -51,17 +51,7 @@ export default function App() {
             path="/deck/edit"
             element={<DeckPage startEditing fullEditor />}
           />
-          <Route
-            path="/deck"
-            element={
-              isAndroidNative() ||
-              import.meta.env.VITE_ANDROID_DECK_PRESETS === "true" ? (
-                <AndroidDeck />
-              ) : (
-                <DeckPage />
-              )
-            }
-          />
+          <Route path="/deck" element={<AndroidDeck />} />
           <Route path="/s/:slug" element={<PublicStatusPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

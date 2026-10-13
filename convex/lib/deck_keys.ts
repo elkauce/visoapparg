@@ -7,7 +7,7 @@ import { isSportsLeague } from "./sports_leagues.ts";
 import { MAX_SLOTS_PER_PAGE } from "./deck_grid.ts";
 import type { deckAction, deckSimpleAction } from "./deck_action_content.ts";
 
-export const MAX_PAGES = 8;
+export const MAX_PAGES = 11;
 export const SLOTS_PER_PAGE = 15;
 // Tope de teclas de un usuario: páginas x posiciones
 export const MAX_KEYS = MAX_PAGES * MAX_SLOTS_PER_PAGE;

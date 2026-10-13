@@ -14,6 +14,7 @@ export default defineSchema({
     // Estado que el usuario tiene marcado ahora mismo
     activeStatusId: v.optional(v.id("statuses")),
     activeStatusRevision: v.optional(v.number()),
+    deckCatalogVersion: v.optional(v.number()),
     // Dirección (IP) de la Key Light de Elgato en la red local del usuario
     keyLightIp: v.optional(v.string()),
     // URL general (IFTTT, Home Assistant, Voice Monkey) que avisa en cada cambio de estado
@@ -66,6 +67,11 @@ export default defineSchema({
 
   // Páginas del deck de pantalla completa (cada una es una cuadrícula de teclas)
   deckPages: defineTable({
+    kind: v.optional(
+      v.union(v.literal("grid"), v.literal("spotify"), v.literal("standby")),
+    ),
+    standbySettings: v.optional(v.any()),
+    standbyPhotos: v.optional(v.array(v.id("_storage"))),
     userId: v.id("users"),
     name: v.string(),
     order: v.number(),

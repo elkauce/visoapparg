@@ -1,3 +1,5 @@
+import { VISO_STATES, findVisoStatus } from "./lib/viso_preset_states";
+import { normalizeStandbySettings } from "./lib/clock_settings";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import {
@@ -31,8 +33,8 @@ import {
 
 // Páginas y teclas del usuario actual (null si no hay sesión)
 export const get = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { unified: v.optional(v.boolean()) },
+  handler: async (ctx, args) => {
     const user = await getCurrentUserOrNull(ctx);
     if (!user) {
       return null;
@@ -61,6 +63,12 @@ export const get = query({
     const pagesWithMedia = await Promise.all(
       pages.map(async (page) => ({
         ...page,
+        standbyPhotoUrls: await Promise.all(
+          (page.standbyPhotos ?? []).map(async (id) => ({
+            id,
+            url: await ctx.storage.getUrl(id),
+          })),
+        ),
         canvas: page.canvas
           ? {
               ...page.canvas,
@@ -70,8 +78,15 @@ export const get = query({
       })),
     );
     return {
-      pages: pagesWithMedia,
-      keys: withMedia,
+      catalogReady: (user.deckCatalogVersion ?? 0) >= 1,
+      pages: args.unified
+        ? pagesWithMedia
+        : pagesWithMedia.filter((page) => !page.kind),
+      keys: args.unified
+        ? withMedia
+        : withMedia.filter((key) =>
+            pages.some((page) => !page.kind && page._id === key.pageId),
+          ),
       volume: user.displayVolume ?? 0,
     };
   },
@@ -205,6 +220,11 @@ export const duplicatePage = mutation({
       userId: user._id,
       name: cleanLabel(args.name ?? `${source.name.slice(0, 14)} copia`, 20),
       order: (pages[pages.length - 1]?.order ?? -1) + 1,
+      ...(source.kind ? { kind: source.kind } : {}),
+      ...(source.standbySettings
+        ? { standbySettings: source.standbySettings }
+        : {}),
+      ...(source.standbyPhotos ? { standbyPhotos: source.standbyPhotos } : {}),
       ...(source.grid ? { grid: source.grid } : {}),
       ...(source.canvas ? { canvas: source.canvas } : {}),
     });
@@ -454,5 +474,144 @@ export const moveKey = mutation({
       ...(args.appearance !== undefined ? { appearance } : {}),
     });
     return null;
+  },
+});
+
+// Explicit idempotent account migration. Never recreate deleted screens.
+export const ensureCatalogue = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireCurrentUser(ctx);
+    if ((user.deckCatalogVersion ?? 0) >= 1) return;
+    const pages = await ctx.db
+      .query("deckPages")
+      .withIndex("by_user_and_order", (q) => q.eq("userId", user._id))
+      .take(MAX_PAGES);
+    if (pages.length > MAX_PAGES - 3)
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "No hay espacio para migrar tus páginas sin perder datos.",
+      });
+    for (const page of pages)
+      await ctx.db.patch("deckPages", page._id, { order: page.order + 3 });
+    const statuses = await ctx.db
+      .query("statuses")
+      .withIndex("by_user_and_order", (q) => q.eq("userId", user._id))
+      .take(100);
+    const statePage = await ctx.db.insert("deckPages", {
+      userId: user._id,
+      name: "Estados VISO",
+      order: 0,
+      kind: "grid",
+      grid: { columns: 3, rows: 2 },
+    });
+    let statusCount = statuses.length;
+    let nextStatusOrder =
+      Math.max(-1, ...statuses.map((status) => status.order)) + 1;
+    for (const [position, definition] of VISO_STATES.entries()) {
+      const status = findVisoStatus(definition, statuses);
+      if (!status && statusCount >= 24) continue;
+      const statusId =
+        status?._id ??
+        (await ctx.db.insert("statuses", {
+          userId: user._id,
+          name: definition.name,
+          color: definition.defaultColor,
+          icon: definition.icon,
+          order: nextStatusOrder++,
+        }));
+      if (!status) statusCount++;
+      await ctx.db.insert("deckKeys", {
+        userId: user._id,
+        pageId: statePage,
+        position,
+        content: { kind: "status", statusId },
+        appearance: { label: definition.label },
+      });
+    }
+    await ctx.db.insert("deckPages", {
+      userId: user._id,
+      name: "Spotify",
+      order: 1,
+      kind: "spotify",
+    });
+    await ctx.db.insert("deckPages", {
+      userId: user._id,
+      name: "Reloj",
+      order: 2,
+      kind: "standby",
+    });
+    await ctx.db.patch("users", user._id, { deckCatalogVersion: 1 });
+  },
+});
+
+export const configureScreen = mutation({
+  args: {
+    pageId: v.id("deckPages"),
+    kind: v.optional(
+      v.union(v.literal("grid"), v.literal("spotify"), v.literal("standby")),
+    ),
+    settings: v.optional(v.any()),
+    photos: v.optional(v.array(v.id("_storage"))),
+    photoOperation: v.optional(
+      v.union(v.literal("append"), v.literal("remove")),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    const page = await getOwnedPage(ctx, user._id, args.pageId);
+    const photos =
+      args.photos === undefined
+        ? undefined
+        : args.photoOperation === "append"
+          ? [...new Set([...(page.standbyPhotos ?? []), ...args.photos])]
+          : args.photoOperation === "remove"
+            ? (page.standbyPhotos ?? []).filter(
+                (id) => !args.photos!.includes(id),
+              )
+            : args.photos;
+    if (photos) {
+      let totalBytes = 0;
+      if (photos.length > 8 || new Set(photos).size !== photos.length)
+        throw new ConvexError({
+          code: "BAD_REQUEST",
+          message: "Hasta 8 fotografías por página.",
+        });
+      for (const id of photos) {
+        const file = await ctx.db
+          .query("deckMedia")
+          .withIndex("by_storage", (q) => q.eq("storageId", id))
+          .unique();
+        const meta = await ctx.db.system.get("_storage", id);
+        if (!meta || meta.size > 8 * 1024 * 1024)
+          throw new ConvexError({
+            code: "BAD_REQUEST",
+            message: "Cada foto puede ocupar hasta 8 MB.",
+          });
+        totalBytes += meta.size;
+        if (totalBytes > 24 * 1024 * 1024)
+          throw new ConvexError({
+            code: "BAD_REQUEST",
+            message: "Hasta 24 MB de fotografías por página.",
+          });
+        if (!file || file.userId !== user._id || file.mediaType !== "image")
+          throw new ConvexError({
+            code: "FORBIDDEN",
+            message: "Fotografía no autorizada.",
+          });
+      }
+    }
+    await ctx.db.patch("deckPages", args.pageId, {
+      ...(args.kind ? { kind: args.kind } : {}),
+      ...(args.settings !== undefined
+        ? {
+            standbySettings: normalizeStandbySettings({
+              ...page.standbySettings,
+              ...args.settings,
+            }),
+          }
+        : {}),
+      ...(photos ? { standbyPhotos: photos } : {}),
+    });
   },
 });

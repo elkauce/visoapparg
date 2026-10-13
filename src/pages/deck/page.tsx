@@ -38,6 +38,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog.tsx";
 import StreamDeckPanel from "../_components/stream-deck-panel.tsx";
+import SharedPresetScreen from "./_components/shared-preset-screen";
 import DeckKey from "./_components/deck-key.tsx";
 import CanvasBackdrop from "./_components/canvas-backdrop.tsx";
 import KeyEditor, { type EditTarget } from "./_components/key-editor.tsx";
@@ -103,7 +104,15 @@ export default function DeckPage({
   startEditing?: boolean;
   fullEditor?: boolean;
 } = {}) {
-  const layout = useQuery(api.deck_layout.get, {});
+  const layout = useQuery(api.deck_layout.get, { unified: true });
+  const ensureCatalogue = useMutation(api.deck_layout.ensureCatalogue);
+  const configureScreen = useMutation(api.deck_layout.configureScreen);
+  useEffect(() => {
+    if (layout?.catalogReady === false)
+      void ensureCatalogue({}).catch(() =>
+        toast.error("No se pudieron sincronizar tus páginas."),
+      );
+  }, [layout?.catalogReady, ensureCatalogue]);
   const statusData = useQuery(api.statuses.list, {});
   const currentUser = useQuery(api.users.getCurrentUser);
   const connection = useConvexConnectionState();
@@ -493,7 +502,7 @@ export default function DeckPage({
       }
     >
       {!embeddedPageId && (
-        <header className="flex items-center gap-2">
+        <header className="flex flex-wrap items-center gap-2">
           <Button asChild variant="ghost" size="icon" aria-label="Volver">
             <Link to="/">
               <ArrowLeft />
@@ -615,80 +624,113 @@ export default function DeckPage({
           </Button>
         </header>
       )}
-      <GridContainer
-        ref={setGridElement}
-        className="min-h-0 flex-1"
-        style={{
-          overflowY: grid.overflowY ? "auto" : "visible",
-          overflowX: grid.overflowX ? "auto" : "visible",
-        }}
-        aria-label="Teclas del Deck"
-      >
-        <div className="relative grid gap-3" style={gridStyle}>
-          {canvas?.mediaUrl && (
-            <CanvasBackdrop
-              mediaUrl={canvas.mediaUrl}
-              mediaType={canvas.mediaType ?? "image"}
-              columns={grid.columns}
-              tileWidth={grid.tileWidth}
-              tileHeight={grid.tileHeight}
-              gap={grid.gap}
-              positions={pageKeys
-                .map((key) => key.position - positionOffset)
-                .filter(
-                  (position) => position >= 0 && position < preference.slots,
-                )}
-            />
-          )}
-          {Array.from({ length: preference.slots }).map((_, slot) => {
-            const position = positionOffset + slot;
-            const key = pageKeys.find((item) => item.position === position);
-            const onPress = () => pressKey(position);
-            if (
-              key &&
-              (key.content.kind === "clock" ||
-                key.content.kind === "weather") &&
-              !key.appearance
-            )
+      {!embeddedPageId && editMode && (
+        <label className="flex items-center gap-2 text-sm">
+          Tipo de página
+          <select
+            aria-label="Tipo de página"
+            className="rounded-md border bg-background p-2"
+            value={currentPage.kind ?? "grid"}
+            onChange={(event) =>
+              void run(() =>
+                configureScreen({
+                  pageId: currentPage._id,
+                  kind: event.target.value as "grid" | "spotify" | "standby",
+                }),
+              )
+            }
+          >
+            <option value="grid">Teclas y widgets</option>
+            <option value="spotify">Spotify</option>
+            <option value="standby">Reloj</option>
+          </select>
+        </label>
+      )}
+      {currentPage.kind === "spotify" || currentPage.kind === "standby" ? (
+        <div className="min-h-0 flex-1">
+          <SharedPresetScreen
+            key={currentPage._id}
+            pageId={currentPage._id}
+            editing={editMode}
+          />
+        </div>
+      ) : (
+        <GridContainer
+          ref={setGridElement}
+          className="min-h-0 flex-1"
+          style={{
+            overflowY: grid.overflowY ? "auto" : "visible",
+            overflowX: grid.overflowX ? "auto" : "visible",
+          }}
+          aria-label="Teclas del Deck"
+        >
+          <div className="relative grid gap-3" style={gridStyle}>
+            {canvas?.mediaUrl && (
+              <CanvasBackdrop
+                mediaUrl={canvas.mediaUrl}
+                mediaType={canvas.mediaType ?? "image"}
+                columns={grid.columns}
+                tileWidth={grid.tileWidth}
+                tileHeight={grid.tileHeight}
+                gap={grid.gap}
+                positions={pageKeys
+                  .map((key) => key.position - positionOffset)
+                  .filter(
+                    (position) => position >= 0 && position < preference.slots,
+                  )}
+              />
+            )}
+            {Array.from({ length: preference.slots }).map((_, slot) => {
+              const position = positionOffset + slot;
+              const key = pageKeys.find((item) => item.position === position);
+              const onPress = () => pressKey(position);
+              if (
+                key &&
+                (key.content.kind === "clock" ||
+                  key.content.kind === "weather") &&
+                !key.appearance
+              )
+                return (
+                  <LiveTile
+                    key={position}
+                    content={key.content}
+                    editMode={editMode}
+                    onPress={onPress}
+                    canvas={!!canvas}
+                  />
+                );
+              const face = key
+                ? resolveKeyFace(
+                    key.content,
+                    statusData.statuses,
+                    activeStatusId,
+                    layout.volume,
+                    key.appearance,
+                  )
+                : null;
+              const requiresConnection =
+                key &&
+                (key.content.kind === "status" ||
+                  key.content.kind === "off" ||
+                  key.content.kind === "volume");
               return (
-                <LiveTile
+                <DeckKey
                   key={position}
-                  content={key.content}
-                  editMode={editMode}
+                  face={face}
+                  editMode={editMode && (advanced || position < 15)}
                   onPress={onPress}
+                  disabled={
+                    !editMode &&
+                    (pending || (!!requiresConnection && !connected))
+                  }
+                  pending={!editMode && pending}
                   canvas={!!canvas}
                 />
               );
-            const face = key
-              ? resolveKeyFace(
-                  key.content,
-                  statusData.statuses,
-                  activeStatusId,
-                  layout.volume,
-                  key.appearance,
-                )
-              : null;
-            const requiresConnection =
-              key &&
-              (key.content.kind === "status" ||
-                key.content.kind === "off" ||
-                key.content.kind === "volume");
-            return (
-              <DeckKey
-                key={position}
-                face={face}
-                editMode={editMode && (advanced || position < 15)}
-                onPress={onPress}
-                disabled={
-                  !editMode && (pending || (!!requiresConnection && !connected))
-                }
-                pending={!editMode && pending}
-                canvas={!!canvas}
-              />
-            );
-          })}
-        </div>
-      </GridContainer>
+            })}
+          </div>
+        </GridContainer>
+      )}
       {viewCount > 1 && (
         <nav
           aria-label="Vistas de la página"

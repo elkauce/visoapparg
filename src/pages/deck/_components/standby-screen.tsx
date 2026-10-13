@@ -58,6 +58,11 @@ export interface StandbyScreenProps {
   connected: boolean;
   onMediaCommand(command: MediaCommand): void;
   mediaBusy: boolean;
+  sharedSettings?: StandbySettings;
+  onSettingsChange?(patch: Partial<StandbySettings>): Promise<unknown>;
+  sharedPhotos?: { id: string; url: string }[];
+  onAddPhotos?(files: File[]): Promise<unknown>;
+  onDeletePhoto?(id: string): Promise<unknown>;
   settingsOpen?: boolean;
   onSettingsOpenChange?(open: boolean): void;
 }
@@ -573,6 +578,9 @@ function PreferenceToggle({
 function AccountStandby(props: StandbyScreenProps) {
   const { userId, activeStatus, connected } = props;
   const [settings, setSettings] = useState(() => loadStandbySettings(userId));
+  useEffect(() => {
+    if (props.sharedSettings) setSettings(props.sharedSettings);
+  }, [props.sharedSettings]);
   const [localCustomizing, setLocalCustomizing] = useState(false);
   const customizing = props.settingsOpen ?? localCustomizing;
   function setCustomizing(open: boolean) {
@@ -613,6 +621,11 @@ function AccountStandby(props: StandbyScreenProps) {
   }, []);
 
   useEffect(() => {
+    if (props.sharedPhotos) {
+      setPhotos(props.sharedPhotos);
+      setPhotosLoading(false);
+      return;
+    }
     let active = true;
     const urls: string[] = [];
     void listStandbyPhotos(userId)
@@ -640,7 +653,7 @@ function AccountStandby(props: StandbyScreenProps) {
       active = false;
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [userId, photosRevision]);
+  }, [userId, photosRevision, props.sharedPhotos]);
 
   useEffect(() => {
     if (
@@ -667,6 +680,13 @@ function AccountStandby(props: StandbyScreenProps) {
     const next = { ...settings, ...patch };
     setSettings(next);
     try {
+      if (props.onSettingsChange) {
+        void props
+          .onSettingsChange(patch)
+          .catch(() =>
+            setMessage("No se pudo guardar en tu cuenta. Revisá la conexión."),
+          );
+      }
       saveStandbySettings(userId, next);
       setMessage(null);
     } catch {
@@ -681,7 +701,8 @@ function AccountStandby(props: StandbyScreenProps) {
     setPhotoBusy(true);
     setMessage(null);
     try {
-      await addStandbyPhotos(userId, files);
+      if (props.onAddPhotos) await props.onAddPhotos(files);
+      else await addStandbyPhotos(userId, files);
       setPhotosRevision((revision) => revision + 1);
     } catch (error) {
       setMessage(
@@ -698,7 +719,8 @@ function AccountStandby(props: StandbyScreenProps) {
     setPhotoBusy(true);
     setMessage(null);
     try {
-      await removeStandbyPhoto(userId, id);
+      if (props.onDeletePhoto) await props.onDeletePhoto(id);
+      else await removeStandbyPhoto(userId, id);
       setPhotosRevision((revision) => revision + 1);
     } catch (error) {
       setMessage(
@@ -730,7 +752,7 @@ function AccountStandby(props: StandbyScreenProps) {
   const backgroundStyle = { backgroundColor: settings.background };
   return (
     <section
-      aria-label="Standby"
+      aria-label="Reloj"
       className="relative flex h-full min-h-0 min-w-0 flex-col text-white"
       style={{ ...accentStyle, ...backgroundStyle }}
     >
@@ -789,7 +811,7 @@ function AccountStandby(props: StandbyScreenProps) {
             ) : currentPhoto ? (
               <img
                 src={currentPhoto.url}
-                alt="Fotografía personal de Standby"
+                alt="Fotografía personal de Reloj"
                 className={cn(
                   "size-full rounded-2xl",
                   settings.photoFit === "cover"
@@ -831,7 +853,7 @@ function AccountStandby(props: StandbyScreenProps) {
             <>
               <img
                 src={currentPhoto.url}
-                alt="Fotografía personal de Standby"
+                alt="Fotografía personal de Reloj"
                 className={cn(
                   "absolute inset-0 size-full",
                   settings.photoFit === "cover"
@@ -973,10 +995,11 @@ function AccountStandby(props: StandbyScreenProps) {
       <Dialog open={customizing} onOpenChange={setCustomizing}>
         <DialogContent className="max-h-[calc(100dvh-3rem)] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Personalizar Standby</DialogTitle>
+            <DialogTitle>Personalizar Reloj</DialogTitle>
             <DialogDescription>
-              Una sola pantalla, con tu estilo. La configuración y las fotos se
-              guardan en este dispositivo para tu cuenta.
+              {props.onSettingsChange
+                ? "Tu estilo y tus fotos se guardan en tu cuenta y se sincronizan con tus dispositivos VISO."
+                : "Una sola pantalla, con tu estilo. La configuración y las fotos se guardan en este dispositivo para tu cuenta."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">

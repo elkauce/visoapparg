@@ -239,17 +239,17 @@ describe("Deck layout compatibility and ownership", () => {
     expect((await bob.query(api.deck_layout.get, {}))!.pages[0].order).toBe(0);
   });
 
-  it("enforces the eight-page cap when creating or duplicating", async () => {
+  it("enforces the eleven-page cap (three built-ins plus eight custom pages) when creating or duplicating", async () => {
     const { alice } = await fixture();
     const first = await alice.mutation(api.deck_layout.createPage, {
       name: "Uno",
     });
-    for (let index = 1; index < 8; index++)
+    for (let index = 1; index < 11; index++)
       await alice.mutation(api.deck_layout.createPage, {
         name: `Página ${index}`,
       });
     await expect(
-      alice.mutation(api.deck_layout.createPage, { name: "Nueve" }),
+      alice.mutation(api.deck_layout.createPage, { name: "Doce" }),
     ).rejects.toThrow(/BAD_REQUEST/);
     await expect(
       alice.mutation(api.deck_layout.duplicatePage, { pageId: first }),
@@ -478,4 +478,212 @@ describe("Deck layout compatibility and ownership", () => {
       alice.mutation(api.deck_layout.removePage, { pageId: keep }),
     ).rejects.toThrow(/BAD_REQUEST/);
   });
+});
+
+describe("Shared APK/web page catalogue", () => {
+  it("migrates once, retains existing page/key IDs, and never recreates a deleted Reloj", async () => {
+    const { alice, bob } = await fixture();
+    const oldPage = await alice.mutation(api.deck_layout.createPage, {
+      name: "Mi página",
+    });
+    await alice.mutation(api.deck_layout.setKey, {
+      pageId: oldPage,
+      position: 0,
+      content: { kind: "clock" },
+    });
+    const oldKey = (await alice.query(api.deck_layout.get, {}))!.keys[0]._id;
+    await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    const apk = (await alice.query(api.deck_layout.get, { unified: true }))!;
+    expect(apk.pages.map((p) => p.name)).toEqual([
+      "Estados VISO",
+      "Spotify",
+      "Reloj",
+      "Mi página",
+    ]);
+    expect(apk.keys.some((k) => k._id === oldKey && k.pageId === oldPage)).toBe(
+      true,
+    );
+    const clock = apk.pages.find((p) => p.kind === "standby")!;
+    await expect(
+      bob.mutation(api.deck_layout.removePage, { pageId: clock._id }),
+    ).rejects.toThrow();
+    await alice.mutation(api.deck_layout.removePage, { pageId: clock._id });
+    await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    expect(
+      (await alice.query(api.deck_layout.get, { unified: true }))!.pages.map(
+        (p) => p._id,
+      ),
+    ).not.toContain(clock._id);
+    expect(
+      (await alice.query(api.deck_layout.get, {}))!.pages.map((p) => p._id),
+    ).toEqual([oldPage]);
+  });
+  it("shares weather, key appearance, page order and Reloj preferences by account", async () => {
+    const { t, alice, aliceId, bob } = await fixture();
+    await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    const layout = (await alice.query(api.deck_layout.get, { unified: true }))!;
+    const statePage = layout.pages[0];
+    const clock = layout.pages.find((p) => p.kind === "standby")!;
+    await alice.mutation(api.deck_layout.setKey, {
+      pageId: statePage._id,
+      position: 0,
+      content: {
+        kind: "weather",
+        label: "Buenos Aires",
+        latitude: -34.6,
+        longitude: -58.4,
+      },
+      appearance: { label: "Buenos Aires", icon: "cloud", color: "#ffff00" },
+    });
+    await alice.mutation(api.deck_layout.configureScreen, {
+      pageId: clock._id,
+      settings: { clockStyle: "analog", accent: "#ff00ff" },
+    });
+    await alice.mutation(api.deck_layout.configureScreen, {
+      pageId: clock._id,
+      settings: { showDate: false },
+    });
+    await expect(
+      bob.mutation(api.deck_layout.configureScreen, {
+        pageId: clock._id,
+        settings: { accent: "#000000" },
+      }),
+    ).rejects.toThrow();
+    const order = layout.pages.map((p) => p._id).reverse();
+    await alice.mutation(api.deck_layout.reorderPages, { pageIds: order });
+    const anotherDevice = t.withIdentity({
+      subject: `${aliceId}|another-device`,
+    });
+    const shared = (await anotherDevice.query(api.deck_layout.get, {
+      unified: true,
+    }))!;
+    expect(shared.pages.map((p) => p._id)).toEqual(order);
+    expect(
+      shared.keys.find((k) => k.pageId === statePage._id && k.position === 0),
+    ).toMatchObject({
+      content: {
+        kind: "weather",
+        label: "Buenos Aires",
+        latitude: -34.6,
+        longitude: -58.4,
+      },
+      appearance: { label: "Buenos Aires", color: "#ffff00" },
+    });
+    expect(
+      shared.pages.find((p) => p._id === clock._id)!.standbySettings,
+    ).toMatchObject({
+      clockStyle: "analog",
+      accent: "#ff00ff",
+      showDate: false,
+    });
+    const duplicate = await alice.mutation(api.deck_layout.duplicatePage, {
+      pageId: clock._id,
+    });
+    expect(
+      (await alice.query(api.deck_layout.get, { unified: true }))!.pages.find(
+        (p) => p._id === duplicate,
+      ),
+    ).toMatchObject({
+      kind: "standby",
+      standbySettings: { clockStyle: "analog" },
+    });
+  });
+});
+
+it("protects shared photos by owner and updates append/remove without losing other photos", async () => {
+  const { t, alice, bob, aliceId, bobId } = await fixture();
+  await alice.mutation(api.deck_layout.ensureCatalogue, {});
+  const clock = (await alice.query(api.deck_layout.get, {
+    unified: true,
+  }))!.pages.find((page) => page.kind === "standby")!;
+  const ids = await t.run(async (ctx) => {
+    const own = [];
+    for (let i = 0; i < 2; i++) {
+      const storageId = await ctx.storage.store(
+        new Blob([new Uint8Array([i + 1])], { type: "image/png" }),
+      );
+      await ctx.db.insert("deckMedia", {
+        userId: aliceId,
+        storageId,
+        mediaType: "image",
+      });
+      own.push(storageId);
+    }
+    const foreign = await ctx.storage.store(
+      new Blob([new Uint8Array([3])], { type: "image/png" }),
+    );
+    await ctx.db.insert("deckMedia", {
+      userId: bobId,
+      storageId: foreign,
+      mediaType: "image",
+    });
+    return { own, foreign };
+  });
+  await alice.mutation(api.deck_layout.configureScreen, {
+    pageId: clock._id,
+    photos: [ids.own[0]],
+    photoOperation: "append",
+  });
+  await alice.mutation(api.deck_layout.configureScreen, {
+    pageId: clock._id,
+    photos: [ids.own[1]],
+    photoOperation: "append",
+  });
+  await expect(
+    alice.mutation(api.deck_layout.configureScreen, {
+      pageId: clock._id,
+      photos: [ids.foreign],
+      photoOperation: "append",
+    }),
+  ).rejects.toThrow(/FORBIDDEN/);
+  await expect(
+    bob.mutation(api.deck_layout.configureScreen, {
+      pageId: clock._id,
+      photos: [],
+      photoOperation: "remove",
+    }),
+  ).rejects.toThrow();
+  expect(
+    (await alice.query(api.deck_layout.get, { unified: true }))!.pages.find(
+      (page) => page._id === clock._id,
+    )!.standbyPhotos,
+  ).toEqual(ids.own);
+  await alice.mutation(api.deck_layout.configureScreen, {
+    pageId: clock._id,
+    photos: [ids.own[0]],
+    photoOperation: "remove",
+  });
+  expect(
+    (await alice.query(api.deck_layout.get, { unified: true }))!.pages.find(
+      (page) => page._id === clock._id,
+    )!.standbyPhotos,
+  ).toEqual([ids.own[1]]);
+});
+
+it("preserves a full existing status library during catalogue migration", async () => {
+  const { t, alice, aliceId } = await fixture();
+  const ids = await t.run(async (ctx) => {
+    const ids = [];
+    for (let i = 0; i < 24; i++)
+      ids.push(
+        await ctx.db.insert("statuses", {
+          userId: aliceId,
+          name: `Personal ${i}`,
+          color: "#00ffff",
+          icon: "star",
+          order: i + 100,
+        }),
+      );
+    return ids;
+  });
+  await alice.mutation(api.deck_layout.ensureCatalogue, {});
+  expect(
+    (await alice.query(api.statuses.list, {}))!.statuses.map(
+      (status) => status._id,
+    ),
+  ).toEqual(ids);
+  const page = (await alice.query(api.deck_layout.get, {
+    unified: true,
+  }))!.pages.find((page) => page.name === "Estados VISO")!;
+  expect(page.grid).toEqual({ columns: 3, rows: 2 });
 });

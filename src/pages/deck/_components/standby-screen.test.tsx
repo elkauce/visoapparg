@@ -66,7 +66,7 @@ describe("Single Standby screen", () => {
       { target: { value: "analog" } },
     );
     fireEvent.click(screen.getByRole("button", { name: "Listo" }));
-    expect(screen.getByRole("region", { name: "Standby" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Reloj" })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /^Reloj:/ })).toBeInTheDocument();
     expect(screen.queryByRole("link")).toBeNull();
     await waitFor(() =>
@@ -97,7 +97,7 @@ describe("Single Standby screen", () => {
       />,
     );
     expect(
-      screen.getByRole("dialog", { name: "Personalizar Standby" }),
+      screen.getByRole("dialog", { name: "Personalizar Reloj" }),
     ).toBeInTheDocument();
     fireEvent.change(screen.getByRole("combobox", { name: "Estilo" }), {
       target: { value: "widgets" },
@@ -219,13 +219,13 @@ describe("Single Standby screen", () => {
     const { rerender, unmount } = render(<StandbyScreen {...props} />);
     expect(
       await screen.findByRole("img", {
-        name: "Fotografía personal de Standby",
+        name: "Fotografía personal de Reloj",
       }),
     ).toHaveAttribute("src", "blob:private-photo");
     rerender(<StandbyScreen {...props} userId="account-two" />);
     expect(revoke).toHaveBeenCalledWith("blob:private-photo");
     expect(
-      screen.queryByRole("img", { name: "Fotografía personal de Standby" }),
+      screen.queryByRole("img", { name: "Fotografía personal de Reloj" }),
     ).toBeNull();
     unmount();
     vi.unstubAllGlobals();

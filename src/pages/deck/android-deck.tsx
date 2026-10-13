@@ -1,10 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  useConvex,
-  useConvexConnectionState,
-  useMutation,
-  useQuery,
-} from "convex/react";
+import { useConvexConnectionState, useMutation, useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import {
   ArrowLeft,
@@ -32,42 +27,28 @@ import { immersive, isAndroidNative, nativeDeck } from "@/lib/android-native";
 import { cn } from "@/lib/utils";
 import DeckPage from "./page.tsx";
 import StreamDeckPanel from "../_components/stream-deck-panel.tsx";
-import VisoStateScreen from "./_components/viso-state-screen.tsx";
-import SpotifyScreen from "./_components/spotify-screen.tsx";
-import StandbyScreen from "./_components/standby-screen.tsx";
 import PresenceSettings from "./_components/presence-settings";
 import GoogleHomeColorsDialog from "./_components/google-home-colors-dialog.tsx";
 import DeckSlide from "./_components/deck-slide.tsx";
-import { useAndroidMedia } from "./_components/use-android-media.ts";
-import {
-  findVisoStatus,
-  type VisoStateDefinition,
-} from "./_lib/viso-states.ts";
-import {
-  deckErrorMessage,
-  deckExtensionsEnabled,
-  getDeckDeviceId,
-} from "./_lib/deck-options.ts";
-import { getGridPreferenceStorage } from "./_lib/grid.ts";
+import { deckErrorMessage } from "./_lib/deck-options.ts";
+import SharedPresetScreen from "./_components/shared-preset-screen";
 
-const SCREENS = [
-  { id: "estados", name: "Estados VISO" },
-  { id: "spotify", name: "Spotify" },
-  { id: "standby", name: "Standby" },
-] as const;
 type Screen = string;
 
 /** Three defaults followed by the account’s saved pages, with the original editor. */
 export default function AndroidDeck() {
-  const convex = useConvex();
   const user = useQuery(api.users.getCurrentUser, {});
   const statusData = useQuery(api.statuses.list, {});
-  const layout = useQuery(api.deck_layout.get, {});
+  const layout = useQuery(api.deck_layout.get, { unified: true });
+  const ensureCatalogue = useMutation(api.deck_layout.ensureCatalogue);
+  useEffect(() => {
+    if (layout?.catalogReady === false)
+      void ensureCatalogue({}).catch(() =>
+        toast.error("No se pudieron sincronizar las páginas."),
+      );
+  }, [layout?.catalogReady, ensureCatalogue]);
   const createPage = useMutation(api.deck_layout.createPage);
   const connection = useConvexConnectionState();
-  const createStatus = useMutation(api.statuses.create);
-  const activateStatus = useMutation(api.deck_actions.activateStatus);
-  const setActive = useMutation(api.statuses.setActive);
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("estados");
   const [editing, setEditing] = useState(false);
@@ -78,11 +59,6 @@ export default function AndroidDeck() {
   const [standbySettingsOpen, setStandbySettingsOpen] = useState(false);
   const [elgatoOpen, setElgatoOpen] = useState(false);
   const [lightsOpen, setLightsOpen] = useState(false);
-  const spotify = useAndroidMedia(
-    screen === "spotify" && !editing,
-    "com.spotify.music",
-  );
-  const standby = useAndroidMedia(screen === "standby" && !editing);
   const connected = connection.isWebSocketConnected;
 
   useEffect(() => {
@@ -137,53 +113,6 @@ export default function AndroidDeck() {
     };
   }, []);
 
-  async function select(
-    definition: VisoStateDefinition,
-    knownId: Id<"statuses"> | null,
-  ) {
-    if (pendingRef.current) return;
-    if (!connected) {
-      toast.error("Sin conexión. Espera antes de cambiar el estado.");
-      return;
-    }
-    pendingRef.current = true;
-    setPending(true);
-    try {
-      let id = knownId;
-      if (!id) {
-        // Re-query at the explicit tap. Never replace Almuerzo or create defaults
-        // from mounting a screen; existing actions keep their original IDs.
-        const current = await convex.query(api.statuses.list, {});
-        if (!current) throw new Error("Inicia sesión para cambiar el estado.");
-        id = findVisoStatus(definition, current.statuses)?._id ?? null;
-        if (!id)
-          id = await createStatus({
-            name: definition.name,
-            color: definition.defaultColor,
-            icon: definition.icon,
-          });
-      }
-      if (deckExtensionsEnabled()) {
-        const storage = getGridPreferenceStorage();
-        const deviceId = isAndroidNative()
-          ? await nativeDeck.getDeviceId()
-          : storage
-            ? getDeckDeviceId(storage)
-            : crypto.randomUUID();
-        await activateStatus({
-          statusId: id,
-          requestId: crypto.randomUUID(),
-          deviceId,
-        });
-      } else await setActive({ statusId: id });
-    } catch (error) {
-      toast.error(deckErrorMessage(error));
-    } finally {
-      pendingRef.current = false;
-      setPending(false);
-    }
-  }
-
   async function toggleFullscreen() {
     try {
       if (isAndroidNative()) {
@@ -223,23 +152,20 @@ export default function AndroidDeck() {
   if (editing)
     return (
       <div className="relative h-dvh">
-        <DeckPage startEditing initialPageId={screen} />
+        <DeckPage startEditing fullEditor initialPageId={screen} />
         <Button
           className="fixed bottom-[max(var(--viso-safe-bottom),1rem)] left-1/2 z-40 -translate-x-1/2 shadow-lg"
           onClick={() => setEditing(false)}
         >
-          Volver a Estados VISO
+          Volver al Deck
         </Button>
       </div>
     );
-  const activeStatus =
-    statusData.statuses.find(
-      (status) => status._id === statusData.activeStatusId,
-    ) ?? null;
-  const screens = [
-    ...SCREENS,
-    ...(layout?.pages ?? []).map((page) => ({ id: page._id, name: page.name })),
-  ];
+  const screens = (layout?.pages ?? []).map((page) => ({
+    id: page._id,
+    name: page.name,
+  }));
+  if (!screens.length) return <p>Sincronizando tus páginas…</p>;
   const pageIndex = Math.max(
     0,
     screens.findIndex((item) => item.id === screen),
@@ -300,41 +226,25 @@ export default function AndroidDeck() {
         onIndexChange={(index) => setScreen(screens[index].id)}
         label={screens[pageIndex].name}
       >
-        <VisoStateScreen
-          statuses={statusData.statuses}
-          activeStatusId={statusData.activeStatusId}
-          pending={pending}
-          connected={connected}
-          onSelect={(definition, id) => void select(definition, id)}
-        />
-        <SpotifyScreen
-          media={spotify.media}
-          loading={spotify.loading}
-          error={spotify.error}
-          pending={spotify.pending}
-          onCommand={spotify.command}
-          onRequestAccess={spotify.requestAccess}
-          onRefresh={spotify.refresh}
-        />
-        <StandbyScreen
-          key={user._id}
-          userId={user._id}
-          media={standby.media}
-          mediaLoading={standby.loading}
-          activeStatus={activeStatus}
-          connected={connected}
-          onMediaCommand={standby.command}
-          mediaBusy={standby.pending}
-          settingsOpen={standbySettingsOpen}
-          onSettingsOpenChange={setStandbySettingsOpen}
-        />
-        {(layout?.pages ?? []).map((page) => (
-          <DeckPage
-            key={page._id}
-            embeddedPageId={page._id}
-            onSelectPage={setScreen}
-          />
-        ))}
+        {(layout?.pages ?? []).map((page) =>
+          page.kind === "spotify" || page.kind === "standby" ? (
+            <SharedPresetScreen
+              key={page._id}
+              pageId={page._id}
+              active={screens[pageIndex].id === page._id}
+              settingsOpen={
+                screens[pageIndex].id === page._id ? standbySettingsOpen : false
+              }
+              onSettingsOpenChange={setStandbySettingsOpen}
+            />
+          ) : (
+            <DeckPage
+              key={page._id}
+              embeddedPageId={page._id}
+              onSelectPage={setScreen}
+            />
+          ),
+        )}
       </DeckSlide>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
@@ -349,14 +259,14 @@ export default function AndroidDeck() {
               variant="secondary"
               className="min-h-11 justify-start"
               disabled={
-                !connected || pending || (layout?.pages.length ?? 0) >= 8
+                !connected || pending || (layout?.pages.length ?? 0) >= 11
               }
               onClick={() => {
                 if (pendingRef.current) return;
                 pendingRef.current = true;
                 setPending(true);
                 void createPage({
-                  name: `Página ${(layout?.pages.length ?? 0) + 4}`,
+                  name: `Página ${(layout?.pages.length ?? 0) + 1}`,
                 })
                   .then((id) => {
                     setScreen(id);
@@ -411,12 +321,16 @@ export default function AndroidDeck() {
               className="min-h-11 justify-start"
               onClick={() => {
                 setSettingsOpen(false);
-                setScreen("standby");
+                const page = layout?.pages.find(
+                  (page) => page.kind === "standby",
+                );
+                if (!page) return;
+                setScreen(page._id);
                 setStandbySettingsOpen(true);
               }}
             >
               <Clock />
-              Personalizar Standby
+              Personalizar Reloj
             </Button>
             <Button
               variant="secondary"
