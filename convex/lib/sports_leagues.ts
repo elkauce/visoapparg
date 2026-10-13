@@ -1,5 +1,11 @@
 // Ligas disponibles: clave interna -> nombre y ruta del marcador público de ESPN
 export const SPORTS_LEAGUES = {
+  sudamericana: { name: "Sudamericana", path: "soccer/conmebol.sudamericana" },
+  brasileirao: { name: "Brasileirão", path: "soccer/bra.1" },
+  uruguay: { name: "Uruguay", path: "soccer/uru.1" },
+  chile: { name: "Chile", path: "soccer/chi.1" },
+  colombia: { name: "Colombia", path: "soccer/col.1" },
+  peru: { name: "Perú", path: "soccer/per.1" },
   libertadores: { name: "Libertadores", path: "soccer/conmebol.libertadores" },
   f1: { name: "Fórmula 1", path: "racing/f1" },
   laliga: { name: "LaLiga", path: "soccer/esp.1" },

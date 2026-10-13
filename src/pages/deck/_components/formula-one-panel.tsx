@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useState } from "react";
 import { useAction } from "convex/react";
 import { useQuery } from "@tanstack/react-query";
@@ -5,9 +6,13 @@ import { api } from "@/convex/_generated/api";
 export default function FormulaOnePanel({
   active,
   favorite,
+  controlHost,
+  editing = true,
 }: {
   active: boolean;
   favorite: string;
+  controlHost?: HTMLElement | null;
+  editing?: boolean;
 }) {
   const [view, setView] = useState<"calendar" | "standings" | "results">(
     "calendar",
@@ -21,33 +26,38 @@ export default function FormulaOnePanel({
     queryFn: () => action({ view }),
   });
   const d = query.data;
+  const controls = (
+    <nav className="mb-4 flex flex-wrap gap-2" aria-label="Vistas de Fórmula 1">
+      {[
+        ["calendar", "Calendario"],
+        ["standings", "Campeonato"],
+        ["results", "Último Gran Premio"],
+      ].map(([key, label]) => (
+        <button
+          key={key}
+          aria-pressed={view === key}
+          className={`rounded-lg px-3 py-2 text-sm ${view === key ? "bg-white/20" : "bg-white/5"}`}
+          onClick={() => setView(key as typeof view)}
+        >
+          {label}
+        </button>
+      ))}
+      <button
+        className="rounded-lg bg-white/5 px-3 py-2 text-sm"
+        onClick={() => void query.refetch()}
+      >
+        Actualizar F1
+      </button>
+    </nav>
+  );
   return (
     <div>
-      <nav
-        className="mb-4 flex flex-wrap gap-2"
-        aria-label="Vistas de Fórmula 1"
-      >
-        {[
-          ["calendar", "Calendario"],
-          ["standings", "Campeonato"],
-          ["results", "Último Gran Premio"],
-        ].map(([key, label]) => (
-          <button
-            key={key}
-            aria-pressed={view === key}
-            className={`rounded-lg px-3 py-2 text-sm ${view === key ? "bg-white/20" : "bg-white/5"}`}
-            onClick={() => setView(key as typeof view)}
-          >
-            {label}
-          </button>
-        ))}
-        <button
-          className="rounded-lg bg-white/5 px-3 py-2 text-sm"
-          onClick={() => void query.refetch()}
-        >
-          Actualizar F1
-        </button>
-      </nav>
+      {editing
+        ? controls
+        : controlHost
+          ? createPortal(controls, controlHost)
+          : null}
+
       {query.isPending && <p>Consultando Fórmula 1…</p>}
       {query.isError && (
         <p role="alert" className="text-amber-300">

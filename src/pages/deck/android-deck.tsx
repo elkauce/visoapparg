@@ -56,6 +56,8 @@ export default function AndroidDeck() {
   const pendingRef = useRef(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const lastTouch = useRef<{ time: number; x: number; y: number } | null>(null);
   const [standbySettingsOpen, setStandbySettingsOpen] = useState(false);
   const [elgatoOpen, setElgatoOpen] = useState(false);
   const [lightsOpen, setLightsOpen] = useState(false);
@@ -131,6 +133,19 @@ export default function AndroidDeck() {
     }
   }
 
+  const sportsActive =
+    !editing &&
+    (layout?.pages.find((p) => p._id === screen) ?? layout?.pages[0])?.kind ===
+      "sports";
+  useEffect(() => {
+    if (!isAndroidNative()) return;
+    void nativeDeck
+      .setScreenOrientation(sportsActive ? "portrait" : "automatic")
+      .catch(() => {});
+    return () => {
+      void nativeDeck.setScreenOrientation("automatic").catch(() => {});
+    };
+  }, [sportsActive]);
   if (user === undefined || statusData === undefined)
     return (
       <div
@@ -170,12 +185,62 @@ export default function AndroidDeck() {
     0,
     screens.findIndex((item) => item.id === screen),
   );
-  const fullBleed = ["visualizer", "sports", "weather"].includes(
-    layout?.pages[pageIndex]?.kind ?? "",
-  );
+  const fullBleed = true;
   const lightSurface = layout?.pages[pageIndex]?.kind === "sports";
+  const configureCurrent = () => {
+    const current = layout?.pages[pageIndex];
+    if (!current) return;
+    if (["visualizer", "weather", "sports"].includes(current.kind ?? ""))
+      window.dispatchEvent(
+        new CustomEvent("viso:configure-page", { detail: current._id }),
+      );
+    else if (current.kind === "standby" || current.kind === "spotify")
+      setStandbySettingsOpen(true);
+    else setSettingsOpen(true);
+  };
   return (
     <div
+      onDoubleClick={(event) => {
+        if (
+          !(event.target as HTMLElement).closest("input,select,[role=dialog]")
+        )
+          configureCurrent();
+      }}
+      onPointerDown={(event) => {
+        if (event.pointerType === "touch")
+          touchStart.current = { x: event.clientX, y: event.clientY };
+      }}
+      onPointerCancel={() => {
+        touchStart.current = null;
+        lastTouch.current = null;
+      }}
+      onPointerUp={(event) => {
+        if (
+          event.pointerType !== "touch" ||
+          (event.target as HTMLElement).closest("input,select,[role=dialog]")
+        )
+          return;
+        const start = touchStart.current;
+        touchStart.current = null;
+        if (
+          !start ||
+          Math.hypot(start.x - event.clientX, start.y - event.clientY) > 10
+        ) {
+          lastTouch.current = null;
+          return;
+        }
+        const now = performance.now();
+        const prev = lastTouch.current;
+        if (
+          prev &&
+          now - prev.time < 350 &&
+          Math.hypot(prev.x - event.clientX, prev.y - event.clientY) < 20
+        ) {
+          lastTouch.current = null;
+          configureCurrent();
+        } else
+          lastTouch.current = { time: now, x: event.clientX, y: event.clientY };
+      }}
       className="viso-safe-screen relative flex h-dvh min-h-0 flex-col overflow-hidden bg-black p-1.5"
       style={{
         paddingTop: fullBleed
@@ -193,9 +258,11 @@ export default function AndroidDeck() {
       }}
     >
       <header
+        hidden
         data-light-surface={lightSurface}
         className="pointer-events-none absolute inset-x-0 z-20 flex items-center justify-between"
         style={{
+          display: "none",
           top: "var(--viso-safe-top, 0px)",
           paddingLeft: "var(--viso-safe-left, 0px)",
           paddingRight: "var(--viso-safe-right, 0px)",

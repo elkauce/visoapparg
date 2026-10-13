@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { useState } from "react";
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
@@ -26,9 +27,11 @@ const glass =
 export default function WeatherScreen({
   settings,
   active,
+  controlHost,
 }: {
   settings: ScreenSettings;
   active: boolean;
+  controlHost?: HTMLElement | null;
 }) {
   const [hours, setHours] = useState(24);
   const fullForecast = useAction(api.weather.fullForecast);
@@ -143,6 +146,7 @@ export default function WeatherScreen({
                 {settings.city}
               </h2>
               <button
+                style={{ display: "none" }}
                 aria-label="Actualizar clima"
                 className="shrink-0 rounded-full bg-white/10 p-2"
                 onClick={() => void query.refetch()}
@@ -255,13 +259,6 @@ export default function WeatherScreen({
                   </div>
                 </div>
               </div>
-              <button
-                className="mt-4 flex w-full items-center justify-end gap-1 text-sm text-white/80"
-                onClick={() => setHours(hours === 24 ? 48 : 24)}
-              >
-                Pronóstico de {hours === 24 ? 48 : 24} horas{" "}
-                <ChevronRight className="size-5" />
-              </button>
             </article>
             <article
               className={`${glass} flex items-center justify-between gap-4`}
@@ -334,6 +331,24 @@ export default function WeatherScreen({
           </div>
         </div>
       </div>
+      {controlHost &&
+        createPortal(
+          <div className="flex flex-wrap gap-3">
+            <button
+              className="rounded-lg border p-2"
+              onClick={() => void query.refetch()}
+            >
+              Actualizar clima
+            </button>
+            <button
+              className="rounded-lg border p-2"
+              onClick={() => setHours(hours === 24 ? 48 : 24)}
+            >
+              Pronóstico de {hours === 24 ? 48 : 24} horas
+            </button>
+          </div>,
+          controlHost,
+        )}
     </section>
   );
 }

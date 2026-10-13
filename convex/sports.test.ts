@@ -110,3 +110,81 @@ it("parses real provider contracts for full scoreboards and F1 standings without
     "https://api.jolpi.ca/ergast/f1/current/driverStandings.json?limit=100",
   );
 });
+
+it("keeps Latin American tables and match detail authenticated and bounded to supported providers", async () => {
+  const t = convexTest(schema, modules);
+  const id = await t.run((ctx) => ctx.db.insert("users", { name: "Viewer" }));
+  const signed = t.withIdentity({ subject: `${id}|s` });
+  const fetch = vi
+    .fn()
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          children: [
+            {
+              name: "Argentina",
+              standings: {
+                entries: [
+                  {
+                    team: { displayName: "Equipo" },
+                    stats: [
+                      { name: "points", displayValue: "30" },
+                      { name: "gamesPlayed", displayValue: "14" },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      ),
+    )
+    .mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          boxscore: {
+            teams: [
+              {
+                team: { displayName: "Equipo" },
+                statistics: [
+                  {
+                    name: "possessionPct",
+                    label: "Possession",
+                    displayValue: "61%",
+                  },
+                ],
+              },
+            ],
+          },
+        }),
+      ),
+    );
+  vi.stubGlobal("fetch", fetch);
+  await expect(
+    t.action(api.sports.leagueTable, { league: "ligaarg" }),
+  ).rejects.toThrow(/UNAUTHENTICATED/);
+  await expect(
+    signed.action(api.sports.matchStatistics, {
+      league: "ligaarg",
+      eventId: "1&url=https://example.test",
+    }),
+  ).rejects.toThrow(/BAD_REQUEST/);
+  expect(fetch).not.toHaveBeenCalled();
+  const table = await signed.action(api.sports.leagueTable, {
+    league: "ligaarg",
+  });
+  expect(table[0].entries[0]).toMatchObject({
+    name: "Equipo",
+    points: "30",
+    played: "14",
+    draws: "—",
+  });
+  const stats = await signed.action(api.sports.matchStatistics, {
+    league: "ligaarg",
+    eventId: "12345",
+  });
+  expect(stats[0].statistics[0]).toEqual({ label: "Posesión", value: "61%" });
+  expect(fetch.mock.calls[0][0]).toBe(
+    "https://site.api.espn.com/apis/v2/sports/soccer/arg.1/standings",
+  );
+});

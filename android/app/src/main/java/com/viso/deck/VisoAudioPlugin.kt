@@ -53,6 +53,7 @@ class VisoAudioPlugin : Plugin() {
                 // or protected playback disallow this; never replace it with fake levels.
                 val effect = Visualizer(0)
                 visualizer = effect
+                if(effect.setScalingMode(Visualizer.SCALING_MODE_AS_PLAYED) != Visualizer.SUCCESS) throw IllegalStateException("La medición musical sin normalización no está disponible")
                 effect.captureSize = Visualizer.getCaptureSizeRange()[1].coerceAtMost(1024)
                 val result = effect.setDataCaptureListener(object: Visualizer.OnDataCaptureListener {
                     override fun onWaveFormDataCapture(v: Visualizer?, bytes: ByteArray?, rate: Int) {
@@ -76,7 +77,7 @@ class VisoAudioPlugin : Plugin() {
             } else {
                 val size = AudioRecord.getMinBufferSize(16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)
                 if (size <= 0) throw IllegalStateException("Micrófono no disponible")
-                val record = AudioRecord(MediaRecorder.AudioSource.MIC, 16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size.coerceAtLeast(4096))
+                val record = AudioRecord(MediaRecorder.AudioSource.VOICE_RECOGNITION, 16000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, size.coerceAtLeast(4096))
                 recorder = record
                 if (record.state != AudioRecord.STATE_INITIALIZED) throw IllegalStateException("No se pudo iniciar el micrófono")
                 record.startRecording()

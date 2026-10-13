@@ -1,5 +1,5 @@
 import { VU_STYLES, VU_STYLE_LABELS } from "../_lib/vu-renderer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { toast } from "sonner";
 import { Settings2 } from "lucide-react";
@@ -31,6 +31,17 @@ export default function ExtendedScreen({
   const settings = normalizeScreenSettings(page.screenSettings);
   const configure = useMutation(api.deck_layout.configureScreen);
   const [open, setOpen] = useState(false);
+  const [controlHost, setControlHost] = useState<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const configure = (event: Event) => {
+      if ((event as CustomEvent).detail === page._id && active) {
+        setDraft(normalizeScreenSettings(page.screenSettings));
+        setOpen(true);
+      }
+    };
+    window.addEventListener("viso:configure-page", configure);
+    return () => window.removeEventListener("viso:configure-page", configure);
+  }, [page._id, page.screenSettings, active]);
   const [draft, setDraft] = useState(settings);
   const [search, setSearch] = useState("");
   const [results, setResults] = useState<GeoResult[]>([]);
@@ -66,26 +77,41 @@ export default function ExtendedScreen({
   };
   return (
     <div className="relative h-full min-h-0">
-      <div className="pointer-events-none absolute bottom-4 right-4 z-30 flex justify-end">
-        <button
-          aria-label={`Configurar ${title}`}
-          className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/50 p-3 text-sm text-white backdrop-blur-md"
-          onClick={() => {
-            setDraft(settings);
-            setOpen(true);
-          }}
-        >
-          <Settings2 className="size-4" />
-          {editing ? `Personalizar ${title}` : ""}
-        </button>
-      </div>
+      {editing && (
+        <div className="pointer-events-none absolute bottom-4 right-4 z-30 flex justify-end">
+          <button
+            aria-label={`Configurar ${title}`}
+            className="pointer-events-auto flex items-center gap-2 rounded-full border border-white/10 bg-black/50 p-3 text-sm text-white backdrop-blur-md"
+            onClick={() => {
+              setDraft(settings);
+              setOpen(true);
+            }}
+          >
+            <Settings2 className="size-4" />
+            {editing ? `Personalizar ${title}` : ""}
+          </button>
+        </div>
+      )}
       <div className="h-full min-h-0">
         {page.kind === "weather" ? (
-          <WeatherScreen settings={settings} active={active} />
+          <WeatherScreen
+            settings={settings}
+            active={active}
+            controlHost={controlHost}
+          />
         ) : page.kind === "sports" ? (
-          <SportsScreen settings={settings} active={active} />
+          <SportsScreen
+            settings={settings}
+            active={active}
+            controlHost={controlHost}
+            editing={editing}
+          />
         ) : (
-          <VisualizerScreen settings={settings} active={active && !open} />
+          <VisualizerScreen
+            settings={settings}
+            active={active}
+            controlHost={controlHost}
+          />
         )}
       </div>
       <Dialog
@@ -101,6 +127,9 @@ export default function ExtendedScreen({
               Estos ajustes se comparten con la web y la APK de tu cuenta.
             </DialogDescription>
           </DialogHeader>
+          {["visualizer", "weather", "sports"].includes(page.kind ?? "") && (
+            <div ref={setControlHost} />
+          )}
           {page.kind === "weather" && (
             <div className="space-y-4">
               <p>Ciudad: {draft.city}</p>
@@ -216,17 +245,20 @@ export default function ExtendedScreen({
                 </label>
               )}
               <label className="block">
-                Sensibilidad ({draft.sensitivity}×)
+                Ganancia ({Math.round(20 * Math.log10(draft.sensitivity))} dB)
                 <input
                   aria-label="Sensibilidad del vúmetro"
                   className="block w-full"
                   type="range"
-                  min="0.25"
-                  max="4"
-                  step="0.25"
-                  value={draft.sensitivity}
+                  min="-30"
+                  max="30"
+                  step="1"
+                  value={Math.round(20 * Math.log10(draft.sensitivity))}
                   onChange={(e) =>
-                    setDraft({ ...draft, sensitivity: Number(e.target.value) })
+                    setDraft({
+                      ...draft,
+                      sensitivity: Math.pow(10, Number(e.target.value) / 20),
+                    })
                   }
                 />
               </label>

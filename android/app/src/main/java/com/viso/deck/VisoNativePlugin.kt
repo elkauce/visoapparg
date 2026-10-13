@@ -74,6 +74,16 @@ class VisoNativePlugin : Plugin() {
     }
 
     @PluginMethod
+    fun setScreenOrientation(call: PluginCall) {
+        val mode=call.getString("mode")
+        if(mode !in listOf("portrait","automatic")){call.reject("Orientación inválida");return}
+        activity.runOnUiThread {
+            activity.requestedOrientation=if(mode=="portrait") android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT else android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            call.resolve()
+        }
+    }
+
+    @PluginMethod
     fun setKeepScreenOn(call: PluginCall) {
         val enabled = call.getBoolean("enabled", false) == true
         activity.runOnUiThread {

@@ -33,6 +33,9 @@ export const defaultScreenSettings: ScreenSettings = {
   leagues: [
     "ligaarg",
     "libertadores",
+    "sudamericana",
+    "brasileirao",
+    "ligamx",
     "premier",
     "laliga",
     "champions",
@@ -69,7 +72,7 @@ export function normalizeScreenSettings(value: unknown): ScreenSettings {
       typeof s.color === "string" && /^#[0-9a-f]{6}$/i.test(s.color)
         ? s.color
         : defaultScreenSettings.color,
-    sensitivity: number("sensitivity", 0.25, 4),
+    sensitivity: number("sensitivity", 0.031622, 31.623),
     leagues: Array.isArray(s.leagues)
       ? [
           ...new Set(
@@ -77,7 +80,7 @@ export function normalizeScreenSettings(value: unknown): ScreenSettings {
               (x): x is string => typeof x === "string" && isSportsLeague(x),
             ),
           ),
-        ].slice(0, 16)
+        ].slice(0, 24)
       : defaultScreenSettings.leagues,
     favorite:
       typeof s.favorite === "string" ? s.favorite.trim().slice(0, 60) : "",
@@ -118,7 +121,7 @@ export function validateScreenSettingsPatch(
           ? [-90, 90]
           : key === "longitude"
             ? [-180, 180]
-            : [0.25, 4];
+            : [0.031622, 31.623];
       if (
         typeof item !== "number" ||
         !Number.isFinite(item) ||
@@ -147,7 +150,7 @@ export function validateScreenSettingsPatch(
     if (
       key === "leagues" &&
       (!Array.isArray(item) ||
-        item.length > 16 ||
+        item.length > 24 ||
         item.some((x) => typeof x !== "string" || !isSportsLeague(x)))
     )
       invalid();

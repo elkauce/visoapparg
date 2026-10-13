@@ -55,23 +55,30 @@ function panel(
 ) {
   c.save();
   c.translate(x, y);
-  c.scale(w / 600, h / 360);
-  const outer = c.createLinearGradient(0, 0, 600, 360);
+  const green = style === "analog-green",
+    blue = style === "analog-blue",
+    amber = style === "analog-amber" || style === "analog-bronze";
+  const edge = Math.min(w, h) * 0.035;
+  const outer = c.createLinearGradient(0, 0, w, h);
   outer.addColorStop(0, style === "analog-bronze" ? "#8a6040" : "#707579");
   outer.addColorStop(0.5, "#191b1c");
   outer.addColorStop(1, style === "analog-bronze" ? "#52321f" : "#53565a");
   c.fillStyle = outer;
   c.beginPath();
-  c.roundRect(0, 0, 600, 360, 18);
+  c.roundRect(0, 0, w, h, edge);
   c.fill();
   c.fillStyle = "#08090a";
   c.beginPath();
-  c.roundRect(13, 13, 574, 334, 12);
+  c.roundRect(edge, edge, w - edge * 2, h - edge * 2, edge * 0.65);
   c.fill();
-  const green = style === "analog-green",
-    blue = style === "analog-blue",
-    amber = style === "analog-amber" || style === "analog-bronze";
-  const face = c.createRadialGradient(300, 120, 15, 300, 180, 360);
+  const face = c.createRadialGradient(
+    w * 0.5,
+    h * 0.3,
+    1,
+    w * 0.5,
+    h * 0.5,
+    Math.max(w, h),
+  );
   face.addColorStop(
     0,
     green ? "#4effc8" : blue ? "#7de5f4" : amber ? "#fff1a5" : "#f9f9f4",
@@ -82,8 +89,11 @@ function panel(
   );
   c.fillStyle = face;
   c.beginPath();
-  c.roundRect(27, 27, 546, 302, 7);
+  c.roundRect(edge * 2, edge * 2, w - edge * 4, h - edge * 4, edge * 0.3);
   c.fill();
+  const scale = Math.min((w - edge * 4) / 600, (h - edge * 4) / 360);
+  c.translate((w - 600 * scale) / 2, (h - 360 * scale) / 2);
+  c.scale(scale, scale);
   const ink = green ? "#073c31" : blue ? "#124e61" : "#333225";
   const cx = 300,
     cy = 325,
@@ -164,6 +174,7 @@ export function drawReferenceMeter(
   color: string,
   held: number[],
   smooth: number[],
+  deltaMs = 16.67,
 ) {
   c.shadowBlur = 0;
   c.shadowOffsetX = 0;
@@ -179,8 +190,12 @@ export function drawReferenceMeter(
       rms;
   const target = levelToPosition(rms, sensitivity),
     targetPeak = levelToPosition(peak, sensitivity);
-  smooth[0] = (smooth[0] ?? 0) + (target - (smooth[0] ?? 0)) * 0.18;
-  smooth[1] = (smooth[1] ?? 0) + (targetPeak - (smooth[1] ?? 0)) * 0.24;
+  const response = 1 - Math.exp(-Math.min(100, Math.max(0, deltaMs)) / 150);
+  smooth[0] = (smooth[0] ?? 0) + (target - (smooth[0] ?? 0)) * response;
+  smooth[1] =
+    (smooth[1] ?? 0) +
+    (targetPeak - (smooth[1] ?? 0)) *
+      (1 - Math.exp(-Math.min(100, Math.max(0, deltaMs)) / 80));
   if (style.startsWith("analog-")) {
     const double = ["analog-white", "analog-bronze", "analog-green"].includes(
       style,

@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+import { SportsTable, MatchStatistics } from "./sports-details";
 import { useState } from "react";
 import { useAction } from "convex/react";
 import { useQuery } from "@tanstack/react-query";
@@ -35,9 +37,13 @@ function Crest({ name, logo }: { name: string; logo?: string | null }) {
 export default function SportsScreen({
   settings,
   active,
+  controlHost,
+  editing = false,
 }: {
   settings: ScreenSettings;
   active: boolean;
+  controlHost?: HTMLElement | null;
+  editing?: boolean;
 }) {
   const [selected, setSelected] = useState(settings.leagues[0] ?? "ligaarg");
   const league = settings.leagues.includes(selected)
@@ -45,6 +51,7 @@ export default function SportsScreen({
     : (settings.leagues[0] ?? "ligaarg");
   const [date, setDate] = useState(() => dateString(new Date()));
   const [filter, setFilter] = useState("all");
+  const [view, setView] = useState("matches");
   const [expanded, setExpanded] = useState<string | null>(null);
   const action = useAction(api.sports.screenScoreboard);
   const query = useQuery({
@@ -71,21 +78,26 @@ export default function SportsScreen({
   );
   return (
     <section
-      className="h-full overflow-y-auto bg-[#f2f2f7] px-4 pb-24 pt-12 text-[#171719] sm:px-7"
+      className="h-full overflow-y-auto bg-[#f2f2f7] px-4 pb-6 pt-0 text-[#171719] sm:px-7"
+      data-passive={!editing}
       aria-label="Deportes a pantalla completa"
     >
-      <header className="mx-auto flex max-w-6xl items-center justify-between gap-3">
+      <style>{`[data-passive=true] .sports-toolbar {display:none!important}`}</style>
+      <header className="mx-auto flex max-w-[520px] items-center justify-between gap-3 rounded-b-3xl bg-gradient-to-br from-[#5535ef] via-[#9c42cf] to-[#eea547] px-5 py-8 text-white">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#8a8a8f]">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/65">
             VISO
           </p>
           <h2 className="mt-1 text-[clamp(28px,4vw,42px)] font-bold leading-tight tracking-tight">
-            {filter === "favorite" ? "Mis equipos" : "Deportes"}
+            {filter === "favorite" ? "Mis equipos" : "VISO Deportes"}
           </h2>
+          <p className="mt-2 text-sm text-white/75">
+            Argentina y Latinoamérica
+          </p>
         </div>
         <button
           aria-label="Actualizar deportes"
-          className="grid size-10 place-items-center rounded-full bg-white text-[#7352d6]"
+          className="sports-toolbar grid size-10 place-items-center rounded-full bg-white text-[#7352d6]"
           onClick={() => void query.refetch()}
         >
           <RefreshCw
@@ -93,9 +105,27 @@ export default function SportsScreen({
           />
         </button>
       </header>
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto max-w-[520px]">
+        <div className="sports-toolbar my-4 flex gap-2">
+          {[
+            ["matches", "Partidos"],
+            ["table", "Tabla"],
+            ["favorite", "Mis equipos"],
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              className={`flex-1 rounded-xl px-3 py-2 text-sm font-semibold ${view === key ? "bg-[#6a3ce4] text-white" : "bg-white text-slate-500"}`}
+              onClick={() => {
+                setView(key);
+                setFilter(key === "favorite" ? "favorite" : "all");
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <nav
-          className="my-5 flex gap-2 overflow-x-auto pb-1"
+          className="sports-toolbar my-5 flex gap-2 overflow-x-auto pb-1"
           aria-label="Competiciones"
         >
           {settings.leagues.map((key) => (
@@ -112,13 +142,20 @@ export default function SportsScreen({
             </button>
           ))}
         </nav>
-        {league === "f1" ? (
+        {view === "table" && league !== "f1" ? (
+          <SportsTable league={league} active={active} />
+        ) : league === "f1" ? (
           <div className="rounded-3xl bg-[#171719] p-5 text-white">
-            <FormulaOnePanel active={active} favorite={settings.favorite} />
+            <FormulaOnePanel
+              active={active}
+              favorite={settings.favorite}
+              controlHost={controlHost}
+              editing={editing}
+            />
           </div>
         ) : (
           <>
-            <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div className="sports-toolbar mb-5 flex flex-wrap items-center justify-between gap-3">
               <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-xl bg-[#e5e5eb] p-1">
                 {[
                   ["all", "Todos"],
@@ -193,7 +230,7 @@ export default function SportsScreen({
               </p>
             )}
             {query.isPending && settings.leagues.length > 0 && (
-              <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1">
                 {[0, 1].map((n) => (
                   <div
                     key={n}
@@ -221,7 +258,7 @@ export default function SportsScreen({
                 </p>
               </div>
             )}
-            <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid items-start gap-4 grid-cols-1">
               {shown?.map((e) => (
                 <article
                   key={e.id}
@@ -292,6 +329,7 @@ export default function SportsScreen({
                         })}
                       </p>
                       {e.venue && <p className="mt-1">{e.venue}</p>}
+                      <MatchStatistics league={league} eventId={e.id} />
                     </div>
                   )}
                 </article>
@@ -307,6 +345,58 @@ export default function SportsScreen({
           </>
         )}
       </div>
+      {controlHost &&
+        createPortal(
+          <div className="space-y-3">
+            <label className="block">
+              Competición
+              <select
+                aria-label="Competición deportiva"
+                className="ml-2 rounded border bg-background p-2"
+                value={league}
+                onChange={(e) => setSelected(e.target.value)}
+              >
+                {settings.leagues.map((k) => (
+                  <option key={k} value={k}>
+                    {SPORTS_LEAGUES[k as SportsLeagueKey].name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              Vista
+              <select
+                aria-label="Vista deportiva"
+                className="ml-2 rounded border bg-background p-2"
+                value={view}
+                onChange={(e) => {
+                  setView(e.target.value);
+                  setFilter(e.target.value === "favorite" ? "favorite" : "all");
+                }}
+              >
+                <option value="matches">Partidos</option>
+                <option value="table">Tabla</option>
+                <option value="favorite">Mis equipos</option>
+              </select>
+            </label>
+            <input
+              aria-label="Fecha deportiva"
+              className="rounded border bg-background p-2"
+              type="date"
+              value={date}
+              onChange={(e) => {
+                if (e.target.value) setDate(e.target.value);
+              }}
+            />
+            <button
+              className="ml-2 rounded border p-2"
+              onClick={() => void query.refetch()}
+            >
+              Actualizar
+            </button>
+          </div>,
+          controlHost,
+        )}
     </section>
   );
 }

@@ -1,3 +1,9 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useMutation, useQuery, useConvexConnectionState } from "convex/react";
 import { useAuthToken } from "@convex-dev/auth/react";
@@ -103,15 +109,41 @@ export default function SharedPresetScreen({
     return <ExtendedScreen page={page} active={active} editing={editing} />;
   if (page.kind === "spotify")
     return (
-      <SpotifyScreen
-        media={media.media}
-        loading={media.loading}
-        error={media.error}
-        pending={media.pending}
-        onCommand={media.command}
-        onRequestAccess={media.requestAccess}
-        onRefresh={media.refresh}
-      />
+      <>
+        <div className={editing ? "h-full" : "h-full [&_button]:hidden"}>
+          <SpotifyScreen
+            media={media.media}
+            loading={media.loading}
+            error={media.error}
+            pending={media.pending}
+            onCommand={media.command}
+            onRequestAccess={media.requestAccess}
+            onRefresh={media.refresh}
+          />
+        </div>
+        <Dialog
+          open={settingsOpen ?? customizing}
+          onOpenChange={(open) => {
+            setCustomizing(open);
+            onSettingsOpenChange?.(open);
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Spotify</DialogTitle>
+            </DialogHeader>
+            <SpotifyScreen
+              media={media.media}
+              loading={media.loading}
+              error={media.error}
+              pending={media.pending}
+              onCommand={media.command}
+              onRequestAccess={media.requestAccess}
+              onRefresh={media.refresh}
+            />
+          </DialogContent>
+        </Dialog>
+      </>
     );
   const activeStatus =
     statuses.statuses.find(
@@ -128,7 +160,13 @@ export default function SharedPresetScreen({
           Personalizar Reloj
         </button>
       )}
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div
+        className={
+          editing
+            ? "min-h-0 flex-1 overflow-hidden"
+            : "min-h-0 flex-1 overflow-hidden [&_button]:hidden"
+        }
+      >
         <StandbyScreen
           userId={user._id}
           media={media.media}

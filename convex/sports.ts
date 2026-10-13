@@ -301,3 +301,157 @@ export const formulaOne = action({
     };
   },
 });
+
+export const leagueTable = action({
+  args: { league: v.string() },
+  handler: async (ctx, args) => {
+    if (!(await ctx.auth.getUserIdentity()))
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
+    if (!isSportsLeague(args.league) || args.league === "f1")
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Competición inválida",
+      });
+    const response = await fetch(
+      `https://site.api.espn.com/apis/v2/sports/${SPORTS_LEAGUES[args.league].path}/standings`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!response.ok)
+      throw new ConvexError({
+        code: "EXTERNAL_SERVICE_ERROR",
+        message: "La tabla no está disponible",
+      });
+    const entry = z.object({
+      team: z.object({
+        displayName: z.string(),
+        logos: z.array(z.object({ href: z.string() })).optional(),
+      }),
+      stats: z.array(
+        z.object({
+          name: z.string(),
+          displayValue: z.string().optional(),
+          value: z.number().optional(),
+        }),
+      ),
+    });
+    const group = z.object({
+      name: z.string().optional(),
+      standings: z.object({ entries: z.array(entry) }).optional(),
+    });
+    const parsed = z
+      .object({
+        children: z.array(group).optional(),
+        standings: z.object({ entries: z.array(entry) }).optional(),
+      })
+      .parse(await response.json());
+    const groups = parsed.children?.length
+      ? parsed.children
+      : [
+          {
+            name: SPORTS_LEAGUES[args.league].name,
+            standings: parsed.standings,
+          },
+        ];
+    return groups.slice(0, 12).map((g) => ({
+      name: g.name ?? "Clasificación",
+      entries: (g.standings?.entries ?? []).slice(0, 40).map((e, index) => {
+        const stat = (...names: string[]) => {
+          const v = e.stats.find((s) => names.includes(s.name));
+          return (
+            v?.displayValue ?? (v?.value === undefined ? "—" : String(v.value))
+          );
+        };
+        return {
+          name: e.team.displayName,
+          rank: stat("rank"),
+          played: stat("gamesPlayed"),
+          wins: stat("wins"),
+          draws: stat("ties", "draws"),
+          losses: stat("losses"),
+          points: stat("points"),
+          difference: stat("pointDifferential", "goalDifference"),
+          logo:
+            e.team.logos?.find((l) => l.href.startsWith("https://"))?.href ??
+            null,
+        };
+      }),
+    }));
+  },
+});
+
+export const matchStatistics = action({
+  args: { league: v.string(), eventId: v.string() },
+  handler: async (ctx, args) => {
+    if (!(await ctx.auth.getUserIdentity()))
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
+    if (!isSportsLeague(args.league) || !/^\d{1,15}$/.test(args.eventId))
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Partido inválido",
+      });
+    const response = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[args.league].path}/summary?event=${args.eventId}`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!response.ok)
+      throw new ConvexError({
+        code: "EXTERNAL_SERVICE_ERROR",
+        message: "Detalle no disponible",
+      });
+    const parsed = z
+      .object({
+        boxscore: z
+          .object({
+            teams: z
+              .array(
+                z.object({
+                  team: z.object({ displayName: z.string() }),
+                  statistics: z
+                    .array(
+                      z.object({
+                        name: z.string().optional(),
+                        label: z.string().optional(),
+                        displayValue: z.string(),
+                      }),
+                    )
+                    .optional(),
+                }),
+              )
+              .optional(),
+          })
+          .optional(),
+      })
+      .parse(await response.json());
+    return (parsed.boxscore?.teams ?? []).slice(0, 2).map((t) => ({
+      name: t.team.displayName,
+      statistics: (t.statistics ?? []).slice(0, 30).map((s) => ({
+        label:
+          (
+            {
+              possessionPct: "Posesión",
+              shotsOnTarget: "Remates al arco",
+              totalShots: "Remates",
+              foulsCommitted: "Faltas",
+              yellowCards: "Amarillas",
+              redCards: "Rojas",
+              offsides: "Fuera de juego",
+              cornerKicks: "Córners",
+              saves: "Atajadas",
+              passes: "Pases",
+              accuratePasses: "Pases acertados",
+            } as Record<string, string>
+          )[s.name ?? ""] ??
+          s.label ??
+          s.name ??
+          "Estadística",
+        value: s.displayValue,
+      })),
+    }));
+  },
+});

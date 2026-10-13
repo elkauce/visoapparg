@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { drawReferenceMeter } from "../_lib/vu-renderer";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -26,9 +27,11 @@ const audio = registerPlugin<{
 export default function VisualizerScreen({
   settings,
   active,
+  controlHost,
 }: {
   settings: ScreenSettings;
   active: boolean;
+  controlHost?: HTMLElement | null;
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const frame = useRef<AudioFrame>({});
@@ -234,6 +237,7 @@ export default function VisualizerScreen({
     if (!active) return;
     let id = 0;
     let previous = 0;
+    let lastFrame = 0;
     const peaks = Array(32).fill(0) as number[];
     const smooth = [0, 0];
     const draw = (time: number) => {
@@ -270,7 +274,9 @@ export default function VisualizerScreen({
           settings.color,
           peaks,
           smooth,
+          lastFrame ? time - lastFrame : 16.67,
         );
+        lastFrame = time;
         if (reference) {
           /* complete reference face drawn above */
         } else if (settings.visualizerStyle === "wave") {
@@ -362,30 +368,37 @@ export default function VisualizerScreen({
         className="absolute inset-0 size-full"
         aria-label="Vúmetro de audio en tiempo real"
       />
-      <div className="absolute bottom-4 left-4 z-20 flex items-center gap-3 rounded-full border border-white/10 bg-black/60 px-3 py-2 backdrop-blur-md">
-        <Button
-          className="h-8 rounded-full text-xs"
-          disabled={busy || !active}
-          onClick={() => (running ? stop() : void start())}
-        >
-          {busy ? "Iniciando…" : running ? "Detener" : "Activar audio"}
-        </Button>
-        <span className="text-xs tabular-nums text-white/60">
-          {running
-            ? `${Math.round(db)} dBFS`
-            : settings.audioSource === "music"
-              ? "Música"
-              : "Micrófono"}
-        </span>
-      </div>
-      {error && (
-        <p
-          role="alert"
-          className="absolute inset-x-4 bottom-20 z-20 rounded-2xl bg-black/90 p-3 text-sm text-amber-300"
-        >
-          {error}
-        </p>
-      )}
+      {controlHost &&
+        createPortal(
+          <div className="flex flex-wrap items-center gap-3 rounded-xl bg-muted p-3">
+            <Button
+              className="h-8 rounded-full text-xs"
+              disabled={busy || !active}
+              onClick={() => (running ? stop() : void start())}
+            >
+              {busy ? "Iniciando…" : running ? "Detener" : "Activar audio"}
+            </Button>
+            <span className="text-xs tabular-nums text-white/60">
+              {running
+                ? `${Math.round(db)} dBFS de entrada`
+                : settings.audioSource === "music"
+                  ? "Música"
+                  : "Micrófono"}
+            </span>
+          </div>,
+          controlHost,
+        )}
+      {controlHost &&
+        error &&
+        createPortal(
+          <p
+            role="alert"
+            className="rounded-xl bg-muted p-3 text-sm text-amber-600"
+          >
+            {error}
+          </p>,
+          controlHost,
+        )}
     </section>
   );
 }

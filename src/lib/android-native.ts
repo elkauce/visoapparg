@@ -82,6 +82,9 @@ export interface InstalledAndroidApp {
 
 interface VisoNativePlugin {
   exportDeckConfiguration(options: { contents: string }): Promise<void>;
+  setScreenOrientation(options: {
+    mode: "portrait" | "automatic";
+  }): Promise<void>;
   enterImmersive(): Promise<void>;
   exitImmersive(): Promise<void>;
   openUrl(options: { url: string }): Promise<void>;
@@ -207,6 +210,10 @@ async function discoverLights(): Promise<HomeAssistantLight[]> {
 }
 
 export const nativeDeck = {
+  async setScreenOrientation(mode: "portrait" | "automatic") {
+    requireAndroid();
+    await plugin.setScreenOrientation({ mode });
+  },
   async exportDeckConfiguration(contents: string): Promise<void> {
     requireAndroid();
     await plugin.exportDeckConfiguration({ contents });
