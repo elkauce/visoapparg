@@ -95,11 +95,13 @@ export default function DeckPage({
   onSelectPage,
   initialPageId,
   startEditing = false,
+  fullEditor = false,
 }: {
   embeddedPageId?: string;
   initialPageId?: string;
   onSelectPage?: (id: string) => void;
   startEditing?: boolean;
+  fullEditor?: boolean;
 } = {}) {
   const layout = useQuery(api.deck_layout.get, {});
   const statusData = useQuery(api.statuses.list, {});
@@ -118,7 +120,7 @@ export default function DeckPage({
   const adjustVolume = useMutation(api.display.adjustVolume);
   const publicLink = useQuery(api.public_status.getMine, {});
   const navigate = useNavigate();
-  const advanced = deckExtensionsEnabled();
+  const advanced = fullEditor || deckExtensionsEnabled();
   const connected = connection.isWebSocketConnected;
 
   const [pageId, setPageId] = useState<string | null>(initialPageId ?? null);

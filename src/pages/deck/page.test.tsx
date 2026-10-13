@@ -111,6 +111,26 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Deck real synchronisation and legacy compatibility", () => {
+  it("opens the complete editor directly even when legacy viewing mode is enabled", () => {
+    render(
+      <MemoryRouter>
+        <DeckPage startEditing fullEditor />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole("button", { name: "Listo" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nueva página" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Libre" }));
+    expect(screen.getByLabelText("Posición (1–15)")).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Página y cuadrícula" }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Duplicar página" }),
+    ).toBeEnabled();
+    expect(state.mutations["deck_layout:setKey"]).not.toHaveBeenCalled();
+  });
+
   it("keeps the original order, active colour and empty slots without changing existing data", () => {
     const { container } = openDeck();
     const buttons = screen

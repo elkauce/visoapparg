@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { ConvexError } from "convex/values";
@@ -30,6 +31,7 @@ function errorMessage(error: unknown): string {
 }
 
 export default function Deck() {
+  const navigate = useNavigate();
   const data = useQuery(api.statuses.list, {});
   const setActive = useMutation(api.statuses.setActive);
   const remove = useMutation(api.statuses.remove);
@@ -128,7 +130,10 @@ export default function Deck() {
           <Button
             variant={editMode ? "default" : "secondary"}
             size="sm"
-            onClick={() => setEditMode((value) => !value)}
+            onClick={() => {
+              setEditMode(false);
+              navigate("/deck/edit");
+            }}
           >
             {editMode ? <Check /> : <Pencil />}
             {editMode ? "Listo" : "Editar deck"}
@@ -175,9 +180,7 @@ export default function Deck() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              ¿Eliminar "{toDelete?.name}"?
-            </AlertDialogTitle>
+            <AlertDialogTitle>¿Eliminar "{toDelete?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
               Esta tecla desaparecerá de tu deck.
             </AlertDialogDescription>

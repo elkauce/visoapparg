@@ -48,6 +48,10 @@ export default function App() {
             element={<AndroidIntegrationDetails />}
           />
           <Route
+            path="/deck/edit"
+            element={<DeckPage startEditing fullEditor />}
+          />
+          <Route
             path="/deck"
             element={
               isAndroidNative() ||
