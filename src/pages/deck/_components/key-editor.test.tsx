@@ -298,3 +298,40 @@ it("saves Pepe as an independent yellow RGB key without creating or selecting a 
     }),
   );
 });
+
+it("removes only the key media while retaining its custom appearance", async () => {
+  const onClose = vi.fn();
+  render(
+    <KeyEditor
+      target={{
+        ...target,
+        appearance: {
+          ...target.appearance,
+          label: "Mi estado",
+          color: "#abcdef",
+          icon: "star",
+        },
+      }}
+      statuses={statuses}
+      pages={pages}
+      advanced
+      onClose={onClose}
+    />,
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Quitar fondo de la tecla" }),
+  );
+  expect(
+    screen.queryByLabelText("Vista previa de la tecla"),
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Guardar" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalled());
+  const saved = state.mutations["deck_layout:moveKey"].mock.calls[0][0];
+  expect(saved.appearance).toMatchObject({
+    label: "Mi estado",
+    color: "#abcdef",
+    icon: "star",
+  });
+  expect(saved.appearance).not.toHaveProperty("mediaStorageId");
+  expect(saved.content).toEqual(target.content);
+});

@@ -1,3 +1,4 @@
+import { screenKind } from "./lib/screen_settings";
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
@@ -67,9 +68,8 @@ export default defineSchema({
 
   // Páginas del deck de pantalla completa (cada una es una cuadrícula de teclas)
   deckPages: defineTable({
-    kind: v.optional(
-      v.union(v.literal("grid"), v.literal("spotify"), v.literal("standby")),
-    ),
+    kind: v.optional(screenKind),
+    screenSettings: v.optional(v.any()),
     standbySettings: v.optional(v.any()),
     standbyPhotos: v.optional(v.array(v.id("_storage"))),
     userId: v.id("users"),

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { ImagePlus, Trash2 } from "lucide-react";
@@ -18,12 +18,31 @@ type MediaFieldProps = {
 };
 
 // Sube imagen, PNG o video del estado. Solo existe al editar (el estado ya debe existir)
-export default function MediaField({ statusId, mediaUrl, mediaType }: MediaFieldProps) {
+export default function MediaField({
+  statusId,
+  mediaUrl,
+  mediaType,
+}: MediaFieldProps) {
   const generateUploadUrl = useMutation(api.media.generateUploadUrl);
   const setMedia = useMutation(api.media.setMedia);
   const clearMedia = useMutation(api.media.clearMedia);
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [visibleUrl, setVisibleUrl] = useState(mediaUrl);
+  const [visibleType, setVisibleType] = useState(mediaType);
+  const localPreview = useRef<string | null>(null);
+  useEffect(() => {
+    if (localPreview.current) URL.revokeObjectURL(localPreview.current);
+    localPreview.current = null;
+    setVisibleUrl(mediaUrl);
+    setVisibleType(mediaType);
+  }, [mediaUrl, mediaType]);
+  useEffect(
+    () => () => {
+      if (localPreview.current) URL.revokeObjectURL(localPreview.current);
+    },
+    [],
+  );
   const id = statusId as Id<"statuses">;
 
   const handleFile = async (file: File) => {
@@ -46,8 +65,14 @@ export default function MediaField({ statusId, mediaUrl, mediaType }: MediaField
       if (!response.ok) {
         throw new Error("upload");
       }
-      const { storageId } = (await response.json()) as { storageId: Id<"_storage"> };
+      const { storageId } = (await response.json()) as {
+        storageId: Id<"_storage">;
+      };
       await setMedia({ statusId: id, storageId });
+      if (localPreview.current) URL.revokeObjectURL(localPreview.current);
+      localPreview.current = URL.createObjectURL(file);
+      setVisibleUrl(localPreview.current);
+      setVisibleType(file.type.startsWith("video/") ? "video" : "image");
       toast.success("Archivo guardado");
     } catch (error) {
       toast.error(
@@ -67,6 +92,11 @@ export default function MediaField({ statusId, mediaUrl, mediaType }: MediaField
     setBusy(true);
     try {
       await clearMedia({ statusId: id });
+      if (localPreview.current) URL.revokeObjectURL(localPreview.current);
+      localPreview.current = null;
+      setVisibleUrl(null);
+      setVisibleType(null);
+      toast.success("Fondo del estado eliminado");
     } catch {
       toast.error("No se pudo quitar el archivo");
     } finally {
@@ -77,12 +107,23 @@ export default function MediaField({ statusId, mediaUrl, mediaType }: MediaField
   return (
     <div className="space-y-2">
       <Label>Fondo del Display (opcional)</Label>
-      {mediaUrl && (
+      {visibleUrl && (
         <div className="overflow-hidden rounded-xl border bg-black">
-          {mediaType === "video" ? (
-            <video src={mediaUrl} muted loop autoPlay playsInline className="h-32 w-full object-cover" />
+          {visibleType === "video" ? (
+            <video
+              src={visibleUrl}
+              muted
+              loop
+              autoPlay
+              playsInline
+              className="h-32 w-full object-cover"
+            />
           ) : (
-            <img src={mediaUrl} alt="Fondo del estado" className="h-32 w-full object-cover" />
+            <img
+              src={visibleUrl}
+              alt="Fondo del estado"
+              className="h-32 w-full object-cover"
+            />
           )}
         </div>
       )}
@@ -99,13 +140,25 @@ export default function MediaField({ statusId, mediaUrl, mediaType }: MediaField
             }
           }}
         />
-        <Button type="button" variant="secondary" size="sm" disabled={busy} onClick={() => inputRef.current?.click()}>
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          disabled={busy}
+          onClick={() => inputRef.current?.click()}
+        >
           {busy ? <Spinner /> : <ImagePlus />}
-          {mediaUrl ? "Cambiar archivo" : "Subir imagen o video"}
+          {visibleUrl ? "Cambiar archivo" : "Subir imagen o video"}
         </Button>
-        {mediaUrl && (
-          <Button type="button" variant="ghost" size="sm" disabled={busy} onClick={handleClear}>
-            <Trash2 /> Quitar
+        {visibleUrl && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={busy}
+            onClick={handleClear}
+          >
+            <Trash2 /> Quitar fondo del estado
           </Button>
         )}
       </div>

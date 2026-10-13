@@ -227,7 +227,7 @@ export default function AndroidDeck() {
         label={screens[pageIndex].name}
       >
         {(layout?.pages ?? []).map((page) =>
-          page.kind === "spotify" || page.kind === "standby" ? (
+          page.kind && page.kind !== "grid" ? (
             <SharedPresetScreen
               key={page._id}
               pageId={page._id}

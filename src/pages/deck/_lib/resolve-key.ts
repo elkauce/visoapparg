@@ -8,6 +8,8 @@ export type DeckStatusInfo = {
   name: string;
   color: string;
   icon: string;
+  mediaUrl?: string | null;
+  mediaType?: "image" | "video";
 };
 
 export type KeyContent = Doc<"deckKeys">["content"];

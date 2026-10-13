@@ -6,6 +6,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import StandbyScreen from "./standby-screen";
 import SpotifyScreen from "./spotify-screen";
+import ExtendedScreen from "./extended-screen";
 import { useAndroidMedia } from "./use-android-media";
 import {
   loadStandbySettings,
@@ -94,6 +95,12 @@ export default function SharedPresetScreen({
     [page?.standbyPhotoUrls],
   );
   if (!page || !statuses || !user) return <p>Cargando página…</p>;
+  if (
+    page.kind === "weather" ||
+    page.kind === "visualizer" ||
+    page.kind === "sports"
+  )
+    return <ExtendedScreen page={page} active={active} editing={editing} />;
   if (page.kind === "spotify")
     return (
       <SpotifyScreen

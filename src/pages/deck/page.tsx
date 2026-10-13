@@ -635,7 +635,13 @@ export default function DeckPage({
               void run(() =>
                 configureScreen({
                   pageId: currentPage._id,
-                  kind: event.target.value as "grid" | "spotify" | "standby",
+                  kind: event.target.value as
+                    | "grid"
+                    | "spotify"
+                    | "standby"
+                    | "weather"
+                    | "visualizer"
+                    | "sports",
                 }),
               )
             }
@@ -643,10 +649,13 @@ export default function DeckPage({
             <option value="grid">Teclas y widgets</option>
             <option value="spotify">Spotify</option>
             <option value="standby">Reloj</option>
+            <option value="weather">Clima</option>
+            <option value="visualizer">Vúmetro</option>
+            <option value="sports">Deportes</option>
           </select>
         </label>
       )}
-      {currentPage.kind === "spotify" || currentPage.kind === "standby" ? (
+      {currentPage.kind && currentPage.kind !== "grid" ? (
         <div className="min-h-0 flex-1">
           <SharedPresetScreen
             key={currentPage._id}

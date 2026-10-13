@@ -1,3 +1,8 @@
+import {
+  screenKind,
+  normalizeScreenSettings,
+  validateScreenSettingsPatch,
+} from "./lib/screen_settings";
 import { VISO_STATES, findVisoStatus } from "./lib/viso_preset_states";
 import { normalizeStandbySettings } from "./lib/clock_settings";
 import { ConvexError, v } from "convex/values";
@@ -221,6 +226,9 @@ export const duplicatePage = mutation({
       name: cleanLabel(args.name ?? `${source.name.slice(0, 14)} copia`, 20),
       order: (pages[pages.length - 1]?.order ?? -1) + 1,
       ...(source.kind ? { kind: source.kind } : {}),
+      ...(source.screenSettings
+        ? { screenSettings: source.screenSettings }
+        : {}),
       ...(source.standbySettings
         ? { standbySettings: source.standbySettings }
         : {}),
@@ -548,10 +556,9 @@ export const ensureCatalogue = mutation({
 export const configureScreen = mutation({
   args: {
     pageId: v.id("deckPages"),
-    kind: v.optional(
-      v.union(v.literal("grid"), v.literal("spotify"), v.literal("standby")),
-    ),
+    kind: v.optional(screenKind),
     settings: v.optional(v.any()),
+    screenSettings: v.optional(v.any()),
     photos: v.optional(v.array(v.id("_storage"))),
     photoOperation: v.optional(
       v.union(v.literal("append"), v.literal("remove")),
@@ -603,6 +610,14 @@ export const configureScreen = mutation({
     }
     await ctx.db.patch("deckPages", args.pageId, {
       ...(args.kind ? { kind: args.kind } : {}),
+      ...(args.screenSettings !== undefined
+        ? {
+            screenSettings: normalizeScreenSettings({
+              ...page.screenSettings,
+              ...validateScreenSettingsPatch(args.screenSettings),
+            }),
+          }
+        : {}),
       ...(args.settings !== undefined
         ? {
             standbySettings: normalizeStandbySettings({

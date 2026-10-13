@@ -47,6 +47,7 @@ import {
 } from "../_lib/action-runner.ts";
 import { encodeKeyVisibility } from "../_lib/key-visibility.ts";
 import DeckKey from "./deck-key.tsx";
+import MediaField from "@/pages/_components/media-field.tsx";
 
 export type EditTarget = {
   pageId: string;
@@ -810,6 +811,20 @@ function KeyForm({
           </>
         )}
 
+        {kind === "status" &&
+          statuses.find((status) => status._id === statusId)?.mediaUrl && (
+            <MediaField
+              statusId={statusId}
+              mediaUrl={
+                statuses.find((status) => status._id === statusId)?.mediaUrl ??
+                null
+              }
+              mediaType={
+                statuses.find((status) => status._id === statusId)?.mediaType ??
+                null
+              }
+            />
+          )}
         {advanced && kind !== "clock" && kind !== "weather" && (
           <div className="space-y-2">
             <Label htmlFor="deck-key-media">
@@ -865,20 +880,25 @@ function KeyForm({
                 setResetAppearance(false);
               }}
             />
-            {(media || target.appearance?.mediaStorageId) && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setMedia(null);
-                  setPreviewUrl(null);
-                  setRemoveMedia(true);
-                }}
-              >
-                Quitar archivo
-              </Button>
-            )}
+            {!removeMedia &&
+              (media ||
+                target.appearance?.mediaStorageId ||
+                target.appearance?.mediaUrl) && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setMedia(null);
+                    setPreviewUrl(null);
+                    uploadedRef.current = null;
+                    setRemoveMedia(true);
+                    setResetAppearance(false);
+                  }}
+                >
+                  Quitar fondo de la tecla
+                </Button>
+              )}
             <p className="text-xs text-muted-foreground">
               Hasta 60 MB. El archivo se sube al guardar. La reproducción
               depende del formato compatible con el dispositivo.

@@ -59,10 +59,16 @@ export const scoreboard = action({
   handler: async (ctx, args): Promise<Match[]> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      throw new ConvexError({ code: "UNAUTHENTICATED", message: "Inicia sesión" });
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
     }
     if (!isSportsLeague(args.league)) {
-      throw new ConvexError({ code: "BAD_REQUEST", message: "Liga no disponible" });
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Liga no disponible",
+      });
     }
 
     const url = `https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[args.league].path}/scoreboard`;
@@ -81,8 +87,12 @@ export const scoreboard = action({
           date: event.date,
           state: toState(event.status.type.state),
           detail: event.status.type.shortDetail ?? "",
-          home: toTeamLine(competitors.find((c) => c.homeAway === "home") ?? competitors[0]),
-          away: toTeamLine(competitors.find((c) => c.homeAway === "away") ?? competitors[1]),
+          home: toTeamLine(
+            competitors.find((c) => c.homeAway === "home") ?? competitors[0],
+          ),
+          away: toTeamLine(
+            competitors.find((c) => c.homeAway === "away") ?? competitors[1],
+          ),
         };
       });
     } catch (error) {
@@ -94,5 +104,199 @@ export const scoreboard = action({
     } finally {
       clearTimeout(timer);
     }
+  },
+});
+
+// Full-page scoreboard keeps all competitors (also useful for race results).
+export const screenScoreboard = action({
+  args: { league: v.string(), date: v.string() },
+  handler: async (ctx, args) => {
+    if (!(await ctx.auth.getUserIdentity()))
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
+    if (
+      !isSportsLeague(args.league) ||
+      !/^\d{4}-\d{2}-\d{2}$/.test(args.date) ||
+      Number.isNaN(Date.parse(args.date)) ||
+      new Date(args.date).toISOString().slice(0, 10) !== args.date
+    )
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Competición o fecha inválida",
+      });
+    const response = await fetch(
+      `https://site.api.espn.com/apis/site/v2/sports/${SPORTS_LEAGUES[args.league].path}/scoreboard?dates=${args.date.replaceAll("-", "")}&limit=50`,
+      { signal: AbortSignal.timeout(8000) },
+    );
+    if (!response.ok)
+      throw new ConvexError({
+        code: "EXTERNAL_SERVICE_ERROR",
+        message: "La fuente deportiva no está disponible",
+      });
+    const parsed = z
+      .object({
+        events: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string().optional(),
+            date: z.string(),
+            status: z.object({
+              type: z.object({
+                state: z.string(),
+                shortDetail: z.string().optional(),
+              }),
+            }),
+            competitions: z.array(
+              z.object({
+                venue: z.object({ fullName: z.string().optional() }).optional(),
+                competitors: z.array(
+                  z.object({
+                    homeAway: z.string().optional(),
+                    score: z.string().optional(),
+                    order: z.number().optional(),
+                    team: z
+                      .object({
+                        displayName: z.string(),
+                        abbreviation: z.string().optional(),
+                        logo: z.string().optional(),
+                      })
+                      .optional(),
+                    athlete: z
+                      .object({
+                        displayName: z.string(),
+                        shortName: z.string().optional(),
+                      })
+                      .optional(),
+                  }),
+                ),
+              }),
+            ),
+          }),
+        ),
+      })
+      .parse(await response.json());
+    return parsed.events.slice(0, 50).map((e) => ({
+      id: e.id,
+      name: e.name ?? "",
+      date: e.date,
+      state: toState(e.status.type.state),
+      detail: e.status.type.shortDetail ?? "",
+      venue: e.competitions[0]?.venue?.fullName ?? "",
+      competitors: (e.competitions[0]?.competitors ?? []).map((c) => ({
+        name: c.team?.displayName ?? c.athlete?.displayName ?? "Participante",
+        score: c.score ?? "",
+        homeAway: c.homeAway ?? "",
+        position: c.order ?? null,
+      })),
+    }));
+  },
+});
+
+export const formulaOne = action({
+  args: {
+    view: v.union(
+      v.literal("calendar"),
+      v.literal("standings"),
+      v.literal("results"),
+    ),
+  },
+  handler: async (ctx, args) => {
+    if (!(await ctx.auth.getUserIdentity()))
+      throw new ConvexError({
+        code: "UNAUTHENTICATED",
+        message: "Inicia sesión",
+      });
+    const endpoint =
+      args.view === "standings"
+        ? "current/driverStandings.json"
+        : args.view === "results"
+          ? "current/last/results.json"
+          : "current.json";
+    const response = await fetch(
+      `https://api.jolpi.ca/ergast/f1/${endpoint}?limit=100`,
+      { signal: AbortSignal.timeout(10000) },
+    );
+    if (!response.ok)
+      throw new ConvexError({
+        code: "EXTERNAL_SERVICE_ERROR",
+        message: "La fuente de Fórmula 1 no está disponible",
+      });
+    const driver = z.object({ givenName: z.string(), familyName: z.string() });
+    const row = z.object({
+      position: z.string(),
+      points: z.string(),
+      wins: z.string().optional(),
+      Driver: driver,
+      Constructors: z.array(z.object({ name: z.string() })).optional(),
+      Constructor: z.object({ name: z.string() }).optional(),
+      status: z.string().optional(),
+      Time: z.object({ time: z.string() }).optional(),
+    });
+    const parsed = z
+      .object({
+        MRData: z.object({
+          RaceTable: z
+            .object({
+              season: z.string(),
+              Races: z.array(
+                z.object({
+                  round: z.string(),
+                  raceName: z.string(),
+                  date: z.string(),
+                  time: z.string().optional(),
+                  Circuit: z.object({
+                    circuitName: z.string(),
+                    Location: z.object({
+                      locality: z.string(),
+                      country: z.string(),
+                    }),
+                  }),
+                  Results: z.array(row).optional(),
+                }),
+              ),
+            })
+            .optional(),
+          StandingsTable: z
+            .object({
+              season: z.string(),
+              StandingsLists: z.array(
+                z.object({ DriverStandings: z.array(row) }),
+              ),
+            })
+            .optional(),
+        }),
+      })
+      .parse(await response.json());
+    return {
+      season:
+        parsed.MRData.RaceTable?.season ??
+        parsed.MRData.StandingsTable?.season ??
+        "",
+      races: (parsed.MRData.RaceTable?.Races ?? []).map((r) => ({
+        round: r.round,
+        name: r.raceName,
+        date: `${r.date}T${r.time ?? "00:00:00Z"}`,
+        timeKnown: Boolean(r.time),
+        circuit: r.Circuit.circuitName,
+        location: `${r.Circuit.Location.locality}, ${r.Circuit.Location.country}`,
+      })),
+      drivers:
+        (args.view === "standings"
+          ? parsed.MRData.StandingsTable?.StandingsLists[0]?.DriverStandings
+          : parsed.MRData.RaceTable?.Races[0]?.Results
+        )?.map((r) => ({
+          position: r.position,
+          name: `${r.Driver.givenName} ${r.Driver.familyName}`,
+          team:
+            r.Constructor?.name ??
+            r.Constructors?.map((c) => c.name).join(" / ") ??
+            "",
+          points: r.points,
+          wins: r.wins ?? "",
+          detail: r.Time?.time ?? r.status ?? "",
+        })) ?? [],
+    };
   },
 });
