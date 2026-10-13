@@ -47,7 +47,7 @@ export default function DevicesPanel() {
       <div className="flex items-start gap-3">
         <Cpu className="mt-0.5 size-5 text-primary" />
         <div>
-          <h2 className="font-semibold">ESP32 y luces RGB</h2>
+          <h2 className="font-semibold">Conexiones de dispositivos</h2>
           <p className="text-sm text-muted-foreground">
             Estas direcciones son públicas y no piden contraseña. Tu ESP32,
             Arduino, Home Assistant o cualquier luz RGB puede consultarlas para

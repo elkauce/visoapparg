@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { SignInButton } from "@/components/ui/signin.tsx";
 import Deck from "./_components/deck.tsx";
 import Landing from "./_components/landing.tsx";
+import AndroidDownloadPanel from "./_components/android-download-panel";
 import SharePanel from "./_components/share-panel.tsx";
 import StreamDeckPanel from "./_components/stream-deck-panel.tsx";
 import LightsPanel from "./_components/lights-panel.tsx";
@@ -30,9 +31,17 @@ function DeckScreen() {
       <main className="mx-auto max-w-5xl space-y-8 px-6 pb-16 pt-4">
         <Deck />
         <SharePanel />
+        <AndroidDownloadPanel />
         <StreamDeckPanel />
         <LightsPanel />
-        <DevicesPanel />
+        <details className="rounded-2xl border bg-card/60 p-5">
+          <summary className="cursor-pointer text-sm font-medium">
+            Ajustes de dispositivos
+          </summary>
+          <div className="mt-4">
+            <DevicesPanel />
+          </div>
+        </details>
         <LightSync />
       </main>
     </div>

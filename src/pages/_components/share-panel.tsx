@@ -61,7 +61,7 @@ export default function SharePanel() {
   return (
     <section className="space-y-3 rounded-2xl border bg-card/60 p-5">
       <div>
-        <h2 className="font-semibold">Pantalla completa</h2>
+        <h2 className="font-semibold">Abrir display</h2>
         <p className="text-sm text-muted-foreground">
           Abre este link en cualquier pantalla (tablet, TV, puerta de tu
           oficina) y mostrará tu estado en tiempo real.
@@ -77,7 +77,7 @@ export default function SharePanel() {
           <Button asChild>
             <a href={url} target="_blank" rel="noreferrer">
               <ExternalLink />
-              Abrir
+              Abrir display
             </a>
           </Button>
           <AlertDialog>
