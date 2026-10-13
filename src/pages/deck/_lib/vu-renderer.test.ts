@@ -107,3 +107,69 @@ it("uses the same needle response at 30 and 60 frames per second", () => {
   expect(fast[0]).toBeCloseTo(slow[0], 8);
   expect(fast[1]).toBeCloseTo(slow[1], 8);
 });
+
+it("draws visible bars and mirrored bars from quiet real input", () => {
+  for (const style of ["bars", "mirror"] as const) {
+    const rectangles: { color: unknown; args: number[] }[] = [];
+    const state: Record<string, unknown> = {};
+    const context = new Proxy(state, {
+      get: (t, k: string) =>
+        k === "fillRect"
+          ? (...args: number[]) => rectangles.push({ color: t.fillStyle, args })
+          : (t[k] ?? (() => {})),
+      set: (t, k: string, v) => {
+        t[k] = v;
+        return true;
+      },
+    }) as unknown as CanvasRenderingContext2D;
+    drawReferenceMeter(
+      context,
+      390,
+      844,
+      style,
+      { bands: [0.01, 0.1] },
+      1,
+      "#00ff00",
+      [],
+      [],
+    );
+    const bars = rectangles.filter((r) => r.color === "#00ff00");
+    expect(bars).toHaveLength(2);
+    expect(bars.every((r) => r.args[3] > 200)).toBe(true);
+  }
+});
+
+it("turns LED meters upright in portrait without overflowing the canvas", () => {
+  for (const style of ["levels", "dual-led"] as const) {
+    const rectangles: number[][] = [];
+    const context = new Proxy(
+      {},
+      {
+        get: (_, k) =>
+          k === "fillRect"
+            ? (...args: number[]) => rectangles.push(args)
+            : () => {},
+        set: () => true,
+      },
+    ) as unknown as CanvasRenderingContext2D;
+    drawReferenceMeter(
+      context,
+      390,
+      844,
+      style,
+      { level: 0.1, peak: 0.2 },
+      1,
+      "#fff",
+      [],
+      [],
+    );
+    const leds = rectangles.slice(1);
+    expect(leds.length).toBe(style === "levels" ? 64 : 128);
+    expect(
+      leds.every(
+        ([x, y, w, h]) =>
+          x >= 0 && y >= 0 && x + w <= 390 && y + h <= 844 && w > h,
+      ),
+    ).toBe(true);
+  }
+});

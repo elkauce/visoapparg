@@ -248,40 +248,101 @@ export function drawReferenceMeter(
     }
     return true;
   }
-  if (style === "dual-led") {
-    const x = w * 0.06,
-      ww = w * 0.88;
-    [smooth[0], smooth[1]].forEach((value, row) => {
-      const y = h * (row === 0 ? 0.25 : 0.63),
-        hh = h * 0.12;
+  if (style === "dual-led" || style === "levels") {
+    const vertical = h > w;
+    const count = style === "dual-led" ? 2 : 1;
+    for (let row = 0; row < count; row++) {
+      const value = smooth[row];
       for (let i = 0; i < 64; i++) {
         const on = i / 64 < value;
         c.fillStyle = i < 38 ? "#33ff24" : i < 50 ? "#ffb02e" : "#ff303d";
         c.globalAlpha = on ? 1 : 0.08;
-        c.shadowColor = c.fillStyle;
-        c.shadowBlur = on ? 5 : 0;
-        c.fillRect(x + (i * ww) / 64, y, (ww / 64) * 0.72, hh);
+        if (vertical) {
+          const span = (w * 0.8) / count;
+          c.fillRect(
+            w * 0.1 + row * span + span * 0.12,
+            h * 0.92 - ((i + 1) * h * 0.84) / 64,
+            span * 0.76,
+            ((h * 0.84) / 64) * 0.72,
+          );
+        } else {
+          const span = (h * 0.8) / count;
+          c.fillRect(
+            w * 0.08 + (i * w * 0.84) / 64,
+            h * 0.1 + row * span + span * 0.12,
+            ((w * 0.84) / 64) * 0.72,
+            span * 0.76,
+          );
+        }
       }
-      c.globalAlpha = 1;
-      c.shadowBlur = 0;
-      text(
-        c,
-        row === 0 ? "NIVEL" : "PICO",
-        x,
-        y - 12,
-        Math.max(11, w * 0.012),
-        "#aaa",
-        "left",
-      );
+    }
+    c.globalAlpha = 1;
+    return true;
+  }
+  if (["bars", "mirror", "radial", "wave"].includes(style)) {
+    const bands = frame.bands ?? Array(32).fill(rms);
+    const decay = (Math.max(0, deltaMs) / 1000) * 0.35;
+    if (style === "wave") {
+      const samples = frame.wave ?? Array(64).fill(0);
+      const gradient = c.createLinearGradient(0, 0, w, 0);
       for (let i = 0; i <= 6; i++)
-        text(
-          c,
-          String(-60 + i * 10),
-          x + (i * ww) / 6,
-          y + hh + Math.max(18, h * 0.04),
-          Math.max(10, w * 0.012),
-          "#aaa",
+        gradient.addColorStop(i / 6, `hsl(${i * 60} 100% 60%)`);
+      c.strokeStyle = gradient;
+      c.lineWidth = Math.max(2, Math.min(w, h) * 0.007);
+      c.beginPath();
+      samples.forEach((sample, i) => {
+        const x = (i * w) / Math.max(1, samples.length - 1);
+        const y =
+          h / 2 - Math.max(-1, Math.min(1, sample * sensitivity)) * h * 0.45;
+        if (i === 0) c.moveTo(x, y);
+        else c.lineTo(x, y);
+      });
+      c.stroke();
+      return true;
+    }
+    bands.forEach((amplitude, i) => {
+      const value = levelToPosition(amplitude, sensitivity);
+      held[i] = Math.max(value, (held[i] ?? 0) - decay);
+      c.fillStyle = color;
+      c.strokeStyle = `hsl(${(i / bands.length) * 360} 100% 60%)`;
+      const bw = w / bands.length;
+      if (style === "radial") {
+        const radius = Math.min(w, h) * 0.18;
+        const angle = (i / bands.length) * Math.PI * 2;
+        c.lineWidth = Math.max(2, Math.min(w, h) * 0.015);
+        c.beginPath();
+        c.moveTo(
+          w / 2 + Math.cos(angle) * radius,
+          h / 2 + Math.sin(angle) * radius,
         );
+        c.lineTo(
+          w / 2 + Math.cos(angle) * (radius + value * Math.min(w, h) * 0.27),
+          h / 2 + Math.sin(angle) * (radius + value * Math.min(w, h) * 0.27),
+        );
+        c.stroke();
+      } else if (style === "mirror") {
+        c.fillRect(
+          i * bw + bw * 0.12,
+          h / 2 - value * h * 0.46,
+          bw * 0.76,
+          value * h * 0.92,
+        );
+      } else {
+        c.fillRect(
+          i * bw + bw * 0.12,
+          h - value * h * 0.94,
+          bw * 0.76,
+          value * h * 0.94,
+        );
+        c.fillStyle = "#ffffff";
+        if (held[i] > 0)
+          c.fillRect(
+            i * bw + bw * 0.12,
+            Math.max(0, h - held[i] * h * 0.94 - 2),
+            bw * 0.76,
+            2,
+          );
+      }
     });
     return true;
   }

@@ -253,18 +253,11 @@ export default function VisualizerScreen({
           c.height = height;
         }
         ctx.clearRect(0, 0, width, height);
-        const values =
-          frame.current.bands ?? Array(32).fill(frame.current.level ?? 0);
         ctx.fillStyle = settings.color;
         ctx.strokeStyle = settings.color;
         ctx.shadowColor = settings.color;
         ctx.shadowBlur = 8 * ratio;
-        const levels = values.map((v, i) => {
-          const value = Math.min(1, v * settings.sensitivity);
-          peaks[i] = Math.max(value, (peaks[i] ?? 0) * 0.92);
-          return value;
-        });
-        const reference = drawReferenceMeter(
+        drawReferenceMeter(
           ctx,
           width,
           height,
@@ -277,80 +270,6 @@ export default function VisualizerScreen({
           lastFrame ? time - lastFrame : 16.67,
         );
         lastFrame = time;
-        if (reference) {
-          /* complete reference face drawn above */
-        } else if (settings.visualizerStyle === "wave") {
-          ctx.lineWidth = 3 * ratio;
-          ctx.beginPath();
-          (frame.current.wave ?? Array(64).fill(0)).forEach((v, i, a) => {
-            const x = (i * width) / (a.length - 1),
-              y = height / 2 + v * height * 0.4 * settings.sensitivity;
-            if (i === 0) ctx.moveTo(x, y);
-            else ctx.lineTo(x, y);
-          });
-          ctx.stroke();
-        } else if (settings.visualizerStyle === "radial") {
-          const radius = Math.min(width, height) * 0.18;
-          levels.forEach((v, i) => {
-            const angle = (i / levels.length) * Math.PI * 2;
-            ctx.lineWidth = 7 * ratio;
-            ctx.beginPath();
-            ctx.moveTo(
-              width / 2 + Math.cos(angle) * radius,
-              height / 2 + Math.sin(angle) * radius,
-            );
-            ctx.lineTo(
-              width / 2 +
-                Math.cos(angle) * (radius + v * Math.min(width, height) * 0.25),
-              height / 2 +
-                Math.sin(angle) * (radius + v * Math.min(width, height) * 0.25),
-            );
-            ctx.stroke();
-          });
-        } else if (settings.visualizerStyle === "levels") {
-          const v = Math.min(
-            1,
-            (frame.current.level ?? 0) * settings.sensitivity * 3,
-          );
-          for (let i = 0; i < 40; i++) {
-            ctx.fillStyle =
-              i < 28 ? settings.color : i < 35 ? "#facc15" : "#ef4444";
-            ctx.globalAlpha = i / 40 <= v ? 1 : 0.12;
-            ctx.fillRect(
-              width * 0.1 + i * width * 0.02,
-              height * 0.25,
-              width * 0.015,
-              height * 0.5,
-            );
-          }
-          ctx.globalAlpha = 1;
-        } else {
-          const barWidth = width / levels.length;
-          levels.forEach((v, i) => {
-            const h =
-              v *
-              height *
-              (settings.visualizerStyle === "mirror" ? 0.45 : 0.85);
-            ctx.fillRect(
-              i * barWidth + barWidth * 0.15,
-              settings.visualizerStyle === "mirror"
-                ? height / 2 - h
-                : height - h,
-              barWidth * 0.7,
-              settings.visualizerStyle === "mirror" ? h * 2 : h,
-            );
-            if (settings.visualizerStyle === "bars") {
-              ctx.globalAlpha = 0.6;
-              ctx.fillRect(
-                i * barWidth + barWidth * 0.15,
-                height - peaks[i] * height * 0.85 - 4 * ratio,
-                barWidth * 0.7,
-                2 * ratio,
-              );
-              ctx.globalAlpha = 1;
-            }
-          });
-        }
         if (time - previous > 200) {
           setDb(frame.current.db ?? -120);
           previous = time;
