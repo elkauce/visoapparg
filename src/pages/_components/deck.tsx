@@ -30,7 +30,7 @@ function errorMessage(error: unknown): string {
     : "Algo salió mal, inténtalo de nuevo";
 }
 
-export default function Deck() {
+export default function Deck({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate();
   const data = useQuery(api.statuses.list, {});
   const setActive = useMutation(api.statuses.setActive);
@@ -42,11 +42,14 @@ export default function Deck() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<DeckStatus | null>(null);
   const [toDelete, setToDelete] = useState<DeckStatus | null>(null);
+  const grid = compact
+    ? "viso-panel-state-grid grid grid-cols-3 gap-3 sm:gap-4"
+    : GRID;
 
   // Mientras la sesión se sincroniza (o carga) mostramos esqueletos
   if (!data) {
     return (
-      <div className={GRID}>
+      <div className={grid}>
         {Array.from({ length: 6 }).map((_, i) => (
           <Skeleton key={i} className="aspect-square w-full rounded-2xl" />
         ))}
@@ -99,26 +102,32 @@ export default function Deck() {
   }
 
   return (
-    <div className="space-y-6">
-      <StatusScreen face={active ?? null} className="mx-auto max-w-2xl" />
+    <div className={compact ? "viso-panel-deck space-y-4" : "space-y-6"}>
+      {!compact && (
+        <StatusScreen face={active ?? null} className="mx-auto max-w-2xl" />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span
-            className="size-3 rounded-full"
-            style={{
-              backgroundColor: active?.color ?? "var(--muted-foreground)",
-              boxShadow: active ? `0 0 14px ${active.color}` : undefined,
-            }}
-          />
-          <p className="text-sm text-muted-foreground">
-            Estado actual:{" "}
-            <span className="font-semibold text-foreground">
-              {active?.name ?? "Ninguno"}
-            </span>
-          </p>
-        </div>
+        {compact ? (
+          <h2 className="text-lg font-semibold">Tu deck</h2>
+        ) : (
+          <div className="flex items-center gap-3">
+            <span
+              className="size-3 rounded-full"
+              style={{
+                backgroundColor: active?.color ?? "var(--muted-foreground)",
+                boxShadow: active ? `0 0 14px ${active.color}` : undefined,
+              }}
+            />
+            <p className="text-sm text-muted-foreground">
+              Estado actual:{" "}
+              <span className="font-semibold text-foreground">
+                {active?.name ?? "Ninguno"}
+              </span>
+            </p>
+          </div>
+        )}
         <div className="flex items-center gap-2">
-          {active && !editMode && (
+          {!compact && active && !editMode && (
             <Button
               variant="ghost"
               size="sm"
@@ -141,7 +150,7 @@ export default function Deck() {
         </div>
       </div>
 
-      <div className={GRID}>
+      <div className={grid}>
         {statuses.map((status, index) => (
           <StatusKey
             key={status._id}
@@ -158,15 +167,27 @@ export default function Deck() {
             }
           />
         ))}
-        <button
-          type="button"
-          onClick={() => openEditor(null)}
-          className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-muted-foreground transition-colors hover:border-primary hover:text-primary"
-        >
-          <Plus className="size-8" />
-          <span className="text-sm font-medium">Añadir estado</span>
-        </button>
+        {!compact && (
+          <button
+            type="button"
+            onClick={() => openEditor(null)}
+            className="flex aspect-square w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+          >
+            <Plus className="size-8" />
+            <span className="text-sm font-medium">Añadir estado</span>
+          </button>
+        )}
       </div>
+
+      {compact && (
+        <Button
+          variant="secondary"
+          onClick={() => openEditor(null)}
+          className="viso-panel-add-state w-full border border-dashed bg-transparent text-muted-foreground"
+        >
+          <Plus /> Añadir estado
+        </Button>
+      )}
 
       <StatusDialog
         open={dialogOpen}

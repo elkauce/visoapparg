@@ -1,147 +1,574 @@
+/* Option 03: a compact web workspace, separate from the fullscreen Deck. */
 .viso-control-panel {
-  position: relative;
-  isolation: isolate;
+  min-height: 100dvh;
+  background: #f5f3ef;
   color: var(--foreground);
-  background-color: #f5f3ef;
-  background-image: radial-gradient(#d9d5cd 0.65px, transparent 0.65px);
-  background-size: 22px 22px;
 }
-
-.viso-control-panel::before {
-  position: absolute;
-  z-index: -1;
-  inset: 0 0 auto;
-  height: 620px;
-  pointer-events: none;
-  content: "";
-  background: radial-gradient(
-    ellipse at 75% 10%,
-    rgb(234 81 12 / 10%),
-    transparent 65%
-  );
-}
-
-.viso-control-panel__header {
+.viso-panel-rail {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 10;
   display: flex;
-  width: min(100%, 1088px);
-  min-height: 88px;
-  margin-inline: auto;
-  padding: 22px 32px;
+  flex-direction: column;
+  align-items: center;
+  width: 132px;
+  padding: 24px 12px;
+  border-right: 1px solid #e2ded7;
+  background: #f8f6f2;
+}
+.viso-panel-rail .viso-panel-brand {
+  width: 94px;
+  height: 44px;
+  max-width: none;
+}
+.viso-panel-rail-nav {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+  margin-top: 32px;
+}
+.viso-panel-rail-nav button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 78px;
+  padding: 15px 6px;
+  border-radius: 12px;
+  color: #62666e;
+  font-size: 12px;
+}
+.viso-panel-rail-nav svg {
+  width: 23px;
+  height: 23px;
+}
+.viso-panel-rail-nav [aria-current="page"] {
+  color: #cb3d07;
+  background: #f7e2d5;
+}
+.viso-panel-rail-nav button:last-child {
+  margin-top: 16px;
+  border-top: 1px solid #e3ded6;
+  border-radius: 0;
+}
+.viso-panel-shell {
+  margin-left: 132px;
+  padding: 36px clamp(24px, 3.5vw, 54px) 48px;
+  max-width: 1640px;
+}
+.viso-panel-header {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-  border-bottom: 1px solid rgb(27 29 32 / 9%);
-}
-
-.viso-control-panel__brand {
-  width: auto;
-  max-width: 128px;
-  object-position: left center;
-}
-
-.viso-control-panel__header-actions > :first-child {
-  border-radius: 12px;
-}
-
-.viso-control-panel__main {
-  width: min(100%, 1088px);
-  margin-inline: auto;
-  padding: 40px 32px 72px;
-}
-
-.viso-control-panel__intro {
+  gap: 20px;
   margin-bottom: 28px;
 }
-
-.viso-control-panel__eyebrow {
-  margin-bottom: 10px;
-  color: #a83b08;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-}
-
-.viso-control-panel__intro h1 {
-  margin: 0 0 10px;
-  font-size: clamp(32px, 4vw, 46px);
+.viso-panel-header h1 {
+  font-size: 36px;
+  line-height: 1.1;
   font-weight: 750;
-  line-height: 1.08;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.05em;
 }
-
-.viso-control-panel__intro > p:last-child {
+.viso-panel-header p {
+  margin-top: 7px;
   color: var(--muted-foreground);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: 14px;
 }
-
-.viso-control-panel__deck,
-.viso-control-panel__connections > section {
+.viso-panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.viso-panel-header-actions > a {
+  height: 42px;
+  border-radius: 11px;
+  padding-inline: 18px;
+}
+.viso-panel-account {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  background: #e9e6e1;
+}
+.viso-panel-header .viso-panel-mobile-brand {
+  display: none;
+}
+.viso-panel-statusbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 62px;
+  padding: 12px 18px;
+  background: #fffefb;
+  border: 1px solid #e6e1d9;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px #24211b03;
+  margin-bottom: 18px;
+}
+.viso-panel-status-text {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
-  padding: 28px;
-  border: 1px solid #e5e0d8;
-  border-radius: 26px;
-  background: #fffefa;
-  box-shadow: 0 5px 22px rgb(36 31 24 / 3%);
+  font-size: 14px;
 }
-
-.viso-control-panel__connections {
+.viso-panel-status-text > span:last-child {
+  overflow-wrap: anywhere;
+}
+.viso-panel-status-dot {
+  width: 12px;
+  height: 12px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+.viso-panel-statusbar button {
+  border-radius: 9px;
+}
+.viso-panel-workspace {
   display: grid;
-  gap: 24px;
-  margin-top: 24px;
+  grid-template-columns: minmax(0, 1.8fr) minmax(265px, 1fr);
+  gap: 20px;
+  align-items: start;
 }
-
-.viso-control-panel__connections h2 {
-  font-size: 18px;
+.viso-panel-primary {
+  min-width: 0;
+  min-height: 580px;
+  background: #fffefb;
+  border: 1px solid #e6e1d9;
+  border-radius: 18px;
+  overflow: clip;
+}
+.viso-panel-tabs {
+  display: flex;
+  gap: 4px;
+  min-height: 66px;
+  padding: 7px 16px 0;
+  border-bottom: 1px solid #e8e3dc;
+}
+.viso-panel-tabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px 16px;
+  border-bottom: 2px solid transparent;
+  color: #62666e;
+  font-size: 13px;
+}
+.viso-panel-tabs svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.viso-panel-tabs [aria-selected="true"] {
+  color: #c73b00;
+  border-bottom-color: #e54a0d;
+  font-weight: 650;
+}
+.viso-panel-tab-content {
+  padding: 24px;
+}
+.viso-panel-tab-content[hidden] {
+  display: none;
+}
+.viso-panel-tab-content > section {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+.viso-panel-tab-content > section + section {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid #e4ded5;
+}
+.viso-panel-deck {
+  min-width: 0;
+}
+.viso-panel-deck > :first-child {
+  gap: 10px;
+}
+.viso-panel-deck h2 {
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: -0.025em;
 }
-
-.viso-control-panel__connections p {
-  line-height: 1.65;
+.viso-panel-state-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 12px;
 }
-
-.viso-control-panel__connections input {
+.viso-panel-state-grid > div {
   min-width: 0;
 }
-
-@media (max-width: 639px) {
-  .viso-control-panel__header {
-    min-height: 76px;
-    padding: 18px 18px;
-    gap: 10px;
+.viso-panel-state-grid button {
+  border-radius: 16px;
+  min-height: 108px;
+  padding: 14px 4px;
+  gap: 10px;
+}
+.viso-panel-state-grid button > svg {
+  width: 34px;
+  height: 34px;
+}
+.viso-panel-state-grid button > span {
+  font-size: 12px;
+}
+.viso-panel-add-state {
+  min-height: 48px;
+  border-radius: 11px;
+  margin-top: 24px;
+}
+.viso-panel-quick {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 20px;
+  background: #fffefb;
+  border: 1px solid #e6e1d9;
+  border-radius: 18px;
+}
+.viso-panel-quick > h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 2px;
+}
+.viso-panel-quick-card {
+  min-width: 0;
+  border: 1px solid #e9e3db;
+  border-radius: 13px;
+  padding: 14px;
+  background: #fff;
+}
+.viso-panel-quick-card h3 {
+  font-size: 14px;
+  font-weight: 650;
+  margin-bottom: 12px;
+}
+.viso-panel-preview {
+  min-width: 0;
+  margin-bottom: 12px;
+}
+.viso-panel-preview > div {
+  border-radius: 10px;
+  border-width: 0;
+  box-shadow: none;
+}
+.viso-panel-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.viso-panel-quick-actions > button,
+.viso-panel-quick-actions > a {
+  border-radius: 9px;
+  font-size: 11px;
+  max-width: 100%;
+}
+.viso-panel-quick-actions > :first-child:not([data-size="sm"]) {
+  width: 100%;
+}
+.viso-panel-quick-actions > button:not([data-size="icon"]) {
+  min-height: 34px;
+}
+.viso-panel-quick-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  min-height: 48px;
+  padding: 0;
+}
+.viso-panel-quick-row > svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  color: #59606a;
+}
+.viso-panel-quick-row > svg:last-child {
+  margin-left: auto;
+  width: 16px;
+}
+.viso-panel-quick-row-copy {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 5px;
+}
+.viso-panel-quick-row-copy strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+.viso-panel-quick-row-copy small {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+.viso-panel-tab-content [data-slot="input"] {
+  min-width: 0;
+}
+.viso-panel-tab-content select {
+  max-width: 100%;
+}
+.viso-panel-mobile-nav {
+  display: none;
+}
+.viso-control-panel button:focus-visible,
+.viso-control-panel a:focus-visible {
+  outline: 2px solid #c34110;
+  outline-offset: 3px;
+}
+@media (min-width: 1700px) {
+  .viso-panel-shell {
+    margin-inline: auto;
+    padding-left: 170px;
   }
-
-  .viso-control-panel__brand {
-    max-width: 96px;
+}
+@media (min-width: 900px) and (max-width: 1120px) {
+  .viso-panel-rail {
+    width: 104px;
+    padding-inline: 8px;
   }
-
-  .viso-control-panel__header-actions {
-    gap: 4px;
+  .viso-panel-rail .viso-panel-brand {
+    width: 80px;
   }
-
-  .viso-control-panel__main {
-    padding: 26px 14px 40px;
+  .viso-panel-shell {
+    margin-left: 104px;
+    padding: 28px 22px 40px;
   }
-
-  .viso-control-panel__intro {
-    margin: 0 4px 22px;
+  .viso-panel-workspace {
+    grid-template-columns: minmax(0, 1.5fr) minmax(245px, 1fr);
+    gap: 14px;
   }
-
-  .viso-control-panel__intro > p:last-child {
-    max-width: 30ch;
-    font-size: 14px;
-  }
-
-  .viso-control-panel__deck,
-  .viso-control-panel__connections > section {
+  .viso-panel-tab-content {
     padding: 18px;
-    border-radius: 22px;
   }
-
-  .viso-control-panel__connections {
-    gap: 16px;
-    margin-top: 16px;
+  .viso-panel-tabs {
+    padding-inline: 8px;
+  }
+  .viso-panel-tabs button {
+    gap: 6px;
+    font-size: 12px;
+  }
+  .viso-panel-state-grid button {
+    min-height: 98px;
+  }
+  .viso-panel-quick {
+    padding: 15px;
+  }
+}
+@media (max-width: 899px) {
+  .viso-panel-rail {
+    display: none;
+  }
+  .viso-panel-shell {
+    margin-left: 0;
+    padding: 20px 18px calc(96px + env(safe-area-inset-bottom));
+  }
+  .viso-panel-header {
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .viso-panel-header .viso-panel-mobile-brand {
+    display: block;
+    width: 94px;
+    max-width: none;
+    height: 40px;
+    margin-bottom: 18px;
+  }
+  .viso-panel-header h1 {
+    font-size: 30px;
+  }
+  .viso-panel-header p {
+    font-size: 13px;
+  }
+  .viso-panel-header-actions {
+    flex-direction: row-reverse;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 138px;
+    gap: 18px;
+    padding-top: 1px;
+  }
+  .viso-panel-header-actions > a {
+    order: 1;
+    width: 138px;
+    margin-top: 1px;
+    padding-inline: 9px;
+    height: 38px;
+    font-size: 12px;
+  }
+  .viso-panel-workspace {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+  .viso-panel-primary {
+    min-height: 0;
+  }
+  .viso-panel-tabs {
+    min-height: 57px;
+    padding: 4px 8px 0;
+  }
+  .viso-panel-tabs button {
+    padding: 10px 5px 13px;
+    gap: 7px;
+    font-size: 12px;
+  }
+  .viso-panel-tab-content {
+    padding: 20px;
+  }
+  .viso-panel-state-grid {
+    gap: 14px 10px;
+  }
+  .viso-panel-state-grid button {
+    min-height: 94px;
+    border-radius: 13px;
+  }
+  .viso-panel-state-grid button > svg {
+    width: 29px;
+    height: 29px;
+  }
+  .viso-panel-state-grid button > span {
+    font-size: 11px;
+  }
+  .viso-panel-add-state {
+    margin-top: 22px;
+    min-height: 44px;
+  }
+  .viso-panel-quick {
+    padding: 18px;
+  }
+  .viso-panel-quick-card:first-of-type {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 10px 14px;
+    align-items: center;
+  }
+  .viso-panel-quick-card:first-of-type h3 {
+    grid-column: 1/-1;
+    margin-bottom: 0;
+  }
+  .viso-panel-preview {
+    margin: 0;
+  }
+  .viso-panel-quick-actions {
+    gap: 7px;
+  }
+  .viso-panel-quick-card:first-of-type .viso-panel-quick-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .viso-panel-quick-actions > button,
+  .viso-panel-quick-actions > a {
+    padding-inline: 10px;
+    font-size: 11px;
+  }
+  .viso-panel-statusbar {
+    min-height: 58px;
+    padding: 10px 13px;
+  }
+  .viso-panel-status-text {
+    font-size: 12px;
+    gap: 9px;
+  }
+  .viso-panel-statusbar button {
+    font-size: 11px;
+  }
+  .viso-panel-mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    justify-content: space-around;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    border-top: 1px solid #dfd9ce;
+    background: #f5f3eff5;
+    backdrop-filter: blur(14px);
+  }
+  .viso-panel-mobile-nav button {
+    min-width: 64px;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-size: 10px;
+    color: #686c73;
+    border-radius: 9px;
+  }
+  .viso-panel-mobile-nav svg {
+    width: 21px;
+    height: 21px;
+  }
+  .viso-panel-mobile-nav [aria-current="page"] {
+    color: #cf3b00;
+  }
+}
+@media (max-width: 374px) {
+  .viso-panel-shell {
+    padding-inline: 12px;
+  }
+  .viso-panel-header h1 {
+    font-size: 28px;
+  }
+  .viso-panel-header-actions {
+    width: 122px;
+  }
+  .viso-panel-header-actions > a {
+    width: 122px;
+    font-size: 11px;
+  }
+  .viso-panel-tabs {
+    padding-inline: 3px;
+  }
+  .viso-panel-tabs button {
+    font-size: 11px;
+    gap: 5px;
+  }
+  .viso-panel-tabs svg {
+    width: 16px;
+  }
+  .viso-panel-tab-content {
+    padding: 15px;
+  }
+  .viso-panel-deck > :first-child {
+    flex-wrap: wrap;
+  }
+  .viso-panel-state-grid {
+    gap: 12px 8px;
+  }
+  .viso-panel-state-grid button {
+    min-height: 84px;
+  }
+  .viso-panel-state-grid button > svg {
+    width: 26px;
+    height: 26px;
+  }
+  .viso-panel-state-grid button > span {
+    font-size: 10px;
+  }
+  .viso-panel-quick {
+    padding: 14px;
+  }
+  .viso-panel-quick-card {
+    padding: 11px;
+  }
+  .viso-panel-quick-actions > button,
+  .viso-panel-quick-actions > a {
+    font-size: 10px;
+    padding-inline: 7px;
   }
 }
