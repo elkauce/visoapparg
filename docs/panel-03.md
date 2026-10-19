@@ -8,6 +8,6 @@ El modo `compact` del componente Deck es optativo: el comportamiento predetermin
 
 Verificación: compilación TypeScript/Vite y ESLint correctos; 384 pruebas existentes correctas; 52 comprobaciones Playwright con cuenta técnica local en 1440, 390 y 320 píxeles. Se comprobaron tres columnas de teclas oscuras, cambios de estado y vista previa sincronizados, restauración del estado de prueba, ajustes de Display, plugin, APK/QR, cuenta, navegación con teclado y barra inferior, editor y restauración de tema, sin desbordamiento ni errores de ejecución. No se controlaron luces ni datos de usuarios reales.
 
-El acceso social todavía no está activado. Los requisitos concretos y la protección de cuentas existentes están en [social-login-setup.md](social-login-setup.md).
+La entrega original del panel 03 no activó acceso social. La actualización posterior incorpora Google web y vinculación de cuentas; su publicación y límites se documentan en [google-login-web.md](google-login-web.md). Los requisitos y la protección de cuentas existentes están en [social-login-setup.md](social-login-setup.md).
 
 Publicado en https://viso-deck-android.vercel.app mediante el proyecto existente, despliegue `dpl_67pNHWbvmZRUhn6jfQ8NtQ6K5YE2`, estado `READY`. Índice, JavaScript y CSS públicos coinciden con la compilación validada. El dominio público se verifica sin iniciar sesiones ni modificar usuarios. El despliegue anterior `dpl_BSH2h7ZRFXzcpQa6gpKvryDbpMJL` se conserva para recuperación. No se requiere backend ni APK nuevos.
