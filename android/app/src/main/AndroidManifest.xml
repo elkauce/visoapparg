@@ -4,6 +4,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <application
         android:allowBackup="false"
         android:fullBackupContent="false"
@@ -40,6 +44,9 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
+        <service android:name=".BackgroundPresenceService" android:exported="false" android:foregroundServiceType="specialUse" android:stopWithTask="false">
+          <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User-enabled telephone presence detection and synchronization of selected status indicator lights; no call audio or dialer functions." />
+        </service>
         <service
             android:name=".VisoNotificationListener"
             android:label="VISO · control multimedia"

@@ -630,3 +630,39 @@ export const configureScreen = mutation({
     });
   },
 });
+
+export const setIdle = mutation({
+  args: {
+    enabled: v.boolean(),
+    mainPageId: v.id("deckPages"),
+    restPageId: v.id("deckPages"),
+    seconds: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    await getOwnedPage(ctx, user._id, args.mainPageId);
+    await getOwnedPage(ctx, user._id, args.restPageId);
+    if (
+      !Number.isInteger(args.seconds) ||
+      args.seconds < 3 ||
+      args.seconds > 3600 ||
+      args.mainPageId === args.restPageId
+    )
+      throw new ConvexError({
+        code: "BAD_REQUEST",
+        message: "Elegí páginas distintas y un tiempo entre 3 y 3600 segundos.",
+      });
+    await ctx.db.patch("users", user._id, { deckIdle: args });
+  },
+});
+
+export const disableIdle = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await requireCurrentUser(ctx);
+    if (user.deckIdle)
+      await ctx.db.patch("users", user._id, {
+        deckIdle: { ...user.deckIdle, enabled: false },
+      });
+  },
+});

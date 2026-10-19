@@ -1,5 +1,8 @@
 package com.viso.deck
 
+import android.content.Intent
+import android.os.Build
+import org.json.JSONObject
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -19,7 +22,8 @@ import com.getcapacitor.annotation.PermissionCallback
 
 @CapacitorPlugin(name = "VisoPresence", permissions = [
     Permission(alias = "calendar", strings = [Manifest.permission.READ_CALENDAR]),
-    Permission(alias = "phone", strings = [Manifest.permission.READ_PHONE_STATE])
+    Permission(alias = "phone", strings = [Manifest.permission.READ_PHONE_STATE]),
+    Permission(alias = "notifications", strings = [Manifest.permission.POST_NOTIFICATIONS])
 ])
 @Suppress("DEPRECATION")
 class VisoPresencePlugin : Plugin() {
@@ -42,6 +46,49 @@ class VisoPresencePlugin : Plugin() {
     @PermissionCallback private fun phonePermissionResult(call: PluginCall) {
         call.resolve(JSObject().put("granted", getPermissionState("phone") == PermissionState.GRANTED))
     }
+
+    @PluginMethod fun requestBackgroundAccess(call:PluginCall) {
+        if(Build.VERSION.SDK_INT<33 || getPermissionState("notifications")==PermissionState.GRANTED){allowBackground();call.resolve(JSObject().put("granted",true))}
+        else requestPermissionForAlias("notifications",call,"backgroundPermissionResult")
+    }
+    private fun allowBackground(){context.getSharedPreferences("viso-presence-runtime",0).edit().remove("stoppedAccount").apply()}
+    @PermissionCallback private fun backgroundPermissionResult(call:PluginCall){val granted=getPermissionState("notifications")==PermissionState.GRANTED;if(granted)allowBackground();call.resolve(JSObject().put("granted",granted))}
+    @PluginMethod fun getBackgroundStatus(call:PluginCall){
+        val account=call.getString("accountId")?:""
+        val configuration=try{SecureVault(context).get(BackgroundPresenceService.CONFIG)?.let(::JSONObject)}catch(_:Exception){null}
+        val current=configuration?.optString("accountId")
+        call.resolve(JSObject().put("running",BackgroundPresenceService.running&&current==account).put("accountId",current).put("expires",configuration?.optLong("expires")?:0L).put("stopped",context.getSharedPreferences("viso-presence-runtime",0).getString("stoppedAccount",null)==account))
+    }
+    @PluginMethod fun configureBackground(call:PluginCall){
+        try {
+            check(granted(Manifest.permission.READ_PHONE_STATE))
+            val account=call.getString("accountId")?:error("Falta cuenta")
+            require(account.length in 1..128 && account.all {it.isLetterOrDigit() || it in "_-:"})
+            val secret=call.getString("secret")?:error("Falta autorización")
+            require(secret.matches(Regex("[0-9a-fA-F-]{72}")))
+            val expires=call.getLong("expires")?:error("Falta vigencia")
+            require(expires>System.currentTimeMillis())
+            val cfg=JSONObject().put("accountId",account).put("secret",secret).put("expires",expires)
+            BackgroundPresenceService.suppressLights=false
+            SecureVault(context).set(BackgroundPresenceService.CONFIG,cfg.toString())
+            val intent=Intent(context,BackgroundPresenceService::class.java)
+            if(Build.VERSION.SDK_INT>=26)context.startForegroundService(intent) else context.startService(intent)
+            call.resolve()
+        } catch(_:Exception){call.reject("No se pudo activar el servicio de llamadas. Revisá permisos y abrí VISO para activarlo.","BACKGROUND_UNAVAILABLE")}
+    }
+    @PluginMethod fun stopBackground(call:PluginCall){
+        val config=try{SecureVault(context).get(BackgroundPresenceService.CONFIG)?.let(::JSONObject)}catch(_:Exception){null}
+        val requested=call.getString("accountId")
+        if(config!=null&&requested!=null&&config.optString("accountId")!=requested){call.resolve();return}
+        BackgroundPresenceService.suppressLights=true
+        GoogleHomeBackground.close()
+        SecureVault(context).remove(BackgroundPresenceService.CONFIG)
+        context.stopService(Intent(context,BackgroundPresenceService::class.java))
+        config?.let { BackgroundPresenceService.revoke(it) }
+        call.resolve()
+    }
+    override fun handleOnResume(){BackgroundPresenceService.foreground=true}
+    override fun handleOnPause(){BackgroundPresenceService.foreground=false}
     @PluginMethod fun listCalendars(call: PluginCall) {
         try {
             check(granted(Manifest.permission.READ_CALENDAR)) { "Autorizá el acceso al calendario en Android." }

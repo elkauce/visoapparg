@@ -1,3 +1,5 @@
+import { useDeckIdle } from "./_lib/use-deck-idle";
+import DeckIdleSettings from "./_components/deck-idle-settings";
 import { useEffect, useRef, useState } from "react";
 import { useConvexConnectionState, useMutation, useQuery } from "convex/react";
 import { Link } from "react-router-dom";
@@ -51,6 +53,7 @@ export default function AndroidDeck() {
   const connection = useConvexConnectionState();
   const [presenceOpen, setPresenceOpen] = useState(false);
   const [screen, setScreen] = useState<Screen>("estados");
+  const [idleSettingsOpen, setIdleSettingsOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [pending, setPending] = useState(false);
   const pendingRef = useRef(false);
@@ -133,6 +136,31 @@ export default function AndroidDeck() {
     }
   }
 
+  const idle = useDeckIdle(
+    user?.deckIdle,
+    layout?.pages.map((page) => page._id) ?? [],
+    editing ||
+      settingsOpen ||
+      standbySettingsOpen ||
+      lightsOpen ||
+      presenceOpen ||
+      elgatoOpen ||
+      idleSettingsOpen,
+    setScreen,
+    () => setIdleSettingsOpen(true),
+  );
+  const mainExists = !!layout?.pages.some(
+    (page) => page._id === user?.deckIdle?.mainPageId,
+  );
+  useEffect(() => {
+    if (user?.deckIdle?.enabled && mainExists)
+      setScreen(user.deckIdle.mainPageId);
+  }, [
+    user?._id,
+    user?.deckIdle?.enabled,
+    user?.deckIdle?.mainPageId,
+    mainExists,
+  ]);
   const sportsActive =
     !editing &&
     (layout?.pages.find((p) => p._id === screen) ?? layout?.pages[0])?.kind ===
@@ -200,6 +228,7 @@ export default function AndroidDeck() {
   };
   return (
     <div
+      {...idle}
       onDoubleClick={(event) => {
         if (
           !(event.target as HTMLElement).closest("input,select,[role=dialog]")
@@ -379,6 +408,17 @@ export default function AndroidDeck() {
               className="min-h-11 justify-start"
               onClick={() => {
                 setSettingsOpen(false);
+                setIdleSettingsOpen(true);
+              }}
+            >
+              <Clock />
+              Principal y protector de pantalla
+            </Button>
+            <Button
+              variant="secondary"
+              className="min-h-11 justify-start"
+              onClick={() => {
+                setSettingsOpen(false);
                 setElgatoOpen(true);
               }}
             >
@@ -461,6 +501,12 @@ export default function AndroidDeck() {
           {elgatoOpen && <StreamDeckPanel pluginOnly />}
         </DialogContent>
       </Dialog>
+      <DeckIdleSettings
+        open={idleSettingsOpen}
+        onOpenChange={setIdleSettingsOpen}
+        pages={layout?.pages ?? []}
+        configuration={user.deckIdle}
+      />
       <PresenceSettings
         key={`presence:${user._id}`}
         accountId={user._id}

@@ -40,10 +40,9 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.roundToInt
 
 /** One official client, reused from STATUS/viso-safe, without another VISO screen. */
-private object GoogleHomeRuntime {
+internal object GoogleHomeRuntime {
     private var client: HomeClient? = null
-    @Synchronized fun register(context: Context, caller: ActivityResultCaller): HomeClient {
-        val result = client ?: Home.getClient(context.applicationContext, HomeConfig(
+    @Synchronized fun existing(context: Context): HomeClient = client ?: Home.getClient(context.applicationContext, HomeConfig(
             coroutineContext = Dispatchers.IO,
             factoryRegistry = FactoryRegistry(
                 types = listOf(ExtendedColorLightDevice),
@@ -51,6 +50,8 @@ private object GoogleHomeRuntime {
             ),
             homePlatformScope = HomeConfig.HomePlatformScope.HOME_PLATFORM_SCOPE_VERSION_1
         )).also { client = it }
+    @Synchronized fun register(context: Context, caller: ActivityResultCaller): HomeClient {
+        val result = existing(context)
         result.registerActivityResultCallerForPermissions(caller)
         return result
     }
@@ -86,6 +87,8 @@ internal class GoogleHomeAdapter(
         check(ready == true) { "VISO todavía no recuperó la sesión después de Google. Volvé a la app y tocá Comprobar de nuevo." }
     }
 
+    fun registerBackground() { if(runtimeAvailable()) client = GoogleHomeRuntime.existing(context) }
+
     fun accountChanged() { lastSuccessfulSignature = null }
     private fun runtimeAvailable(): Boolean = Build.VERSION.SDK_INT >= 29 &&
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
@@ -115,7 +118,7 @@ internal class GoogleHomeAdapter(
             (state == PermissionsState.GRANTED && structures != null && structures.isEmpty())
         if (accessRevoked && owner.isOwner(account)) {
             // Revoked device IDs never stay eligible for later commands.
-            preferences.clearSelection(account)
+            // Keep choices for reauthorization; permission checks still block every command.
             owner.invalidate()
             lastSuccessfulSignature = null
         }
@@ -191,12 +194,7 @@ internal class GoogleHomeAdapter(
     suspend fun discover(account: String): JSObject = withTimeout(25_000) {
         val lights = permittedLights(account, refresh = true)
         val configuration = preferences.get(account)
-        val validSelection = configuration.selectedIds.filter { it in lights }
-        if (validSelection != configuration.selectedIds) {
-            owner.invalidate()
-            preferences.save(account, validSelection, configuration.colorsByState)
-            lastSuccessfulSignature = null
-        }
+        // A partial SDK discovery is not an explicit request to forget a light.
         val rows = JSArray()
         lights.forEach { (id, pair) ->
             val device = pair.first

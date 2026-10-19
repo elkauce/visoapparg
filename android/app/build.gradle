@@ -24,13 +24,14 @@ def hasHomeSdk = !homeSdkFiles.isEmpty()
 
 android {
     namespace = "com.viso.deck"
+    buildFeatures { buildConfig true }
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.viso.deck"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.11.4"
+        versionCode 22
+        versionName "1.12.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -89,6 +90,7 @@ dependencies {
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
     if (hasHomeSdk) {
         implementation files(homeSdkFiles)
         // Dependencies of the reviewed STATUS/viso-safe SDK integration.
@@ -97,7 +99,6 @@ dependencies {
         implementation 'com.google.android.gms:play-services-base:18.5.0'
         implementation 'com.google.android.gms:play-services-basement:18.9.0'
         implementation 'com.google.android.gms:play-services-tasks:18.2.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
         implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2'
     }
 }

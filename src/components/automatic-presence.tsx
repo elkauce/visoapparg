@@ -1,3 +1,4 @@
+import BackgroundPresence from "./background-presence";
 import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -30,7 +31,10 @@ export default function AutomaticPresence() {
   const enabled = isAndroidNative() && isAuthenticated && !isLoading;
   const user = useQuery(api.users.getCurrentUser, enabled ? {} : "skip");
   return enabled && user ? (
-    <Worker key={user._id} accountId={user._id} deck={pathname === "/deck"} />
+    <>
+      <BackgroundPresence key={`background:${user._id}`} accountId={user._id} />
+      <Worker key={user._id} accountId={user._id} deck={pathname === "/deck"} />
+    </>
   ) : null;
 }
 function Worker({
@@ -196,7 +200,16 @@ function Worker({
           again = true;
           return;
         }
-        feed(signals.calling ? "call" : signals.meeting ? "meeting" : null);
+        // The native service is the single writer for calls when background mode is on.
+        feed(
+          signals.calling && preferences.backgroundCalls
+            ? null
+            : signals.calling
+              ? "call"
+              : signals.meeting
+                ? "meeting"
+                : null,
+        );
       } catch (error) {
         if (alive)
           toast.error(

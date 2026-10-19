@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as background_presence from "../background_presence.js";
 import type * as deck_actions from "../deck_actions.js";
 import type * as deck_api from "../deck_api.js";
 import type * as deck_layout from "../deck_layout.js";
@@ -47,6 +48,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  background_presence: typeof background_presence;
   deck_actions: typeof deck_actions;
   deck_api: typeof deck_api;
   deck_layout: typeof deck_layout;

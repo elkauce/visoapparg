@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { BACKGROUND_STATUS_EVENT } from "@/components/background-presence";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -32,6 +33,15 @@ export default function PresenceSettings({
   );
   const [calendars, setCalendars] = useState<PresenceCalendar[]>([]);
   const [pending, setPending] = useState(false);
+  const [backgroundStatus, setBackgroundStatus] = useState("");
+  useEffect(() => {
+    const changed = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail.accountId === accountId) setBackgroundStatus(detail.message);
+    };
+    window.addEventListener(BACKGROUND_STATUS_EVENT, changed);
+    return () => window.removeEventListener(BACKGROUND_STATUS_EVENT, changed);
+  }, [accountId]);
   const save = (next: PresencePreferences) => {
     savePresencePreferences(accountId, next);
     setPreferences(next);
@@ -82,7 +92,13 @@ export default function PresenceSettings({
                       throw new Error(
                         "Android no autorizó el estado de llamadas.",
                       );
-                    save({ ...preferences, calls: enabled });
+                    save({
+                      ...preferences,
+                      calls: enabled,
+                      backgroundCalls: enabled
+                        ? preferences.backgroundCalls
+                        : false,
+                    });
                   })
                 }
               />
@@ -91,6 +107,37 @@ export default function PresenceSettings({
               No usa el micrófono ni lee números, contactos o el historial de
               llamadas.
             </p>
+            <label className="flex items-center justify-between gap-3">
+              <span>Detectar llamadas en segundo plano</span>
+              <Switch
+                aria-label="Detectar llamadas en segundo plano"
+                checked={preferences.backgroundCalls === true}
+                disabled={pending || !preferences.calls}
+                onCheckedChange={(enabled) =>
+                  void perform(async () => {
+                    if (
+                      enabled &&
+                      !(await presenceNative.requestBackgroundAccess()).granted
+                    )
+                      throw new Error(
+                        "Permití la notificación de VISO para activar la detección en segundo plano.",
+                      );
+                    save({ ...preferences, backgroundCalls: enabled });
+                  })
+                }
+              />
+            </label>
+            <p className="text-xs text-muted-foreground">
+              Funciona sin abrir el Deck, incluso si usás Elgato. Android
+              muestra una notificación para abrir VISO o desactivar el servicio.
+              No detecta llamadas si forzás la detención de la app. Las
+              reuniones de calendario mantienen su funcionamiento actual.
+            </p>
+            {backgroundStatus && (
+              <p role="status" className="text-xs text-muted-foreground">
+                {backgroundStatus}
+              </p>
+            )}
             <Button
               variant="outline"
               disabled={pending}

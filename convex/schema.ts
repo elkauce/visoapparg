@@ -21,6 +21,14 @@ export default defineSchema({
     // URL general (IFTTT, Home Assistant, Voice Monkey) que avisa en cada cambio de estado
     homeWebhookUrl: v.optional(v.string()),
     // Volumen (0-100) de los videos del Display público. 0 = silencio
+    deckIdle: v.optional(
+      v.object({
+        enabled: v.boolean(),
+        mainPageId: v.id("deckPages"),
+        restPageId: v.id("deckPages"),
+        seconds: v.number(),
+      }),
+    ),
     displayVolume: v.optional(v.number()),
     displayBackground: v.optional(
       v.object({
@@ -35,6 +43,21 @@ export default defineSchema({
     .index("phone", ["phone"])
     .index("by_token", ["tokenIdentifier"]),
 
+  presenceDevices: defineTable({
+    userId: v.id("users"),
+    deviceId: v.string(),
+    secretHash: v.string(),
+    lastSeen: v.optional(v.number()),
+    expires: v.number(),
+    enabled: v.boolean(),
+    calling: v.boolean(),
+    suppressed: v.boolean(),
+    previous: v.optional(v.id("statuses")),
+    appliedRevision: v.optional(v.number()),
+  })
+    .index("by_owner_device", ["userId", "deviceId"])
+    .index("by_owner", ["userId"])
+    .index("by_secret", ["secretHash"]),
   statuses: defineTable({
     userId: v.id("users"),
     name: v.string(),

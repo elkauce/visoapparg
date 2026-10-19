@@ -26,15 +26,15 @@ internal class GoogleHomePreferences(context: Context) {
         return try {
             val value = JSONObject(stored)
             val ids = value.getJSONArray("selectedIds")
-            val colors = value.getJSONObject("colorsByState")
+            val colors = value.optJSONObject("colorsByState")
             Configuration(
                 GoogleHomePolicy.selected((0 until ids.length()).map { ids.getString(it) }),
-                GoogleHomePolicy.colors(GoogleHomePolicy.stateKeys.associateWith { colors.getString(it) }),
-                value.getString("revision")
+                GoogleHomePolicy.colors(GoogleHomePolicy.stateKeys.associateWith { state -> colors?.optString(state)?.takeIf { Regex("^#[0-9a-fA-F]{6}$").matches(it) } ?: GoogleHomePolicy.defaultColors.getValue(state) }),
+                value.optString("revision", "migrated")
             )
         } catch (_: Exception) {
             // A broken or older preference cannot authorize a device by itself.
-            vault.remove(key(account))
+            // Preserve raw preferences if a transient vault/read error occurs.
             Configuration(emptyList(), GoogleHomePolicy.defaultColors, "initial")
         }
     }

@@ -745,3 +745,47 @@ it("shares sports content selection between sessions without overwriting teams a
     }),
   ).rejects.toThrow();
 });
+
+it("stores opt-in idle pages by account, rejects foreign pages and can disable after deletion", async () => {
+  const { t, alice, aliceId, bob } = await fixture();
+  await alice.mutation(api.deck_layout.ensureCatalogue, {});
+  await bob.mutation(api.deck_layout.ensureCatalogue, {});
+  const pages = (await alice.query(api.deck_layout.get, { unified: true }))!
+    .pages;
+  const foreign = (await bob.query(api.deck_layout.get, { unified: true }))!
+    .pages[0]._id;
+  await expect(
+    alice.mutation(api.deck_layout.setIdle, {
+      enabled: true,
+      mainPageId: pages[0]._id,
+      restPageId: foreign,
+      seconds: 3,
+    }),
+  ).rejects.toThrow();
+  await expect(
+    alice.mutation(api.deck_layout.setIdle, {
+      enabled: true,
+      mainPageId: pages[0]._id,
+      restPageId: pages[0]._id,
+      seconds: 3,
+    }),
+  ).rejects.toThrow();
+  await alice.mutation(api.deck_layout.setIdle, {
+    enabled: true,
+    mainPageId: pages[0]._id,
+    restPageId: pages[1]._id,
+    seconds: 3,
+  });
+  expect(
+    (
+      await t
+        .withIdentity({ subject: `${aliceId}|mobile` })
+        .query(api.users.getCurrentUser, {})
+    )?.deckIdle,
+  ).toMatchObject({ enabled: true, seconds: 3, restPageId: pages[1]._id });
+  await t.run((ctx) => ctx.db.delete("deckPages", pages[1]._id));
+  await alice.mutation(api.deck_layout.disableIdle, {});
+  expect(
+    (await alice.query(api.users.getCurrentUser, {}))?.deckIdle?.enabled,
+  ).toBe(false);
+});
