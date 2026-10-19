@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { SignInButton } from "@/components/ui/signin";
+import GoogleAccountSettings from "@/components/google-account-settings";
 import { VisoBrand } from "@/components/viso-brand";
 import StatusScreen from "@/components/status-screen";
 import {
@@ -48,6 +49,7 @@ type PanelTab = (typeof TABS)[number]["id"];
 export default function ControlPanel() {
   const [tab, setTab] = useState<PanelTab>("states");
   const [accountOpen, setAccountOpen] = useState(false);
+  const [googlePending, setGooglePending] = useState(false);
   const [androidOpen, setAndroidOpen] = useState(false);
   const data = useQuery(api.statuses.list, {});
   const user = useQuery(api.users.getCurrentUser, {});
@@ -325,8 +327,22 @@ export default function ControlPanel() {
           <span>Cuenta</span>
         </button>
       </nav>
-      <Dialog open={accountOpen} onOpenChange={setAccountOpen}>
-        <DialogContent className="viso-panel-account-dialog">
+      <Dialog
+        open={accountOpen}
+        onOpenChange={(open) => {
+          if (!googlePending) setAccountOpen(open);
+        }}
+      >
+        <DialogContent
+          className="viso-panel-account-dialog"
+          showCloseButton={!googlePending}
+          onEscapeKeyDown={(event) => {
+            if (googlePending) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (googlePending) event.preventDefault();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>Tu cuenta</DialogTitle>
             <DialogDescription>
@@ -334,7 +350,12 @@ export default function ControlPanel() {
             </DialogDescription>
           </DialogHeader>
           <p className="break-all text-sm">{user?.email}</p>
-          <SignInButton variant="secondary" signOutText="Cerrar sesión" />
+          <GoogleAccountSettings onPendingChange={setGooglePending} />
+          <SignInButton
+            variant="secondary"
+            signOutText="Cerrar sesión"
+            disabled={googlePending}
+          />
         </DialogContent>
       </Dialog>
       <Dialog open={androidOpen} onOpenChange={setAndroidOpen}>

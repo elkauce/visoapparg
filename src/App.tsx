@@ -16,12 +16,14 @@ import AndroidIntegrations from "./pages/android/integrations.tsx";
 import AndroidIntegrationDetails from "./pages/android/integration-details.tsx";
 import { isAndroidNative } from "./lib/android-native.ts";
 import WebSurfaceTheme from "./components/web-surface-theme";
+import GoogleAuthReturn from "./components/google-auth-return";
 
 export default function App() {
   return (
     <DefaultProviders>
       <BrowserRouter>
         <WebSurfaceTheme />
+        <GoogleAuthReturn />
         <AndroidRuntime />
         <DeckAwake />
         <AutomaticPresence />

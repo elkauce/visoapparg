@@ -1,10 +1,19 @@
 import { ConvexAuthProvider } from "@convex-dev/auth/react";
 import { ConvexReactClient } from "convex/react";
 import { isAndroidNative, secureTokenStorage } from "@/lib/android-native.ts";
+import { shouldHandleGoogleAuthCode } from "@/lib/google-auth-flow";
 
 const convexUrl = import.meta.env.VITE_CONVEX_URL ?? "http://localhost:3000";
 const convex = new ConvexReactClient(convexUrl);
 
 export function ConvexProvider({ children }: { children: React.ReactNode }) {
-  return <ConvexAuthProvider client={convex} storage={isAndroidNative() ? secureTokenStorage : undefined}>{children}</ConvexAuthProvider>;
+  return (
+    <ConvexAuthProvider
+      client={convex}
+      storage={isAndroidNative() ? secureTokenStorage : undefined}
+      shouldHandleCode={shouldHandleGoogleAuthCode}
+    >
+      {children}
+    </ConvexAuthProvider>
+  );
 }

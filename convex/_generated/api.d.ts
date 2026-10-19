@@ -36,6 +36,7 @@ import type * as lights from "../lights.js";
 import type * as media from "../media.js";
 import type * as public_status from "../public_status.js";
 import type * as sports from "../sports.js";
+import type * as social_auth from "../social_auth.js";
 import type * as statuses from "../statuses.js";
 import type * as users from "../users.js";
 import type * as weather from "../weather.js";
@@ -75,6 +76,7 @@ declare const fullApi: ApiFromModules<{
   media: typeof media;
   public_status: typeof public_status;
   sports: typeof sports;
+  social_auth: typeof social_auth;
   statuses: typeof statuses;
   users: typeof users;
   weather: typeof weather;

@@ -43,6 +43,34 @@ export default defineSchema({
     .index("phone", ["phone"])
     .index("by_token", ["tokenIdentifier"]),
 
+  // One explicit account-link request per authenticated browser session.
+  socialLinkIntents: defineTable({
+    userId: v.id("users"),
+    sessionId: v.id("authSessions"),
+    createdAt: v.number(),
+    expires: v.number(),
+  }).index("by_session", ["sessionId"]),
+  // Google proves its identity at the OAuth callback; VISO proves its existing
+  // session and PKCE verifier only when the browser redeems this one-use code.
+  socialPendingLinks: defineTable({
+    userId: v.id("users"),
+    sessionId: v.id("authSessions"),
+    verifierId: v.id("authVerifiers"),
+    codeHash: v.string(),
+    expires: v.number(),
+    signature: v.string(),
+    googleSubject: v.string(),
+    profile: v.object({
+      email: v.string(),
+      emailVerified: v.literal(true),
+      googleSubject: v.string(),
+      name: v.optional(v.string()),
+      image: v.optional(v.string()),
+    }),
+  })
+    .index("by_code", ["codeHash"])
+    .index("by_session", ["sessionId"]),
+
   presenceDevices: defineTable({
     userId: v.id("users"),
     deviceId: v.string(),

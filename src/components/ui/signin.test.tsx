@@ -6,9 +6,10 @@ import { SignInButton } from "./signin.tsx";
 const mocks = vi.hoisted(() => ({
   isAuthenticated: false,
   isLoading: false,
-  signIn: vi.fn<() => Promise<void>>(),
+  signIn: vi.fn<(...args: unknown[]) => Promise<void | { redirect: URL }>>(),
   signOut: vi.fn<() => Promise<void>>(),
   toastError: vi.fn(),
+  availability: vi.fn<() => Promise<{ google: boolean }>>(),
 }));
 
 vi.mock("@convex-dev/auth/react", () => ({
@@ -19,6 +20,7 @@ vi.mock("@convex-dev/auth/react", () => ({
 }));
 
 vi.mock("convex/react", () => ({
+  useConvex: () => ({ query: mocks.availability }),
   useConvexAuth: () => ({
     isAuthenticated: mocks.isAuthenticated,
     isLoading: mocks.isLoading,
@@ -53,9 +55,119 @@ beforeEach(() => {
   mocks.signIn.mockReset().mockResolvedValue(undefined);
   mocks.signOut.mockReset().mockResolvedValue(undefined);
   mocks.toastError.mockReset();
+  mocks.availability.mockReset().mockResolvedValue({ google: false });
+  sessionStorage.clear();
 });
 
 describe("SignInButton", () => {
+  it("restores password controls after returning from Google with browser Back", async () => {
+    mocks.availability.mockResolvedValue({ google: true });
+    mocks.signIn.mockResolvedValueOnce({
+      redirect: new URL("https://accounts.google.com/"),
+    });
+    const { user, dialog } = await openSignIn();
+    await user.click(
+      await within(dialog).findByRole("button", {
+        name: "Continuar con Google",
+      }),
+    );
+    expect(within(dialog).getByLabelText("Contraseña")).toBeDisabled();
+    expect(sessionStorage.getItem("viso:google-auth-attempt")).not.toBeNull();
+
+    act(() =>
+      window.dispatchEvent(
+        new PageTransitionEvent("pageshow", { persisted: false }),
+      ),
+    );
+    expect(within(dialog).getByLabelText("Contraseña")).toBeDisabled();
+    act(() =>
+      window.dispatchEvent(
+        new PageTransitionEvent("pageshow", { persisted: true }),
+      ),
+    );
+
+    expect(within(dialog).getByLabelText("Correo electrónico")).toBeEnabled();
+    expect(within(dialog).getByLabelText("Contraseña")).toBeEnabled();
+    expect(
+      within(dialog).getByRole("button", { name: "Continuar con Google" }),
+    ).toBeEnabled();
+    expect(sessionStorage.getItem("viso:google-auth-attempt")).toBeNull();
+    await user.type(
+      within(dialog).getByLabelText("Correo electrónico"),
+      "persona@example.com",
+    );
+    await user.type(within(dialog).getByLabelText("Contraseña"), "password");
+    await user.click(within(dialog).getByRole("button", { name: "Entrar" }));
+    expect(mocks.signIn).toHaveBeenLastCalledWith("password", {
+      email: "persona@example.com",
+      password: "password",
+      flow: "signIn",
+    });
+    expect(mocks.signIn).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps password sign-in available when provider discovery fails", async () => {
+    mocks.availability.mockRejectedValueOnce(
+      new Error("Backend function unavailable"),
+    );
+    const { user, dialog } = await openSignIn();
+    expect(
+      within(dialog).queryByRole("button", { name: "Continuar con Google" }),
+    ).toBeNull();
+    await user.type(
+      within(dialog).getByLabelText("Correo electrónico"),
+      "persona@example.com",
+    );
+    await user.type(within(dialog).getByLabelText("Contraseña"), "password");
+    await user.click(within(dialog).getByRole("button", { name: "Entrar" }));
+    expect(mocks.signIn).toHaveBeenCalledExactlyOnceWith("password", {
+      email: "persona@example.com",
+      password: "password",
+      flow: "signIn",
+    });
+  });
+
+  it("shares the in-flight lock across Google and password and recovers from Google errors", async () => {
+    mocks.availability.mockResolvedValue({ google: true });
+    const request = deferred();
+    mocks.signIn.mockReturnValueOnce(request.promise);
+    const { user, dialog } = await openSignIn();
+    const google = await within(dialog).findByRole("button", {
+      name: "Continuar con Google",
+    });
+    await user.dblClick(google);
+    expect(mocks.signIn).toHaveBeenCalledExactlyOnceWith("google", {
+      redirectTo: "/?google=return",
+    });
+    expect(within(dialog).getByLabelText("Correo electrónico")).toBeDisabled();
+    expect(within(dialog).getByLabelText("Contraseña")).toBeDisabled();
+    expect(
+      within(dialog).getByRole("button", { name: "Entrando..." }),
+    ).toBeDisabled();
+    expect(
+      within(dialog).getByRole("button", { name: "Crear una cuenta" }),
+    ).toBeDisabled();
+    await user.keyboard("{Escape}");
+    expect(dialog).toBeInTheDocument();
+    const stored = JSON.parse(
+      sessionStorage.getItem("viso:google-auth-attempt")!,
+    );
+    expect(Object.keys(stored).sort()).toEqual(["mode", "startedAt"]);
+    expect(stored.mode).toBe("signin");
+    await act(async () =>
+      request.reject(new Error("Private provider diagnostic")),
+    );
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "No pudimos iniciar Google",
+    );
+    expect(within(dialog).getByLabelText("Contraseña")).toBeEnabled();
+    expect(
+      within(dialog).getByRole("button", { name: "Continuar con Google" }),
+    ).toBeEnabled();
+    expect(sessionStorage.getItem("viso:google-auth-attempt")).toBeNull();
+    expect(screen.queryByText("Private provider diagnostic")).toBeNull();
+  });
+
   it("opens an accessible local sign-in form without calling the backend", async () => {
     const { dialog } = await openSignIn();
 

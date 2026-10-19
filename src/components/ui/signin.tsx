@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Label } from "@/components/ui/label.tsx";
+import { GoogleSignInButton } from "@/components/google-sign-in";
 
 export interface SignInButtonProps
   extends
@@ -181,6 +182,15 @@ export const SignInButton = forwardRef<HTMLButtonElement, SignInButtonProps>(
                   : "Usa tu correo y contraseña para abrir tu panel."}
               </DialogDescription>
             </DialogHeader>
+            <GoogleSignInButton
+              withEmailSeparator
+              disabled={pending}
+              onPendingChange={(nextPending) => {
+                busy.current = nextPending;
+                setPending(nextPending);
+              }}
+              onError={setError}
+            />
             <form onSubmit={submit} noValidate aria-busy={pending}>
               <fieldset disabled={pending} className="space-y-4">
                 <div className="space-y-2">
