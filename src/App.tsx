@@ -15,11 +15,13 @@ import AndroidDisplay from "./pages/android/display.tsx";
 import AndroidIntegrations from "./pages/android/integrations.tsx";
 import AndroidIntegrationDetails from "./pages/android/integration-details.tsx";
 import { isAndroidNative } from "./lib/android-native.ts";
+import WebSurfaceTheme from "./components/web-surface-theme";
 
 export default function App() {
   return (
     <DefaultProviders>
       <BrowserRouter>
+        <WebSurfaceTheme />
         <AndroidRuntime />
         <DeckAwake />
         <AutomaticPresence />

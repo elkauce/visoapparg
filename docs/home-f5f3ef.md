@@ -13,3 +13,11 @@ Validación: compilación TypeScript/Vite correcta; ESLint de los tres component
 Publicado en https://viso-deck-android.vercel.app mediante el proyecto Vercel existente, despliegue `dpl_BLJP9ZppHSFzVPPspdTa8yn6VSVj`. Publicación exclusivamente de archivos estáticos de la compilación verificada. Recuperación: despliegue anterior `dpl_FoqVh69NXTpk9BTdTii2mWndJCKB` conservado en Vercel y fuente anterior en Git.
 
 Las mismas 76 comprobaciones se repitieron sobre el dominio público y pasaron sin errores ni intentos de mutación. El índice, JavaScript y CSS servidos coinciden con la compilación local; `/deck` y `/android/display` continúan respondiendo.
+
+## Accesos, productos y panel
+
+El usuario pidió completar el mismo diseño en los accesos Crear mi deck/Abrir panel/Configurar mis luces, fichas Mini/Display/Matrix y panel autenticado. `WebSurfaceTheme` aplica variables claras al documento únicamente en la ruta web `/`, para que los portales Radix hereden fondo cálido, texto oscuro y botones naranjas. Limpia el atributo al salir de la ruta; no afecta Deck, editor completo, Display ni Android. El panel conserva las acciones y componentes existentes dentro de tarjetas claras adaptables al celular.
+
+Compilación y ESLint correctos; 384 pruebas correctas. Se comprobaron 11 recorridos de diálogos en escritorio y móvil. Con una cuenta técnica en backend local, panel y editor de estados son legibles y no desbordan; navegar al Deck/editor/Display restaura el tema oscuro y volver al panel recupera la paleta clara. No se iniciaron sesiones ni modificaron datos de usuarios o luces en producción.
+
+Publicado el 19 de octubre de 2026 en el mismo dominio mediante despliegue `dpl_BSH2h7ZRFXzcpQa6gpKvryDbpMJL`; índice, JavaScript y CSS públicos coinciden con la compilación comprobada. Recuperación anterior: `dpl_BLJP9ZppHSFzVPPspdTa8yn6VSVj`. No requiere backend ni APK nuevos.

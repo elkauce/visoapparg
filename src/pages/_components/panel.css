@@ -1,0 +1,147 @@
+.viso-control-panel {
+  position: relative;
+  isolation: isolate;
+  color: var(--foreground);
+  background-color: #f5f3ef;
+  background-image: radial-gradient(#d9d5cd 0.65px, transparent 0.65px);
+  background-size: 22px 22px;
+}
+
+.viso-control-panel::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 620px;
+  pointer-events: none;
+  content: "";
+  background: radial-gradient(
+    ellipse at 75% 10%,
+    rgb(234 81 12 / 10%),
+    transparent 65%
+  );
+}
+
+.viso-control-panel__header {
+  display: flex;
+  width: min(100%, 1088px);
+  min-height: 88px;
+  margin-inline: auto;
+  padding: 22px 32px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid rgb(27 29 32 / 9%);
+}
+
+.viso-control-panel__brand {
+  width: auto;
+  max-width: 128px;
+  object-position: left center;
+}
+
+.viso-control-panel__header-actions > :first-child {
+  border-radius: 12px;
+}
+
+.viso-control-panel__main {
+  width: min(100%, 1088px);
+  margin-inline: auto;
+  padding: 40px 32px 72px;
+}
+
+.viso-control-panel__intro {
+  margin-bottom: 28px;
+}
+
+.viso-control-panel__eyebrow {
+  margin-bottom: 10px;
+  color: #a83b08;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.viso-control-panel__intro h1 {
+  margin: 0 0 10px;
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+}
+
+.viso-control-panel__intro > p:last-child {
+  color: var(--muted-foreground);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.viso-control-panel__deck,
+.viso-control-panel__connections > section {
+  min-width: 0;
+  padding: 28px;
+  border: 1px solid #e5e0d8;
+  border-radius: 26px;
+  background: #fffefa;
+  box-shadow: 0 5px 22px rgb(36 31 24 / 3%);
+}
+
+.viso-control-panel__connections {
+  display: grid;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.viso-control-panel__connections h2 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.viso-control-panel__connections p {
+  line-height: 1.65;
+}
+
+.viso-control-panel__connections input {
+  min-width: 0;
+}
+
+@media (max-width: 639px) {
+  .viso-control-panel__header {
+    min-height: 76px;
+    padding: 18px 18px;
+    gap: 10px;
+  }
+
+  .viso-control-panel__brand {
+    max-width: 96px;
+  }
+
+  .viso-control-panel__header-actions {
+    gap: 4px;
+  }
+
+  .viso-control-panel__main {
+    padding: 26px 14px 40px;
+  }
+
+  .viso-control-panel__intro {
+    margin: 0 4px 22px;
+  }
+
+  .viso-control-panel__intro > p:last-child {
+    max-width: 30ch;
+    font-size: 14px;
+  }
+
+  .viso-control-panel__deck,
+  .viso-control-panel__connections > section {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .viso-control-panel__connections {
+    gap: 16px;
+    margin-top: 16px;
+  }
+}

@@ -11,13 +11,14 @@ import SharePanel from "./_components/share-panel.tsx";
 import StreamDeckPanel from "./_components/stream-deck-panel.tsx";
 import LightSync from "./_components/light-sync.tsx";
 import { VisoBrand } from "@/components/viso-brand.tsx";
+import "./_components/panel.css";
 
 function DeckScreen() {
   return (
-    <div className="min-h-screen">
-      <header className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-6 py-5">
-        <VisoBrand className="h-8 max-w-36" />
-        <div className="flex items-center gap-2">
+    <div className="viso-control-panel min-h-screen">
+      <header className="viso-control-panel__header">
+        <VisoBrand className="viso-control-panel__brand h-8" />
+        <div className="viso-control-panel__header-actions flex items-center gap-2">
           <Button asChild size="sm">
             <Link to="/deck">
               <LayoutGrid /> Abrir deck
@@ -26,11 +27,20 @@ function DeckScreen() {
           <SignInButton variant="ghost" size="sm" signOutText="Salir" />
         </div>
       </header>
-      <main className="mx-auto max-w-5xl space-y-8 px-6 pb-16 pt-4">
-        <Deck />
-        <SharePanel />
-        <AndroidDownloadPanel />
-        <StreamDeckPanel />
+      <main className="viso-control-panel__main">
+        <div className="viso-control-panel__intro">
+          <p className="viso-control-panel__eyebrow">TU ESPACIO, CONECTADO</p>
+          <h1>Tu panel</h1>
+          <p>Elegí un estado y llevá tu señal a todas tus pantallas.</p>
+        </div>
+        <section className="viso-control-panel__deck" aria-label="Tus estados">
+          <Deck />
+        </section>
+        <div className="viso-control-panel__connections">
+          <SharePanel />
+          <AndroidDownloadPanel />
+          <StreamDeckPanel />
+        </div>
         <LightSync />
       </main>
     </div>
