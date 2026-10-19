@@ -15,7 +15,8 @@ const VISO_PRODUCTS = [
     id: "mini",
     name: "VISO Mini",
     image: "/products/viso-mini.png",
-    caption: "Compacto. Tu estado siempre visible.",
+    caption: "Compacto, elegante y siempre visible.",
+    shortCaption: "Estado al instante",
     detail:
       "Una pantalla compacta para mostrar tu estado en el escritorio o junto a tu espacio de trabajo.",
   },
@@ -23,7 +24,8 @@ const VISO_PRODUCTS = [
     id: "display",
     name: "VISO Display",
     image: "/products/viso-display.png",
-    caption: "Tu estado, agenda y widgets en un solo lugar.",
+    caption: "Toda tu agenda, en gran formato.",
+    shortCaption: "Tu estado y tus widgets",
     detail:
       "Una pantalla horizontal para reunir tu estado y la información que elegís mostrar.",
   },
@@ -31,7 +33,8 @@ const VISO_PRODUCTS = [
     id: "matrix",
     name: "VISO Matrix",
     image: "/products/viso-matrix.png",
-    caption: "Iconos y colores que hablan por vos.",
+    caption: "Simple, claro y expresivo.",
+    shortCaption: "Indicador en grande",
     detail:
       "Una matriz de luces para expresar tus estados con iconos y colores personalizados.",
   },
@@ -47,9 +50,10 @@ export function ProductHero({
   const reduced = useReducedMotion();
   const [viewport, carousel] = useEmblaCarousel({
     loop: true,
+    startIndex: 1,
     duration: reduced ? 0 : 25,
   });
-  const [selected, setSelected] = useState(0);
+  const [selected, setSelected] = useState(1);
   const sync = useCallback(() => {
     if (carousel) setSelected(carousel.selectedScrollSnap());
   }, [carousel]);
@@ -86,9 +90,9 @@ export function ProductHero({
                 width={product.id === "display" ? 1666 : 1024}
                 height={product.id === "display" ? 938 : 1024}
               />
-              <div>
+              <div className="viso-carousel-copy">
                 <h2>{product.name}</h2>
-                <p>{product.caption}</p>
+                <p>{product.shortCaption}</p>
               </div>
             </div>
           ))}
@@ -138,7 +142,7 @@ export function ProductCollection() {
         <div className="viso-products-heading">
           <h2>
             <span className="viso-desktop-copy">Tu estado, también en el </span>
-            <span className="viso-desktop-copy viso-green">mundo real</span>
+            <span className="viso-desktop-copy">mundo real.</span>
             <span className="viso-mobile-copy">Dispositivos VISO</span>
           </h2>
           <p className="viso-desktop-copy">
@@ -153,9 +157,16 @@ export function ProductCollection() {
               onClick={() => setSelected(product)}
               aria-label={`Conocer ${product.name}`}
             >
+              <div className="viso-product-card-copy">
+                <h3>{product.name}</h3>
+                <p className="viso-product-caption-desktop viso-desktop-copy">
+                  {product.caption}
+                </p>
+                <p className="viso-product-caption-mobile viso-mobile-copy">
+                  {product.shortCaption}
+                </p>
+              </div>
               <img src={product.image} alt="" loading="lazy" decoding="async" />
-              <h3>{product.name}</h3>
-              <p className="viso-desktop-copy">{product.caption}</p>
               <span className="viso-product-more viso-desktop-copy">
                 Conocer más →
               </span>

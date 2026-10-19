@@ -7,10 +7,12 @@ import {
   MonitorPlay,
   Plug,
   Zap,
+  ArrowRight,
 } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import { SignInButton } from "@/components/ui/signin";
 import KeyCap from "@/components/key-cap";
-import StatusScreen from "@/components/status-screen";
+import StatusIcon from "@/components/status-icon";
 import { VisoBrand } from "@/components/viso-brand";
 import { VISO_STATES } from "../deck/_lib/viso-states";
 import { ProductCollection, ProductHero } from "./viso-products";
@@ -40,11 +42,15 @@ export default function Landing() {
   const [index, setIndex] = useState(0);
   const [tab, setTab] = useState("inicio");
   const current = VISO_STATES[index];
-  const demoFace = {
-    name: current.name,
-    color: current.defaultColor,
-    icon: current.icon,
-  };
+  const reducedMotion = useReducedMotion();
+  const descriptions = [
+    "Podés pasar",
+    "No molestar",
+    "En reunión",
+    "En comunicación",
+    "Un momento para concentrarme",
+    "Vuelvo pronto",
+  ];
   function scrollTo(id: string, selected: string) {
     setTab(selected);
     document.getElementById(id)?.scrollIntoView({
@@ -62,13 +68,23 @@ export default function Landing() {
         { "--viso-demo-color": current.defaultColor } as React.CSSProperties
       }
     >
+      <motion.div
+        className="viso-state-glow"
+        aria-hidden="true"
+        initial={false}
+        animate={{ backgroundColor: current.defaultColor }}
+        transition={{ duration: reducedMotion ? 0 : 0.8, ease: "easeInOut" }}
+      />
       <header className="viso-home-header">
-        <VisoBrand className="h-8 max-w-36" />
-        <SignInButton
-          variant="secondary"
-          className="viso-desktop-copy"
-          signInText="Entrar al panel"
-        />
+        <VisoBrand className="viso-home-brand" />
+        <div className="viso-desktop-copy viso-header-entry">
+          <SignInButton
+            className="viso-orange-button"
+            signInText="Abrir panel"
+            showIcon={false}
+          />
+          <ArrowRight aria-hidden="true" />
+        </div>
         <div className="viso-mobile-account-wrap">
           <UserRound aria-hidden="true" />
           <SignInButton
@@ -83,32 +99,50 @@ export default function Landing() {
       <main>
         <section className="viso-home-hero">
           <div className="viso-home-intro viso-desktop-copy">
-            <p className="viso-eyebrow">TU ESTADO, A LA VISTA</p>
+            <p className="viso-current-state">
+              <span style={{ backgroundColor: current.defaultColor }} />
+              Estado actual: {current.name}
+            </p>
             <h1>
-              Un toque y todos saben si estás{" "}
-              <span style={{ color: current.defaultColor }}>
-                {current.name.toLowerCase()}
-              </span>
+              Tu estado, a la
+              <br />
+              vista de todos.
             </h1>
             <p>
-              Un Stream Deck online. Marcá si estás libre, ocupado o en reunión,
-              mostralo a pantalla completa y cambiá el color de tus luces.
+              Elegí tu estado y mostralo en tus pantallas y luces compatibles.
             </p>
             <div className="viso-home-cta">
               <SignInButton
                 size="lg"
+                className="viso-orange-button"
                 signInText="Crear mi deck"
                 showIcon={false}
               />
-              <span>Probá la demo: tocá una tecla</span>
+              <ArrowRight aria-hidden="true" />
             </div>
           </div>
           <div className="viso-demo-deck" id="viso-demo-deck">
             <div className="viso-mobile-copy">
+              <div className="viso-app-heading">
+                <h1>Tu espacio</h1>
+                <span>Demo</span>
+              </div>
+              <p className="viso-app-description">
+                Elegí un estado para tu espacio.
+              </p>
               <ProductHero color={current.defaultColor} demo />
             </div>
             <div className="viso-desktop-status viso-desktop-copy">
-              <StatusScreen face={demoFace} caption="Demo de VISO" />
+              <motion.div
+                className="viso-status-face"
+                initial={false}
+                animate={{ backgroundColor: current.defaultColor }}
+                transition={{ duration: reducedMotion ? 0 : 0.65 }}
+              >
+                <StatusIcon name={current.icon} strokeWidth={1.7} />
+                <h2>{current.name}</h2>
+                <p>{descriptions[index]}</p>
+              </motion.div>
             </div>
             <div
               className="viso-demo-keys"
@@ -116,14 +150,23 @@ export default function Landing() {
               aria-label="Probar estados de VISO"
             >
               {VISO_STATES.map((status, position) => (
-                <KeyCap
+                <div
                   key={status.key}
-                  label={status.name}
-                  icon={status.icon}
-                  color={status.defaultColor}
-                  active={position === index}
-                  onClick={() => setIndex(position)}
-                />
+                  style={
+                    {
+                      "--viso-key-color": status.defaultColor,
+                    } as React.CSSProperties
+                  }
+                >
+                  <KeyCap
+                    className="viso-demo-key"
+                    label={status.name}
+                    icon={status.icon}
+                    color={status.defaultColor}
+                    active={position === index}
+                    onClick={() => setIndex(position)}
+                  />
+                </div>
               ))}
             </div>
             <p className="viso-demo-caption">
@@ -146,9 +189,19 @@ export default function Landing() {
         <HomeLightsCard />
         <ProductCollection />
         <div className="viso-mobile-entry">
-          <SignInButton size="lg" signInText="Entrar" showIcon={false} />
+          <SignInButton
+            size="lg"
+            className="viso-orange-button"
+            signInText="Entrar"
+            showIcon={false}
+          />
+          <ArrowRight aria-hidden="true" />
         </div>
       </main>
+      <footer className="viso-home-footer viso-desktop-copy">
+        <VisoBrand className="viso-footer-brand" />
+        <p>Tu estado, a la vista de todos.</p>
+      </footer>
       <nav className="viso-mobile-nav" aria-label="Navegación principal">
         <button
           onClick={() => scrollTo("viso-home", "inicio")}
