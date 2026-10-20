@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { lazy, Suspense } from "react";
 import { DefaultProviders } from "./components/providers/default.tsx";
 import DeckPage from "./pages/deck/page.tsx";
 import AndroidDeck from "./pages/deck/android-deck.tsx";
@@ -14,9 +15,12 @@ import AndroidSettings from "./pages/android/settings.tsx";
 import AndroidDisplay from "./pages/android/display.tsx";
 import AndroidIntegrations from "./pages/android/integrations.tsx";
 import AndroidIntegrationDetails from "./pages/android/integration-details.tsx";
+import AndroidStreamDeckPage from "./pages/android/stream-deck.tsx";
 import { isAndroidNative } from "./lib/android-native.ts";
 import WebSurfaceTheme from "./components/web-surface-theme";
 import GoogleAuthReturn from "./components/google-auth-return";
+
+const MarketplacePage = lazy(() => import("./pages/marketplace/page.tsx"));
 
 export default function App() {
   return (
@@ -44,6 +48,10 @@ export default function App() {
           <Route path="/android/settings" element={<AndroidSettings />} />
           <Route path="/android/display" element={<AndroidDisplay />} />
           <Route
+            path="/android/stream-deck"
+            element={<AndroidStreamDeckPage />}
+          />
+          <Route
             path="/android/integrations"
             element={<AndroidIntegrations />}
           />
@@ -57,6 +65,23 @@ export default function App() {
           />
           <Route path="/deck" element={<AndroidDeck />} />
           <Route path="/s/:slug" element={<PublicStatusPage />} />
+          <Route
+            path="/marketplace"
+            element={
+              <Suspense
+                fallback={
+                  <div
+                    role="status"
+                    className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
+                  >
+                    Cargando Marketplace…
+                  </div>
+                }
+              >
+                <MarketplacePage />
+              </Suspense>
+            }
+          />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

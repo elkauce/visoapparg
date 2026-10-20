@@ -8,6 +8,7 @@ import {
 } from "./lib/current_user.ts";
 import { getOwnedStatus } from "./lib/owned_status.ts";
 import { getDeckMedia } from "./lib/deck_appearance.ts";
+import { isMarketplaceOriginal } from "./media";
 import { contentTargetsStatus, deleteDanglingKeys } from "./lib/deck_keys.ts";
 import { setActiveStatus } from "./lib/activate_status.ts";
 import { validateLight, validateWebhookUrl } from "./lib/light_validation.ts";
@@ -189,7 +190,8 @@ export const remove = mutation({
     }
     if (
       status.mediaStorageId &&
-      !(await getDeckMedia(ctx, status.mediaStorageId))
+      !(await getDeckMedia(ctx, status.mediaStorageId)) &&
+      !(await isMarketplaceOriginal(ctx, status.mediaStorageId))
     ) {
       await ctx.storage.delete(status.mediaStorageId);
     }

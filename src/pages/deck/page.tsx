@@ -45,7 +45,11 @@ import KeyEditor, { type EditTarget } from "./_components/key-editor.tsx";
 import PageSettings from "./_components/page-settings.tsx";
 import SportsDialog from "./_components/sports-dialog.tsx";
 import { ClockTile, WeatherTile } from "./_components/widget-tiles.tsx";
-import { resolveKeyFace, type KeyContent } from "./_lib/resolve-key.ts";
+import {
+  isLiveWidget,
+  resolveKeyFace,
+  type KeyContent,
+} from "./_lib/resolve-key.ts";
 import {
   deckErrorMessage,
   deckExtensionsEnabled,
@@ -694,12 +698,7 @@ export default function DeckPage({
               const position = positionOffset + slot;
               const key = pageKeys.find((item) => item.position === position);
               const onPress = () => pressKey(position);
-              if (
-                key &&
-                (key.content.kind === "clock" ||
-                  key.content.kind === "weather") &&
-                !key.appearance
-              )
+              if (key && isLiveWidget(key.content, key.appearance))
                 return (
                   <LiveTile
                     key={position}

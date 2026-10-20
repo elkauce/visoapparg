@@ -1,0 +1,537 @@
+import {
+  Component,
+  lazy,
+  Suspense,
+  useDeferredValue,
+  type ReactNode,
+} from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { useConvexAuth, useQuery } from "convex/react";
+import {
+  ArrowLeft,
+  ArrowUpRight,
+  AudioLines,
+  Check,
+  ChevronRight,
+  Compass,
+  Image,
+  Library,
+  Loader2,
+  Monitor,
+  Package,
+  PanelsTopLeft,
+  Plug,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Users,
+  X,
+} from "lucide-react";
+import { api } from "@/convex/_generated/api";
+import type { MarketplaceCategory } from "@/convex/lib/marketplace_catalog";
+import { Button } from "@/components/ui/button";
+import { SignInButton } from "@/components/ui/signin";
+import { VisoBrand } from "@/components/viso-brand";
+import MarketProductDialog from "./product-detail";
+import MarketLibrary from "./library";
+import { CATEGORY_LABELS, type MarketProduct } from "./types";
+import "./marketplace.css";
+
+const MarketplaceStudio = lazy(() => import("./studio"));
+const MarketplaceAdmin = lazy(() => import("./admin"));
+
+const CATEGORIES = [
+  { id: "discover", label: "Descubrir", icon: Compass },
+  { id: "icons", label: "Iconos", icon: Image },
+  { id: "plugins", label: "Plugins", icon: Plug },
+  { id: "profiles", label: "Perfiles", icon: PanelsTopLeft },
+  { id: "screensavers", label: "Protectores", icon: Monitor },
+  { id: "soundboards", label: "Sonidos", icon: AudioLines },
+  { id: "hardware", label: "Hardware", icon: Package },
+  { id: "used", label: "Usados", icon: Store },
+] as const;
+
+type Category = (typeof CATEGORIES)[number]["id"];
+type View = "discover" | "library" | "studio" | "admin";
+
+function isCategory(value: string | null): value is Category {
+  return CATEGORIES.some((category) => category.id === value);
+}
+
+export function ProductCard({
+  product,
+  onOpen,
+}: {
+  product: MarketProduct;
+  onOpen: () => void;
+}) {
+  return (
+    <button className="vm-product-card" type="button" onClick={onOpen}>
+      <div
+        className={`vm-product-cover${product.category === "hardware" ? " vm-hardware-cover" : ""}`}
+      >
+        {product.coverUrl ? (
+          <img src={product.coverUrl} alt="" loading="lazy" />
+        ) : (
+          <Package aria-hidden="true" />
+        )}
+        {product.acquired && (
+          <span className="vm-cover-badge">
+            <Check aria-hidden="true" /> En tu biblioteca
+          </span>
+        )}
+      </div>
+      <div className="vm-product-copy">
+        <span className="vm-product-category">
+          {CATEGORY_LABELS[product.category]}
+        </span>
+        <h3>{product.title}</h3>
+        <p className="vm-product-description">{product.description}</p>
+        <div className="vm-product-footer">
+          <span className="vm-creator-label">
+            <span className="vm-creator-mark" aria-hidden="true">
+              {product.creatorName.slice(0, 1).toUpperCase()}
+            </span>
+            {product.creatorName}
+          </span>
+          <span className="vm-product-price">
+            {product.priceMode === "free"
+              ? "Gratis"
+              : product.priceMode === "external"
+                ? "Ver oferta"
+                : "Conocer"}
+            <ArrowUpRight aria-hidden="true" />
+          </span>
+        </div>
+        {product.affiliate && (
+          <span className="vm-affiliate-note">Enlace afiliado</span>
+        )}
+      </div>
+    </button>
+  );
+}
+
+export function MarketLoading() {
+  return (
+    <div className="vm-loading" role="status">
+      <Loader2 className="animate-spin" aria-hidden="true" />
+      <span>Cargando tu espacio…</span>
+    </div>
+  );
+}
+
+class MarketBoundary extends Component<
+  { children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  render() {
+    if (this.state.failed) {
+      return (
+        <div className="vm-empty" role="alert">
+          <Store aria-hidden="true" />
+          <h2>No pudimos cargar el marketplace</h2>
+          <p>Revisá tu conexión y volvé a intentarlo.</p>
+          <Button onClick={() => window.location.reload()}>
+            Intentar de nuevo
+          </Button>
+          <Link to="/">Volver al panel</Link>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+export default function MarketplacePage() {
+  const { isAuthenticated, isLoading } = useConvexAuth();
+
+  if (isLoading) {
+    return (
+      <div className="viso-marketplace vm-auth-shell">
+        <MarketLoading />
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return (
+      <div className="viso-marketplace vm-auth-shell">
+        <Link to="/" aria-label="Volver a VISO">
+          <VisoBrand />
+        </Link>
+        <div className="vm-auth-card">
+          <span className="vm-eyebrow">MARKETPLACE VISO</span>
+          <h1>Un espacio para hacerlo tuyo.</h1>
+          <p>
+            Entrá a tu cuenta para descubrir recursos, guardarlos en tu
+            biblioteca y personalizar tu deck.
+          </p>
+          <SignInButton signInText="Entrar al marketplace" />
+          <Button variant="ghost" asChild>
+            <Link to="/">
+              <ArrowLeft /> Volver a VISO
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="viso-marketplace">
+      <MarketBoundary>
+        <MarketplaceContent />
+      </MarketBoundary>
+    </div>
+  );
+}
+
+function MarketplaceContent() {
+  const [params, setParams] = useSearchParams();
+  const session = useQuery(api.marketplace.session, {});
+  const requestedView = params.get("view");
+  const view: View =
+    requestedView === "library" ||
+    requestedView === "studio" ||
+    requestedView === "admin"
+      ? requestedView
+      : "discover";
+  const category = isCategory(params.get("category"))
+    ? (params.get("category") as Category)
+    : "discover";
+  const search = params.get("q") ?? "";
+  const deferredSearch = useDeferredValue(search);
+  const products = useQuery(
+    api.marketplace.list,
+    view === "discover"
+      ? {
+          ...(category !== "discover"
+            ? { category: category as MarketplaceCategory }
+            : {}),
+          ...(deferredSearch.trim() ? { search: deferredSearch.trim() } : {}),
+        }
+      : "skip",
+  );
+  const productId = params.get("product");
+
+  const chooseView = (next: View) => {
+    const update = new URLSearchParams(params);
+    update.delete("product");
+    if (next === "discover") update.delete("view");
+    else update.set("view", next);
+    setParams(update);
+  };
+  const chooseCategory = (next: Category) => {
+    const update = new URLSearchParams();
+    if (next !== "discover") update.set("category", next);
+    setParams(update);
+  };
+  const openProduct = (id: string) => {
+    const update = new URLSearchParams(params);
+    update.set("product", id);
+    setParams(update);
+  };
+  const closeProduct = () => {
+    const update = new URLSearchParams(params);
+    update.delete("product");
+    setParams(update, { replace: true });
+  };
+  const changeSearch = (value: string) => {
+    const update = new URLSearchParams(params);
+    if (value) update.set("q", value);
+    else update.delete("q");
+    setParams(update, { replace: true });
+  };
+  const title =
+    view === "library"
+      ? "Mi biblioteca"
+      : view === "studio"
+        ? "Espacio creador"
+        : view === "admin"
+          ? "Administración"
+          : category === "discover"
+            ? "Descubrí tu próximo favorito."
+            : CATEGORY_LABELS[category];
+  const featured =
+    products?.find((product) => product.id === "viso-living-icons") ??
+    products?.find((product) => product.category === "icons");
+
+  return (
+    <>
+      <header className="vm-header">
+        <Link
+          to="/"
+          className="vm-brand-link"
+          aria-label="Volver al panel VISO"
+        >
+          <VisoBrand />
+          <span>Marketplace</span>
+        </Link>
+        <nav aria-label="Tu espacio en Marketplace" className="vm-header-nav">
+          <Link to="/" className="vm-return-link" aria-label="Volver al panel">
+            <ArrowLeft /> <span>Volver al panel</span>
+          </Link>
+          <button
+            type="button"
+            aria-label="Mi biblioteca"
+            aria-current={view === "library" ? "page" : undefined}
+            onClick={() => chooseView("library")}
+          >
+            <Library /> <span>Mi biblioteca</span>
+          </button>
+          <button
+            type="button"
+            aria-label="Espacio creador"
+            aria-current={view === "studio" ? "page" : undefined}
+            onClick={() => chooseView("studio")}
+          >
+            <Users /> <span>Espacio creador</span>
+          </button>
+          {session?.isAdmin && (
+            <button
+              type="button"
+              aria-label="Administrar marketplace"
+              aria-current={view === "admin" ? "page" : undefined}
+              onClick={() => chooseView("admin")}
+            >
+              <ShieldCheck /> <span>Administrar</span>
+            </button>
+          )}
+        </nav>
+      </header>
+
+      <div className="vm-shell">
+        <aside className="vm-sidebar">
+          <p className="vm-sidebar-label">EXPLORAR</p>
+          <nav
+            aria-label="Categorías del marketplace"
+            className="vm-categories"
+          >
+            {CATEGORIES.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                aria-current={
+                  view === "discover" && category === id ? "page" : undefined
+                }
+                onClick={() => chooseCategory(id)}
+              >
+                <Icon aria-hidden="true" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </nav>
+          <div className="vm-sidebar-creator">
+            <Sparkles aria-hidden="true" />
+            <h2>Tu talento tiene lugar.</h2>
+            <p>Compartí tus creaciones con quienes usan VISO.</p>
+            <button type="button" onClick={() => chooseView("studio")}>
+              Ser creador <ArrowUpRight aria-hidden="true" />
+            </button>
+          </div>
+        </aside>
+
+        <main className="vm-main" id="marketplace-content">
+          <div className="vm-page-heading">
+            <div>
+              <span className="vm-eyebrow">TU ECOSISTEMA VISO</span>
+              <h1>{title}</h1>
+              <p>
+                {view === "library"
+                  ? "Tus recursos, listos para darles tu estilo."
+                  : view === "studio"
+                    ? "Creá, compartí y hacé crecer tu espacio."
+                    : view === "admin"
+                      ? "Cuidá lo que compartimos con la comunidad."
+                      : category === "used"
+                        ? "Oportunidades seleccionadas por VISO, con enlaces de afiliado."
+                        : "Recursos originales, creadores y equipos para tu espacio."}
+              </p>
+            </div>
+            {view === "discover" && (
+              <label className="vm-search">
+                <Search aria-hidden="true" />
+                <span className="sr-only">Buscar en el marketplace</span>
+                <input
+                  type="search"
+                  placeholder="Buscar recursos o creadores"
+                  maxLength={120}
+                  value={search}
+                  onChange={(event) => changeSearch(event.target.value)}
+                />
+                {search && (
+                  <button
+                    type="button"
+                    aria-label="Limpiar búsqueda"
+                    onClick={() => changeSearch("")}
+                  >
+                    <X />
+                  </button>
+                )}
+              </label>
+            )}
+          </div>
+
+          {view === "discover" ? (
+            <>
+              {category === "discover" && !search && featured && (
+                <section className="vm-featured" aria-label="Destacado de VISO">
+                  <div className="vm-featured-copy">
+                    <span className="vm-featured-label">
+                      <Sparkles aria-hidden="true" /> ORIGINAL DE VISO
+                    </span>
+                    <h2>Que cada tecla hable de vos.</h2>
+                    <p>
+                      Imágenes y animaciones para darle vida a tu deck. Tu
+                      estilo, con las funciones de siempre.
+                    </p>
+                    <Button onClick={() => openProduct(featured.id)}>
+                      Descubrir VISO Pulso <ArrowUpRight />
+                    </Button>
+                  </div>
+                  <button
+                    className="vm-featured-art"
+                    type="button"
+                    onClick={() => openProduct(featured.id)}
+                    aria-label={`Ver ${featured.title}`}
+                  >
+                    {featured.coverUrl && (
+                      <img src={featured.coverUrl} alt="" />
+                    )}
+                    <span className="vm-featured-mobile-art" aria-hidden="true">
+                      <img src="/marketplace/animated/libre.gif" alt="" />
+                      <img src="/marketplace/animated/ocupado.gif" alt="" />
+                      <img src="/marketplace/animated/reunion.gif" alt="" />
+                    </span>
+                  </button>
+                </section>
+              )}
+              <div className="vm-section-heading">
+                <h2>
+                  {search
+                    ? "Resultados de búsqueda"
+                    : category === "discover"
+                      ? "Hecho para tu espacio"
+                      : `Explorá ${CATEGORY_LABELS[category].toLowerCase()}`}
+                </h2>
+                {category === "discover" && !search && (
+                  <button type="button" onClick={() => chooseCategory("icons")}>
+                    Ver iconos <ChevronRight />
+                  </button>
+                )}
+              </div>
+              {products === undefined ? (
+                <MarketLoading />
+              ) : products.length ? (
+                <div className="vm-product-grid" aria-live="polite">
+                  {products.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onOpen={() => openProduct(product.id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="vm-empty" role="status">
+                  {category === "used" ? <Store /> : <Search />}
+                  <h2>
+                    {search
+                      ? "No encontramos coincidencias"
+                      : category === "used"
+                        ? "Pronto, oportunidades seleccionadas"
+                        : "Este espacio está listo para crecer"}
+                  </h2>
+                  <p>
+                    {search
+                      ? "Probá con otro nombre o explorá las categorías."
+                      : category === "used"
+                        ? "VISO publicará aquí los usados con sus enlaces de afiliado a Mercado Libre."
+                        : "Las nuevas publicaciones aparecerán acá después de su aprobación."}
+                  </p>
+                  {search ? (
+                    <Button variant="outline" onClick={() => changeSearch("")}>
+                      Limpiar búsqueda
+                    </Button>
+                  ) : category === "used" && session?.isAdmin ? (
+                    <Button onClick={() => chooseView("admin")}>
+                      Publicar una oportunidad
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      onClick={() => chooseCategory("discover")}
+                    >
+                      Seguir explorando
+                    </Button>
+                  )}
+                </div>
+              )}
+            </>
+          ) : view === "library" ? (
+            <MarketLibrary onExplore={() => chooseCategory("discover")} />
+          ) : view === "admin" && session === undefined ? (
+            <MarketLoading />
+          ) : view === "admin" && !session?.isAdmin ? (
+            <div className="vm-empty" role="alert">
+              <ShieldCheck />
+              <h2>Esta sección es para administradores</h2>
+              <p>Podés explorar los recursos o abrir tu espacio de creador.</p>
+              <Button onClick={() => chooseCategory("discover")}>
+                Explorar recursos
+              </Button>
+            </div>
+          ) : (
+            <Suspense fallback={<MarketLoading />}>
+              {view === "studio" ? <MarketplaceStudio /> : <MarketplaceAdmin />}
+            </Suspense>
+          )}
+        </main>
+      </div>
+
+      <nav className="vm-mobile-nav" aria-label="Navegación del marketplace">
+        <Link to="/">
+          <PanelsTopLeft />
+          <span>Panel</span>
+        </Link>
+        <button
+          type="button"
+          aria-current={view === "discover" ? "page" : undefined}
+          onClick={() => chooseCategory("discover")}
+        >
+          <Compass />
+          <span>Descubrir</span>
+        </button>
+        <button
+          type="button"
+          aria-current={view === "library" ? "page" : undefined}
+          onClick={() => chooseView("library")}
+        >
+          <Library />
+          <span>Biblioteca</span>
+        </button>
+        <button
+          type="button"
+          aria-current={view === "studio" ? "page" : undefined}
+          onClick={() => chooseView("studio")}
+        >
+          <Users />
+          <span>Creador</span>
+        </button>
+      </nav>
+
+      {productId && (
+        <MarketProductDialog
+          productId={productId}
+          onClose={closeProduct}
+          onAcquired={() => chooseView("library")}
+        />
+      )}
+    </>
+  );
+}

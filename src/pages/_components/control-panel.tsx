@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import {
   Home,
@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Copy,
   ChevronRight,
+  ShoppingBag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
@@ -47,7 +48,10 @@ const TABS = [
 type PanelTab = (typeof TABS)[number]["id"];
 
 export default function ControlPanel() {
-  const [tab, setTab] = useState<PanelTab>("states");
+  const [params, setParams] = useSearchParams();
+  const section = params.get("section");
+  const tab: PanelTab =
+    section === "display" || section === "connections" ? section : "states";
   const [accountOpen, setAccountOpen] = useState(false);
   const [googlePending, setGooglePending] = useState(false);
   const [androidOpen, setAndroidOpen] = useState(false);
@@ -58,7 +62,16 @@ export default function ControlPanel() {
   const active =
     data?.statuses.find((status) => status._id === data.activeStatusId) ?? null;
   const displayUrl = slug ? `/s/${slug}` : undefined;
-  const selectTab = (next: PanelTab) => setTab(next);
+  const selectTab = (next: PanelTab) =>
+    setParams(
+      (previous) => {
+        const nextParams = new URLSearchParams(previous);
+        if (next === "states") nextParams.delete("section");
+        else nextParams.set("section", next);
+        return nextParams;
+      },
+      { replace: true },
+    );
   const tabKey = (
     event: React.KeyboardEvent<HTMLButtonElement>,
     index: number,
@@ -75,7 +88,7 @@ export default function ControlPanel() {
               : null;
     if (next === null) return;
     event.preventDefault();
-    setTab(TABS[next].id);
+    selectTab(TABS[next].id);
     document.getElementById(`viso-tab-${TABS[next].id}`)?.focus();
   };
   const copyDisplay = async () => {
@@ -116,6 +129,10 @@ export default function ControlPanel() {
             <Plug />
             <span>Conexiones</span>
           </button>
+          <Link to="/marketplace">
+            <ShoppingBag />
+            <span>Marketplace</span>
+          </Link>
           <button onClick={() => setAccountOpen(true)}>
             <Settings2 />
             <span>Cuenta</span>
@@ -322,6 +339,10 @@ export default function ControlPanel() {
           <Plug />
           <span>Conexiones</span>
         </button>
+        <Link to="/marketplace">
+          <ShoppingBag />
+          <span>Marketplace</span>
+        </Link>
         <button onClick={() => setAccountOpen(true)}>
           <UserRound />
           <span>Cuenta</span>

@@ -2,11 +2,91 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   MAX_KEY_MEDIA_BYTES,
   uploadKeyMedia,
+  uploadBuiltinKeyMedia,
   validateKeyMedia,
 } from "./upload-media.ts";
 
 beforeEach(() => {
   vi.stubEnv("VITE_CONVEX_SITE_URL", "https://example.convex.site");
+});
+
+describe("bundled VISO media", () => {
+  it("copies an original animated resource through the user's authenticated storage instead of persisting a preview URL", async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        blob: async () => new Blob(["GIF89a"], { type: "image/gif" }),
+      })
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            storageId: "owned-builtin-copy",
+            mediaType: "image",
+          }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetch);
+    await expect(
+      uploadBuiltinKeyMedia(
+        {
+          builtinPath: "/marketplace/animated/libre.gif",
+          name: "Libre animado",
+          mimeType: "image/gif",
+        },
+        "test-token",
+      ),
+    ).resolves.toEqual({ storageId: "owned-builtin-copy", mediaType: "image" });
+    expect(fetch.mock.calls[0]).toEqual([
+      "/marketplace/animated/libre.gif",
+      { credentials: "same-origin" },
+    ]);
+    const [url, options] = fetch.mock.calls[1];
+    expect(url).toBe("https://example.convex.site/deck/media");
+    expect(options.headers).toEqual({
+      "Content-Type": "image/gif",
+      Authorization: "Bearer test-token",
+    });
+    expect(options.body).toBeInstanceOf(File);
+    expect(options.body.name).toBe("libre.gif");
+    expect(options.body.size).toBe(6);
+  });
+
+  it.each([
+    "https://example.com/icon.gif",
+    "/marketplace/../private.gif",
+    "/other/icon.gif",
+  ])(
+    "rejects an untrusted built-in path %s before fetching",
+    async (builtinPath) => {
+      const fetch = vi.fn();
+      vi.stubGlobal("fetch", fetch);
+      await expect(
+        uploadBuiltinKeyMedia({ builtinPath, name: "icon" }, "token"),
+      ).rejects.toThrow("no es válido");
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it("requires a session before downloading and reports missing resources", async () => {
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(new Response("missing", { status: 404 }));
+    vi.stubGlobal("fetch", fetch);
+    const resource = {
+      builtinPath: "/marketplace/originals/libre.png",
+      name: "Libre",
+    };
+    await expect(uploadBuiltinKeyMedia(resource, null)).rejects.toThrow(
+      "cuenta",
+    );
+    expect(fetch).not.toHaveBeenCalled();
+    await expect(uploadBuiltinKeyMedia(resource, "token")).rejects.toThrow(
+      "descargar",
+    );
+    expect(fetch).toHaveBeenCalledOnce();
+  });
 });
 afterEach(() => {
   vi.unstubAllGlobals();

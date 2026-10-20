@@ -47,7 +47,9 @@ import {
 } from "../_lib/action-runner.ts";
 import { encodeKeyVisibility } from "../_lib/key-visibility.ts";
 import DeckKey from "./deck-key.tsx";
-import MediaField from "@/pages/_components/media-field.tsx";
+import KeyAssetPicker, {
+  type KeyLibrarySelection,
+} from "@/components/marketplace/key-asset-picker.tsx";
 
 export type EditTarget = {
   pageId: string;
@@ -224,9 +226,14 @@ function KeyForm({
   const [resetAppearance, setResetAppearance] = useState(false);
   const [media, setMedia] = useState<File | null>(null);
   const [removeMedia, setRemoveMedia] = useState(false);
+  const [mediaTab, setMediaTab] = useState<"viso" | "files" | "library">(
+    target.appearance?.mediaStorageId ? "files" : "viso",
+  );
+  const [librarySelection, setLibrarySelection] =
+    useState<KeyLibrarySelection | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const uploadedRef = useRef<{
-    file: File;
+    source: File | KeyLibrarySelection;
     storageId: Id<"_storage">;
     mediaType: "image" | "video";
   } | null>(null);
@@ -339,27 +346,34 @@ function KeyForm({
     setSaving(true);
     onBusyChange(true);
     try {
+      const source = librarySelection ?? media;
       let uploaded =
-        uploadedRef.current?.file === media ? uploadedRef.current : null;
-      if (media && !uploaded) {
-        uploaded = { file: media, ...(await uploadKeyMedia(media, token)) };
+        source && uploadedRef.current?.source === source
+          ? uploadedRef.current
+          : null;
+      if (source && !uploaded) {
+        uploaded = {
+          source,
+          ...(librarySelection
+            ? await librarySelection.load(token)
+            : await uploadKeyMedia(media!, token)),
+        };
         uploadedRef.current = uploaded;
       }
       const needsAppearance =
-        advanced &&
-        (appearanceTouched ||
-          visibilityTouched ||
-          media ||
-          removeMedia ||
-          target.appearance ||
-          resetAppearance);
+        appearanceTouched ||
+        visibilityTouched ||
+        source ||
+        removeMedia ||
+        target.appearance ||
+        resetAppearance;
       const appearance =
-        resetAppearance && !appearanceTouched && !visibilityTouched && !media
+        resetAppearance && !appearanceTouched && !visibilityTouched && !source
           ? null
           : {
               ...(appearanceTouched
                 ? {
-                    label: label.trim(),
+                    ...(label.trim() ? { label: label.trim() } : {}),
                     icon: encodeKeyVisibility(icon, showLabel, showIcon),
                     color,
                   }
@@ -445,7 +459,7 @@ function KeyForm({
     kind === "link" ||
     kind === "folder" ||
     kind === "action" ||
-    (advanced && kind !== "clock" && kind !== "weather");
+    (kind !== "clock" && kind !== "weather");
 
   return (
     <>
@@ -706,7 +720,7 @@ function KeyForm({
                 placeholder={kind === "link" ? "Ej: Calendario" : "Ej: Música"}
                 onChange={(e) => {
                   setLabel(e.target.value);
-                  if (advanced) setAppearanceTouched(true);
+                  setAppearanceTouched(true);
                 }}
               />
             </div>
@@ -731,7 +745,7 @@ function KeyForm({
                     aria-label={`Color ${swatch}`}
                     onClick={() => {
                       setColor(swatch);
-                      if (advanced) setAppearanceTouched(true);
+                      setAppearanceTouched(true);
                     }}
                     className={cn(
                       "size-9 cursor-pointer rounded-full border-2",
@@ -750,7 +764,7 @@ function KeyForm({
                     value={color}
                     onChange={(event) => {
                       setColor(event.target.value);
-                      if (advanced) setAppearanceTouched(true);
+                      setAppearanceTouched(true);
                     }}
                     className="absolute -inset-2 size-14 cursor-pointer opacity-0"
                   />
@@ -761,202 +775,327 @@ function KeyForm({
                 </label>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label>Icono</Label>
-              {kind === "action" &&
-                action.type === "android-app" &&
-                action.packageName && (
-                  <Button
-                    type="button"
-                    variant={icon === "android-app" ? "secondary" : "outline"}
-                    size="sm"
-                    aria-pressed={icon === "android-app"}
-                    onClick={() => {
-                      setIcon("android-app");
-                      setIconCustomized(false);
-                      if (advanced) setAppearanceTouched(true);
-                    }}
-                  >
-                    <AndroidAppIcon
-                      packageName={action.packageName}
-                      className="size-5"
-                      fallback={<StatusIcon name="phone" className="size-5" />}
-                    />
-                    Usar icono de la aplicación
-                  </Button>
-                )}
-              <div className="grid grid-cols-8 gap-1.5">
-                {STATUS_ICON_KEYS.map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    aria-label={key}
-                    onClick={() => {
-                      setIcon(key);
-                      setIconCustomized(true);
-                      if (advanced) setAppearanceTouched(true);
-                    }}
-                    className={cn(
-                      "flex aspect-square cursor-pointer items-center justify-center rounded-lg border",
-                      icon === key
-                        ? "border-primary bg-accent text-primary"
-                        : "border-border text-muted-foreground hover:bg-accent",
-                    )}
-                  >
-                    <StatusIcon name={key} className="size-4" />
-                  </button>
-                ))}
-              </div>
-            </div>
           </>
         )}
 
-        {kind === "status" &&
-          statuses.find((status) => status._id === statusId)?.mediaUrl && (
-            <MediaField
-              statusId={statusId}
-              mediaUrl={
-                statuses.find((status) => status._id === statusId)?.mediaUrl ??
-                null
-              }
-              mediaType={
-                statuses.find((status) => status._id === statusId)?.mediaType ??
-                null
-              }
-            />
-          )}
-        {advanced && kind !== "clock" && kind !== "weather" && (
-          <div className="space-y-2">
-            <Label htmlFor="deck-key-media">
-              Imagen, GIF o video de la tecla
-            </Label>
-            {(previewUrl || (!removeMedia && target.appearance?.mediaUrl)) && (
-              <div
-                className="grid h-36 overflow-hidden rounded-2xl border bg-black"
-                aria-label="Vista previa de la tecla"
-              >
-                <DeckKey
-                  face={{
-                    label,
-                    icon,
-                    color,
-                    active: false,
-                    mediaUrl: previewUrl ?? target.appearance?.mediaUrl,
-                    mediaType: (
+        <div className="space-y-3 rounded-2xl border p-3">
+          <div>
+            <Label>Aspecto de la tecla</Label>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Solo cambia este botón. Su acción, el color de las luces y el
+              fondo del Display se conservan.
+            </p>
+          </div>
+          {(previewUrl ||
+            librarySelection ||
+            (!removeMedia && target.appearance?.mediaUrl)) && (
+            <div
+              className="grid h-36 overflow-hidden rounded-2xl border bg-black"
+              aria-label="Vista previa de la tecla"
+            >
+              <DeckKey
+                face={{
+                  label:
+                    label ||
+                    (kind === "clock"
+                      ? "Reloj"
+                      : kind === "weather"
+                        ? "Clima"
+                        : "Tecla"),
+                  icon,
+                  color,
+                  active: false,
+                  mediaUrl:
+                    previewUrl ??
+                    librarySelection?.previewUrl ??
+                    target.appearance?.mediaUrl,
+                  mediaType:
+                    librarySelection?.mediaType ??
+                    ((
                       media
                         ? media.type.startsWith("video/")
                         : target.appearance?.mediaType === "video"
                     )
                       ? "video"
-                      : "image",
-                    showLabel,
-                    showIcon,
-                    ...(kind === "action" && action.type === "android-app"
-                      ? { appPackageName: action.packageName }
-                      : {}),
-                  }}
-                  editMode={false}
-                  onPress={() => {}}
-                  disabled
-                />
+                      : "image"),
+                  showLabel,
+                  showIcon,
+                  ...(kind === "action" && action.type === "android-app"
+                    ? { appPackageName: action.packageName }
+                    : {}),
+                }}
+                editMode={false}
+                onPress={() => {}}
+                disabled
+              />
+            </div>
+          )}
+          <div
+            role="tablist"
+            aria-label="Origen del aspecto"
+            className="grid grid-cols-3 gap-1 rounded-xl bg-muted p-1"
+          >
+            {(
+              [
+                ["viso", "Iconos VISO"],
+                ["files", "Mis archivos"],
+                ["library", "Biblioteca"],
+              ] as const
+            ).map(([value, title]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={mediaTab === value}
+                tabIndex={mediaTab === value ? 0 : -1}
+                aria-controls={`key-media-${value}`}
+                id={`key-media-tab-${value}`}
+                className={cn(
+                  "rounded-lg px-2 py-2 text-xs font-medium",
+                  mediaTab === value && "bg-background shadow-sm",
+                )}
+                onClick={() => setMediaTab(value)}
+                onKeyDown={(event) => {
+                  const tabs = ["viso", "files", "library"] as const;
+                  const index = tabs.indexOf(value);
+                  const next =
+                    event.key === "ArrowRight"
+                      ? (index + 1) % tabs.length
+                      : event.key === "ArrowLeft"
+                        ? (index + tabs.length - 1) % tabs.length
+                        : event.key === "Home"
+                          ? 0
+                          : event.key === "End"
+                            ? tabs.length - 1
+                            : null;
+                  if (next === null) return;
+                  event.preventDefault();
+                  setMediaTab(tabs[next]);
+                  document
+                    .getElementById(`key-media-tab-${tabs[next]}`)
+                    ?.focus();
+                }}
+              >
+                {title}
+              </button>
+            ))}
+          </div>
+          <div
+            role="tabpanel"
+            id={`key-media-${mediaTab}`}
+            aria-labelledby={`key-media-tab-${mediaTab}`}
+          >
+            {mediaTab === "viso" && (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">
+                  Tus iconos VISO de siempre, incluidos sin descargar nada.
+                </p>
+                <div className="space-y-2">
+                  <Label>Icono</Label>
+                  {kind === "action" &&
+                    action.type === "android-app" &&
+                    action.packageName && (
+                      <Button
+                        type="button"
+                        variant={
+                          icon === "android-app" ? "secondary" : "outline"
+                        }
+                        size="sm"
+                        aria-pressed={icon === "android-app"}
+                        onClick={() => {
+                          setIcon("android-app");
+                          setIconCustomized(false);
+                          setAppearanceTouched(true);
+                          setMedia(null);
+                          setLibrarySelection(null);
+                          setPreviewUrl(null);
+                          uploadedRef.current = null;
+                          setRemoveMedia(true);
+                          setShowLabel(true);
+                          setShowIcon(true);
+                          setVisibilityTouched(true);
+                          setResetAppearance(false);
+                        }}
+                      >
+                        <AndroidAppIcon
+                          packageName={action.packageName}
+                          className="size-5"
+                          fallback={
+                            <StatusIcon name="phone" className="size-5" />
+                          }
+                        />
+                        Usar icono de la aplicación
+                      </Button>
+                    )}
+                  <div className="grid grid-cols-8 gap-1.5">
+                    {STATUS_ICON_KEYS.map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        aria-label={key}
+                        onClick={() => {
+                          setIcon(key);
+                          setIconCustomized(true);
+                          setAppearanceTouched(true);
+                          setMedia(null);
+                          setLibrarySelection(null);
+                          setPreviewUrl(null);
+                          uploadedRef.current = null;
+                          setRemoveMedia(true);
+                          setShowLabel(true);
+                          setShowIcon(true);
+                          setVisibilityTouched(true);
+                          setResetAppearance(false);
+                        }}
+                        className={cn(
+                          "flex aspect-square cursor-pointer items-center justify-center rounded-lg border",
+                          icon === key
+                            ? "border-primary bg-accent text-primary"
+                            : "border-border text-muted-foreground hover:bg-accent",
+                        )}
+                      >
+                        <StatusIcon name={key} className="size-4" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
-            <Input
-              id="deck-key-media"
-              type="file"
-              accept="image/*,video/mp4,video/webm"
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (!file) return;
-                const invalid = validateKeyMedia(file);
-                if (invalid) {
-                  toast.error(invalid);
-                  event.target.value = "";
-                  return;
-                }
-                setPreviewUrl(URL.createObjectURL(file));
-                setMedia(file);
-                setRemoveMedia(false);
-                setResetAppearance(false);
-              }}
-            />
-            {!removeMedia &&
-              (media ||
-                target.appearance?.mediaStorageId ||
-                target.appearance?.mediaUrl) && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setMedia(null);
-                    setPreviewUrl(null);
+            {mediaTab === "files" && (
+              <div className="space-y-2">
+                <Label htmlFor="deck-key-media">
+                  Imagen, GIF o video de la tecla
+                </Label>
+                <Input
+                  id="deck-key-media"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif,image/avif,video/mp4,video/webm"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (!file) return;
+                    const invalid = validateKeyMedia(file);
+                    event.target.value = "";
+                    if (invalid) {
+                      toast.error(invalid);
+                      return;
+                    }
+                    setPreviewUrl(URL.createObjectURL(file));
+                    setMedia(file);
+                    setLibrarySelection(null);
+                    setShowLabel(false);
+                    setShowIcon(false);
+                    setVisibilityTouched(true);
                     uploadedRef.current = null;
-                    setRemoveMedia(true);
-                    setResetAppearance(false);
-                  }}
-                >
-                  Quitar fondo de la tecla
-                </Button>
-              )}
-            <p className="text-xs text-muted-foreground">
-              Hasta 60 MB. El archivo se sube al guardar. La reproducción
-              depende del formato compatible con el dispositivo.
-            </p>
-            <div className="space-y-3 rounded-xl border p-3">
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="key-show-label">Mostrar nombre</Label>
-                <Switch
-                  id="key-show-label"
-                  checked={showLabel}
-                  onCheckedChange={(value) => {
-                    setShowLabel(value);
-                    setVisibilityTouched(true);
+                    setRemoveMedia(false);
                     setResetAppearance(false);
                   }}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Hasta 60 MB. Se sube al guardar. Los GIF se animan y los
+                  videos compatibles se reproducen en bucle, sin sonido.
+                </p>
               </div>
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="key-show-icon">Mostrar icono</Label>
-                <Switch
-                  id="key-show-icon"
-                  checked={showIcon}
-                  onCheckedChange={(value) => {
-                    setShowIcon(value);
-                    setVisibilityTouched(true);
-                    setResetAppearance(false);
-                  }}
-                />
-              </div>
-            </div>
-            {target.appearance && (
+            )}
+            {mediaTab === "library" && (
+              <KeyAssetPicker
+                onSelect={(selection) => {
+                  setMedia(null);
+                  setPreviewUrl(null);
+                  uploadedRef.current = null;
+                  setLibrarySelection(selection);
+                  setShowLabel(false);
+                  setShowIcon(false);
+                  setVisibilityTouched(true);
+                  setRemoveMedia(false);
+                  setResetAppearance(false);
+                }}
+              />
+            )}
+          </div>
+          {!removeMedia &&
+            (media ||
+              librarySelection ||
+              target.appearance?.mediaStorageId ||
+              target.appearance?.mediaUrl) && (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  const face = initial
-                    ? resolveKeyFace(initial, statuses, null, 0)
-                    : null;
-                  setLabel(face?.label ?? "");
-                  setIcon(face?.icon ?? "globe");
-                  setIconCustomized(false);
+                  setMedia(null);
+                  setLibrarySelection(null);
+                  setPreviewUrl(null);
+                  uploadedRef.current = null;
+                  setRemoveMedia(true);
                   setShowLabel(true);
                   setShowIcon(true);
-                  setVisibilityTouched(false);
-                  setColor(face?.color ?? STATUS_COLORS[4]);
-                  setMedia(null);
-                  setPreviewUrl(null);
-                  setRemoveMedia(true);
-                  setAppearanceTouched(false);
-                  setResetAppearance(true);
+                  setVisibilityTouched(true);
+                  setResetAppearance(false);
                 }}
               >
-                Restablecer aspecto original
+                Quitar fondo de la tecla
               </Button>
             )}
+          <div className="space-y-3 rounded-xl border p-3">
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="key-show-label">Mostrar nombre</Label>
+              <Switch
+                id="key-show-label"
+                checked={showLabel}
+                onCheckedChange={(value) => {
+                  setShowLabel(value);
+                  setVisibilityTouched(true);
+                  setResetAppearance(false);
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="key-show-icon">Mostrar icono</Label>
+              <Switch
+                id="key-show-icon"
+                checked={showIcon}
+                onCheckedChange={(value) => {
+                  setShowIcon(value);
+                  setVisibilityTouched(true);
+                  setResetAppearance(false);
+                }}
+              />
+            </div>
           </div>
-        )}
+          {(target.appearance ||
+            media ||
+            librarySelection ||
+            appearanceTouched ||
+            visibilityTouched) && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const face = initial
+                  ? resolveKeyFace(initial, statuses, null, 0)
+                  : null;
+                setLabel(face?.label ?? "");
+                setIcon(face?.icon ?? "globe");
+                setIconCustomized(false);
+                setShowLabel(true);
+                setShowIcon(true);
+                setVisibilityTouched(false);
+                setColor(face?.color ?? STATUS_COLORS[4]);
+                setMedia(null);
+                setLibrarySelection(null);
+                setPreviewUrl(null);
+                uploadedRef.current = null;
+                setRemoveMedia(true);
+                setAppearanceTouched(false);
+                setResetAppearance(true);
+                setMediaTab("viso");
+              }}
+            >
+              Restablecer aspecto original
+            </Button>
+          )}
+        </div>
 
         {target.keyId && (
           <div className="space-y-2 border-t pt-4">
@@ -1011,9 +1150,8 @@ function KeyForm({
               </>
             ) : (
               <p className="text-xs text-muted-foreground">
-                Posición {target.position + 1}. Mover teclas e incorporar
-                archivos requiere la actualización del servidor. Puedes editar
-                el estado y su fondo de Display desde Configuración.
+                Posición {target.position + 1}. Puedes organizar las teclas
+                desde el editor completo del Deck.
               </p>
             )}
           </div>
@@ -1038,7 +1176,11 @@ function KeyForm({
           </Button>
           <Button
             onClick={handleSave}
-            disabled={saving || !connected || (kind === "action" && !advanced)}
+            disabled={
+              saving ||
+              !connected ||
+              (kind === "action" && !advanced && initial?.kind !== "action")
+            }
           >
             {saving ? "Guardando…" : "Guardar"}
           </Button>

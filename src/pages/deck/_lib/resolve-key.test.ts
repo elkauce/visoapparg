@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Id } from "@/convex/_generated/dataModel.d.ts";
 import {
   resolveKeyFace,
+  isLiveWidget,
   type DeckStatusInfo,
   type KeyContent,
 } from "./resolve-key.ts";
@@ -52,6 +53,36 @@ describe("original Deck faces", () => {
     ).toBeNull();
     expect(resolveKeyFace({ kind: "clock" }, statuses, "free", 0)).toBeNull();
   });
+  it.each([
+    { kind: "clock" } as const,
+    {
+      kind: "weather",
+      label: "Buenos Aires",
+      latitude: -34.6,
+      longitude: -58.4,
+    } as const,
+  ])(
+    "keeps $kind live until a custom media visual is saved, and restores it after removal",
+    (content) => {
+      expect(isLiveWidget(content)).toBe(true);
+      expect(isLiveWidget(content, {})).toBe(true);
+      expect(isLiveWidget(content, { mediaUrl: null })).toBe(true);
+      const appearance = {
+        mediaStorageId: "own-video" as Id<"_storage">,
+        mediaType: "video" as const,
+        mediaUrl: "https://example.com/visual.mp4",
+      };
+      expect(isLiveWidget(content, appearance)).toBe(false);
+      expect(
+        resolveKeyFace(content, statuses, null, 0, appearance),
+      ).toMatchObject({
+        label: content.kind === "clock" ? "Reloj" : "Clima",
+        mediaType: "video",
+        mediaUrl: appearance.mediaUrl,
+      });
+      expect(isLiveWidget({ kind: "off" }, appearance)).toBe(false);
+    },
+  );
   it("shows off as selected only when Convex confirms no active status", () => {
     expect(resolveKeyFace({ kind: "off" }, statuses, null, 0)).toEqual({
       label: "Apagar",

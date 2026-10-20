@@ -34,6 +34,8 @@ import type * as lib_viso_preset_states from "../lib/viso_preset_states.js";
 import type * as lib_webhook_payload from "../lib/webhook_payload.js";
 import type * as lights from "../lights.js";
 import type * as media from "../media.js";
+import type * as marketplace from "../marketplace.js";
+import type * as marketplace_files from "../marketplace_files.js";
 import type * as public_status from "../public_status.js";
 import type * as sports from "../sports.js";
 import type * as social_auth from "../social_auth.js";
@@ -74,6 +76,8 @@ declare const fullApi: ApiFromModules<{
   "lib/webhook_payload": typeof lib_webhook_payload;
   lights: typeof lights;
   media: typeof media;
+  marketplace: typeof marketplace;
+  marketplace_files: typeof marketplace_files;
   public_status: typeof public_status;
   sports: typeof sports;
   social_auth: typeof social_auth;

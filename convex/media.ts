@@ -1,10 +1,27 @@
 import { ConvexError, v } from "convex/values";
 import { mutation } from "./_generated/server";
+import type { MutationCtx } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { requireCurrentUser } from "./lib/current_user.ts";
 import { getOwnedStatus } from "./lib/owned_status.ts";
 import { getDeckMedia } from "./lib/deck_appearance.ts";
 
 const MAX_MEDIA_BYTES = 60 * 1024 * 1024;
+
+// Marketplace originals belong to the creator and can back many libraries.
+// They must first be copied to the current user's deckMedia before being used
+// by an editor that historically owns and deletes its status-upload files.
+export async function isMarketplaceOriginal(
+  ctx: MutationCtx,
+  storageId: Id<"_storage">,
+) {
+  return (
+    (await ctx.db
+      .query("marketplaceUploads")
+      .withIndex("by_storage", (q) => q.eq("storageId", storageId))
+      .unique()) !== null
+  );
+}
 
 export const generateUploadUrl = mutation({
   args: {},
@@ -20,6 +37,14 @@ export const setMedia = mutation({
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
     const status = await getOwnedStatus(ctx, user._id, args.statusId);
+
+    if (await isMarketplaceOriginal(ctx, args.storageId)) {
+      throw new ConvexError({
+        code: "FORBIDDEN",
+        message:
+          "Usá una copia de tu biblioteca; el archivo original pertenece al marketplace.",
+      });
+    }
 
     const deckFile = await getDeckMedia(ctx, args.storageId);
     if (deckFile && deckFile.userId !== user._id) {
@@ -53,7 +78,8 @@ export const setMedia = mutation({
     if (
       status.mediaStorageId &&
       status.mediaStorageId !== args.storageId &&
-      !(await getDeckMedia(ctx, status.mediaStorageId))
+      !(await getDeckMedia(ctx, status.mediaStorageId)) &&
+      !(await isMarketplaceOriginal(ctx, status.mediaStorageId))
     ) {
       await ctx.storage.delete(status.mediaStorageId);
     }
@@ -72,7 +98,8 @@ export const clearMedia = mutation({
     const status = await getOwnedStatus(ctx, user._id, args.statusId);
     if (
       status.mediaStorageId &&
-      !(await getDeckMedia(ctx, status.mediaStorageId))
+      !(await getDeckMedia(ctx, status.mediaStorageId)) &&
+      !(await isMarketplaceOriginal(ctx, status.mediaStorageId))
     ) {
       await ctx.storage.delete(status.mediaStorageId);
     }

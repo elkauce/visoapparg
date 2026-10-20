@@ -8,9 +8,10 @@ import "./web-surface-theme.css";
 export default function WebSurfaceTheme() {
   const { pathname } = useLocation();
   const light =
-    pathname === "/" &&
-    !isAndroidNative() &&
-    import.meta.env.VITE_ANDROID_PREVIEW !== "true";
+    pathname === "/marketplace" ||
+    (pathname === "/" &&
+      !isAndroidNative() &&
+      import.meta.env.VITE_ANDROID_PREVIEW !== "true");
 
   useLayoutEffect(() => {
     if (!light) return;

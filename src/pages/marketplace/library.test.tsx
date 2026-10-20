@@ -1,0 +1,197 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { getFunctionName } from "convex/server";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import MarketLibrary, { LibraryAsset } from "./library";
+import type { MarketLibraryEntry } from "./types";
+
+const fixture = vi.hoisted(() => ({
+  entries: [] as MarketLibraryEntry[],
+  mutations: {} as Record<string, ReturnType<typeof vi.fn>>,
+  error: vi.fn(),
+  success: vi.fn(),
+}));
+vi.mock("convex/react", () => ({
+  useQuery: () => fixture.entries,
+  useMutation: (reference: Parameters<typeof getFunctionName>[0]) => {
+    const name = getFunctionName(reference);
+    fixture.mutations[name] ??= vi.fn().mockResolvedValue(null);
+    return fixture.mutations[name];
+  },
+}));
+vi.mock("./display-apply", () => ({
+  default: () => <button>Usar en Display</button>,
+}));
+vi.mock("sonner", () => ({
+  toast: { error: fixture.error, success: fixture.success },
+}));
+
+const profile: MarketLibraryEntry = {
+  productId: "viso-essential-profile",
+  title: "Deck Esencial",
+  category: "profiles",
+  creatorName: "VISO",
+  delivery: "profile",
+  acquiredAt: 1,
+  profileTemplate: "essential",
+  assets: [],
+};
+beforeEach(() => {
+  fixture.entries = [];
+  fixture.mutations = {};
+  fixture.error.mockReset();
+  fixture.success.mockReset();
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
+
+describe("Marketplace library", () => {
+  it("requires explicit confirmation before creating a page and sends only the licensed product", async () => {
+    fixture.entries = [profile];
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Agregar página al deck" }),
+    );
+    expect(
+      fixture.mutations["marketplace:installProfile"],
+    ).not.toHaveBeenCalled();
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Tus otras páginas y sus configuraciones se conservan",
+    );
+    await user.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(
+      fixture.mutations["marketplace:installProfile"],
+    ).not.toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", { name: "Agregar página al deck" }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Crear página nueva" }),
+    );
+    expect(
+      fixture.mutations["marketplace:installProfile"],
+    ).toHaveBeenCalledExactlyOnceWith({ productId: profile.productId });
+  });
+
+  it("confirms removing a library entry and explains that existing keys keep their files", async () => {
+    fixture.entries = [profile];
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: "Quitar Deck Esencial de mi biblioteca",
+      }),
+    );
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Las teclas que ya personalizaste conservan sus archivos",
+    );
+    await user.click(screen.getByRole("button", { name: "Quitar recurso" }));
+    expect(
+      fixture.mutations["marketplace:removeFromLibrary"],
+    ).toHaveBeenCalledExactlyOnceWith({ productId: profile.productId });
+  });
+
+  it.each([
+    ["image/gif", "image", "gif"],
+    ["video/webm", "video", "webm"],
+    ["audio/mpeg", "audio", "mp3"],
+    ["application/zip", "archive", "zip"],
+  ] as const)(
+    "downloads an opaque storage URL with the real %s format",
+    async (mimeType, mediaType, extension) => {
+      const fetcher = vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => new Blob(["valid download"], { type: mimeType }),
+      });
+
+      vi.stubGlobal("fetch", fetcher);
+      Object.defineProperty(URL, "createObjectURL", {
+        configurable: true,
+        value: vi.fn(() => "blob:temporary-download"),
+      });
+      Object.defineProperty(URL, "revokeObjectURL", {
+        configurable: true,
+        value: vi.fn(),
+      });
+      let filename = "";
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
+        function (this: HTMLAnchorElement) {
+          filename = this.download;
+        },
+      );
+      const user = userEvent.setup();
+      render(
+        <LibraryAsset
+          asset={{
+            id: "owned",
+            name: "Mi recurso",
+            mediaType,
+            url: "https://files.example.test/opaque-file-id",
+          }}
+          product={{
+            category: mediaType === "audio" ? "soundboards" : "icons",
+            productId: "owned-pack",
+          }}
+        />,
+      );
+      await user.click(screen.getByRole("button", { name: "Descargar" }));
+      await waitFor(() => expect(filename).toBe(`Mi recurso.${extension}`));
+      expect(fetcher).toHaveBeenCalledExactlyOnceWith(
+        "https://files.example.test/opaque-file-id",
+      );
+      expect(fixture.error).not.toHaveBeenCalled();
+    },
+  );
+  it("preserves the installable Elgato plugin extension instead of adding zip", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockResolvedValue({
+          ok: true,
+          blob: async () =>
+            new Blob(["PK plugin"], { type: "application/zip" }),
+        }),
+    );
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: vi.fn(() => "blob:plugin-download"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: vi.fn(),
+    });
+    let filename = "";
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
+      this: HTMLAnchorElement,
+    ) {
+      filename = this.download;
+    });
+    const user = userEvent.setup();
+    render(
+      <LibraryAsset
+        asset={{
+          id: "plugin",
+          name: "MiPlugin.streamDeckPlugin",
+          mediaType: "archive",
+          url: "https://files.example.test/opaque",
+        }}
+        product={{ category: "plugins", productId: "creator-plugin" }}
+      />,
+    );
+    await user.click(screen.getByRole("button", { name: "Descargar" }));
+    await waitFor(() => expect(filename).toBe("MiPlugin.streamDeckPlugin"));
+  });
+});

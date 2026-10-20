@@ -1,0 +1,182 @@
+{
+  "creator": "VISO",
+  "generator": "scripts/generate-marketplace-assets.py",
+  "rights": "Original VISO graphics, animation and synthesized sounds.",
+  "video": {
+    "codec": "H.264",
+    "pixelFormat": "yuv420p",
+    "audio": false
+  },
+  "files": [
+    {
+      "path": "animated/ausente.gif",
+      "bytes": 122692,
+      "sha256": "3098c5963b577909199e7ea2f27993d59b860d682370909c613ef1fa9f56a431"
+    },
+    {
+      "path": "animated/ausente.mp4",
+      "bytes": 9582,
+      "sha256": "41c8218c757472df670cbba5d1cb4551a9fb453eff9ab77e92149c4934ee28fa"
+    },
+    {
+      "path": "animated/libre.gif",
+      "bytes": 108232,
+      "sha256": "24400f43c35234dc1fdec987d683a58a500c1544d984d159a1dabb57ea5ae27d"
+    },
+    {
+      "path": "animated/libre.mp4",
+      "bytes": 11208,
+      "sha256": "47078011c268dcddac0f45b5372b70ad9ec709a01207026a562408894de8cd5a"
+    },
+    {
+      "path": "animated/llamada.gif",
+      "bytes": 114818,
+      "sha256": "d01a6bae6cc5d0a21d63ed877b117a51f59cd9a2f2aa9e14b265f5af42af7bc8"
+    },
+    {
+      "path": "animated/llamada.mp4",
+      "bytes": 10959,
+      "sha256": "7657dcbd1e10aca4867817ff55c166fcd9416e3e993903aa6994d9024de97297"
+    },
+    {
+      "path": "animated/no-molestar.gif",
+      "bytes": 114812,
+      "sha256": "e6d96d4c5792013e0a30065f6714181caba87b2e3da592791d080773a2b11b5a"
+    },
+    {
+      "path": "animated/no-molestar.mp4",
+      "bytes": 11915,
+      "sha256": "d4e8f0fadd07807d05e4904528a5453b34b6e48f86aa8da05cb74fbf1d3294b4"
+    },
+    {
+      "path": "animated/ocupado.gif",
+      "bytes": 109490,
+      "sha256": "b443cd6e4df4461ef83fac956f7aa5160afd294d24ecf120ccb52042e6ad58d5"
+    },
+    {
+      "path": "animated/ocupado.mp4",
+      "bytes": 11821,
+      "sha256": "7aac899c196f88e99abd132d48235cca39ad67e653382041e3b777a17639519f"
+    },
+    {
+      "path": "animated/reunion.gif",
+      "bytes": 111583,
+      "sha256": "181abd8c6c1c320e83d84c631b36806c8754373321809e5c195f67957b756687"
+    },
+    {
+      "path": "animated/reunion.mp4",
+      "bytes": 12754,
+      "sha256": "0764a3c615afb96d7a9157aa944b96d8366f373d9f49d27f2d654fda04a170fb"
+    },
+    {
+      "path": "covers/ambient-screen.png",
+      "bytes": 124290,
+      "sha256": "833de951d971d966fdce68e46196b077a5dea18021768185e1c5ebcadde7cc43"
+    },
+    {
+      "path": "covers/essential-profile.png",
+      "bytes": 131925,
+      "sha256": "2241c94462d222d7035aafd65f27fe9f77fba036da7436057ade27ccb380857e"
+    },
+    {
+      "path": "covers/living-icons.png",
+      "bytes": 131290,
+      "sha256": "02ba433aadd74dc52934d2524dfa2c60b365a18a01c4252a2a26113484fd0936"
+    },
+    {
+      "path": "covers/original-icons.png",
+      "bytes": 130847,
+      "sha256": "511e22c6020f6b44b4b7c2f31e4dc611e76d42bc403c1dbe0f79a2907cdc2c16"
+    },
+    {
+      "path": "covers/soft-sounds.png",
+      "bytes": 21983,
+      "sha256": "2a0419a090332305f398d738a6b653959cf0e12b984799ca9598ce988e988fcd"
+    },
+    {
+      "path": "covers/stream-deck.png",
+      "bytes": 131181,
+      "sha256": "27a34ffb55c5bb4c7b1e4d23cc195f34d29c196d2aa5bcc436f5a9799de0027f"
+    },
+    {
+      "path": "originals/ausente.png",
+      "bytes": 27932,
+      "sha256": "e6bdc220c06579da7f7ca0427fce04150e667ae1a8c0ef7271f2dffd3b8670de"
+    },
+    {
+      "path": "originals/camara.png",
+      "bytes": 25463,
+      "sha256": "8193b362aca2fccdd38cf06ef85f0f8ee882e7afc6799a51e3ece24294995ad0"
+    },
+    {
+      "path": "originals/clima.png",
+      "bytes": 25616,
+      "sha256": "3c9633a833f5985e14d12c5acf9f4d2ccf24613da40b057685740246806e9a83"
+    },
+    {
+      "path": "originals/deportes.png",
+      "bytes": 28560,
+      "sha256": "f2331b4dd61215ce3854ae674772903f589d8b520c398ffe5ca60b198a80d63e"
+    },
+    {
+      "path": "originals/libre.png",
+      "bytes": 25490,
+      "sha256": "683dd20ce522419b45b27db2db2cd32311225fdbb4b53e4cee394347e8464394"
+    },
+    {
+      "path": "originals/llamada.png",
+      "bytes": 28681,
+      "sha256": "bd1b73d3410cabeb98c7b0f91968cdf69ce0ce63f9fabd8b8ea16873c18e9501"
+    },
+    {
+      "path": "originals/microfono.png",
+      "bytes": 25447,
+      "sha256": "d50870b1a3b194b94d59e478e08461c4270e2f0f898cb1864f70d9350285bd6f"
+    },
+    {
+      "path": "originals/musica.png",
+      "bytes": 24815,
+      "sha256": "fd12a17b6a07dc26f7887f3aa5fefefdec9f78589816be64a4df65b00f10c982"
+    },
+    {
+      "path": "originals/no-molestar.png",
+      "bytes": 28933,
+      "sha256": "c1a167ece2db1320e09ec10b82e74997c6acdc65a19373eaeafec9b79452c242"
+    },
+    {
+      "path": "originals/ocupado.png",
+      "bytes": 27043,
+      "sha256": "3e9b02902c2e5d5b4fa6e92122366f1799791a2ee70119776e90a40584de56d0"
+    },
+    {
+      "path": "originals/pausa.png",
+      "bytes": 20912,
+      "sha256": "5c65097fbda9062dbd93616ab1b7fe2ff1d5c05c47bf41388c5d161a038c0907"
+    },
+    {
+      "path": "originals/reunion.png",
+      "bytes": 29256,
+      "sha256": "c4d9c1fce308f8eb44545b3ab790008e13f33854f96abe9c6ce15370812cc915"
+    },
+    {
+      "path": "screensavers/aurora.mp4",
+      "bytes": 64458,
+      "sha256": "79d306f2f8d18625af2cdd558b87d3aa5cefd8780ddbb16a2fd5fcef544a4129"
+    },
+    {
+      "path": "sounds/atencion.wav",
+      "bytes": 33118,
+      "sha256": "88edff2e68f1783658645f3cb5da2e887d47c078d5dbeb48d7c0a3118acc3fac"
+    },
+    {
+      "path": "sounds/confirmar.wav",
+      "bytes": 33118,
+      "sha256": "e589d5124185996b35f31fe170d75d26aec303a1c55f91b960a67ccee8340b95"
+    },
+    {
+      "path": "sounds/pausa.wav",
+      "bytes": 39734,
+      "sha256": "f4734d6d82a83afa64ceeb0863e397b59b766c24b9b210c41387878004de0393"
+    }
+  ]
+}

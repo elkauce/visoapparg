@@ -135,6 +135,13 @@ function resolveContentFace(
   }
 }
 
-export function isLiveWidget(content: KeyContent): boolean {
-  return content.kind === "clock" || content.kind === "weather";
+export function isLiveWidget(
+  content: KeyContent,
+  appearance?: Pick<KeyAppearance, "mediaStorageId" | "mediaUrl">,
+): boolean {
+  return (
+    (content.kind === "clock" || content.kind === "weather") &&
+    !appearance?.mediaStorageId &&
+    !appearance?.mediaUrl
+  );
 }

@@ -1,0 +1,6 @@
+{
+  "checks": 19,
+  "passed": true,
+  "scope": "technical account on local backend; no state or media changes saved",
+  "physicalAndroidTested": false
+}

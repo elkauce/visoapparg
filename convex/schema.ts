@@ -5,6 +5,13 @@ import { v } from "convex/values";
 import { deckKeyContent } from "./lib/deck_key_content.ts";
 import { deckGrid } from "./lib/deck_grid.ts";
 import { deckAppearance, deckCanvas } from "./lib/deck_appearance.ts";
+import {
+  marketplaceAsset,
+  marketplaceCategory,
+  marketplaceDelivery,
+  marketplaceMediaType,
+  marketplacePriceMode,
+} from "./lib/marketplace_validation";
 
 export default defineSchema({
   ...authTables,
@@ -158,6 +165,82 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_storage", ["storageId"]),
+
+  creatorProfiles: defineTable({
+    userId: v.id("users"),
+    displayName: v.string(),
+    bio: v.string(),
+    website: v.optional(v.string()),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected"),
+    ),
+    reviewReason: v.optional(v.string()),
+    reviewedBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"]),
+
+  marketplaceUploads: defineTable({
+    userId: v.id("users"),
+    storageId: v.id("_storage"),
+    mediaType: marketplaceMediaType,
+    contentType: v.string(),
+    size: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_storage", ["storageId"])
+    .index("by_user", ["userId"]),
+
+  marketplaceProducts: defineTable({
+    userId: v.id("users"),
+    creatorId: v.optional(v.id("creatorProfiles")),
+    creatorName: v.string(),
+    title: v.string(),
+    description: v.string(),
+    category: marketplaceCategory,
+    coverStorageId: v.optional(v.id("_storage")),
+    priceMode: marketplacePriceMode,
+    delivery: marketplaceDelivery,
+    externalUrl: v.optional(v.string()),
+    affiliate: v.boolean(),
+    assets: v.array(marketplaceAsset),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("pending"),
+      v.literal("published"),
+      v.literal("rejected"),
+      v.literal("archived"),
+    ),
+    reviewReason: v.optional(v.string()),
+    reviewedBy: v.optional(v.id("users")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    publishedAt: v.optional(v.number()),
+  })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_category_status", ["category", "status"]),
+
+  // Acquisition snapshots keep a creator from replacing an acquired free asset
+  // with a different file or a future paid download after publication.
+  marketplaceLibrary: defineTable({
+    userId: v.id("users"),
+    productId: v.string(),
+    title: v.string(),
+    category: marketplaceCategory,
+    creatorName: v.string(),
+    delivery: marketplaceDelivery,
+    assets: v.array(marketplaceAsset),
+    profileTemplate: v.optional(v.literal("essential")),
+    acquiredAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_user_product", ["userId", "productId"]),
 
   // Recibos de pulsaciones: deviceId es identificación no secreta, nunca autenticación.
   deckActionRequests: defineTable({

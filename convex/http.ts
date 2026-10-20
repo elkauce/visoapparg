@@ -3,6 +3,11 @@ import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { auth } from "./auth.ts";
 import { MAX_DECK_MEDIA_BYTES, deckMediaType } from "./deck_media.ts";
+import {
+  MAX_MARKETPLACE_BYTES,
+  marketplaceType,
+  matchesMarketplaceBytes,
+} from "./lib/marketplace_validation";
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
@@ -24,6 +29,113 @@ const JSON_HEADERS = {
   "Cache-Control": "no-store",
   "Access-Control-Allow-Origin": "*",
 };
+
+http.route({
+  path: "/marketplace/media",
+  method: "OPTIONS",
+  handler: httpAction(
+    async () =>
+      new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Authorization, Content-Type",
+          "Access-Control-Max-Age": "600",
+          "Cache-Control": "no-store",
+        },
+      }),
+  ),
+});
+
+http.route({
+  path: "/marketplace/media",
+  method: "POST",
+  handler: httpAction(async (ctx, request) => {
+    const access = await ctx.runQuery(
+      internal.marketplace_files.uploadAccess,
+      {},
+    );
+    if (!access) return json({ ok: false, error: "Debes iniciar sesión" }, 401);
+    if (!access.allowed)
+      return json(
+        { ok: false, error: "Completá tu perfil de creador primero" },
+        403,
+      );
+    const contentType =
+      request.headers.get("Content-Type")?.split(";")[0].trim().toLowerCase() ??
+      "";
+    const mediaType = marketplaceType(contentType);
+    if (!mediaType)
+      return json(
+        { ok: false, error: "Formato de archivo no compatible" },
+        400,
+      );
+    const maxBytes = Math.min(
+      access.remainingBytes,
+      mediaType === "profile" ? 512 * 1024 : MAX_MARKETPLACE_BYTES,
+    );
+    if (maxBytes === 0)
+      return json(
+        {
+          ok: false,
+          error: "Tu espacio de archivos del marketplace está completo",
+        },
+        413,
+      );
+    const length = Number(request.headers.get("Content-Length"));
+    if (Number.isFinite(length) && length > maxBytes)
+      return json(
+        { ok: false, error: "El archivo supera el tamaño permitido" },
+        413,
+      );
+    const reader = request.body?.getReader();
+    if (!reader) return json({ ok: false, error: "Falta el archivo" }, 400);
+    const chunks: ArrayBuffer[] = [];
+    let size = 0;
+    while (true) {
+      const chunk = await reader.read();
+      if (chunk.done) break;
+      size += chunk.value.byteLength;
+      if (size > maxBytes) {
+        await reader.cancel();
+        return json(
+          { ok: false, error: "El archivo supera el tamaño permitido" },
+          413,
+        );
+      }
+      chunks.push(new Uint8Array(chunk.value).buffer);
+    }
+    if (size === 0)
+      return json({ ok: false, error: "El archivo está vacío" }, 400);
+    const blob = new Blob(chunks, { type: contentType });
+    // JSON profiles are bounded above; other formats need only their header.
+    const probe = await (
+      mediaType === "profile" ? blob : blob.slice(0, 64)
+    ).arrayBuffer();
+    if (!matchesMarketplaceBytes(new Uint8Array(probe), contentType))
+      return json(
+        {
+          ok: false,
+          error: "El contenido no corresponde al formato del archivo",
+        },
+        400,
+      );
+    const storageId = await ctx.storage.store(blob);
+    try {
+      await ctx.runMutation(internal.marketplace_files.recordUpload, {
+        userId: access.userId,
+        storageId,
+        mediaType,
+        contentType,
+      });
+    } catch (error) {
+      await ctx.storage.delete(storageId);
+      throw error;
+    }
+    return json({ ok: true, storageId, mediaType }, 200);
+  }),
+});
 
 // Subida autenticada: la propiedad deriva de la sesión, nunca de un id de cliente.
 http.route({

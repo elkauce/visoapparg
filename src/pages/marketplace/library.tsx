@@ -1,0 +1,435 @@
+import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useMutation, useQuery } from "convex/react";
+import {
+  ArrowUpRight,
+  Check,
+  ChevronDown,
+  Download,
+  FileArchive,
+  FileJson,
+  Library,
+  Loader2,
+  PanelsTopLeft,
+  Trash2,
+} from "lucide-react";
+import { toast } from "sonner";
+import { api } from "@/convex/_generated/api";
+import { Button } from "@/components/ui/button";
+import { isAndroidNative } from "@/lib/android-native";
+import {
+  marketplaceConnectionsPath,
+  openMarketplaceAsset,
+} from "@/lib/marketplace-navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import MarketplaceDisplayApply from "./display-apply";
+import {
+  assetSource,
+  CATEGORY_LABELS,
+  type MarketAsset,
+  type MarketLibraryEntry,
+} from "./types";
+
+const EXTENSIONS: Record<MarketAsset["mediaType"], string> = {
+  image: "png",
+  video: "mp4",
+  audio: "wav",
+  archive: "zip",
+  profile: "json",
+};
+
+const MIME_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "image/avif": "avif",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "audio/mpeg": "mp3",
+  "audio/wav": "wav",
+  "audio/x-wav": "wav",
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+  "audio/webm": "webm",
+  "application/zip": "zip",
+  "application/x-zip-compressed": "zip",
+  "application/json": "json",
+};
+
+function downloadName(asset: MarketAsset, source: string, contentType: string) {
+  const elgatoBundle =
+    asset.mediaType === "archive"
+      ? asset.name.match(/\.(streamDeckPlugin|streamDeckProfile)$/i)?.[1]
+      : undefined;
+  const extension =
+    elgatoBundle ??
+    MIME_EXTENSIONS[contentType.split(";")[0].trim().toLowerCase()] ??
+    new URL(source, window.location.origin).pathname.match(
+      /\.([a-z0-9]{2,8})$/i,
+    )?.[1];
+  const name = [...asset.name]
+    .map((character) =>
+      character.charCodeAt(0) < 32 || '<>:"/\\|?*'.includes(character)
+        ? "_"
+        : character,
+    )
+    .join("")
+    .replace(
+      /\.(png|jpe?g|gif|webp|avif|mp4|webm|mp3|wav|ogg|m4a|zip|json|streamDeckPlugin|streamDeckProfile)$/i,
+      "",
+    )
+    .slice(0, 100);
+  return `${name || "recurso-viso"}.${extension ?? EXTENSIONS[asset.mediaType]}`;
+}
+
+export function LibraryAsset({
+  asset,
+  product,
+}: {
+  asset: MarketAsset;
+  product: Pick<MarketLibraryEntry, "category" | "productId">;
+}) {
+  const [downloading, setDownloading] = useState(false);
+  const busy = useRef(false);
+  const source = assetSource(asset);
+
+  const download = async () => {
+    if (!source || busy.current) return;
+    busy.current = true;
+    setDownloading(true);
+    let temporaryUrl: string | null = null;
+    try {
+      if (isAndroidNative()) {
+        await openMarketplaceAsset(source);
+        return;
+      }
+      const response = await fetch(source);
+      if (!response.ok) throw new Error("Download unavailable");
+      const blob = await response.blob();
+      if (!blob.size) throw new Error("Empty download");
+      temporaryUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = temporaryUrl;
+      anchor.download = downloadName(asset, source, blob.type);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      // Keep the object URL available while the browser starts the download.
+      const completedUrl = temporaryUrl;
+      setTimeout(() => URL.revokeObjectURL(completedUrl), 30_000);
+      temporaryUrl = null;
+    } catch {
+      toast.error("No se pudo descargar el archivo. Volvé a intentarlo.");
+    } finally {
+      if (temporaryUrl) URL.revokeObjectURL(temporaryUrl);
+      busy.current = false;
+      setDownloading(false);
+    }
+  };
+
+  if (!source) {
+    return (
+      <div className="vm-asset-unavailable">
+        <strong>{asset.name}</strong>
+        <span>Archivo no disponible.</span>
+      </div>
+    );
+  }
+
+  return (
+    <article className={`vm-asset-card vm-asset-${asset.mediaType}`}>
+      <div className="vm-asset-preview">
+        {asset.mediaType === "image" ? (
+          <img src={source} alt={asset.name} loading="lazy" />
+        ) : asset.mediaType === "video" ? (
+          <video
+            src={source}
+            poster={
+              asset.builtinPath?.startsWith("/marketplace/animated/")
+                ? asset.builtinPath
+                    .replace("/animated/", "/originals/")
+                    .replace(/\.mp4$/, ".png")
+                : asset.builtinPath === "/marketplace/screensavers/aurora.mp4"
+                  ? "/marketplace/covers/ambient-screen.png"
+                  : undefined
+            }
+            controls
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label={`Vista previa de ${asset.name}`}
+          />
+        ) : asset.mediaType === "audio" ? (
+          <audio
+            src={source}
+            controls
+            preload="metadata"
+            aria-label={`Escuchar ${asset.name}`}
+          />
+        ) : asset.mediaType === "profile" ? (
+          <FileJson aria-hidden="true" />
+        ) : (
+          <FileArchive aria-hidden="true" />
+        )}
+      </div>
+      <div className="vm-asset-copy">
+        <h4>{asset.name}</h4>
+        <div className="vm-asset-actions">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={downloading}
+            onClick={() => void download()}
+          >
+            {downloading ? <Loader2 className="animate-spin" /> : <Download />}
+            {downloading
+              ? "Abriendo…"
+              : isAndroidNative()
+                ? "Abrir archivo"
+                : "Descargar"}
+          </Button>
+          {product.category === "screensavers" &&
+            (asset.mediaType === "image" || asset.mediaType === "video") && (
+              <MarketplaceDisplayApply
+                productId={product.productId}
+                asset={asset}
+              />
+            )}
+        </div>
+      </div>
+    </article>
+  );
+}
+
+export default function MarketLibrary({
+  onExplore,
+}: {
+  onExplore: () => void;
+}) {
+  const entries = useQuery(api.marketplace.library, {});
+  const remove = useMutation(api.marketplace.removeFromLibrary);
+  const install = useMutation(api.marketplace.installProfile);
+  const [removing, setRemoving] = useState<MarketLibraryEntry | null>(null);
+  const [installing, setInstalling] = useState<MarketLibraryEntry | null>(null);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const busy = useRef(false);
+
+  const closeConfirmation = () => {
+    if (busy.current) return;
+    setRemoving(null);
+    setInstalling(null);
+    setError(null);
+  };
+  const confirm = async () => {
+    if (busy.current || (!removing && !installing)) return;
+    busy.current = true;
+    setPending(true);
+    setError(null);
+    try {
+      if (removing) {
+        await remove({ productId: removing.productId });
+        toast.success("Recurso quitado de tu biblioteca.");
+      } else if (installing) {
+        await install({ productId: installing.productId });
+        toast.success(
+          "Se agregó una página nueva al deck. Tus páginas anteriores se conservan.",
+        );
+      }
+      setRemoving(null);
+      setInstalling(null);
+    } catch {
+      setError(
+        removing
+          ? "No pudimos quitar el recurso. Volvé a intentarlo."
+          : "No pudimos agregar la página. Comprobá que haya espacio en tu deck y volvé a intentarlo.",
+      );
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
+  };
+
+  if (entries === undefined) {
+    return (
+      <div className="vm-loading" role="status">
+        <Loader2 className="animate-spin" /> Cargando tu biblioteca…
+      </div>
+    );
+  }
+  if (!entries.length) {
+    return (
+      <div className="vm-empty" role="status">
+        <Library aria-hidden="true" />
+        <h2>Acá empieza tu colección.</h2>
+        <p>
+          Agregá un recurso gratuito y lo vas a encontrar acá, listo para usar.
+        </p>
+        <Button onClick={onExplore}>
+          Explorar recursos <ArrowUpRight />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="vm-library-help">
+        <Check aria-hidden="true" />
+        <p>
+          Tus recursos se guardan con tu cuenta. Elegilos desde la biblioteca al
+          editar una tecla.
+        </p>
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/deck/edit">
+            Editar mis teclas <ArrowUpRight />
+          </Link>
+        </Button>
+      </div>
+      <div className="vm-library-list">
+        {[...entries]
+          .sort((a, b) => b.acquiredAt - a.acquiredAt)
+          .map((entry, index) => (
+            <details
+              key={entry.productId}
+              className="vm-library-entry"
+              open={index === 0}
+            >
+              <summary>
+                <span className="vm-library-entry-icon">
+                  <Library aria-hidden="true" />
+                </span>
+                <span className="vm-library-entry-heading">
+                  <span>
+                    {CATEGORY_LABELS[entry.category]} · {entry.creatorName}
+                  </span>
+                  <h2>{entry.title}</h2>
+                </span>
+                <ChevronDown
+                  className="vm-library-chevron"
+                  aria-hidden="true"
+                />
+              </summary>
+              <div className="vm-library-entry-body">
+                {entry.delivery === "plugin" &&
+                entry.productId === "viso-stream-deck" ? (
+                  <div className="vm-library-inline-notice">
+                    <p>
+                      Descargá el plugin preparado con la configuración de tu
+                      cuenta.
+                    </p>
+                    <Button asChild>
+                      <Link to={marketplaceConnectionsPath()}>
+                        Descargar mi plugin <ArrowUpRight />
+                      </Link>
+                    </Button>
+                  </div>
+                ) : entry.profileTemplate === "essential" ? (
+                  <div className="vm-library-inline-notice">
+                    <p>
+                      Agregá una página con tus seis estados VISO. Las páginas
+                      que ya tenés se conservan.
+                    </p>
+                    <Button
+                      onClick={() => {
+                        setError(null);
+                        setInstalling(entry);
+                      }}
+                    >
+                      <PanelsTopLeft /> Agregar página al deck
+                    </Button>
+                  </div>
+                ) : null}
+                {entry.assets.length > 0 && (
+                  <div className="vm-asset-grid">
+                    {entry.assets.map((asset) => (
+                      <LibraryAsset
+                        key={asset.id}
+                        asset={asset}
+                        product={entry}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="vm-library-entry-footer">
+                  {(entry.category === "icons" ||
+                    entry.category === "profiles") && (
+                    <Link to="/deck/edit">
+                      Abrir editor del deck <ArrowUpRight />
+                    </Link>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setError(null);
+                      setRemoving(entry);
+                    }}
+                    aria-label={`Quitar ${entry.title} de mi biblioteca`}
+                  >
+                    <Trash2 /> Quitar de mi biblioteca
+                  </Button>
+                </div>
+              </div>
+            </details>
+          ))}
+      </div>
+
+      <Dialog
+        open={!!removing || !!installing}
+        onOpenChange={(open) => !open && closeConfirmation()}
+      >
+        <DialogContent
+          className="vm-confirm-dialog"
+          showCloseButton={!pending}
+          onEscapeKeyDown={(event) => pending && event.preventDefault()}
+          onPointerDownOutside={(event) => pending && event.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>
+              {removing
+                ? "¿Quitar este recurso?"
+                : "Agregar una página a tu deck"}
+            </DialogTitle>
+            <DialogDescription>
+              {removing
+                ? `Vas a quitar ${removing.title} de tu biblioteca. Las teclas que ya personalizaste conservan sus archivos.`
+                : "Se creará una página nueva con tus estados. Tus otras páginas y sus configuraciones se conservan."}
+            </DialogDescription>
+          </DialogHeader>
+          {error && (
+            <p role="alert" className="vm-error">
+              {error}
+            </p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={closeConfirmation}
+            >
+              Cancelar
+            </Button>
+            <Button disabled={pending} onClick={() => void confirm()}>
+              {pending && <Loader2 className="animate-spin" />}
+              {pending
+                ? "Guardando…"
+                : removing
+                  ? "Quitar recurso"
+                  : "Crear página nueva"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
