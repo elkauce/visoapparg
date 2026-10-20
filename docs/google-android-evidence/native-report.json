@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-20T16:52:44.790Z",
+  "environment": "API36 Google APIs x86_64 emulator, software CPU emulation without KVM",
+  "backend": "local loopback3210/3211 only",
+  "apk": {
+    "versionName": "1.13.1",
+    "versionCode": 24,
+    "sha256": "fb4febffe8a9d6ba191ef1804ddadc77ff0bd6b5e1ce9fb602b16644c603ed1c",
+    "installedArtifactSha256": "fb4febffe8a9d6ba191ef1804ddadc77ff0bd6b5e1ce9fb602b16644c603ed1c",
+    "installedArtifactMatchesFinalBuild": true
+  },
+  "passed": false,
+  "checks": [
+    {
+      "name": "emulator completed boot",
+      "passed": true
+    },
+    {
+      "name": "installed final APK verified independently by SHA-256",
+      "passed": true
+    },
+    {
+      "name": "packaged and runtime manifest contain exact native Google callback filter",
+      "passed": true
+    }
+  ],
+  "incomplete": [
+    "actual app sign-in UI",
+    "warm and cold Google callback transport",
+    "simulated Google provider token redemption",
+    "technical account session persistence"
+  ],
+  "blocker": {
+    "systemProcessCrashObserved": "system_server fatal: Lost network stack; subsequent DeadSystemException in system components",
+    "adbInstallCompletion": "streaming install exceeded180s; one supported no-streaming retry exceeded90s; no verification checks disabled",
+    "activityStart": "default explicit activity start returned activity-not-found; full MAIN/LAUNCHER start did not finish within25s and no VISO process appeared",
+    "packageRegistration": "APK and dumpsys metadata contain activity/filter; runtime resolution remained unavailable/inconsistent after system process restart"
+  },
+  "limits": {
+    "realGoogleConsentTested": false,
+    "physicalDeviceTested": false,
+    "customerDataTouched": false,
+    "remoteDeploymentTouched": false,
+    "googleAccountEntered": false,
+    "appDefectConfirmed": false
+  },
+  "screenshots": [],
+  "cleanup": {
+    "ownedEmulatorPid": 214632,
+    "stopRequested": true,
+    "otherEmulatorsOrBackendsStopped": false,
+    "ownedEmulatorStopped": true
+  },
+  "evidenceFiles": [
+    "google-native-transport-smoke-final.log",
+    "google-native-transport-smoke-verified-apk.log",
+    "google-native-transport-smoke-recovered.log",
+    "google-native-nonstreaming-install.log"
+  ]
+}

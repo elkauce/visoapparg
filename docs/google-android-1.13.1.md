@@ -1,6 +1,6 @@
 # Acceso con Google en Android — 1.13.1
 
-Implementado sobre `fix/viso-deck-reference-layout`, sin modificar `main`. APK `com.viso.deck`, versionCode 24, versionName 1.13.1. La publicación de este ajuste en el servidor y de la descarga web queda pendiente de aprobación del propietario.
+Publicado el 20 de octubre de 2026 con autorización del propietario, desde `fix/viso-deck-reference-layout`, sin modificar `main`. APK `com.viso.deck`, versionCode 24, versionName 1.13.1. Fuente de la aplicación: `295b215`.
 
 ## Comportamiento
 
@@ -28,6 +28,12 @@ La [web de revisión](https://viso-deck-android-4v7u1x01b-manuelhaguilar8-4981s-
 
 La autorización Google con una cuenta real y la instalación en un teléfono físico quedan pendientes. Las comprobaciones con un proveedor simulado local no equivalen a probar el consentimiento Google real.
 
-## Pase pendiente
+El emulador API 36 sin KVM confirmó por hash la instalación del APK local final y la presencia del filtro nativo en el APK y en el registro Android. Su proceso de red cayó y reinició `system_server`, dejando inconsistentes la resolución de actividades y la apertura de VISO. El smoke nativo no pudo completar la interfaz, los retornos frío/caliente, el canje simulado ni la persistencia de sesión; no se presentan esos resultados como aprobados. Se mantuvieron las verificaciones del sistema y se detuvo el AVD de prueba. [Reporte del emulador](google-android-evidence/native-report.json).
 
-Actualizar explícitamente el backend compartido `vivid-nightingale-785`, publicar la web ya compilada en el proyecto existente y verificar disponibilidad, retorno y descarga de APK/QR. No crear proyectos, regenerar credenciales ni cambiar permisos del dispositivo. La APK requiere esa actualización del servidor para ofrecer Google.
+## Publicación verificada
+
+Se actualizó explícitamente el backend compartido `vivid-nightingale-785`. La disponibilidad ya devuelve `google: true` y `nativeGoogle: true`. Un inicio anónimo real llega al destino Google y conserva su callback HTTPS; al simular la cancelación antes de ingresar a Google, el servidor devuelve exactamente el retorno nativo ligado al nonce del intento. No se inició sesión de ningún cliente ni se modificaron luces o dispositivos.
+
+Se publicó la compilación web en el proyecto existente, despliegue `dpl_Ek2yreo7PDATVwDzSHd3TXZtyR1w`, alias https://viso-deck-android.vercel.app. El QR y la descarga apuntan a la APK 1.13.1. Se conservaron las credenciales de Google, Google Home y las claves de sesión existentes. [Evidencia de producción](google-android-evidence/production-report.json).
+
+Falta la prueba completa de consentimiento e ingreso con una cuenta Google real desde un celular. La verificación de servidor, archivos y descarga no sustituye esa prueba.
