@@ -1,0 +1,425 @@
+{
+  "publishedAt": "2026-10-20T09:14:42Z",
+  "sourceCommit": "b10e036",
+  "branch": "fix/viso-deck-reference-layout",
+  "mainModified": false,
+  "backend": {
+    "deployment": "vivid-nightingale-785",
+    "updated": true,
+    "verification": {
+      "creatorProfilesReadable": true,
+      "libraryReadable": true,
+      "ownerExists": true,
+      "ownerIsMarketplaceAdmin": true,
+      "productsReadable": true,
+      "uploadsReadable": true
+    },
+    "verificationScope": "readonly role membership and indexes; no owner session created"
+  },
+  "web": {
+    "verifiedAt": "2026-10-20T09:15:11.401Z",
+    "origin": "https://viso-deck-android.vercel.app",
+    "deploymentId": "dpl_C9TqQxSQWGEZLhNhs4XrS8gbMUpq",
+    "sourceCommit": "b10e036",
+    "staticFiles": [
+      {
+        "path": "/assets/admin-B5xyfRPn.js",
+        "sha256": "a0ffb5b3a96681347567aecc4d7493033432d9baa3411f4a84282658a1513b32",
+        "bytes": 11560
+      },
+      {
+        "path": "/assets/index-DfUz8HZw.css",
+        "sha256": "f55e59ed6f337474a42b40acabfc2e95f49fec7b1efab6bddf711300858418d1",
+        "bytes": 188453
+      },
+      {
+        "path": "/assets/index-S7oTHjzT.js",
+        "sha256": "ef14905628e10620f8d10cdce0117d5f437579d5c8ab15537a0ea023df400f1c",
+        "bytes": 990072
+      },
+      {
+        "path": "/assets/label-BFZMq_PB.js",
+        "sha256": "13c2e4e907f739075a963663e26c38c8952ae31bab577d901a027ee371168c5f",
+        "bytes": 217345
+      },
+      {
+        "path": "/assets/page-CykWHiJM.css",
+        "sha256": "645baca32afb10ab904bcb283021798db203fa456544cc36d6cccda8203541e5",
+        "bytes": 22277
+      },
+      {
+        "path": "/assets/page-KGanrHQN.js",
+        "sha256": "08545ffcdc8e9298b445c16d64d4af0eb69213590f9a5aab4bce9390b84c2665",
+        "bytes": 30384
+      },
+      {
+        "path": "/assets/product-form-BsJfQyce.css",
+        "sha256": "582af67195b139a3d653868a22f1f46b2dc75a18c4267a5c3b564418ee07005b",
+        "bytes": 8931
+      },
+      {
+        "path": "/assets/product-form-DaP6cV_W.js",
+        "sha256": "fd2e1deff4c132658b892731dabf7a0aaf6aed3b8674087931d425d2e16fd4c0",
+        "bytes": 13718
+      },
+      {
+        "path": "/assets/rolldown-runtime-B0Z9INg1.js",
+        "sha256": "5e9b0d884d2ebb14e241ab38b43e41efb61bce2e74d71507b0b95b264fba4047",
+        "bytes": 901
+      },
+      {
+        "path": "/assets/studio-Cb4Xnlbm.js",
+        "sha256": "e18eb4bb19a132d5022041935b4495f523bfa389f65a4d438187e40b559f05ac",
+        "bytes": 7573
+      },
+      {
+        "path": "/assets/web-C2dSkhYo.js",
+        "sha256": "1f5f6db2318b46f03e94c48bf3776338bdc095b10ebab63ade38c41d686f0805",
+        "bytes": 844
+      },
+      {
+        "path": "/brand/viso-icon.png",
+        "sha256": "eceeec8d200d10a99fb1a64cdba3bb90cbed6503ad5849a66f8dea8faa6d93a0",
+        "bytes": 1318543
+      },
+      {
+        "path": "/brand/viso-logo.png",
+        "sha256": "706d409be787e977854fbd51e806824d23c44d10ad3c5df319b96555f701dfc1",
+        "bytes": 921108
+      },
+      {
+        "path": "/downloads/VISO-Elgato-1.2.streamDeckPlugin",
+        "sha256": "be989cb4cd63d25d45e8969ea49655e676f3dcf0a9d28bc6c45a73082d3b4f5b",
+        "bytes": 157232
+      },
+      {
+        "path": "/fonts/bricolage-grotesque-OFL.txt",
+        "sha256": "923f4ddf0fd39f9b7794ab0df7332f3d95dc43e8ad7ec2289d6d9e8491177f51",
+        "bytes": 4401
+      },
+      {
+        "path": "/fonts/bricolage-grotesque-latin-ext-opsz-normal.woff2",
+        "sha256": "776f6dcaf03636cd69a5802c94808cc8896c0a66c8e9ce0fe147231b6ee01957",
+        "bytes": 30736
+      },
+      {
+        "path": "/fonts/bricolage-grotesque-latin-opsz-normal.woff2",
+        "sha256": "a79fdb52d4a5c76552452f69202add96e287401fff03d3e8c0e38b4dcb5a99cd",
+        "bytes": 76888
+      },
+      {
+        "path": "/fonts/geist-mono-OFL.txt",
+        "sha256": "cc815ed4fc045f0e991abb10395b7932bd028c6a067deb13316d6002105074e6",
+        "bytes": 4498
+      },
+      {
+        "path": "/fonts/geist-mono-latin-ext-wght-normal.woff2",
+        "sha256": "1a189eb997c3e2ece68373e387afaec9e8617424186c4b1ab3cff7c54ba6223b",
+        "bytes": 14696
+      },
+      {
+        "path": "/fonts/geist-mono-latin-wght-normal.woff2",
+        "sha256": "684ad5b531f81d43c1e8c7038262d5db7cdc1f68006e04d6c7769efa8d33c8cc",
+        "bytes": 23128
+      },
+      {
+        "path": "/fonts/provenance.json",
+        "sha256": "c452eebbaa7ea2a7a70ecb096570f8f5f5baac1cd59d93edf2f2c5cb29574b0a",
+        "bytes": 3263
+      },
+      {
+        "path": "/index.html",
+        "sha256": "303f8a0d0f0f167a335a0c59cc735af339cdfa293eba773ba93df8880638b8f4",
+        "bytes": 2424
+      },
+      {
+        "path": "/marketplace/animated/ausente.gif",
+        "sha256": "3098c5963b577909199e7ea2f27993d59b860d682370909c613ef1fa9f56a431",
+        "bytes": 122692
+      },
+      {
+        "path": "/marketplace/animated/ausente.mp4",
+        "sha256": "41c8218c757472df670cbba5d1cb4551a9fb453eff9ab77e92149c4934ee28fa",
+        "bytes": 9582
+      },
+      {
+        "path": "/marketplace/animated/libre.gif",
+        "sha256": "24400f43c35234dc1fdec987d683a58a500c1544d984d159a1dabb57ea5ae27d",
+        "bytes": 108232
+      },
+      {
+        "path": "/marketplace/animated/libre.mp4",
+        "sha256": "47078011c268dcddac0f45b5372b70ad9ec709a01207026a562408894de8cd5a",
+        "bytes": 11208
+      },
+      {
+        "path": "/marketplace/animated/llamada.gif",
+        "sha256": "d01a6bae6cc5d0a21d63ed877b117a51f59cd9a2f2aa9e14b265f5af42af7bc8",
+        "bytes": 114818
+      },
+      {
+        "path": "/marketplace/animated/llamada.mp4",
+        "sha256": "7657dcbd1e10aca4867817ff55c166fcd9416e3e993903aa6994d9024de97297",
+        "bytes": 10959
+      },
+      {
+        "path": "/marketplace/animated/no-molestar.gif",
+        "sha256": "e6d96d4c5792013e0a30065f6714181caba87b2e3da592791d080773a2b11b5a",
+        "bytes": 114812
+      },
+      {
+        "path": "/marketplace/animated/no-molestar.mp4",
+        "sha256": "d4e8f0fadd07807d05e4904528a5453b34b6e48f86aa8da05cb74fbf1d3294b4",
+        "bytes": 11915
+      },
+      {
+        "path": "/marketplace/animated/ocupado.gif",
+        "sha256": "b443cd6e4df4461ef83fac956f7aa5160afd294d24ecf120ccb52042e6ad58d5",
+        "bytes": 109490
+      },
+      {
+        "path": "/marketplace/animated/ocupado.mp4",
+        "sha256": "7aac899c196f88e99abd132d48235cca39ad67e653382041e3b777a17639519f",
+        "bytes": 11821
+      },
+      {
+        "path": "/marketplace/animated/reunion.gif",
+        "sha256": "181abd8c6c1c320e83d84c631b36806c8754373321809e5c195f67957b756687",
+        "bytes": 111583
+      },
+      {
+        "path": "/marketplace/animated/reunion.mp4",
+        "sha256": "0764a3c615afb96d7a9157aa944b96d8366f373d9f49d27f2d654fda04a170fb",
+        "bytes": 12754
+      },
+      {
+        "path": "/marketplace/covers/ambient-screen.png",
+        "sha256": "833de951d971d966fdce68e46196b077a5dea18021768185e1c5ebcadde7cc43",
+        "bytes": 124290
+      },
+      {
+        "path": "/marketplace/covers/essential-profile.png",
+        "sha256": "2241c94462d222d7035aafd65f27fe9f77fba036da7436057ade27ccb380857e",
+        "bytes": 131925
+      },
+      {
+        "path": "/marketplace/covers/living-icons.png",
+        "sha256": "02ba433aadd74dc52934d2524dfa2c60b365a18a01c4252a2a26113484fd0936",
+        "bytes": 131290
+      },
+      {
+        "path": "/marketplace/covers/original-icons.png",
+        "sha256": "511e22c6020f6b44b4b7c2f31e4dc611e76d42bc403c1dbe0f79a2907cdc2c16",
+        "bytes": 130847
+      },
+      {
+        "path": "/marketplace/covers/soft-sounds.png",
+        "sha256": "2a0419a090332305f398d738a6b653959cf0e12b984799ca9598ce988e988fcd",
+        "bytes": 21983
+      },
+      {
+        "path": "/marketplace/covers/stream-deck.png",
+        "sha256": "27a34ffb55c5bb4c7b1e4d23cc195f34d29c196d2aa5bcc436f5a9799de0027f",
+        "bytes": 131181
+      },
+      {
+        "path": "/marketplace/originals/ausente.png",
+        "sha256": "e6bdc220c06579da7f7ca0427fce04150e667ae1a8c0ef7271f2dffd3b8670de",
+        "bytes": 27932
+      },
+      {
+        "path": "/marketplace/originals/camara.png",
+        "sha256": "8193b362aca2fccdd38cf06ef85f0f8ee882e7afc6799a51e3ece24294995ad0",
+        "bytes": 25463
+      },
+      {
+        "path": "/marketplace/originals/clima.png",
+        "sha256": "3c9633a833f5985e14d12c5acf9f4d2ccf24613da40b057685740246806e9a83",
+        "bytes": 25616
+      },
+      {
+        "path": "/marketplace/originals/deportes.png",
+        "sha256": "f2331b4dd61215ce3854ae674772903f589d8b520c398ffe5ca60b198a80d63e",
+        "bytes": 28560
+      },
+      {
+        "path": "/marketplace/originals/libre.png",
+        "sha256": "683dd20ce522419b45b27db2db2cd32311225fdbb4b53e4cee394347e8464394",
+        "bytes": 25490
+      },
+      {
+        "path": "/marketplace/originals/llamada.png",
+        "sha256": "bd1b73d3410cabeb98c7b0f91968cdf69ce0ce63f9fabd8b8ea16873c18e9501",
+        "bytes": 28681
+      },
+      {
+        "path": "/marketplace/originals/microfono.png",
+        "sha256": "d50870b1a3b194b94d59e478e08461c4270e2f0f898cb1864f70d9350285bd6f",
+        "bytes": 25447
+      },
+      {
+        "path": "/marketplace/originals/musica.png",
+        "sha256": "fd12a17b6a07dc26f7887f3aa5fefefdec9f78589816be64a4df65b00f10c982",
+        "bytes": 24815
+      },
+      {
+        "path": "/marketplace/originals/no-molestar.png",
+        "sha256": "c1a167ece2db1320e09ec10b82e74997c6acdc65a19373eaeafec9b79452c242",
+        "bytes": 28933
+      },
+      {
+        "path": "/marketplace/originals/ocupado.png",
+        "sha256": "3e9b02902c2e5d5b4fa6e92122366f1799791a2ee70119776e90a40584de56d0",
+        "bytes": 27043
+      },
+      {
+        "path": "/marketplace/originals/pausa.png",
+        "sha256": "5c65097fbda9062dbd93616ab1b7fe2ff1d5c05c47bf41388c5d161a038c0907",
+        "bytes": 20912
+      },
+      {
+        "path": "/marketplace/originals/reunion.png",
+        "sha256": "c4d9c1fce308f8eb44545b3ab790008e13f33854f96abe9c6ce15370812cc915",
+        "bytes": 29256
+      },
+      {
+        "path": "/marketplace/originals-manifest.json",
+        "sha256": "af8845341289afe3c7a6f76bd5d41920a2736c0bee66323c58d61bba755fe563",
+        "bytes": 5612
+      },
+      {
+        "path": "/marketplace/screensavers/aurora.mp4",
+        "sha256": "79d306f2f8d18625af2cdd558b87d3aa5cefd8780ddbb16a2fd5fcef544a4129",
+        "bytes": 64458
+      },
+      {
+        "path": "/marketplace/sounds/atencion.wav",
+        "sha256": "88edff2e68f1783658645f3cb5da2e887d47c078d5dbeb48d7c0a3118acc3fac",
+        "bytes": 33118
+      },
+      {
+        "path": "/marketplace/sounds/confirmar.wav",
+        "sha256": "e589d5124185996b35f31fe170d75d26aec303a1c55f91b960a67ccee8340b95",
+        "bytes": 33118
+      },
+      {
+        "path": "/marketplace/sounds/pausa.wav",
+        "sha256": "f4734d6d82a83afa64ceeb0863e397b59b766c24b9b210c41387878004de0393",
+        "bytes": 39734
+      },
+      {
+        "path": "/products/viso-display.png",
+        "sha256": "d43616ae404e74346585102df84e6d335b634a5abf6d429057c52788d4819ae5",
+        "bytes": 1150517
+      },
+      {
+        "path": "/products/viso-matrix.png",
+        "sha256": "5df19b677611639e207fee2946f842cdd4e7d24bf815e64aacf61469c9f54cfb",
+        "bytes": 1129026
+      },
+      {
+        "path": "/products/viso-mini.png",
+        "sha256": "8495d70cbfe84e5fb06b6350371b2849d219b052e595d235087a0b4a973dfe97",
+        "bytes": 898246
+      }
+    ],
+    "marketplaceSpaRoute": true,
+    "apk": {
+      "url": "https://raw.githubusercontent.com/elkauce/visoapparg/fix/viso-deck-reference-layout/downloads/VISO-Deck-1.13.0-debug.apk",
+      "sha256": "dfe569bfd54c765f0fbc058c654e4fa6c50b28695775ca09cbfc1e398bdefa7c",
+      "bytes": 21930232
+    },
+    "passed": true,
+    "readyState": "READY"
+  },
+  "anonymousAccess": {
+    "checks": [
+      {
+        "name": "anonymous session rejected",
+        "passed": true
+      },
+      {
+        "name": "anonymous list rejected",
+        "passed": true
+      },
+      {
+        "name": "anonymous adminProducts rejected",
+        "passed": true
+      },
+      {
+        "name": "anonymous upload rejected 401",
+        "passed": true
+      }
+    ]
+  },
+  "browser": {
+    "checkedAt": "2026-10-20T09:16:06.062Z",
+    "origin": "https://viso-deck-android.vercel.app",
+    "deploymentId": "dpl_C9TqQxSQWGEZLhNhs4XrS8gbMUpq",
+    "checks": 42,
+    "passed": true,
+    "scope": "Public production browser checks only; no authentication, account changes or light controls",
+    "viewports": [
+      1440,
+      390,
+      320
+    ],
+    "results": [
+      "1440px home returns 200",
+      "1440px home has no horizontal overflow",
+      "1440px home headline visible",
+      "1440px home Google entry available",
+      "1440px home password entry available",
+      "1440px home login fits viewport",
+      "1440px marketplace direct route returns 200",
+      "1440px marketplace requires sign-in",
+      "1440px marketplace hides catalogue without session",
+      "1440px marketplace gate fits viewport",
+      "1440px marketplace Google entry available",
+      "1440px marketplace password entry available",
+      "1440px marketplace login dialog fits viewport",
+      "1440px no browser runtime errors",
+      "390px home returns 200",
+      "390px home has no horizontal overflow",
+      "390px home headline visible",
+      "390px home Google entry available",
+      "390px home password entry available",
+      "390px home login fits viewport",
+      "390px marketplace direct route returns 200",
+      "390px marketplace requires sign-in",
+      "390px marketplace hides catalogue without session",
+      "390px marketplace gate fits viewport",
+      "390px marketplace Google entry available",
+      "390px marketplace password entry available",
+      "390px marketplace login dialog fits viewport",
+      "390px no browser runtime errors",
+      "320px home returns 200",
+      "320px home has no horizontal overflow",
+      "320px home headline visible",
+      "320px home Google entry available",
+      "320px home password entry available",
+      "320px home login fits viewport",
+      "320px marketplace direct route returns 200",
+      "320px marketplace requires sign-in",
+      "320px marketplace hides catalogue without session",
+      "320px marketplace gate fits viewport",
+      "320px marketplace Google entry available",
+      "320px marketplace password entry available",
+      "320px marketplace login dialog fits viewport",
+      "320px no browser runtime errors"
+    ]
+  },
+  "recovery": {
+    "sourceCommit": "3263ae3",
+    "apkVersion": "1.12.0",
+    "webDeployment": "dpl_D8zcb4jfBpZEGLKG6Wp1y2CaoxH6"
+  },
+  "limits": {
+    "physicalAndroidTested": false,
+    "realGoogleConsentRetested": false,
+    "realHomeLightsRetested": false,
+    "productionAccountLoginAttempted": false,
+    "internalPaymentsEnabled": false,
+    "mercadoLibreAutomaticImportEnabled": false
+  }
+}
