@@ -125,6 +125,7 @@ it("reports only availability and own Google connection; refuses anonymous or fa
   const f = await fixture();
   expect(await f.t.query(api.social_auth.availability, {})).toEqual({
     google: true,
+    nativeGoogle: true,
   });
   expect(await f.t.query(api.social_auth.connection, {})).toEqual({
     linked: false,
@@ -506,6 +507,7 @@ it("expires armed intents and exposes no credential values in availability", asy
   vi.stubEnv("AUTH_GOOGLE_SECRET", "");
   expect(await f.t.query(api.social_auth.availability, {})).toEqual({
     google: false,
+    nativeGoogle: false,
   });
   await expect(
     f.alice.mutation(api.social_auth.prepareGoogleLink, {}),

@@ -1,0 +1,14 @@
+{
+  "package": "com.viso.deck",
+  "versionCode": 24,
+  "versionName": "1.13.1",
+  "certificateSha1": "f3e392aed08c29514f1d6d25176120213c5a77a6",
+  "permissionsUnchangedFrom1_13_0": true,
+  "googleHomeSdkBundled": true,
+  "productionBackendSelected": true,
+  "nativeGoogleCallbackBundled": true,
+  "apkSha256": "5a17f67b1b2958089cc421cd7213127690709f6c74e3fc1e2b32673d43065da9",
+  "bytes": 21935986,
+  "physicalDeviceTested": false,
+  "realGoogleConsentTested": false
+}

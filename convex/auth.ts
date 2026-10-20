@@ -17,6 +17,7 @@ import {
   newSocialCode,
   normalizeEmail,
 } from "./lib/google_auth";
+import { googleAuthRedirect } from "./lib/google_auth_redirect";
 
 const LINK_TTL = 2 * 60_000;
 type LinkTarget = { userId: Id<"users">; googleSubject: string };
@@ -79,6 +80,9 @@ function configureAuth(linkTarget?: LinkTarget) {
         : []),
     ],
     callbacks: {
+      async redirect({ redirectTo }) {
+        return googleAuthRedirect(redirectTo);
+      },
       async createOrUpdateUser(genericCtx, args) {
         const ctx = genericCtx as MutationCtx;
         if (args.provider.id === "google" && args.type === "oauth") {

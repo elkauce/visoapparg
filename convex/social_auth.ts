@@ -8,7 +8,10 @@ const INTENT_TTL = 5 * 60_000;
 
 export const availability = query({
   args: {},
-  handler: async () => ({ google: googleAvailable() }),
+  handler: async () => {
+    const available = googleAvailable();
+    return { google: available, nativeGoogle: available };
+  },
 });
 
 export const connection = query({

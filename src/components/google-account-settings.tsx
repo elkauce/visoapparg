@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useConvex } from "convex/react";
 import { CheckCircle2 } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import { isAndroidNative } from "@/lib/android-native";
 import { GoogleSignInButton } from "./google-sign-in";
+import { useNativeGoogleAuth } from "@/lib/native-google-auth-context";
+import { isAndroidNative } from "@/lib/android-native";
 
 export default function GoogleAccountSettings({
   onPendingChange,
@@ -11,24 +12,31 @@ export default function GoogleAccountSettings({
   onPendingChange: (pending: boolean) => void;
 }) {
   const convex = useConvex();
+  const nativeAuth = useNativeGoogleAuth();
+  useEffect(() => {
+    if (isAndroidNative()) onPendingChange(nativeAuth.pending);
+  }, [nativeAuth.pending, onPendingChange]);
   const [connection, setConnection] = useState<{
     linked: boolean;
     email?: string;
   } | null>(null);
   useEffect(() => {
-    if (isAndroidNative() || import.meta.env.VITE_ANDROID_PREVIEW === "true")
-      return;
+    if (import.meta.env.VITE_ANDROID_PREVIEW === "true") return;
     let alive = true;
-    void Promise.all([
-      convex.query(api.social_auth.availability, {}),
-      convex.query(api.social_auth.connection, {}),
-    ])
-      .then(([availability, current]) => {
-        if (alive && availability.google) setConnection(current);
-      })
-      .catch(() => undefined);
+    const refresh = () =>
+      void Promise.all([
+        convex.query(api.social_auth.availability, {}),
+        convex.query(api.social_auth.connection, {}),
+      ])
+        .then(([availability, current]) => {
+          if (alive && availability.google) setConnection(current);
+        })
+        .catch(() => undefined);
+    refresh();
+    window.addEventListener("viso:google-account-changed", refresh);
     return () => {
       alive = false;
+      window.removeEventListener("viso:google-account-changed", refresh);
     };
   }, [convex]);
   if (!connection) return null;

@@ -19,6 +19,7 @@ import AndroidStreamDeckPage from "./pages/android/stream-deck.tsx";
 import { isAndroidNative } from "./lib/android-native.ts";
 import WebSurfaceTheme from "./components/web-surface-theme";
 import GoogleAuthReturn from "./components/google-auth-return";
+import { NativeGoogleAuthProvider } from "./components/native-google-auth";
 
 const MarketplacePage = lazy(() => import("./pages/marketplace/page.tsx"));
 
@@ -26,65 +27,67 @@ export default function App() {
   return (
     <DefaultProviders>
       <BrowserRouter>
-        <WebSurfaceTheme />
-        <GoogleAuthReturn />
-        <AndroidRuntime />
-        <DeckAwake />
-        <AutomaticPresence />
-        <GoogleHomeSync />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              isAndroidNative() ||
-              import.meta.env.VITE_ANDROID_PREVIEW === "true" ? (
-                <AndroidHome />
-              ) : (
-                <Index />
-              )
-            }
-          />
-          <Route path="/android" element={<AndroidHome />} />
-          <Route path="/android/settings" element={<AndroidSettings />} />
-          <Route path="/android/display" element={<AndroidDisplay />} />
-          <Route
-            path="/android/stream-deck"
-            element={<AndroidStreamDeckPage />}
-          />
-          <Route
-            path="/android/integrations"
-            element={<AndroidIntegrations />}
-          />
-          <Route
-            path="/android/integrations/:integration"
-            element={<AndroidIntegrationDetails />}
-          />
-          <Route
-            path="/deck/edit"
-            element={<DeckPage startEditing fullEditor />}
-          />
-          <Route path="/deck" element={<AndroidDeck />} />
-          <Route path="/s/:slug" element={<PublicStatusPage />} />
-          <Route
-            path="/marketplace"
-            element={
-              <Suspense
-                fallback={
-                  <div
-                    role="status"
-                    className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
-                  >
-                    Cargando Marketplace…
-                  </div>
-                }
-              >
-                <MarketplacePage />
-              </Suspense>
-            }
-          />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <NativeGoogleAuthProvider>
+          <WebSurfaceTheme />
+          <GoogleAuthReturn />
+          <AndroidRuntime />
+          <DeckAwake />
+          <AutomaticPresence />
+          <GoogleHomeSync />
+          <Routes>
+            <Route
+              path="/"
+              element={
+                isAndroidNative() ||
+                import.meta.env.VITE_ANDROID_PREVIEW === "true" ? (
+                  <AndroidHome />
+                ) : (
+                  <Index />
+                )
+              }
+            />
+            <Route path="/android" element={<AndroidHome />} />
+            <Route path="/android/settings" element={<AndroidSettings />} />
+            <Route path="/android/display" element={<AndroidDisplay />} />
+            <Route
+              path="/android/stream-deck"
+              element={<AndroidStreamDeckPage />}
+            />
+            <Route
+              path="/android/integrations"
+              element={<AndroidIntegrations />}
+            />
+            <Route
+              path="/android/integrations/:integration"
+              element={<AndroidIntegrationDetails />}
+            />
+            <Route
+              path="/deck/edit"
+              element={<DeckPage startEditing fullEditor />}
+            />
+            <Route path="/deck" element={<AndroidDeck />} />
+            <Route path="/s/:slug" element={<PublicStatusPage />} />
+            <Route
+              path="/marketplace"
+              element={
+                <Suspense
+                  fallback={
+                    <div
+                      role="status"
+                      className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
+                    >
+                      Cargando Marketplace…
+                    </div>
+                  }
+                >
+                  <MarketplacePage />
+                </Suspense>
+              }
+            />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </NativeGoogleAuthProvider>
       </BrowserRouter>
     </DefaultProviders>
   );

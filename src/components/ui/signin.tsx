@@ -179,7 +179,7 @@ export const SignInButton = forwardRef<HTMLButtonElement, SignInButtonProps>(
               <DialogDescription>
                 {signingUp
                   ? "Guarda tu deck, tus estados y tus dispositivos en tu cuenta."
-                  : "Usa tu correo y contraseña para abrir tu panel."}
+                  : "Entrá con tu cuenta VISO para recuperar tu deck y tus dispositivos."}
               </DialogDescription>
             </DialogHeader>
             <GoogleSignInButton

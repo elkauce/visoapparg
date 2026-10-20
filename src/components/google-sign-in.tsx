@@ -10,6 +10,7 @@ import {
   type GoogleAuthMode,
 } from "@/lib/google-auth-flow";
 import { Button } from "@/components/ui/button";
+import { useNativeGoogleAuth } from "@/lib/native-google-auth-context";
 
 interface GoogleSignInButtonProps {
   mode?: GoogleAuthMode;
@@ -32,16 +33,25 @@ export function GoogleSignInButton({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false);
-  const native =
-    isAndroidNative() || import.meta.env.VITE_ANDROID_PREVIEW === "true";
+  const native = isAndroidNative();
+  const preview = !native && import.meta.env.VITE_ANDROID_PREVIEW === "true";
+  const nativeAuth = useNativeGoogleAuth();
+  const waiting = pending || (native && nativeAuth.pending);
 
   useEffect(() => {
-    if (native) return;
+    if (native) onPendingChange?.(waiting);
+  }, [native, waiting, onPendingChange]);
+
+  useEffect(() => {
+    if (preview) return;
     let cancelled = false;
     // An older/unavailable server must never break password sign-in.
     void convex.query(api.social_auth.availability, {}).then(
       (value) => {
-        if (!cancelled) setAvailable(value.google === true);
+        if (!cancelled)
+          setAvailable(
+            native ? value.nativeGoogle === true : value.google === true,
+          );
       },
       () => {
         if (!cancelled) setAvailable(false);
@@ -50,7 +60,7 @@ export function GoogleSignInButton({
     return () => {
       cancelled = true;
     };
-  }, [convex, native]);
+  }, [convex, native, preview]);
 
   useEffect(() => {
     if (native) return;
@@ -70,13 +80,19 @@ export function GoogleSignInButton({
   }, [native, onError, onPendingChange]);
 
   const start = async () => {
-    if (disabled || busy.current || !available || native) return;
+    if (disabled || busy.current || !available || waiting) return;
     busy.current = true;
     setPending(true);
     setError(null);
     onError?.(null);
     onPendingChange?.(true);
     try {
+      if (native) {
+        await nativeAuth.start(mode);
+        busy.current = false;
+        setPending(false);
+        return;
+      }
       if (mode === "link") {
         await convex.mutation(api.social_auth.prepareGoogleLink, {});
       }
@@ -99,7 +115,7 @@ export function GoogleSignInButton({
     }
   };
 
-  if (!available || native) return null;
+  if (!available || preview) return null;
 
   return (
     <div className="space-y-3">
@@ -107,11 +123,11 @@ export function GoogleSignInButton({
         type="button"
         variant="outline"
         className="w-full"
-        disabled={disabled || pending}
-        aria-busy={pending}
+        disabled={disabled || waiting || (native && !nativeAuth.ready)}
+        aria-busy={waiting}
         onClick={() => void start()}
       >
-        {pending ? (
+        {waiting ? (
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
         ) : (
           <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
@@ -133,12 +149,31 @@ export function GoogleSignInButton({
             />
           </svg>
         )}
-        {pending
+        {waiting
           ? "Abriendo Google…"
           : mode === "link"
             ? "Vincular Google"
             : "Continuar con Google"}
       </Button>
+      {native && nativeAuth.pending && (
+        <div className="space-y-2 text-center text-xs text-muted-foreground">
+          <p>Completá el acceso en Google para volver a tu cuenta VISO.</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              void nativeAuth
+                .cancel()
+                .catch(() =>
+                  setError("No pudimos cancelar. Cerrá y volvé a abrir VISO."),
+                )
+            }
+          >
+            Cancelar acceso Google
+          </Button>
+        </div>
+      )}
       {error && !onError && (
         <p role="alert" className="text-sm text-destructive">
           {error}
