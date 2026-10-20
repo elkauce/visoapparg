@@ -11,6 +11,7 @@ import {
   Library,
   Loader2,
   PanelsTopLeft,
+  RefreshCw,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import MarketplaceDisplayApply from "./display-apply";
+import MarketplacePageInstall from "./page-install";
 import {
   assetSource,
   CATEGORY_LABELS,
@@ -197,8 +199,7 @@ export function LibraryAsset({
                 ? "Abrir archivo"
                 : "Descargar"}
           </Button>
-          {product.category === "screensavers" &&
-            (asset.mediaType === "image" || asset.mediaType === "video") && (
+          {(asset.mediaType === "image" || asset.mediaType === "video") && (
               <MarketplaceDisplayApply
                 productId={product.productId}
                 asset={asset}
@@ -218,8 +219,10 @@ export default function MarketLibrary({
   const entries = useQuery(api.marketplace.library, {});
   const remove = useMutation(api.marketplace.removeFromLibrary);
   const install = useMutation(api.marketplace.installProfile);
+  const update = useMutation(api.marketplace.updateLibrary);
   const [removing, setRemoving] = useState<MarketLibraryEntry | null>(null);
   const [installing, setInstalling] = useState<MarketLibraryEntry | null>(null);
+  const [updating, setUpdating] = useState<MarketLibraryEntry | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = useRef(false);
@@ -228,10 +231,11 @@ export default function MarketLibrary({
     if (busy.current) return;
     setRemoving(null);
     setInstalling(null);
+    setUpdating(null);
     setError(null);
   };
   const confirm = async () => {
-    if (busy.current || (!removing && !installing)) return;
+    if (busy.current || (!removing && !installing && !updating)) return;
     busy.current = true;
     setPending(true);
     setError(null);
@@ -239,6 +243,9 @@ export default function MarketLibrary({
       if (removing) {
         await remove({ productId: removing.productId });
         toast.success("Recurso quitado de tu biblioteca.");
+      } else if (updating) {
+        await update({ productId: updating.productId });
+        toast.success("Biblioteca actualizada. Tu deck y tus fondos conservan sus archivos.");
       } else if (installing) {
         await install({ productId: installing.productId });
         toast.success(
@@ -247,10 +254,13 @@ export default function MarketLibrary({
       }
       setRemoving(null);
       setInstalling(null);
+      setUpdating(null);
     } catch {
       setError(
         removing
           ? "No pudimos quitar el recurso. Volvé a intentarlo."
+          : updating
+            ? "No pudimos actualizar el recurso. Tu versión anterior se conserva; volvé a intentarlo."
           : "No pudimos agregar la página. Comprobá que haya espacio en tu deck y volvé a intentarlo.",
       );
     } finally {
@@ -287,7 +297,7 @@ export default function MarketLibrary({
         <Check aria-hidden="true" />
         <p>
           Tus recursos se guardan con tu cuenta. Elegilos desde la biblioteca al
-          editar una tecla.
+          editar una tecla o el fondo del Display.
         </p>
         <Button variant="outline" size="sm" asChild>
           <Link to="/deck/edit">
@@ -320,6 +330,9 @@ export default function MarketLibrary({
                 />
               </summary>
               <div className="vm-library-entry-body">
+                {entry.delivery === "page" && entry.pageTemplate && (
+                  <MarketplacePageInstall key={`${entry.productId}:${entry.revision ?? 1}`} product={entry} />
+                )}
                 {entry.delivery === "plugin" &&
                 entry.productId === "viso-stream-deck" ? (
                   <div className="vm-library-inline-notice">
@@ -361,6 +374,19 @@ export default function MarketLibrary({
                   </div>
                 )}
                 <div className="vm-library-entry-footer">
+                  {entry.updateAvailable && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setError(null);
+                        setUpdating(entry);
+                      }}
+                      aria-label={`Actualizar ${entry.title} en mi biblioteca`}
+                    >
+                      <RefreshCw /> Actualizar recurso
+                    </Button>
+                  )}
                   {(entry.category === "icons" ||
                     entry.category === "profiles") && (
                     <Link to="/deck/edit">
@@ -385,7 +411,7 @@ export default function MarketLibrary({
       </div>
 
       <Dialog
-        open={!!removing || !!installing}
+        open={!!removing || !!installing || !!updating}
         onOpenChange={(open) => !open && closeConfirmation()}
       >
         <DialogContent
@@ -398,11 +424,15 @@ export default function MarketLibrary({
             <DialogTitle>
               {removing
                 ? "¿Quitar este recurso?"
+                : updating
+                  ? "¿Actualizar este recurso?"
                 : "Agregar una página a tu deck"}
             </DialogTitle>
             <DialogDescription>
               {removing
                 ? `Vas a quitar ${removing.title} de tu biblioteca. Las teclas que ya personalizaste conservan sus archivos.`
+                : updating
+                  ? `Vas a actualizar ${updating.title} en tu biblioteca${updating.latestVersion ? ` a la versión ${updating.latestVersion}` : " a la nueva versión publicada"}. Tus teclas, fondos y páginas ya instaladas se conservan. Para usar los cambios, elegí el recurso de nuevo o aplicá los ajustes de la página desde tu biblioteca.`
                 : "Se creará una página nueva con tus estados. Tus otras páginas y sus configuraciones se conservan."}
             </DialogDescription>
           </DialogHeader>
@@ -425,6 +455,8 @@ export default function MarketLibrary({
                 ? "Guardando…"
                 : removing
                   ? "Quitar recurso"
+                  : updating
+                    ? "Actualizar mi biblioteca"
                   : "Crear página nueva"}
             </Button>
           </DialogFooter>

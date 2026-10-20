@@ -1,0 +1,7 @@
+{
+  "screenSettings": {
+    "leagues": ["ligaarg", "libertadores", "sudamericana"],
+    "sportsView": "matches",
+    "sportsFilter": "all"
+  }
+}

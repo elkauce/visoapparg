@@ -1,4 +1,5 @@
 import { useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import {
   BadgeCheck,
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { marketErrorMessage } from "@/lib/marketplace-upload";
 import ProductForm, { type EditableMarketProduct } from "./product-form";
+import { CreatorPaymentConnection } from "./payment-settings";
 import "./studio.css";
 
 const STATUS_NAMES: Record<string, string> = {
@@ -207,6 +209,7 @@ export default function MarketplaceStudio() {
         <p>Compartí tus diseños, recursos y productos con la comunidad VISO.</p>
       </header>
       <CreatorProfile profile={session.creator} />
+      {canPublish && <CreatorPaymentConnection />}
       {!canPublish && (
         <div className="vm-studio-step">
           <Clock3 aria-hidden="true" />
@@ -285,6 +288,13 @@ export default function MarketplaceStudio() {
                     )}
                   </div>
                   <div className="vm-studio-product-actions">
+                    <Button asChild size="sm" variant="ghost">
+                      <Link
+                        to={`/marketplace/products/${encodeURIComponent(product.id)}`}
+                      >
+                        Ver ficha
+                      </Link>
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -292,21 +302,23 @@ export default function MarketplaceStudio() {
                     >
                       Editar
                     </Button>
-                    {product.status !== "published" &&
-                      product.status !== "pending" && (
-                        <Button
-                          size="sm"
-                          disabled={sending !== null}
-                          onClick={() => void send(product.id)}
-                        >
-                          {sending === product.id ? (
-                            <Loader2 className="animate-spin" />
-                          ) : (
-                            <Send />
-                          )}
-                          Enviar a revisión
-                        </Button>
-                      )}
+                    {(product.hasDraft
+                      ? product.draftStatus !== "pending"
+                      : product.status !== "published" &&
+                        product.status !== "pending") && (
+                      <Button
+                        size="sm"
+                        disabled={sending !== null}
+                        onClick={() => void send(product.id)}
+                      >
+                        {sending === product.id ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <Send />
+                        )}
+                        Enviar a revisión
+                      </Button>
+                    )}
                     {product.status === "published" && (
                       <span className="vm-studio-published">
                         <BadgeCheck aria-hidden="true" />
@@ -321,9 +333,9 @@ export default function MarketplaceStudio() {
         </section>
       )}
       <p className="vm-studio-footer-note">
-        Empezamos con recursos gratuitos y compras en los sitios de los
-        vendedores. Los cobros dentro de VISO se incorporarán en una próxima
-        etapa.
+        Tus cambios se revisan antes de publicarse. Los usuarios conservan los
+        recursos que ya adquirieron y pueden elegir cuándo instalar una
+        actualización.
       </p>
       {editor && (
         <ProductForm

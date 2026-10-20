@@ -9,8 +9,10 @@ const fixture = vi.hoisted(() => ({
   submit: vi.fn(),
   upload: vi.fn(),
   success: vi.fn(),
+  preview: vi.fn(),
 }));
 vi.mock("convex/react", () => ({
+  useAction: () => fixture.preview,
   useMutation: (ref: Parameters<typeof getFunctionName>[0]) =>
     getFunctionName(ref) === "marketplace:saveProduct"
       ? fixture.save
@@ -52,6 +54,7 @@ beforeEach(() => {
     .mockReset()
     .mockResolvedValue({ storageId: "uploaded-file", mediaType: "image" });
   fixture.success.mockReset();
+  fixture.preview.mockReset();
   Object.defineProperty(URL, "createObjectURL", {
     configurable: true,
     value: vi.fn(() => "blob:cover"),
@@ -66,7 +69,9 @@ describe("creator product editing", () => {
   it("keeps an existing private cover and downloadable assets when editing a published product", async () => {
     const close = vi.fn();
     render(<ProductForm product={original} isAdmin={false} onClose={close} />);
-    expect(screen.getByText(/esta ficha vuelve a borrador/)).toBeVisible();
+    expect(
+      screen.getByText(/La versión publicada sigue disponible/),
+    ).toBeVisible();
     fireEvent.change(screen.getByLabelText("Título"), {
       target: { value: "Iconos renovados" },
     });
@@ -81,6 +86,9 @@ describe("creator product editing", () => {
       coverStorageId: "old-cover",
       affiliate: false,
       assets: [{ name: "Libre", storageId: "old-key", mediaType: "image" }],
+      gallery: [],
+      details: {},
+      changelog: [],
     });
     expect(fixture.upload).not.toHaveBeenCalled();
     expect(fixture.submit).not.toHaveBeenCalled();
@@ -93,6 +101,9 @@ describe("creator product editing", () => {
     });
     fireEvent.change(screen.getByLabelText("Descripción"), {
       target: { value: "Descripción y condición del vendedor original." },
+    });
+    fireEvent.change(screen.getByLabelText("Precio"), {
+      target: { value: "12500" },
     });
     const url = screen.getByLabelText("Enlace de afiliado de Mercado Libre");
     fireEvent.change(url, {
@@ -153,5 +164,213 @@ describe("creator product editing", () => {
       { name: "first.png", storageId: "first-owned", mediaType: "image" },
       { name: "second.png", storageId: "second-owned", mediaType: "image" },
     ]);
+  });
+
+  it("lets creators edit every category and saves gallery videos separately from downloadable assets", async () => {
+    render(
+      <ProductForm product={original} isAdmin={false} onClose={vi.fn()} />,
+    );
+    for (const name of [
+      "Iconos",
+      "Plugins",
+      "Perfiles",
+      "Protectores",
+      "Sonidos",
+      "Hardware",
+      "Nuevo",
+      "Usados",
+      "Página",
+    ]) {
+      expect(screen.getByRole("option", { name })).toBeInTheDocument();
+    }
+    const video = new File(["video"], "vertical.mp4", { type: "video/mp4" });
+    fixture.upload.mockResolvedValueOnce({
+      storageId: "video-owned",
+      mediaType: "video",
+    });
+    fireEvent.change(screen.getByLabelText("Fotos y videos de la ficha"), {
+      target: { files: [video] },
+    });
+    fireEvent.change(screen.getByLabelText("Descripción de la vista 1"), {
+      target: { value: "Video vertical de demostración" },
+    });
+    fireEvent.change(screen.getByLabelText("Dispositivos compatibles"), {
+      target: { value: "Deck y Display" },
+    });
+    fireEvent.change(
+      screen.getByLabelText("Instrucciones de instalación y uso"),
+      { target: { value: "Elegir desde la biblioteca." } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    await waitFor(() => expect(fixture.save).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      gallery: [
+        {
+          name: "Video vertical de demostración",
+          storageId: "video-owned",
+          mediaType: "video",
+        },
+      ],
+      assets: [{ name: "Libre", storageId: "old-key", mediaType: "image" }],
+      details: {
+        device: "Deck y Display",
+        setup: "Elegir desde la biblioteca.",
+      },
+    });
+  });
+
+  it("preserves builtin files and removes their original cover when the administrator requests it", async () => {
+    render(
+      <ProductForm
+        product={{
+          ...original,
+          id: "viso-original-icons",
+          builtin: true,
+          coverStorageId: undefined,
+          coverPath: "/marketplace/covers/original-icons.png",
+          assets: [
+            {
+              id: "libre-png",
+              name: "Libre",
+              mediaType: "image",
+              builtinPath: "/marketplace/originals/libre.png",
+            },
+          ],
+        }}
+        isAdmin
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Quitar portada" }));
+    fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    await waitFor(() => expect(fixture.save).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      productId: "viso-original-icons",
+      coverPath: "",
+      assets: [
+        {
+          id: "libre-png",
+          name: "Libre",
+          mediaType: "image",
+          builtinPath: "/marketplace/originals/libre.png",
+        },
+      ],
+    });
+    expect(fixture.upload).not.toHaveBeenCalled();
+  });
+
+  it("saves a native page with its settings without requiring a downloadable archive", async () => {
+    render(
+      <ProductForm isAdmin={false} initialCategory="pages" onClose={vi.fn()} />,
+    );
+    fireEvent.change(screen.getByLabelText("Título"), {
+      target: { value: "Clima Córdoba" },
+    });
+    fireEvent.change(screen.getByLabelText("Descripción"), {
+      target: { value: "Pronóstico para la oficina." },
+    });
+    fireEvent.change(
+      screen.getByLabelText("Configuración inicial de la página (opcional)"),
+      {
+        target: {
+          value: '{"screenSettings":{"city":"Córdoba","units":"celsius"}}',
+        },
+      },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Guardar y enviar" }));
+    await waitFor(() => expect(fixture.submit).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      category: "pages",
+      pageTemplate: "weather",
+      pageSettings: { screenSettings: { city: "Córdoba", units: "celsius" } },
+      assets: [],
+      priceMode: "free",
+    });
+    expect(fixture.upload).not.toHaveBeenCalled();
+  });
+
+  it("keeps unpriced physical goods as drafts and requires an actual price before submission", async () => {
+    render(
+      <ProductForm
+        isAdmin={false}
+        initialCategory="hardware"
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("Título"), {
+      target: { value: "Control de escritorio" },
+    });
+    fireEvent.change(screen.getByLabelText("Descripción"), {
+      target: { value: "Dispositivo nuevo con garantía." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar y enviar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "guardá un borrador",
+    );
+    expect(fixture.save).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    await waitFor(() => expect(fixture.save).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      priceMode: "info",
+      condition: "new",
+      assets: [],
+    });
+    expect(fixture.save.mock.calls[0][0]).not.toHaveProperty("priceAmount");
+    expect(fixture.submit).not.toHaveBeenCalled();
+  });
+
+  it("requires a displayed price for an external listing before sending it to review", async () => {
+    render(
+      <ProductForm
+        product={{
+          ...original,
+          category: "hardware",
+          priceMode: "external",
+          externalUrl: "https://shop.example.test/item",
+          assets: [],
+        }}
+        isAdmin={false}
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Guardar y enviar" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("precio válido");
+    expect(fixture.save).not.toHaveBeenCalled();
+    fireEvent.change(screen.getByLabelText("Precio"), {
+      target: { value: "25000,50" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar y enviar" }));
+    await waitFor(() => expect(fixture.submit).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      priceAmount: 2500050,
+      currency: "ARS",
+      priceMode: "external",
+    });
+  });
+
+  it("allows editing the built-in essential profile without inventing an archive", async () => {
+    render(
+      <ProductForm
+        product={{
+          ...original,
+          id: "viso-essential-profile",
+          category: "profiles",
+          builtin: true,
+          delivery: "profile",
+          profileTemplate: "essential",
+          assets: [],
+        }}
+        isAdmin
+        onClose={vi.fn()}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Guardar borrador" }));
+    await waitFor(() => expect(fixture.save).toHaveBeenCalledOnce());
+    expect(fixture.save.mock.calls[0][0]).toMatchObject({
+      productId: "viso-essential-profile",
+      category: "profiles",
+      assets: [],
+    });
+    expect(fixture.upload).not.toHaveBeenCalled();
   });
 });

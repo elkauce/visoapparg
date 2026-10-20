@@ -3,6 +3,7 @@ import { httpAction } from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { auth } from "./auth.ts";
 import { MAX_DECK_MEDIA_BYTES, deckMediaType } from "./deck_media.ts";
+import { oauthCallback, paymentWebhook } from "./marketplace_payment_http";
 import {
   MAX_MARKETPLACE_BYTES,
   marketplaceType,
@@ -11,6 +12,17 @@ import {
 
 const http = httpRouter();
 auth.addHttpRoutes(http);
+
+http.route({
+  path: "/marketplace/payments/oauth/callback",
+  method: "GET",
+  handler: oauthCallback,
+});
+http.route({
+  path: "/marketplace/payments/webhook",
+  method: "POST",
+  handler: paymentWebhook,
+});
 
 // Texto plano mínimo, fácil de leer desde un microcontrolador
 function text(body: string): Response {

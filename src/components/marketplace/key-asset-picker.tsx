@@ -55,6 +55,7 @@ class KeyLibraryBoundary extends Component<
 
 export default function KeyAssetPicker(props: {
   onSelect: (selection: KeyLibrarySelection) => void;
+  purpose?: "key" | "display";
 }) {
   return (
     <KeyLibraryBoundary>
@@ -65,8 +66,10 @@ export default function KeyAssetPicker(props: {
 
 function KeyAssetPickerContent({
   onSelect,
+  purpose = "key",
 }: {
   onSelect: (selection: KeyLibrarySelection) => void;
+  purpose?: "key" | "display";
 }) {
   const library = useQuery(api.marketplace.library, {});
   const copyAsset = useAction(api.marketplace.copyAssetToDeck);
@@ -93,8 +96,10 @@ function KeyAssetPickerContent({
   return (
     <div className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Recursos VISO incluidos y paquetes que agregaste a tu biblioteca. Elige
-        uno para esta tecla; se aplica al guardar.
+        Recursos VISO incluidos y paquetes que agregaste a tu biblioteca.{" "}
+        {purpose === "display"
+          ? "Elegí un fondo para tu Display y confirmá para aplicarlo."
+          : "Elige uno para esta tecla; se aplica al guardar."}
       </p>
       <div className="max-h-72 space-y-4 overflow-y-auto pr-1">
         {products.map((product) => {
@@ -116,7 +121,7 @@ function KeyAssetPickerContent({
                       key={asset.id}
                       type="button"
                       className="group overflow-hidden rounded-xl border bg-card text-left transition-colors hover:border-primary focus-visible:outline-2 focus-visible:outline-primary"
-                      aria-label={`Usar ${asset.name} de ${product.title}`}
+                      aria-label={`Usar ${asset.name} de ${product.title}${purpose === "display" ? " en Display" : ""}`}
                       onClick={() =>
                         onSelect({
                           id: `${product.productId}/${asset.id}`,
@@ -140,7 +145,7 @@ function KeyAssetPickerContent({
                         })
                       }
                     >
-                      <div className="relative aspect-square overflow-hidden bg-black">
+                      <div className={`relative overflow-hidden bg-black ${purpose === "display" ? "aspect-video" : "aspect-square"}`}>
                         {mediaType === "video" ? (
                           <video
                             src={previewUrl}
@@ -150,14 +155,14 @@ function KeyAssetPickerContent({
                             playsInline
                             preload="metadata"
                             aria-hidden="true"
-                            className="size-full object-cover"
+                            className={`size-full ${purpose === "display" ? "object-contain" : "object-cover"}`}
                           />
                         ) : (
                           <img
                             src={previewUrl}
                             alt=""
                             loading="lazy"
-                            className="size-full object-cover"
+                            className={`size-full ${purpose === "display" ? "object-contain" : "object-cover"}`}
                           />
                         )}
                         <span className="absolute bottom-1 right-1 rounded bg-black/70 p-1 text-white">

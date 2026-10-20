@@ -10,7 +10,10 @@ import {
   marketplaceCategory,
   marketplaceDelivery,
   marketplaceMediaType,
-  marketplacePriceMode,
+  marketplaceProductFields,
+  marketplacePageTemplate,
+  marketplaceAcquisitionSnapshot,
+  marketplacePageSettings,
 } from "./lib/marketplace_validation";
 
 export default defineSchema({
@@ -134,6 +137,8 @@ export default defineSchema({
 
   // Páginas del deck de pantalla completa (cada una es una cuadrícula de teclas)
   deckPages: defineTable({
+    marketplaceProductId: v.optional(v.string()),
+    marketplaceVersion: v.optional(v.string()),
     kind: v.optional(screenKind),
     screenSettings: v.optional(v.any()),
     standbySettings: v.optional(v.any()),
@@ -199,16 +204,14 @@ export default defineSchema({
   marketplaceProducts: defineTable({
     userId: v.id("users"),
     creatorId: v.optional(v.id("creatorProfiles")),
-    creatorName: v.string(),
-    title: v.string(),
-    description: v.string(),
-    category: marketplaceCategory,
-    coverStorageId: v.optional(v.id("_storage")),
-    priceMode: marketplacePriceMode,
-    delivery: marketplaceDelivery,
-    externalUrl: v.optional(v.string()),
-    affiliate: v.boolean(),
-    assets: v.array(marketplaceAsset),
+    builtinId: v.optional(v.string()),
+    ...marketplaceProductFields,
+    revision: v.optional(v.number()),
+    draft: v.optional(v.object(marketplaceProductFields)),
+    draftStatus: v.optional(
+      v.union(v.literal("draft"), v.literal("pending"), v.literal("rejected")),
+    ),
+    draftReviewReason: v.optional(v.string()),
     status: v.union(
       v.literal("draft"),
       v.literal("pending"),
@@ -224,7 +227,8 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_status", ["status"])
-    .index("by_category_status", ["category", "status"]),
+    .index("by_category_status", ["category", "status"])
+    .index("by_builtin", ["builtinId"]),
 
   // Acquisition snapshots keep a creator from replacing an acquired free asset
   // with a different file or a future paid download after publication.
@@ -237,10 +241,95 @@ export default defineSchema({
     delivery: marketplaceDelivery,
     assets: v.array(marketplaceAsset),
     profileTemplate: v.optional(v.literal("essential")),
+    pageTemplate: v.optional(marketplacePageTemplate),
+    pageSettings: v.optional(marketplacePageSettings),
+    revision: v.optional(v.number()),
     acquiredAt: v.number(),
   })
     .index("by_user", ["userId"])
     .index("by_user_product", ["userId", "productId"]),
+
+  marketplacePaymentSettings: defineTable({
+    key: v.string(),
+    digitalCommissionBps: v.optional(v.number()),
+    hardwareCommissionBps: v.optional(v.number()),
+    enabled: v.boolean(),
+    splitApproved: v.boolean(),
+    policiesAccepted: v.boolean(),
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+  marketplacePaymentAccounts: defineTable({
+    userId: v.id("users"),
+    provider: v.literal("mercadopago"),
+    providerUserId: v.string(),
+    country: v.string(),
+    encryptedAccessToken: v.string(),
+    encryptedRefreshToken: v.optional(v.string()),
+    expiresAt: v.optional(v.number()),
+    status: v.union(v.literal("connected"), v.literal("revoked")),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_provider_user", ["providerUserId"]),
+  marketplacePaymentOAuthStates: defineTable({
+    userId: v.id("users"),
+    stateHash: v.string(),
+    expiresAt: v.number(),
+    consumedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_state", ["stateHash"])
+    .index("by_user", ["userId"]),
+  marketplaceOrders: defineTable({
+    buyerId: v.id("users"),
+    sellerId: v.id("users"),
+    productId: v.string(),
+    title: v.string(),
+    currency: v.string(),
+    amount: v.number(),
+    commissionBps: v.number(),
+    commissionAmount: v.number(),
+    sellerAmount: v.number(),
+    productSnapshot: marketplaceAcquisitionSnapshot,
+    sellerProviderUserId: v.string(),
+    providerMode: v.union(v.literal("test"), v.literal("live")),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("cancelled"),
+      v.literal("refunded"),
+      v.literal("charged_back"),
+    ),
+    preferenceId: v.optional(v.string()),
+    paymentId: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    paidAt: v.optional(v.number()),
+  })
+    .index("by_buyer", ["buyerId"])
+    .index("by_payment", ["paymentId"]),
+  marketplacePaymentAttempts: defineTable({
+    orderId: v.id("marketplaceOrders"),
+    paymentId: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected"),
+      v.literal("cancelled"),
+      v.literal("refunded"),
+      v.literal("charged_back"),
+    ),
+    updatedAt: v.number(),
+  })
+    .index("by_payment", ["paymentId"])
+    .index("by_order", ["orderId"]),
+  marketplacePaymentWebhookEvents: defineTable({
+    eventKey: v.string(),
+    processedAt: v.number(),
+  }).index("by_event", ["eventKey"]),
 
   // Recibos de pulsaciones: deviceId es identificación no secreta, nunca autenticación.
   deckActionRequests: defineTable({

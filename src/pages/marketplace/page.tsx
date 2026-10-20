@@ -5,12 +5,18 @@ import {
   useDeferredValue,
   type ReactNode,
 } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from "react-router-dom";
 import { useConvexAuth, useQuery } from "convex/react";
 import {
   ArrowLeft,
   ArrowUpRight,
   AudioLines,
+  BookOpen,
   Check,
   ChevronRight,
   Compass,
@@ -35,11 +41,13 @@ import { SignInButton } from "@/components/ui/signin";
 import { VisoBrand } from "@/components/viso-brand";
 import MarketProductDialog from "./product-detail";
 import MarketLibrary from "./library";
-import { CATEGORY_LABELS, type MarketProduct } from "./types";
+import { MarketplaceOrders } from "./checkout";
+import { CATEGORY_LABELS, productPrice, type MarketProduct } from "./types";
 import "./marketplace.css";
 
 const MarketplaceStudio = lazy(() => import("./studio"));
 const MarketplaceAdmin = lazy(() => import("./admin"));
+const CreatorDocs = lazy(() => import("./creator-docs"));
 
 const CATEGORIES = [
   { id: "discover", label: "Descubrir", icon: Compass },
@@ -50,10 +58,12 @@ const CATEGORIES = [
   { id: "soundboards", label: "Sonidos", icon: AudioLines },
   { id: "hardware", label: "Hardware", icon: Package },
   { id: "used", label: "Usados", icon: Store },
+  { id: "new", label: "Nuevo", icon: Sparkles },
+  { id: "pages", label: "Página", icon: PanelsTopLeft },
 ] as const;
 
 type Category = (typeof CATEGORIES)[number]["id"];
-type View = "discover" | "library" | "studio" | "admin";
+type View = "discover" | "library" | "studio" | "admin" | "docs";
 
 function isCategory(value: string | null): value is Category {
   return CATEGORIES.some((category) => category.id === value);
@@ -96,11 +106,7 @@ export function ProductCard({
             {product.creatorName}
           </span>
           <span className="vm-product-price">
-            {product.priceMode === "free"
-              ? "Gratis"
-              : product.priceMode === "external"
-                ? "Ver oferta"
-                : "Conocer"}
+            {productPrice(product)}
             <ArrowUpRight aria-hidden="true" />
           </span>
         </div>
@@ -193,12 +199,15 @@ export default function MarketplacePage() {
 
 function MarketplaceContent() {
   const [params, setParams] = useSearchParams();
+  const navigate = useNavigate();
+  const route = useParams<{ productId?: string }>();
   const session = useQuery(api.marketplace.session, {});
   const requestedView = params.get("view");
   const view: View =
     requestedView === "library" ||
     requestedView === "studio" ||
-    requestedView === "admin"
+    requestedView === "admin" ||
+    requestedView === "docs"
       ? requestedView
       : "discover";
   const category = isCategory(params.get("category"))
@@ -217,29 +226,31 @@ function MarketplaceContent() {
         }
       : "skip",
   );
-  const productId = params.get("product");
+  const productId = route.productId ?? params.get("product");
 
   const chooseView = (next: View) => {
     const update = new URLSearchParams(params);
     update.delete("product");
     if (next === "discover") update.delete("view");
     else update.set("view", next);
-    setParams(update);
+    navigate(`/marketplace${update.size ? `?${update}` : ""}`);
   };
   const chooseCategory = (next: Category) => {
     const update = new URLSearchParams();
     if (next !== "discover") update.set("category", next);
-    setParams(update);
+    navigate(`/marketplace${update.size ? `?${update}` : ""}`);
   };
   const openProduct = (id: string) => {
     const update = new URLSearchParams(params);
-    update.set("product", id);
-    setParams(update);
+    update.delete("product");
+    navigate(
+      `/marketplace/products/${encodeURIComponent(id)}${update.size ? `?${update}` : ""}`,
+    );
   };
   const closeProduct = () => {
     const update = new URLSearchParams(params);
     update.delete("product");
-    setParams(update, { replace: true });
+    navigate(`/marketplace${update.size ? `?${update}` : ""}`);
   };
   const changeSearch = (value: string) => {
     const update = new URLSearchParams(params);
@@ -252,11 +263,13 @@ function MarketplaceContent() {
       ? "Mi biblioteca"
       : view === "studio"
         ? "Espacio creador"
-        : view === "admin"
-          ? "Administración"
-          : category === "discover"
-            ? "Descubrí tu próximo favorito."
-            : CATEGORY_LABELS[category];
+        : view === "docs"
+          ? "Documentación para creadores"
+          : view === "admin"
+            ? "Administración"
+            : category === "discover"
+              ? "Descubrí tu próximo favorito."
+              : CATEGORY_LABELS[category];
   const featured =
     products?.find((product) => product.id === "viso-living-icons") ??
     products?.find((product) => product.category === "icons");
@@ -326,6 +339,13 @@ function MarketplaceContent() {
               </button>
             ))}
           </nav>
+          <button
+            className="vm-docs-link"
+            type="button"
+            onClick={() => chooseView("docs")}
+          >
+            <BookOpen aria-hidden="true" /> Guía para creadores
+          </button>
           <div className="vm-sidebar-creator">
             <Sparkles aria-hidden="true" />
             <h2>Tu talento tiene lugar.</h2>
@@ -337,47 +357,59 @@ function MarketplaceContent() {
         </aside>
 
         <main className="vm-main" id="marketplace-content">
-          <div className="vm-page-heading">
-            <div>
-              <span className="vm-eyebrow">TU ECOSISTEMA VISO</span>
-              <h1>{title}</h1>
-              <p>
-                {view === "library"
-                  ? "Tus recursos, listos para darles tu estilo."
-                  : view === "studio"
-                    ? "Creá, compartí y hacé crecer tu espacio."
-                    : view === "admin"
-                      ? "Cuidá lo que compartimos con la comunidad."
-                      : category === "used"
-                        ? "Oportunidades seleccionadas por VISO, con enlaces de afiliado."
-                        : "Recursos originales, creadores y equipos para tu espacio."}
-              </p>
+          {!productId && (
+            <div className="vm-page-heading">
+              <div>
+                <span className="vm-eyebrow">TU ECOSISTEMA VISO</span>
+                <h1>{title}</h1>
+                <p>
+                  {view === "library"
+                    ? "Tus recursos, listos para darles tu estilo."
+                    : view === "studio"
+                      ? "Creá, compartí y hacé crecer tu espacio."
+                      : view === "admin"
+                        ? "Cuidá lo que compartimos con la comunidad."
+                        : category === "used"
+                          ? "Oportunidades seleccionadas por VISO, con enlaces de afiliado."
+                          : "Recursos originales, creadores y equipos para tu espacio."}
+                </p>
+              </div>
+              {view === "discover" && (
+                <label className="vm-search">
+                  <Search aria-hidden="true" />
+                  <span className="sr-only">Buscar en el marketplace</span>
+                  <input
+                    type="search"
+                    placeholder="Buscar recursos o creadores"
+                    maxLength={120}
+                    value={search}
+                    onChange={(event) => changeSearch(event.target.value)}
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      aria-label="Limpiar búsqueda"
+                      onClick={() => changeSearch("")}
+                    >
+                      <X />
+                    </button>
+                  )}
+                </label>
+              )}
             </div>
-            {view === "discover" && (
-              <label className="vm-search">
-                <Search aria-hidden="true" />
-                <span className="sr-only">Buscar en el marketplace</span>
-                <input
-                  type="search"
-                  placeholder="Buscar recursos o creadores"
-                  maxLength={120}
-                  value={search}
-                  onChange={(event) => changeSearch(event.target.value)}
-                />
-                {search && (
-                  <button
-                    type="button"
-                    aria-label="Limpiar búsqueda"
-                    onClick={() => changeSearch("")}
-                  >
-                    <X />
-                  </button>
-                )}
-              </label>
-            )}
-          </div>
+          )}
 
-          {view === "discover" ? (
+          {productId ? (
+            <MarketProductDialog
+              productId={productId}
+              onClose={closeProduct}
+              onAcquired={() => chooseView("library")}
+            />
+          ) : view === "docs" ? (
+            <Suspense fallback={<MarketLoading />}>
+              <CreatorDocs />
+            </Suspense>
+          ) : view === "discover" ? (
             <>
               {category === "discover" && !search && featured && (
                 <section className="vm-featured" aria-label="Destacado de VISO">
@@ -474,7 +506,10 @@ function MarketplaceContent() {
               )}
             </>
           ) : view === "library" ? (
-            <MarketLibrary onExplore={() => chooseCategory("discover")} />
+            <>
+              <MarketLibrary onExplore={() => chooseCategory("discover")} />
+              <MarketplaceOrders />
+            </>
           ) : view === "admin" && session === undefined ? (
             <MarketLoading />
           ) : view === "admin" && !session?.isAdmin ? (
@@ -524,14 +559,6 @@ function MarketplaceContent() {
           <span>Creador</span>
         </button>
       </nav>
-
-      {productId && (
-        <MarketProductDialog
-          productId={productId}
-          onClose={closeProduct}
-          onAcquired={() => chooseView("library")}
-        />
-      )}
     </>
   );
 }

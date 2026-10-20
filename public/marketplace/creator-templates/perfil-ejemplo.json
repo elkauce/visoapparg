@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "title": "Mi perfil de trabajo",
+  "description": "Ejemplo de documentación para un perfil descargable. No se importa ni ejecuta automáticamente.",
+  "version": "1.0.0",
+  "compatibility": "Indicar aplicación y versión mínima comprobadas por el creador",
+  "pages": [
+    {
+      "name": "Trabajo",
+      "keys": [
+        { "label": "Disponible", "actionDescription": "Elegir el estado Libre en el editor de VISO", "color": "#22c55e" },
+        { "label": "Concentrado", "actionDescription": "Crear o elegir el estado Concentrado en el editor de VISO", "color": "#8b5cf6" }
+      ]
+    }
+  ],
+  "installation": [
+    "Abrir Editar deck y crear una página.",
+    "Configurar las teclas y acciones descritas en este archivo.",
+    "Comprobar cada tecla en web y Android antes de usar."
+  ]
+}

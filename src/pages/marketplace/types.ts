@@ -17,8 +17,21 @@ export type MarketProduct = {
   category: MarketplaceCategory;
   creatorName: string;
   coverUrl?: string | null;
-  priceMode: "free" | "external" | "info";
-  delivery: "assets" | "profile" | "plugin" | "inquiry";
+  priceMode: "free" | "external" | "info" | "paid";
+  priceAmount?: number;
+  currency?: "ARS" | "USD";
+  condition?: "new" | "used";
+  gallery?: MarketGalleryItem[];
+  details?: MarketDetails;
+  changelog?: MarketChangelog[];
+  pageTemplate?: "football" | "clock" | "weather" | "spotify";
+  profileTemplate?: "essential";
+  pageSettings?: Record<string, unknown>;
+  canEdit?: boolean;
+  hasDraft?: boolean;
+  draftStatus?: "draft" | "pending" | "rejected";
+  revision?: number;
+  delivery: "assets" | "profile" | "plugin" | "inquiry" | "page";
   externalUrl?: string;
   affiliate: boolean;
   status: string;
@@ -29,14 +42,61 @@ export type MarketProduct = {
   assets?: MarketAsset[];
 };
 
+export type MarketGalleryItem = {
+  id: string;
+  name: string;
+  mediaType: "image" | "video";
+  storageId?: string;
+  builtinPath?: string;
+  externalUrl?: string;
+  url?: string | null;
+};
+export type MarketDetails = Partial<
+  Record<
+    | "type"
+    | "device"
+    | "os"
+    | "compatibility"
+    | "size"
+    | "version"
+    | "language"
+    | "supportUrl"
+    | "included"
+    | "setup",
+    string
+  >
+>;
+export type MarketChangelog = { version: string; date: string; notes: string };
+
+export function productPrice(
+  product: Pick<MarketProduct, "priceMode" | "priceAmount" | "currency">,
+): string {
+  if (product.priceMode === "free") return "Gratis";
+  if (Number.isSafeInteger(product.priceAmount) && product.priceAmount! > 0) {
+    return new Intl.NumberFormat("es-AR", {
+      style: "currency",
+      currency: product.currency ?? "ARS",
+      currencyDisplay: "code",
+      minimumFractionDigits: product.priceAmount! % 100 ? 2 : 0,
+    }).format(product.priceAmount! / 100);
+  }
+  return "Precio a confirmar";
+}
+
 export type MarketLibraryEntry = {
   productId: string;
   title: string;
   category: MarketplaceCategory;
   creatorName: string;
-  delivery: "assets" | "profile" | "plugin" | "inquiry";
+  delivery: "assets" | "profile" | "plugin" | "inquiry" | "page";
   acquiredAt: number;
+  revision?: number;
+  latestRevision?: number;
+  latestVersion?: string;
+  updateAvailable?: boolean;
   profileTemplate?: "essential";
+  pageTemplate?: "football" | "clock" | "weather" | "spotify";
+  pageSettings?: Record<string, unknown>;
   assets: MarketAsset[];
 };
 
@@ -48,6 +108,8 @@ export const CATEGORY_LABELS: Record<MarketplaceCategory, string> = {
   soundboards: "Sonidos",
   hardware: "Hardware",
   used: "Usados",
+  new: "Nuevo",
+  pages: "Página",
 };
 
 export function assetSource(asset: MarketAsset): string | null {

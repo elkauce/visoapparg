@@ -1,3 +1,5 @@
+import type { MarketplacePageSettings } from "./marketplace_page_templates";
+
 /** First-party resources owned by VISO. No external seller or purchase is implied. */
 export type MarketplaceCategory =
   | "icons"
@@ -6,7 +8,11 @@ export type MarketplaceCategory =
   | "screensavers"
   | "soundboards"
   | "hardware"
-  | "used";
+  | "used"
+  | "new"
+  | "pages";
+
+export type MarketplacePageTemplate = "football" | "clock" | "weather" | "spotify";
 
 export type BuiltinMarketplaceAsset = {
   id: string;
@@ -23,9 +29,34 @@ export type BuiltinProduct = {
   category: MarketplaceCategory;
   creatorName: "VISO";
   coverPath: string;
-  priceMode: "free" | "external" | "info";
-  delivery: "assets" | "profile" | "plugin" | "inquiry";
+  priceMode: "free" | "external" | "info" | "paid";
+  priceAmount?: number;
+  currency?: "ARS" | "USD";
+  condition?: "new" | "used";
+  delivery: "assets" | "profile" | "plugin" | "inquiry" | "page";
   profileTemplate?: "essential";
+  pageTemplate?: MarketplacePageTemplate;
+  pageSettings?: MarketplacePageSettings;
+  details?: {
+    type?: string;
+    device?: string;
+    os?: string;
+    compatibility?: string;
+    size?: string;
+    version?: string;
+    language?: string;
+    supportUrl?: string;
+    included?: string;
+    setup?: string;
+  };
+  changelog?: { version: string; date: string; notes: string }[];
+  gallery?: {
+    id: string;
+    name: string;
+    mediaType: "image" | "video";
+    builtinPath?: string;
+    externalUrl?: string;
+  }[];
   externalUrl?: string;
   assets: BuiltinMarketplaceAsset[];
 };
@@ -159,6 +190,98 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     coverPath: "/marketplace/covers/stream-deck.png",
     priceMode: "free",
     delivery: "plugin",
+    assets: [],
+  },
+  {
+    id: "viso-page-football",
+    title: "Fútbol",
+    description:
+      "Resultados, partidos anteriores, favoritos y competiciones de Argentina, Latinoamérica y el mundo. Agregá la página deportiva de VISO a tu deck; tus elecciones se guardan en tu cuenta. La disponibilidad de estadísticas y alineaciones depende de la competición y del proveedor de datos.",
+    category: "pages",
+    creatorName: "VISO",
+    coverPath: "/marketplace/covers/page-football.png",
+    priceMode: "free",
+    delivery: "page",
+    pageTemplate: "football",
+    details: {
+      type: "Página de deportes",
+      device: "Deck y Display VISO",
+      os: "Android y navegador web",
+      compatibility: "VISO 1.14 o posterior. Requiere conexión a Internet.",
+      version: "1.0.0",
+      language: "Español",
+      included: "Página de deportes integrada, favoritos y consulta de resultados anteriores.",
+      setup: "Agregá la página al deck y hacé doble toque para elegir equipos, fecha y competiciones.",
+    },
+    assets: [],
+  },
+  {
+    id: "viso-page-clock",
+    title: "Reloj",
+    description:
+      "Un reloj a pantalla completa con estilos, colores, fecha y fotografías configurables. Puede ser tu página principal o tu protector de pantalla, según lo que elijas en el deck.",
+    category: "pages",
+    creatorName: "VISO",
+    coverPath: "/marketplace/covers/page-clock.png",
+    priceMode: "free",
+    delivery: "page",
+    pageTemplate: "clock",
+    details: {
+      type: "Página de reloj",
+      device: "Deck y Display VISO",
+      os: "Android y navegador web",
+      compatibility: "VISO 1.14 o posterior",
+      version: "1.0.0",
+      language: "Español",
+      included: "Reloj con estilos, fecha, colores y fotografías configurables.",
+      setup: "Agregá la página y hacé doble toque para elegir su diseño.",
+    },
+    assets: [],
+  },
+  {
+    id: "viso-page-weather",
+    title: "Clima",
+    description:
+      "El clima de tu ciudad a pantalla completa, con condiciones actuales, pronóstico y animaciones. Se incluye al crear una cuenta nueva y también podés agregarlo desde tu biblioteca.",
+    category: "pages",
+    creatorName: "VISO",
+    coverPath: "/marketplace/covers/page-weather.png",
+    priceMode: "free",
+    delivery: "page",
+    pageTemplate: "weather",
+    details: {
+      type: "Página de clima",
+      device: "Deck y Display VISO",
+      os: "Android y navegador web",
+      compatibility: "VISO 1.14 o posterior. Requiere conexión a Internet.",
+      version: "1.0.0",
+      language: "Español",
+      included: "Condiciones actuales y pronóstico para la ciudad que elijas.",
+      setup: "Hacé doble toque en la página para cambiar ciudad y unidades.",
+    },
+    assets: [],
+  },
+  {
+    id: "viso-page-spotify",
+    title: "Spotify",
+    description:
+      "Agregá la página de música de VISO para acceder a Spotify desde tu deck. La reproducción, el acceso a la cuenta y las funciones disponibles dependen de Spotify y de tu dispositivo; este recurso no incluye una suscripción.",
+    category: "pages",
+    creatorName: "VISO",
+    coverPath: "/marketplace/covers/page-spotify.png",
+    priceMode: "free",
+    delivery: "page",
+    pageTemplate: "spotify",
+    details: {
+      type: "Página de música",
+      device: "Deck y Display VISO",
+      os: "Android y navegador web",
+      compatibility: "VISO 1.14 o posterior. Las funciones de Spotify requieren su servicio.",
+      version: "1.0.0",
+      language: "Español",
+      included: "Página de música integrada con acceso a Spotify.",
+      setup: "Agregá la página al deck. Usá los accesos de música disponibles en tu dispositivo.",
+    },
     assets: [],
   },
   {

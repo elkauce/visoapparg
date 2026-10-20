@@ -1,28 +1,39 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { useAuthToken } from "@convex-dev/auth/react";
+import { FolderOpen, Library } from "lucide-react";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { uploadKeyMedia } from "@/pages/deck/_lib/upload-media";
+import KeyAssetPicker, {
+  type KeyLibrarySelection,
+} from "@/components/marketplace/key-asset-picker";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+
 export default function DisplayBackgroundSettings() {
   const background = useQuery(api.display.getBackground, {});
   const set = useMutation(api.display.setBackground);
   const clear = useMutation(api.display.clearBackground);
   const token = useAuthToken();
   const [busy, setBusy] = useState(false);
-  const [fit, setFit] = useState<"cover" | "contain">("contain");
-  const [show, setShow] = useState(true);
-  useEffect(() => {
-    if (background) {
-      setFit(background.fit);
-      setShow(background.showStatus);
-    }
-  }, [background]);
+  const [source, setSource] = useState<"file" | "library">("file");
+  const [selected, setSelected] = useState<KeyLibrarySelection | null>(null);
+  const [options, setOptions] = useState<{
+    fit: "cover" | "contain";
+    showStatus: boolean;
+  } | null>(null);
+  const fit = options?.fit ?? background?.fit ?? "contain";
+  const show = options?.showStatus ?? background?.showStatus ?? true;
+  const pending = useRef(false);
+  const copied = useRef<{ id: string; storageId: Id<"_storage"> } | null>(null);
+
   const change = async (nextFit: "cover" | "contain", nextShow: boolean) => {
-    setFit(nextFit);
-    setShow(nextShow);
-    if (!background) return;
+    if (pending.current) return;
+    setOptions({ fit: nextFit, showStatus: nextShow });
+    // A library choice is a preview until the user confirms it.
+    if (!background || selected) return;
+    pending.current = true;
     setBusy(true);
     try {
       await set({
@@ -33,20 +44,87 @@ export default function DisplayBackgroundSettings() {
     } catch {
       toast.error("No se pudo actualizar el Display");
     } finally {
+      setOptions(null);
+      pending.current = false;
       setBusy(false);
     }
   };
+
+  const applyLibrary = async () => {
+    if (!selected || pending.current || background === undefined) return;
+    pending.current = true;
+    setBusy(true);
+    try {
+      if (copied.current?.id !== selected.id) {
+        const media = await selected.load(token);
+        copied.current = { id: selected.id, storageId: media.storageId };
+      }
+      await set({ storageId: copied.current.storageId, fit, showStatus: show });
+      setSelected(null);
+      setOptions(null);
+      copied.current = null;
+      toast.success("Fondo del Display guardado");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "No se pudo aplicar el recurso. Tu fondo anterior se conserva.",
+      );
+    } finally {
+      pending.current = false;
+      setBusy(false);
+    }
+  };
+
+  const preview = selected
+    ? { mediaUrl: selected.previewUrl, mediaType: selected.mediaType }
+    : background;
+
   return (
-    <div className="space-y-3 border-t pt-4">
-      <h3 className="font-semibold">Imagen o video del Display</h3>
+    <section className="space-y-3 border-t pt-4" aria-label="Fondo del Display">
+      <h3 className="font-semibold">Imagen, GIF o video del Display</h3>
       <p className="text-sm text-muted-foreground">
-        Tu marca en todas las pantallas vinculadas, independientemente de la
-        tecla activa. Imagen o video MP4/WebM de hasta 60 MB.
+        Elegí tus archivos o los recursos de tu biblioteca. El fondo se comparte
+        con los Displays vinculados a tu cuenta. Hasta 60 MB por archivo.
       </p>
-      {background?.mediaUrl &&
-        (background.mediaType === "video" ? (
+      <div className="flex flex-wrap gap-2" aria-label="Origen del fondo">
+        <Button
+          variant={source === "file" ? "secondary" : "outline"}
+          size="sm"
+          aria-pressed={source === "file"}
+          disabled={busy}
+          onClick={() => setSource("file")}
+        >
+          <FolderOpen className="size-4" /> Mis archivos
+        </Button>
+        <Button
+          variant={source === "library" ? "secondary" : "outline"}
+          size="sm"
+          aria-pressed={source === "library"}
+          disabled={busy}
+          onClick={() => setSource("library")}
+        >
+          <Library className="size-4" /> Biblioteca
+        </Button>
+      </div>
+      {source === "library" && (
+        <div className="rounded-xl border p-3" inert={busy || undefined}>
+          <KeyAssetPicker
+            purpose="display"
+            onSelect={(selection) => {
+              if (pending.current) return;
+              setSelected(selection);
+              setOptions({ fit, showStatus: show });
+              copied.current = null;
+            }}
+          />
+        </div>
+      )}
+      {preview?.mediaUrl &&
+        (preview.mediaType === "video" ? (
           <video
-            src={background.mediaUrl}
+            src={preview.mediaUrl}
+            aria-label={selected ? `Vista previa de ${selected.name}` : "Fondo actual del Display"}
             muted
             autoPlay
             loop
@@ -55,11 +133,16 @@ export default function DisplayBackgroundSettings() {
           />
         ) : (
           <img
-            src={background.mediaUrl}
-            alt="Fondo del Display"
+            src={preview.mediaUrl}
+            alt={selected ? `Vista previa de ${selected.name}` : "Fondo del Display"}
             className="h-40 w-full rounded-xl bg-black object-contain"
           />
         ))}
+      {selected && (
+        <p className="text-sm font-medium">
+          Seleccionado: {selected.name}. Confirmá para cambiar el fondo.
+        </p>
+      )}
       <label className="block text-sm">
         Ajuste de imagen{" "}
         <select
@@ -67,12 +150,7 @@ export default function DisplayBackgroundSettings() {
           disabled={busy || background === undefined}
           value={fit}
           className="ml-2 rounded border bg-background p-2"
-          onChange={(e) =>
-            void change(
-              e.target.value as "cover" | "contain",
-              background?.showStatus ?? show,
-            )
-          }
+          onChange={(event) => void change(event.target.value as "cover" | "contain", show)}
         >
           <option value="contain">Ver completo, sin recortar</option>
           <option value="cover">Cubrir toda la pantalla</option>
@@ -83,61 +161,80 @@ export default function DisplayBackgroundSettings() {
           type="checkbox"
           disabled={busy || background === undefined}
           checked={show}
-          onChange={(e) =>
-            void change(background?.fit ?? fit, e.target.checked)
-          }
+          onChange={(event) => void change(fit, event.target.checked)}
         />
         Mostrar estado sobre el fondo
       </label>
-      <label className="block text-sm">
-        Subir imagen o video
-        <input
-          aria-label="Archivo del Display"
-          className="mt-2 block w-full text-sm"
-          type="file"
-          accept="image/*,video/mp4,video/webm"
-          disabled={busy || background === undefined}
-          onChange={async (e) => {
-            const input = e.currentTarget;
-            const file = input.files?.[0];
-            if (!file) return;
-            setBusy(true);
-            try {
-              const uploaded = await uploadKeyMedia(file, token);
-              await set({
-                storageId: uploaded.storageId,
-                fit: background?.fit ?? fit,
-                showStatus: background?.showStatus ?? show,
-              });
-              toast.success("Fondo del Display guardado");
-            } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : "No se pudo guardar",
-              );
-            } finally {
-              setBusy(false);
-              input.value = "";
-            }
-          }}
-        />
-      </label>
-      {busy && (
-        <p role="status" className="text-sm">
-          Guardando…
-        </p>
+      {source === "file" && (
+        <label className="block text-sm">
+          Subir imagen, GIF o video
+          <input
+            aria-label="Archivo del Display"
+            className="mt-2 block w-full text-sm"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif,image/avif,video/mp4,video/webm"
+            disabled={busy || background === undefined}
+            onChange={async (event) => {
+              const input = event.currentTarget;
+              const file = input.files?.[0];
+              if (!file || pending.current) return;
+              pending.current = true;
+              setBusy(true);
+              try {
+                const uploaded = await uploadKeyMedia(file, token);
+                await set({ storageId: uploaded.storageId, fit, showStatus: show });
+                setSelected(null);
+                setOptions(null);
+                copied.current = null;
+                toast.success("Fondo del Display guardado");
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : "No se pudo guardar");
+              } finally {
+                pending.current = false;
+                setBusy(false);
+                input.value = "";
+              }
+            }}
+          />
+        </label>
       )}
+      {selected && (
+        <div className="flex flex-wrap gap-2">
+          <Button disabled={busy || background === undefined} onClick={() => void applyLibrary()}>
+            {busy ? "Aplicando…" : "Aplicar al Display"}
+          </Button>
+          <Button
+            variant="outline"
+            disabled={busy}
+            onClick={() => {
+              setSelected(null);
+              setOptions(null);
+              copied.current = null;
+            }}
+          >
+            Cancelar selección
+          </Button>
+        </div>
+      )}
+      {busy && <p role="status" className="text-sm">Guardando…</p>}
       {background && (
         <Button
           variant="secondary"
           disabled={busy}
           onClick={async () => {
+            if (pending.current) return;
+            pending.current = true;
             setBusy(true);
             try {
               await clear({});
+              setSelected(null);
+              setOptions(null);
+              copied.current = null;
               toast.success("Fondo del Display eliminado");
             } catch {
               toast.error("No se pudo eliminar el fondo");
             } finally {
+              pending.current = false;
               setBusy(false);
             }
           }}
@@ -145,6 +242,6 @@ export default function DisplayBackgroundSettings() {
           Quitar fondo del Display
         </Button>
       )}
-    </div>
+    </section>
   );
 }

@@ -67,7 +67,7 @@ export default function MarketplaceDisplayApply({
       }
       await setBackground({
         storageId: copy.current.storageId,
-        fit: fit ?? background?.fit ?? "cover",
+        fit: fit ?? background?.fit ?? "contain",
         showStatus: showStatus ?? background?.showStatus ?? true,
       });
       toast.success("El recurso ya se ve en tu Display.");
@@ -119,14 +119,16 @@ export default function MarketplaceDisplayApply({
                 autoPlay
                 loop
                 playsInline
-                className="size-full object-cover"
+                className="size-full"
+                style={{ objectFit: fit ?? background?.fit ?? "contain" }}
                 aria-label={`Vista previa de ${asset.name}`}
               />
             ) : (
               <img
                 src={preview}
                 alt={`Vista previa de ${asset.name}`}
-                className="size-full object-cover"
+                className="size-full"
+                style={{ objectFit: fit ?? background?.fit ?? "contain" }}
               />
             )}
           </div>
@@ -148,7 +150,7 @@ export default function MarketplaceDisplayApply({
           </Label>
           <select
             id={`market-display-fit-${asset.id}`}
-            value={fit ?? background?.fit ?? "cover"}
+            value={fit ?? background?.fit ?? "contain"}
             disabled={busy || background === undefined}
             onChange={(event) =>
               setFit(event.target.value as "cover" | "contain")

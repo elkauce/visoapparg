@@ -23,6 +23,23 @@ import { NativeGoogleAuthProvider } from "./components/native-google-auth";
 
 const MarketplacePage = lazy(() => import("./pages/marketplace/page.tsx"));
 
+function MarketplaceRoute() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          role="status"
+          className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
+        >
+          Cargando Marketplace…
+        </div>
+      }
+    >
+      <MarketplacePage />
+    </Suspense>
+  );
+}
+
 export default function App() {
   return (
     <DefaultProviders>
@@ -67,22 +84,10 @@ export default function App() {
             />
             <Route path="/deck" element={<AndroidDeck />} />
             <Route path="/s/:slug" element={<PublicStatusPage />} />
+            <Route path="/marketplace" element={<MarketplaceRoute />} />
             <Route
-              path="/marketplace"
-              element={
-                <Suspense
-                  fallback={
-                    <div
-                      role="status"
-                      className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
-                    >
-                      Cargando Marketplace…
-                    </div>
-                  }
-                >
-                  <MarketplacePage />
-                </Suspense>
-              }
+              path="/marketplace/products/:productId"
+              element={<MarketplaceRoute />}
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

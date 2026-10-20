@@ -1533,3 +1533,314 @@
     transform: none;
   }
 }
+
+/* Product pages share the control panel's content width. */
+.vm-shell {
+  max-width: 1640px;
+}
+.vm-header {
+  padding-inline: max(30px, calc((100vw - 1640px) / 2 + 38px));
+}
+.vm-docs-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 8px 0;
+  color: #746c61;
+  font-size: 12px;
+  text-align: left;
+}
+.vm-docs-link svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+.vm-product-page {
+  min-width: 0;
+  width: 100%;
+  padding-bottom: 20px;
+}
+.vm-product-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #7b746b;
+  font-size: 12px;
+  margin: 2px 0 30px;
+}
+.vm-product-breadcrumb button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.vm-product-breadcrumb svg {
+  width: 14px;
+  height: 14px;
+}
+.vm-product-title-row {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 32px;
+}
+.vm-product-title-row > div:first-child {
+  min-width: 0;
+}
+.vm-product-title-row h1 {
+  color: #202126;
+  font-size: clamp(26px, 2.6vw, 39px);
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  font-weight: 730;
+  margin: 11px 0 13px;
+  overflow-wrap: anywhere;
+}
+.vm-product-purchase {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  gap: 12px;
+  flex: 0 0 auto;
+  max-width: 330px;
+}
+.vm-detail-price {
+  font-size: 24px;
+  letter-spacing: -0.025em;
+  color: #252626;
+}
+.vm-product-purchase .vm-detail-actions {
+  margin: 0;
+  align-items: end;
+}
+.vm-product-purchase .vm-detail-actions p {
+  text-align: right;
+}
+.vm-product-gallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 46%);
+  gap: 18px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 15px;
+  margin-bottom: 30px;
+  scrollbar-width: thin;
+  scrollbar-color: #d5cbbf transparent;
+}
+.vm-product-gallery:has(> :only-child) {
+  grid-auto-columns: minmax(0, 100%);
+}
+.vm-gallery-item {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  height: clamp(240px, 26vw, 365px);
+  border: 1px solid #e4ded5;
+  border-radius: 18px;
+  background: #eae5dd;
+  overflow: hidden;
+  scroll-snap-align: start;
+}
+.vm-gallery-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.vm-gallery-image > img,
+.vm-gallery-item > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.vm-gallery-image > span,
+.vm-gallery-expand {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ffffff4d;
+  border-radius: 50%;
+  background: #ffffffda;
+  color: #35322b;
+}
+.vm-gallery-image > span > svg,
+.vm-gallery-expand > svg {
+  width: 16px;
+  height: 16px;
+}
+.vm-product-information {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+  gap: 26px;
+  align-items: start;
+}
+.vm-product-overview {
+  display: grid;
+  gap: 26px;
+  min-width: 0;
+}
+.vm-product-information h2 {
+  color: #30302f;
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0 0 12px;
+}
+.vm-product-info-card {
+  border: 1px solid #e3ddd3;
+  border-radius: 16px;
+  background: #fffdfa;
+  padding: 22px;
+  min-width: 0;
+}
+.vm-product-info-card .vm-detail-description,
+.vm-product-info-card.vm-detail-description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #625f59;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.vm-product-details dl {
+  display: grid;
+  gap: 20px;
+  margin: 0;
+  font-size: 13px;
+}
+.vm-product-details dl > div {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.8fr) minmax(0, 1.1fr);
+  gap: 12px;
+}
+.vm-product-details dt {
+  color: #8b8176;
+  line-height: 1.55;
+}
+.vm-product-details dd {
+  margin: 0;
+  color: #343431;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+.vm-product-details dd a {
+  color: #be4215;
+}
+.vm-product-details dd svg {
+  display: inline;
+  vertical-align: middle;
+  width: 13px;
+  height: 13px;
+  margin-left: 3px;
+}
+.vm-version-history {
+  display: grid;
+  gap: 22px;
+}
+.vm-version-history > div + div {
+  border-top: 1px solid #eee7dc;
+  padding-top: 18px;
+}
+.vm-version-history > div > div {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  font-size: 13px;
+}
+.vm-version-history time {
+  color: #9a8c7a;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.vm-version-history p {
+  color: #70675b;
+  font-size: 13px;
+  margin: 10px 0 0;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.vm-gallery-dialog {
+  width: min(94vw, 1250px);
+  max-width: min(94vw, 1250px) !important;
+  max-height: 94dvh;
+  color: #25272b;
+  background: #f5f3ef;
+  border: 0;
+}
+.vm-gallery-dialog > img,
+.vm-gallery-dialog > video {
+  display: block;
+  width: 100%;
+  max-height: 76dvh;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #e5e1db;
+}
+@media (max-width: 1000px) {
+  .vm-product-information {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .vm-product-details {
+    max-width: none;
+  }
+  .vm-product-title-row {
+    gap: 16px;
+  }
+  .vm-product-purchase {
+    max-width: 260px;
+  }
+}
+@media (max-width: 700px) {
+  .vm-header {
+    padding-inline: 18px;
+  }
+  .vm-product-title-row {
+    flex-direction: column;
+    gap: 23px;
+    margin-bottom: 25px;
+  }
+  .vm-product-purchase {
+    max-width: none;
+    width: 100%;
+    align-items: start;
+  }
+  .vm-product-purchase .vm-detail-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+  .vm-product-purchase .vm-detail-actions > button,
+  .vm-product-purchase .vm-detail-actions > a {
+    width: 100%;
+  }
+  .vm-product-purchase .vm-detail-actions p {
+    text-align: left;
+  }
+  .vm-product-breadcrumb {
+    margin-bottom: 22px;
+  }
+  .vm-product-gallery {
+    grid-auto-columns: 90%;
+    gap: 12px;
+    margin-inline: -3px;
+    margin-bottom: 22px;
+  }
+  .vm-gallery-item {
+    height: 280px;
+    border-radius: 16px;
+  }
+  .vm-product-info-card {
+    padding: 18px;
+  }
+  .vm-product-title-row h1 {
+    font-size: 30px;
+  }
+  .vm-docs-link {
+    margin: 15px 0 0;
+  }
+}

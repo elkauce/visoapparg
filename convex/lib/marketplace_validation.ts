@@ -8,6 +8,8 @@ export const marketplaceCategory = v.union(
   v.literal("soundboards"),
   v.literal("hardware"),
   v.literal("used"),
+  v.literal("new"),
+  v.literal("pages"),
 );
 export type MarketplaceCategory =
   | "icons"
@@ -16,7 +18,9 @@ export type MarketplaceCategory =
   | "screensavers"
   | "soundboards"
   | "hardware"
-  | "used";
+  | "used"
+  | "new"
+  | "pages";
 export const marketplaceMediaType = v.union(
   v.literal("image"),
   v.literal("video"),
@@ -37,13 +41,92 @@ export const marketplacePriceMode = v.union(
   v.literal("free"),
   v.literal("external"),
   v.literal("info"),
+  v.literal("paid"),
 );
 export const marketplaceDelivery = v.union(
   v.literal("assets"),
   v.literal("profile"),
   v.literal("plugin"),
   v.literal("inquiry"),
+  v.literal("page"),
 );
+export const marketplacePageTemplate = v.union(
+  v.literal("football"),
+  v.literal("clock"),
+  v.literal("weather"),
+  v.literal("spotify"),
+);
+export const marketplaceGalleryItem = v.object({
+  id: v.string(),
+  name: v.string(),
+  mediaType: v.union(v.literal("image"), v.literal("video")),
+  storageId: v.optional(v.id("_storage")),
+  builtinPath: v.optional(v.string()),
+  externalUrl: v.optional(v.string()),
+});
+export const marketplaceDetails = v.object({
+  type: v.optional(v.string()),
+  device: v.optional(v.string()),
+  os: v.optional(v.string()),
+  compatibility: v.optional(v.string()),
+  size: v.optional(v.string()),
+  version: v.optional(v.string()),
+  language: v.optional(v.string()),
+  supportUrl: v.optional(v.string()),
+  included: v.optional(v.string()),
+  setup: v.optional(v.string()),
+});
+export const marketplaceChangelog = v.object({
+  version: v.string(),
+  date: v.string(),
+  notes: v.string(),
+});
+export const marketplaceImportSource = v.object({
+  affiliateUrl: v.string(),
+  sourceUrl: v.optional(v.string()),
+  itemId: v.optional(v.string()),
+  importedAt: v.number(),
+  availability: v.optional(v.string()),
+});
+export const marketplacePageSettings = v.object({
+  screenSettings: v.optional(v.any()),
+  standbySettings: v.optional(v.any()),
+});
+export const marketplaceAcquisitionSnapshot = v.object({
+  productId: v.string(),
+  title: v.string(),
+  category: marketplaceCategory,
+  creatorName: v.string(),
+  delivery: marketplaceDelivery,
+  assets: v.array(marketplaceAsset),
+  profileTemplate: v.optional(v.literal("essential")),
+  pageTemplate: v.optional(marketplacePageTemplate),
+  revision: v.optional(v.number()),
+  pageSettings: v.optional(marketplacePageSettings),
+});
+export const marketplaceProductFields = {
+  creatorName: v.string(),
+  title: v.string(),
+  description: v.string(),
+  category: marketplaceCategory,
+  condition: v.optional(v.union(v.literal("new"), v.literal("used"))),
+  coverStorageId: v.optional(v.id("_storage")),
+  coverPath: v.optional(v.string()),
+  priceMode: marketplacePriceMode,
+  priceAmount: v.optional(v.number()),
+  currency: v.optional(v.union(v.literal("ARS"), v.literal("USD"))),
+  delivery: marketplaceDelivery,
+  externalUrl: v.optional(v.string()),
+  affiliate: v.boolean(),
+  assets: v.array(marketplaceAsset),
+  gallery: v.optional(v.array(marketplaceGalleryItem)),
+  details: v.optional(marketplaceDetails),
+  changelog: v.optional(v.array(marketplaceChangelog)),
+  pageTemplate: v.optional(marketplacePageTemplate),
+  pageSettings: v.optional(marketplacePageSettings),
+  profileTemplate: v.optional(v.literal("essential")),
+  importSource: v.optional(marketplaceImportSource),
+};
 export const MAX_MARKETPLACE_BYTES = 60 * 1024 * 1024;
 export const MAX_MARKETPLACE_ASSETS = 32;
 export const MAX_MARKETPLACE_LIBRARY = 500;

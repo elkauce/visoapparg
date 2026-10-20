@@ -52,6 +52,7 @@ it("previews a resource without uploading it or changing the Display", async () 
   const preview = screen.getByLabelText("Vista previa de Aurora");
   expect(preview).toHaveAttribute("src", builtinAsset.builtinPath);
   expect(preview).toHaveAttribute("loop");
+  expect(preview).toHaveStyle({ objectFit: "contain" });
   expect(fixture.upload).not.toHaveBeenCalled();
   expect(fixture.copy).not.toHaveBeenCalled();
   expect(fixture.save).not.toHaveBeenCalled();

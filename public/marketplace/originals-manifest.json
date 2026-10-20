@@ -89,6 +89,26 @@
       "sha256": "511e22c6020f6b44b4b7c2f31e4dc611e76d42bc403c1dbe0f79a2907cdc2c16"
     },
     {
+      "path": "covers/page-clock.png",
+      "bytes": 22790,
+      "sha256": "12fd9931badd68cefff4752c06081c4c46d5a7ba6782283c4f294d25adfbe9b7"
+    },
+    {
+      "path": "covers/page-football.png",
+      "bytes": 27320,
+      "sha256": "44e1ef91d9c4ca183ca8824464f56c325424f64bb9c2dfeecec69bb8e85a393f"
+    },
+    {
+      "path": "covers/page-spotify.png",
+      "bytes": 23416,
+      "sha256": "2de3551e9cf34f58b5b3a7e950b290f3d7b5cb75e647b2eb74ff21f939205379"
+    },
+    {
+      "path": "covers/page-weather.png",
+      "bytes": 22941,
+      "sha256": "e03385a10c96864e70a66df37846e32d596726660213febcf8555210e4b96fda"
+    },
+    {
       "path": "covers/soft-sounds.png",
       "bytes": 21983,
       "sha256": "2a0419a090332305f398d738a6b653959cf0e12b984799ca9598ce988e988fcd"
@@ -97,6 +117,41 @@
       "path": "covers/stream-deck.png",
       "bytes": 131181,
       "sha256": "27a34ffb55c5bb4c7b1e4d23cc195f34d29c196d2aa5bcc436f5a9799de0027f"
+    },
+    {
+      "path": "creator-templates/LEEME.md",
+      "bytes": 1808,
+      "sha256": "b62d93207e998e0d95a6a2c248b0b9fad56f958dd4d0a2562eb84e035e581806"
+    },
+    {
+      "path": "creator-templates/ficha-producto-ejemplo.json",
+      "bytes": 1091,
+      "sha256": "758f82380f39b3f1a8e4e1d8ea24ef551d0c8b8016e3bbb60318128d78463145"
+    },
+    {
+      "path": "creator-templates/pagina-ejemplo.json",
+      "bytes": 126,
+      "sha256": "ba19dc6c50395fba7610f664e942533c6f40a913712a7e70de866b92fd4dca99"
+    },
+    {
+      "path": "creator-templates/pagina-futbol-ejemplo.json",
+      "bytes": 145,
+      "sha256": "bd493c7cc0cfbc8bb12985f095fb2d0f85cc7ea1b2b2f2e40bf33721285c3251"
+    },
+    {
+      "path": "creator-templates/pagina-reloj-ejemplo.json",
+      "bytes": 182,
+      "sha256": "5d07e892a7019ffceb9c01db35cc4636404026ca1abc48a4ca7bef13443b3c06"
+    },
+    {
+      "path": "creator-templates/perfil-ejemplo.json",
+      "bytes": 823,
+      "sha256": "1723843b5eb47bb11ce26d7bded56371f7cb5d543486111dd2dcd3255c2cd638"
+    },
+    {
+      "path": "creator-templates/plugin-estructura-ejemplo.zip",
+      "bytes": 638,
+      "sha256": "3a062708bb760f0ff07c85ab862323d20dc294402f657c0844f992978d562f9a"
     },
     {
       "path": "originals/ausente.png",
@@ -178,5 +233,9 @@
       "bytes": 39734,
       "sha256": "f4734d6d82a83afa64ceeb0863e397b59b766c24b9b210c41387878004de0393"
     }
+  ],
+  "generators": [
+    "scripts/generate-marketplace-assets.py",
+    "scripts/generate-marketplace-page-covers.py"
   ]
 }

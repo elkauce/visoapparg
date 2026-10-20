@@ -1,0 +1,29 @@
+{
+  "release": "1.14.0",
+  "vitest": {
+    "files": 71,
+    "tests": 669,
+    "failed": 0
+  },
+  "jvm": {
+    "tests": 21,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "browser": {
+    "checks": 32,
+    "javascriptErrors": 0,
+    "widths": [1440, 390, 320]
+  },
+  "typescriptFrontend": true,
+  "typescriptBackend": true,
+  "changedFileEslint": true,
+  "webBuild": true,
+  "androidBuild": true,
+  "physicalDeviceTested": false,
+  "realMercadoPagoTested": false,
+  "realMercadoLibreImportTested": false,
+  "productionPublished": false,
+  "scope": "Local technical accounts, builds and mocked provider requests. No real user data or light commands modified."
+}

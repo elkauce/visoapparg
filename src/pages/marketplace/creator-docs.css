@@ -1,0 +1,55 @@
+.vm-docs { display: grid; gap: 24px; min-width: 0; }
+.vm-doc-intro { padding: 28px; background: #fffdf9; border: 1px solid #e8e2d9; border-radius: 22px; }
+.vm-doc-intro > span { display: inline-flex; align-items: center; gap: 7px; color: #af431e; font-size: 10px; font-weight: 700; letter-spacing: .09em; }
+.vm-doc-intro > span svg { width: 15px; height: 15px; }
+.vm-doc-intro h2 { margin: 14px 0 9px; font-size: clamp(23px, 3vw, 34px); line-height: 1.2; font-weight: 650; letter-spacing: -.04em; }
+.vm-doc-intro > p { max-width: 680px; color: #74716b; font-size: 14px; line-height: 1.7; }
+.vm-doc-intro-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; margin-top: 20px; }
+.vm-doc-readme { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: #68635c; }
+.vm-doc-readme svg { height: 15px; width: 15px; }
+.vm-doc-category-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.vm-doc-category-nav button { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 8px 12px; border: 1px solid #e3ddd3; background: #fcfaf6; border-radius: 11px; color: #6d6860; font-size: 12px; font-weight: 550; }
+.vm-doc-category-nav button svg { height: 15px; width: 15px; }
+.vm-doc-category-nav button[aria-pressed="true"] { background: #f7e3d6; border-color: #e6bea6; color: #bd4319; }
+.vm-doc-guide, .vm-doc-publication { min-width: 0; padding: 28px; background: #fff; border: 1px solid #e8e2da; border-radius: 22px; }
+.vm-doc-guide > header { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 25px; }
+.vm-doc-guide-icon { display: grid; place-items: center; flex: 0 0 44px; height: 44px; border-radius: 13px; background: #f6f1e9; color: #a65b35; }
+.vm-doc-guide-icon svg { width: 22px; height: 22px; }
+.vm-doc-guide h3 { margin: 0 0 5px; font-size: 21px; font-weight: 650; letter-spacing: -.03em; }
+.vm-doc-guide header p { margin: 0; max-width: 670px; color: #76716a; font-size: 13px; line-height: 1.7; }
+.vm-doc-specs { margin: 0; }
+.vm-doc-specs > div { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 22px; padding: 16px 0; border-bottom: 1px solid #eee9e2; }
+.vm-doc-specs dt { color: #5c574f; font-size: 12px; font-weight: 650; }
+.vm-doc-specs dd { margin: 0; color: #7c766e; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.vm-doc-checklists { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 26px; }
+.vm-doc-guide h4 { margin: 0 0 12px; font-size: 14px; font-weight: 650; }
+.vm-doc-checklists ol { padding-left: 20px; margin: 0; list-style: decimal; }
+.vm-doc-checklists ul { margin: 0; padding: 0; list-style: none; }
+.vm-doc-checklists li { margin-bottom: 10px; color: #7b756d; font-size: 12px; line-height: 1.75; }
+.vm-doc-checklists ul li { display: flex; align-items: flex-start; gap: 8px; }
+.vm-doc-checklists ul svg { width: 15px; height: 15px; color: #45955a; flex: 0 0 15px; margin-top: 3px; }
+.vm-doc-examples { margin-top: 28px; padding-top: 23px; border-top: 1px solid #eee9e2; }
+.vm-doc-example { margin-top: 13px; }
+.vm-doc-example a { display: inline-flex; align-items: center; gap: 7px; color: #b3441b; font-size: 13px; font-weight: 600; }
+.vm-doc-example a svg { width: 15px; height: 15px; }
+.vm-doc-example p { margin: 6px 0 0; color: #8a847d; font-size: 11px; line-height: 1.7; }
+.vm-doc-publication > div { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.vm-doc-publication > div svg { width: 20px; height: 20px; color: #b25d32; }
+.vm-doc-publication h3 { margin: 0; font-size: 17px; font-weight: 650; letter-spacing: -.025em; }
+.vm-doc-publication ol { margin: 0; padding-left: 20px; list-style: decimal; }
+.vm-doc-publication li { margin-bottom: 12px; color: #78736b; font-size: 12px; line-height: 1.8; }
+.vm-doc-publication li strong { color: #4d4841; font-weight: 600; }
+.vm-doc-license { border-top: 1px solid #eee9e2; margin: 23px 0 0; padding-top: 18px; color: #8c8479; font-size: 11px; line-height: 1.8; }
+@media (max-width: 680px) {
+  .vm-docs { gap: 18px; }
+  .vm-doc-intro, .vm-doc-guide, .vm-doc-publication { padding: 20px; border-radius: 18px; }
+  .vm-doc-category-nav { flex-wrap: nowrap; overflow-x: auto; padding: 0 0 7px; scrollbar-width: thin; }
+  .vm-doc-category-nav button { flex: 0 0 auto; }
+  .vm-doc-specs > div { grid-template-columns: 1fr; gap: 5px; padding: 13px 0; }
+  .vm-doc-checklists { grid-template-columns: 1fr; gap: 20px; }
+  .vm-doc-guide > header { gap: 11px; }
+  .vm-doc-guide-icon { flex-basis: 36px; height: 36px; border-radius: 11px; }
+  .vm-doc-guide-icon svg { width: 19px; height: 19px; }
+  .vm-doc-guide h3 { font-size: 20px; }
+  .vm-doc-intro-actions { gap: 14px; }
+}

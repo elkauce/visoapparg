@@ -1,4 +1,5 @@
 import { useId, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import {
   Archive,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/dialog";
 import { marketErrorMessage } from "@/lib/marketplace-upload";
 import ProductForm, { type EditableMarketProduct } from "./product-form";
+import MarketplacePaymentSettings from "./payment-settings";
 import "./studio.css";
 
 type Review =
@@ -57,6 +59,8 @@ const CATEGORY_NAMES: Record<string, string> = {
   soundboards: "Sonidos",
   hardware: "Hardware",
   used: "Usados",
+  new: "Nuevo",
+  pages: "Página",
 };
 
 function ReviewDialog({
@@ -192,7 +196,7 @@ function AdminWorkspace() {
   const reviewProduct = useMutation(api.marketplace.reviewProduct);
   const [review, setReview] = useState<Review | null>(null);
   const [editor, setEditor] = useState<
-    EditableMarketProduct | "new-used" | null
+    EditableMarketProduct | "new-used" | "new" | null
   >(null);
   const [filter, setFilter] = useState("all");
   if (!queues || !products || !creators)
@@ -240,6 +244,7 @@ function AdminWorkspace() {
           publicados por VISO.
         </p>
       </header>
+      <MarketplacePaymentSettings />
       <div className="vm-admin-summary">
         <div>
           <strong>{queues.creators.length}</strong>
@@ -439,10 +444,15 @@ function AdminWorkspace() {
               original.
             </p>
           </div>
-          <Button onClick={() => setEditor("new-used")}>
-            <FilePlus2 />
-            Nuevo usado
-          </Button>
+          <div className="vm-studio-actions">
+            <Button variant="outline" onClick={() => setEditor("new")}>
+              <FilePlus2 /> Nuevo producto
+            </Button>
+            <Button onClick={() => setEditor("new-used")}>
+              <FilePlus2 />
+              Nuevo usado
+            </Button>
+          </div>
         </div>
         <label className="vm-admin-filter">
           Mostrar
@@ -491,6 +501,13 @@ function AdminWorkspace() {
                   )}
                 </div>
                 <div className="vm-studio-product-actions">
+                  <Button asChild size="sm" variant="ghost">
+                    <Link
+                      to={`/marketplace/products/${encodeURIComponent(product.id)}`}
+                    >
+                      Ver ficha
+                    </Link>
+                  </Button>
                   {product.canEdit && (
                     <Button
                       size="sm"
@@ -576,9 +593,9 @@ function AdminWorkspace() {
       )}
       {editor && (
         <ProductForm
-          key={editor === "new-used" ? "new-used" : editor.id}
-          product={editor === "new-used" ? null : editor}
-          initialCategory="used"
+          key={typeof editor === "string" ? editor : editor.id}
+          product={typeof editor === "string" ? null : editor}
+          initialCategory={editor === "new-used" ? "used" : "icons"}
           isAdmin
           onClose={() => setEditor(null)}
         />

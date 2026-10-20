@@ -1,0 +1,10 @@
+{
+  "standbySettings": {
+    "style": "clock",
+    "clockStyle": "analog",
+    "accent": "#ef4444",
+    "background": "#101010",
+    "showDate": true,
+    "showSeconds": false
+  }
+}

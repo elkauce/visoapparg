@@ -481,8 +481,8 @@ describe("Deck layout compatibility and ownership", () => {
 });
 
 describe("Shared APK/web page catalogue", () => {
-  it("migrates once, retains existing page/key IDs, and never recreates a deleted Reloj", async () => {
-    const { alice, bob } = await fixture();
+  it("keeps all existing legacy page/key IDs, settings and ordering unchanged", async () => {
+    const { t, alice, aliceId } = await fixture();
     const oldPage = await alice.mutation(api.deck_layout.createPage, {
       name: "Mi página",
     });
@@ -491,36 +491,34 @@ describe("Shared APK/web page catalogue", () => {
       position: 0,
       content: { kind: "clock" },
     });
-    const oldKey = (await alice.query(api.deck_layout.get, {}))!.keys[0]._id;
+    const before = (await alice.query(api.deck_layout.get, { unified: true }))!;
     await alice.mutation(api.deck_layout.ensureCatalogue, {});
-    const apk = (await alice.query(api.deck_layout.get, { unified: true }))!;
-    expect(apk.pages.map((p) => p.name)).toEqual([
-      "Estados VISO",
-      "Spotify",
-      "Reloj",
-      "Mi página",
+    await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    const after = (await alice.query(api.deck_layout.get, { unified: true }))!;
+    expect(after.pages).toEqual(before.pages);
+    expect(after.keys).toEqual(before.keys);
+    expect((await t.run((ctx) => ctx.db.get("users", aliceId)))?.deckCatalogVersion).toBe(1);
+  });
+
+  it("starts only Estados and Clima once and never recreates deleted pages", async () => {
+    const { alice } = await fixture();
+    await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    const layout = (await alice.query(api.deck_layout.get, { unified: true }))!;
+    expect(layout.pages.map((page) => [page.name, page.kind])).toEqual([
+      ["Estados VISO", "grid"], ["Clima", "weather"],
     ]);
-    expect(apk.keys.some((k) => k._id === oldKey && k.pageId === oldPage)).toBe(
-      true,
-    );
-    const clock = apk.pages.find((p) => p.kind === "standby")!;
-    await expect(
-      bob.mutation(api.deck_layout.removePage, { pageId: clock._id }),
-    ).rejects.toThrow();
-    await alice.mutation(api.deck_layout.removePage, { pageId: clock._id });
+    expect(layout.keys).toHaveLength(6);
+    const weather = layout.pages[1];
+    expect(weather.marketplaceProductId).toBe("viso-page-weather");
+    await alice.mutation(api.deck_layout.removePage, { pageId: weather._id });
     await alice.mutation(api.deck_layout.ensureCatalogue, {});
-    expect(
-      (await alice.query(api.deck_layout.get, { unified: true }))!.pages.map(
-        (p) => p._id,
-      ),
-    ).not.toContain(clock._id);
-    expect(
-      (await alice.query(api.deck_layout.get, {}))!.pages.map((p) => p._id),
-    ).toEqual([oldPage]);
+    expect((await alice.query(api.deck_layout.get, { unified: true }))!.pages.map((page) => page._id)).toEqual([layout.pages[0]._id]);
   });
   it("shares weather, key appearance, page order and Reloj preferences by account", async () => {
     const { t, alice, aliceId, bob } = await fixture();
     await alice.mutation(api.deck_layout.ensureCatalogue, {});
+    const clockId = await alice.mutation(api.deck_layout.createPage, { name: "Reloj" });
+    await alice.mutation(api.deck_layout.configureScreen, { pageId: clockId, kind: "standby" });
     const layout = (await alice.query(api.deck_layout.get, { unified: true }))!;
     const statePage = layout.pages[0];
     const clock = layout.pages.find((p) => p.kind === "standby")!;
@@ -593,6 +591,8 @@ describe("Shared APK/web page catalogue", () => {
 it("protects shared photos by owner and updates append/remove without losing other photos", async () => {
   const { t, alice, bob, aliceId, bobId } = await fixture();
   await alice.mutation(api.deck_layout.ensureCatalogue, {});
+  const clockId = await alice.mutation(api.deck_layout.createPage, { name: "Reloj" });
+  await alice.mutation(api.deck_layout.configureScreen, { pageId: clockId, kind: "standby" });
   const clock = (await alice.query(api.deck_layout.get, {
     unified: true,
   }))!.pages.find((page) => page.kind === "standby")!;

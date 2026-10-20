@@ -1,0 +1,25 @@
+{
+  "title": "Nombre de tu producto",
+  "description": "Descripción completa, contenido, instalación y condiciones de entrega.",
+  "category": "hardware",
+  "condition": "new",
+  "priceMode": "external",
+  "priceAmount": 1500000,
+  "currency": "ARS",
+  "priceNote": "El ejemplo representa ARS 15.000,00 en centavos; reemplazar por el precio real antes de publicar.",
+  "externalUrl": "https://tu-tienda.example/producto",
+  "details": {
+    "device": "Modelo probado",
+    "os": "Sistema operativo compatible",
+    "compatibility": "Requisitos y versiones mínimas",
+    "version": "1.0.0",
+    "language": "Español",
+    "included": "Unidades, accesorios y contenido incluidos",
+    "setup": "Pasos de instalación y configuración"
+  },
+  "gallery": [
+    { "name": "Vista frontal", "filename": "frente.jpg", "orientation": "horizontal" },
+    { "name": "Demostración", "filename": "demo.mp4", "orientation": "vertical" }
+  ],
+  "note": "Plantilla de referencia. Completar y subir los archivos desde el formulario del marketplace; este JSON no publica un producto automáticamente."
+}

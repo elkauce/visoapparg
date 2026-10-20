@@ -3,7 +3,7 @@ import {
   normalizeScreenSettings,
   validateScreenSettingsPatch,
 } from "./lib/screen_settings";
-import { VISO_STATES, findVisoStatus } from "./lib/viso_preset_states";
+import { initializeDeckCatalogue } from "./lib/deck_catalogue";
 import { normalizeStandbySettings } from "./lib/clock_settings";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
@@ -485,71 +485,12 @@ export const moveKey = mutation({
   },
 });
 
-// Explicit idempotent account migration. Never recreate deleted screens.
+// Starter initialization is shared with marketplace installation.
 export const ensureCatalogue = mutation({
   args: {},
   handler: async (ctx) => {
     const user = await requireCurrentUser(ctx);
-    if ((user.deckCatalogVersion ?? 0) >= 1) return;
-    const pages = await ctx.db
-      .query("deckPages")
-      .withIndex("by_user_and_order", (q) => q.eq("userId", user._id))
-      .take(MAX_PAGES);
-    if (pages.length > MAX_PAGES - 3)
-      throw new ConvexError({
-        code: "BAD_REQUEST",
-        message: "No hay espacio para migrar tus páginas sin perder datos.",
-      });
-    for (const page of pages)
-      await ctx.db.patch("deckPages", page._id, { order: page.order + 3 });
-    const statuses = await ctx.db
-      .query("statuses")
-      .withIndex("by_user_and_order", (q) => q.eq("userId", user._id))
-      .take(100);
-    const statePage = await ctx.db.insert("deckPages", {
-      userId: user._id,
-      name: "Estados VISO",
-      order: 0,
-      kind: "grid",
-      grid: { columns: 3, rows: 2 },
-    });
-    let statusCount = statuses.length;
-    let nextStatusOrder =
-      Math.max(-1, ...statuses.map((status) => status.order)) + 1;
-    for (const [position, definition] of VISO_STATES.entries()) {
-      const status = findVisoStatus(definition, statuses);
-      if (!status && statusCount >= 24) continue;
-      const statusId =
-        status?._id ??
-        (await ctx.db.insert("statuses", {
-          userId: user._id,
-          name: definition.name,
-          color: definition.defaultColor,
-          icon: definition.icon,
-          order: nextStatusOrder++,
-        }));
-      if (!status) statusCount++;
-      await ctx.db.insert("deckKeys", {
-        userId: user._id,
-        pageId: statePage,
-        position,
-        content: { kind: "status", statusId },
-        appearance: { label: definition.label },
-      });
-    }
-    await ctx.db.insert("deckPages", {
-      userId: user._id,
-      name: "Spotify",
-      order: 1,
-      kind: "spotify",
-    });
-    await ctx.db.insert("deckPages", {
-      userId: user._id,
-      name: "Reloj",
-      order: 2,
-      kind: "standby",
-    });
-    await ctx.db.patch("users", user._id, { deckCatalogVersion: 1 });
+    await initializeDeckCatalogue(ctx, user);
   },
 });
 
