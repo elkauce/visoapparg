@@ -1,6 +1,6 @@
 # Marketplace VISO — 1.14.0
 
-Versión preparada en `fix/viso-deck-reference-layout`. La publicación del servidor y la web requiere autorización separada. No se modifican los proyectos existentes ni las credenciales de Google.
+Versión publicada con autorización del propietario desde `fix/viso-deck-reference-layout`, fuente `6922286`. Se actualizó explícitamente el backend compartido `vivid-nightingale-785` y la web https://viso-deck-android.vercel.app en su proyecto existente. Las credenciales de Google se conservaron y los cobros permanecen desactivados.
 
 ## Catálogo y edición
 
@@ -39,3 +39,13 @@ La evidencia de esta versión se guarda en `docs/marketplace-1.14-evidence/`. La
 Pasaron **669 pruebas en 71 archivos**, TypeScript frontend/backend, ESLint de los archivos modificados, compilaciones web/Android y **21 pruebas JVM**. El [recorrido real en navegador](marketplace-1.14-evidence/browser-report.json) pasó **32 comprobaciones**: edición y moderación, versiones adquiridas, reproducción de videos en ambas proporciones, biblioteca del Display, nuevas cuentas, instalación de páginas y acceso desde otra sesión, además de vistas de 1440, 390 y 320 px sin errores de ejecución.
 
 APK preparada: `downloads/VISO-Deck-1.14.0-debug.apk`, versionCode 25, 21.705.655 bytes, SHA-256 `1514066e4f7b1250e0b488716518393b9eafcf791df42b8287d9ddde0a8b0b10`. La [verificación del APK](marketplace-1.14-evidence/apk-report.json) confirma la firma existente, los permisos de 1.13.1 y el SDK Google Home incluido. No se afirma una prueba física ni una operación real con Mercado Pago o Mercado Libre.
+
+## Publicación verificada
+
+Vercel publicó el despliegue `dpl_2ce8tFtpCPRSz5bE9x5z1PnaudLy`, estado `READY`, con alias https://viso-deck-android.vercel.app. Los 74 archivos servidos coinciden por SHA-256 con la compilación revisada. La ruta permanente de producto devuelve la aplicación actual. La [evidencia de producción](marketplace-1.14-evidence/production-report.json) incluye los archivos y la descarga real del APK, que responde HTTP 200 y coincide con el artefacto firmado.
+
+Pasaron [56 comprobaciones públicas en navegador](marketplace-1.14-evidence/production-browser-report.json) a 1440, 390 y 320 px, sin errores de ejecución: logo original visible, acceso Google/contraseña disponible, catálogo/ficha/documentación protegidos por sesión, siete plantillas descargables idénticas y cuatro portadas de páginas disponibles.
+
+Se comprobó con consultas de sólo lectura que no hay cobros habilitados ni pedidos. Las variables privadas de Mercado Pago siguen ausentes. El webhook sin configurar responde 503 y no procesa pagos; la subida sin sesión responde 401 y el callback OAuth incompleto responde 400. Google sigue disponible y su autorización conserva el retorno HTTPS y PKCE. No se inició sesión de ningún cliente ni se modificaron luces o estados reales.
+
+Se conserva la versión web anterior `dpl_Ek2yreo7PDATVwDzSHd3TXZtyR1w`, la fuente `b08bad2` y el APK 1.13.1 para recuperación. La nueva configuración de páginas y productos usa los campos existentes y ampliaciones opcionales; no se reemplazaron las cuentas ni los proyectos.

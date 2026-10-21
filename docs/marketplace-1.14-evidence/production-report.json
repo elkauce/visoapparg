@@ -1,0 +1,413 @@
+{
+  "release": "1.14.0",
+  "sourceCommit": "6922286a5bbe6d802622f98a5462016915d59018",
+  "publishedAt": "2026-10-21T02:49:49.243471+00:00",
+  "url": "https://viso-deck-android.vercel.app",
+  "backend": "vivid-nightingale-785",
+  "deploymentId": "dpl_2ce8tFtpCPRSz5bE9x5z1PnaudLy",
+  "readyState": "READY",
+  "matchingStaticFileCount": 74,
+  "staticFiles": [
+    {
+      "path": "/assets/admin-CLMyE_v8.js",
+      "sha256": "c6350c59bca09ba244b7c250af4b1584a88fdb82f256fda71b40e914c493d376",
+      "bytes": 11996
+    },
+    {
+      "path": "/assets/creator-docs-TX1xryge.js",
+      "sha256": "dde82991029eb2168afa633d1f6fdce0d789a8bf688b32ca65c26d9d636b309a",
+      "bytes": 15117
+    },
+    {
+      "path": "/assets/creator-docs-qdSxkGTw.css",
+      "sha256": "ff7d9ffd83fce8214103b87aa86932f70970c5aac43c68234af924a13b186381",
+      "bytes": 4064
+    },
+    {
+      "path": "/assets/dist-Btb5Jv1E.js",
+      "sha256": "020bd3311ec36b945d412865b91d0b0152780fe623ad1ce85bcc570b836c2b92",
+      "bytes": 7752
+    },
+    {
+      "path": "/assets/index-DMENKBOB.js",
+      "sha256": "ab144ef0873da2bdfa0773a71e8635a8cc9b9d2a17aef834efeb11f023bfa492",
+      "bytes": 951809
+    },
+    {
+      "path": "/assets/index-DfUz8HZw.css",
+      "sha256": "f55e59ed6f337474a42b40acabfc2e95f49fec7b1efab6bddf711300858418d1",
+      "bytes": 188453
+    },
+    {
+      "path": "/assets/label-BCnYvR_g.js",
+      "sha256": "92b018de051dc58983105b486fa5800989af0228d265a0a34fd3e50d93d38b8a",
+      "bytes": 135966
+    },
+    {
+      "path": "/assets/marketplace-navigation-DziBbpTB.js",
+      "sha256": "ccc8c96922b5df16c01a99203046e2bb9c8422fa96c9c7602aa90de7ecc9bf8b",
+      "bytes": 125479
+    },
+    {
+      "path": "/assets/page-BO4aOD-b.css",
+      "sha256": "9481be96f008234eab542b5bf351597d9b94056bc78644390f5707c26d3ac22a",
+      "bytes": 27026
+    },
+    {
+      "path": "/assets/page-C94jWoLP.js",
+      "sha256": "dce617a35528c81954a12fb16bb3af29fc072eb3bda7ee1647d0a30b00b92867",
+      "bytes": 43192
+    },
+    {
+      "path": "/assets/payment-settings-BIz9pzRB.js",
+      "sha256": "675ce93915c70b0c5deb11c3c97a14a0a010b35f080b41d4014f9a08f56a4e03",
+      "bytes": 34304
+    },
+    {
+      "path": "/assets/payment-settings-l2OUCYqn.css",
+      "sha256": "d9ca03bfc8de0af590ee62a76c3c7fb835a50602848ee95207bc92c5449fa8f4",
+      "bytes": 13675
+    },
+    {
+      "path": "/assets/studio-DxQg4rwO.js",
+      "sha256": "2ddca1e8f759b8189a38b7155521b02b2b908a4f5bbd610da7988a8d1bfd68f6",
+      "bytes": 7845
+    },
+    {
+      "path": "/assets/web-BP-1yMvb.js",
+      "sha256": "f73cb37e7d759e4c26d8ca9bb12d9721813b2ccd20100c81db458a8ba577decf",
+      "bytes": 843
+    },
+    {
+      "path": "/brand/viso-icon.png",
+      "sha256": "eceeec8d200d10a99fb1a64cdba3bb90cbed6503ad5849a66f8dea8faa6d93a0",
+      "bytes": 1318543
+    },
+    {
+      "path": "/brand/viso-logo.png",
+      "sha256": "706d409be787e977854fbd51e806824d23c44d10ad3c5df319b96555f701dfc1",
+      "bytes": 921108
+    },
+    {
+      "path": "/downloads/VISO-Elgato-1.2.streamDeckPlugin",
+      "sha256": "be989cb4cd63d25d45e8969ea49655e676f3dcf0a9d28bc6c45a73082d3b4f5b",
+      "bytes": 157232
+    },
+    {
+      "path": "/fonts/bricolage-grotesque-OFL.txt",
+      "sha256": "923f4ddf0fd39f9b7794ab0df7332f3d95dc43e8ad7ec2289d6d9e8491177f51",
+      "bytes": 4401
+    },
+    {
+      "path": "/fonts/bricolage-grotesque-latin-ext-opsz-normal.woff2",
+      "sha256": "776f6dcaf03636cd69a5802c94808cc8896c0a66c8e9ce0fe147231b6ee01957",
+      "bytes": 30736
+    },
+    {
+      "path": "/fonts/bricolage-grotesque-latin-opsz-normal.woff2",
+      "sha256": "a79fdb52d4a5c76552452f69202add96e287401fff03d3e8c0e38b4dcb5a99cd",
+      "bytes": 76888
+    },
+    {
+      "path": "/fonts/geist-mono-OFL.txt",
+      "sha256": "cc815ed4fc045f0e991abb10395b7932bd028c6a067deb13316d6002105074e6",
+      "bytes": 4498
+    },
+    {
+      "path": "/fonts/geist-mono-latin-ext-wght-normal.woff2",
+      "sha256": "1a189eb997c3e2ece68373e387afaec9e8617424186c4b1ab3cff7c54ba6223b",
+      "bytes": 14696
+    },
+    {
+      "path": "/fonts/geist-mono-latin-wght-normal.woff2",
+      "sha256": "684ad5b531f81d43c1e8c7038262d5db7cdc1f68006e04d6c7769efa8d33c8cc",
+      "bytes": 23128
+    },
+    {
+      "path": "/fonts/provenance.json",
+      "sha256": "c452eebbaa7ea2a7a70ecb096570f8f5f5baac1cd59d93edf2f2c5cb29574b0a",
+      "bytes": 3263
+    },
+    {
+      "path": "/index.html",
+      "sha256": "ba856715a3e2fb6932dc1acedee48c0fdb90acae71ca832f0830e1366555d1fc",
+      "bytes": 2505
+    },
+    {
+      "path": "/marketplace/animated/ausente.gif",
+      "sha256": "3098c5963b577909199e7ea2f27993d59b860d682370909c613ef1fa9f56a431",
+      "bytes": 122692
+    },
+    {
+      "path": "/marketplace/animated/ausente.mp4",
+      "sha256": "41c8218c757472df670cbba5d1cb4551a9fb453eff9ab77e92149c4934ee28fa",
+      "bytes": 9582
+    },
+    {
+      "path": "/marketplace/animated/libre.gif",
+      "sha256": "24400f43c35234dc1fdec987d683a58a500c1544d984d159a1dabb57ea5ae27d",
+      "bytes": 108232
+    },
+    {
+      "path": "/marketplace/animated/libre.mp4",
+      "sha256": "47078011c268dcddac0f45b5372b70ad9ec709a01207026a562408894de8cd5a",
+      "bytes": 11208
+    },
+    {
+      "path": "/marketplace/animated/llamada.gif",
+      "sha256": "d01a6bae6cc5d0a21d63ed877b117a51f59cd9a2f2aa9e14b265f5af42af7bc8",
+      "bytes": 114818
+    },
+    {
+      "path": "/marketplace/animated/llamada.mp4",
+      "sha256": "7657dcbd1e10aca4867817ff55c166fcd9416e3e993903aa6994d9024de97297",
+      "bytes": 10959
+    },
+    {
+      "path": "/marketplace/animated/no-molestar.gif",
+      "sha256": "e6d96d4c5792013e0a30065f6714181caba87b2e3da592791d080773a2b11b5a",
+      "bytes": 114812
+    },
+    {
+      "path": "/marketplace/animated/no-molestar.mp4",
+      "sha256": "d4e8f0fadd07807d05e4904528a5453b34b6e48f86aa8da05cb74fbf1d3294b4",
+      "bytes": 11915
+    },
+    {
+      "path": "/marketplace/animated/ocupado.gif",
+      "sha256": "b443cd6e4df4461ef83fac956f7aa5160afd294d24ecf120ccb52042e6ad58d5",
+      "bytes": 109490
+    },
+    {
+      "path": "/marketplace/animated/ocupado.mp4",
+      "sha256": "7aac899c196f88e99abd132d48235cca39ad67e653382041e3b777a17639519f",
+      "bytes": 11821
+    },
+    {
+      "path": "/marketplace/animated/reunion.gif",
+      "sha256": "181abd8c6c1c320e83d84c631b36806c8754373321809e5c195f67957b756687",
+      "bytes": 111583
+    },
+    {
+      "path": "/marketplace/animated/reunion.mp4",
+      "sha256": "0764a3c615afb96d7a9157aa944b96d8366f373d9f49d27f2d654fda04a170fb",
+      "bytes": 12754
+    },
+    {
+      "path": "/marketplace/covers/ambient-screen.png",
+      "sha256": "833de951d971d966fdce68e46196b077a5dea18021768185e1c5ebcadde7cc43",
+      "bytes": 124290
+    },
+    {
+      "path": "/marketplace/covers/essential-profile.png",
+      "sha256": "2241c94462d222d7035aafd65f27fe9f77fba036da7436057ade27ccb380857e",
+      "bytes": 131925
+    },
+    {
+      "path": "/marketplace/covers/living-icons.png",
+      "sha256": "02ba433aadd74dc52934d2524dfa2c60b365a18a01c4252a2a26113484fd0936",
+      "bytes": 131290
+    },
+    {
+      "path": "/marketplace/covers/original-icons.png",
+      "sha256": "511e22c6020f6b44b4b7c2f31e4dc611e76d42bc403c1dbe0f79a2907cdc2c16",
+      "bytes": 130847
+    },
+    {
+      "path": "/marketplace/covers/page-clock.png",
+      "sha256": "12fd9931badd68cefff4752c06081c4c46d5a7ba6782283c4f294d25adfbe9b7",
+      "bytes": 22790
+    },
+    {
+      "path": "/marketplace/covers/page-football.png",
+      "sha256": "44e1ef91d9c4ca183ca8824464f56c325424f64bb9c2dfeecec69bb8e85a393f",
+      "bytes": 27320
+    },
+    {
+      "path": "/marketplace/covers/page-spotify.png",
+      "sha256": "2de3551e9cf34f58b5b3a7e950b290f3d7b5cb75e647b2eb74ff21f939205379",
+      "bytes": 23416
+    },
+    {
+      "path": "/marketplace/covers/page-weather.png",
+      "sha256": "e03385a10c96864e70a66df37846e32d596726660213febcf8555210e4b96fda",
+      "bytes": 22941
+    },
+    {
+      "path": "/marketplace/covers/soft-sounds.png",
+      "sha256": "2a0419a090332305f398d738a6b653959cf0e12b984799ca9598ce988e988fcd",
+      "bytes": 21983
+    },
+    {
+      "path": "/marketplace/covers/stream-deck.png",
+      "sha256": "27a34ffb55c5bb4c7b1e4d23cc195f34d29c196d2aa5bcc436f5a9799de0027f",
+      "bytes": 131181
+    },
+    {
+      "path": "/marketplace/creator-templates/LEEME.md",
+      "sha256": "b62d93207e998e0d95a6a2c248b0b9fad56f958dd4d0a2562eb84e035e581806",
+      "bytes": 1808
+    },
+    {
+      "path": "/marketplace/creator-templates/ficha-producto-ejemplo.json",
+      "sha256": "758f82380f39b3f1a8e4e1d8ea24ef551d0c8b8016e3bbb60318128d78463145",
+      "bytes": 1091
+    },
+    {
+      "path": "/marketplace/creator-templates/pagina-ejemplo.json",
+      "sha256": "ba19dc6c50395fba7610f664e942533c6f40a913712a7e70de866b92fd4dca99",
+      "bytes": 126
+    },
+    {
+      "path": "/marketplace/creator-templates/pagina-futbol-ejemplo.json",
+      "sha256": "bd493c7cc0cfbc8bb12985f095fb2d0f85cc7ea1b2b2f2e40bf33721285c3251",
+      "bytes": 145
+    },
+    {
+      "path": "/marketplace/creator-templates/pagina-reloj-ejemplo.json",
+      "sha256": "5d07e892a7019ffceb9c01db35cc4636404026ca1abc48a4ca7bef13443b3c06",
+      "bytes": 182
+    },
+    {
+      "path": "/marketplace/creator-templates/perfil-ejemplo.json",
+      "sha256": "1723843b5eb47bb11ce26d7bded56371f7cb5d543486111dd2dcd3255c2cd638",
+      "bytes": 823
+    },
+    {
+      "path": "/marketplace/creator-templates/plugin-estructura-ejemplo.zip",
+      "sha256": "3a062708bb760f0ff07c85ab862323d20dc294402f657c0844f992978d562f9a",
+      "bytes": 638
+    },
+    {
+      "path": "/marketplace/originals/ausente.png",
+      "sha256": "e6bdc220c06579da7f7ca0427fce04150e667ae1a8c0ef7271f2dffd3b8670de",
+      "bytes": 27932
+    },
+    {
+      "path": "/marketplace/originals/camara.png",
+      "sha256": "8193b362aca2fccdd38cf06ef85f0f8ee882e7afc6799a51e3ece24294995ad0",
+      "bytes": 25463
+    },
+    {
+      "path": "/marketplace/originals/clima.png",
+      "sha256": "3c9633a833f5985e14d12c5acf9f4d2ccf24613da40b057685740246806e9a83",
+      "bytes": 25616
+    },
+    {
+      "path": "/marketplace/originals/deportes.png",
+      "sha256": "f2331b4dd61215ce3854ae674772903f589d8b520c398ffe5ca60b198a80d63e",
+      "bytes": 28560
+    },
+    {
+      "path": "/marketplace/originals/libre.png",
+      "sha256": "683dd20ce522419b45b27db2db2cd32311225fdbb4b53e4cee394347e8464394",
+      "bytes": 25490
+    },
+    {
+      "path": "/marketplace/originals/llamada.png",
+      "sha256": "bd1b73d3410cabeb98c7b0f91968cdf69ce0ce63f9fabd8b8ea16873c18e9501",
+      "bytes": 28681
+    },
+    {
+      "path": "/marketplace/originals/microfono.png",
+      "sha256": "d50870b1a3b194b94d59e478e08461c4270e2f0f898cb1864f70d9350285bd6f",
+      "bytes": 25447
+    },
+    {
+      "path": "/marketplace/originals/musica.png",
+      "sha256": "fd12a17b6a07dc26f7887f3aa5fefefdec9f78589816be64a4df65b00f10c982",
+      "bytes": 24815
+    },
+    {
+      "path": "/marketplace/originals/no-molestar.png",
+      "sha256": "c1a167ece2db1320e09ec10b82e74997c6acdc65a19373eaeafec9b79452c242",
+      "bytes": 28933
+    },
+    {
+      "path": "/marketplace/originals/ocupado.png",
+      "sha256": "3e9b02902c2e5d5b4fa6e92122366f1799791a2ee70119776e90a40584de56d0",
+      "bytes": 27043
+    },
+    {
+      "path": "/marketplace/originals/pausa.png",
+      "sha256": "5c65097fbda9062dbd93616ab1b7fe2ff1d5c05c47bf41388c5d161a038c0907",
+      "bytes": 20912
+    },
+    {
+      "path": "/marketplace/originals/reunion.png",
+      "sha256": "c4d9c1fce308f8eb44545b3ab790008e13f33854f96abe9c6ce15370812cc915",
+      "bytes": 29256
+    },
+    {
+      "path": "/marketplace/originals-manifest.json",
+      "sha256": "22a014b38847dff3280011a91e6d5ef3635caa146c030a1e9683f9b1e7393123",
+      "bytes": 7585
+    },
+    {
+      "path": "/marketplace/screensavers/aurora.mp4",
+      "sha256": "79d306f2f8d18625af2cdd558b87d3aa5cefd8780ddbb16a2fd5fcef544a4129",
+      "bytes": 64458
+    },
+    {
+      "path": "/marketplace/sounds/atencion.wav",
+      "sha256": "88edff2e68f1783658645f3cb5da2e887d47c078d5dbeb48d7c0a3118acc3fac",
+      "bytes": 33118
+    },
+    {
+      "path": "/marketplace/sounds/confirmar.wav",
+      "sha256": "e589d5124185996b35f31fe170d75d26aec303a1c55f91b960a67ccee8340b95",
+      "bytes": 33118
+    },
+    {
+      "path": "/marketplace/sounds/pausa.wav",
+      "sha256": "f4734d6d82a83afa64ceeb0863e397b59b766c24b9b210c41387878004de0393",
+      "bytes": 39734
+    },
+    {
+      "path": "/products/viso-display.png",
+      "sha256": "d43616ae404e74346585102df84e6d335b634a5abf6d429057c52788d4819ae5",
+      "bytes": 1150517
+    },
+    {
+      "path": "/products/viso-matrix.png",
+      "sha256": "5df19b677611639e207fee2946f842cdd4e7d24bf815e64aacf61469c9f54cfb",
+      "bytes": 1129026
+    },
+    {
+      "path": "/products/viso-mini.png",
+      "sha256": "8495d70cbfe84e5fb06b6350371b2849d219b052e595d235087a0b4a973dfe97",
+      "bytes": 898246
+    }
+  ],
+  "apk": {
+    "url": "https://raw.githubusercontent.com/elkauce/visoapparg/fix/viso-deck-reference-layout/downloads/VISO-Deck-1.14.0-debug.apk",
+    "httpStatus": 200,
+    "bytes": 21705655,
+    "sha256": "1514066e4f7b1250e0b488716518393b9eafcf791df42b8287d9ddde0a8b0b10",
+    "matchesSignedArtifact": true
+  },
+  "paymentWebhookUnconfigured503": true,
+  "oauthMissingParametersRejected400": true,
+  "anonymousUploadRejected401": true,
+  "directProductRoutesServeCurrentApp": true,
+  "realPaymentTested": false,
+  "physicalDeviceTested": false,
+  "previousDeployment": "dpl_Ek2yreo7PDATVwDzSHd3TXZtyR1w",
+  "paymentState": {
+    "enabledSettingExists": false,
+    "hasAnyOrders": false,
+    "paymentSettingsCount": 1
+  },
+  "mercadoPagoCredentialVariablesPresent": false,
+  "googleAuth": {
+    "googleAvailable": true,
+    "anonymousConnectionPrivate": true,
+    "authorizationRedirectStatus": 302,
+    "authorizationHost": "accounts.google.com",
+    "callback": "https://vivid-nightingale-785.convex.site/api/auth/callback/google",
+    "identityScopesOnly": true,
+    "pkceS256": true,
+    "realConsentAndCallback": "pending user test"
+  },
+  "productionPublished": true
+}
