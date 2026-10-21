@@ -1,8 +1,8 @@
 # VISO 1.15.0 — navegación, biblioteca y Google Home
 
-Versión preparada en `fix/viso-deck-reference-layout`. La web de revisión está en https://viso-deck-android-g89ehkpun-manuelhaguilar8-4981s-projects.vercel.app . **No se actualizó el backend compartido ni el dominio de producción.**
+Versión publicada en https://viso-deck-android.vercel.app desde `fix/viso-deck-reference-layout`, después de la autorización explícita del propietario. El backend compartido `vivid-nightingale-785` y la web corresponden a 1.15.0. La publicación de Vercel es `dpl_7P7WbVBNT1u6otZK6ebJiPHS4ctM`.
 
-La revisión pública permite comprobar el frontend. El catálogo Vúmetro y la aplicación directa de imágenes a teclas necesitan publicar también el backend de esta versión; el recorrido funcional completo se verificó contra el servidor local con cuentas técnicas. No se presentan estas operaciones nuevas como habilitadas en el servicio actual.
+El catálogo Vúmetro y la aplicación directa de imágenes a teclas están incluidos en el backend publicado. El recorrido funcional completo se verificó contra el servidor local con cuentas técnicas; las comprobaciones posteriores a la publicación fueron anónimas y de solo lectura. La web de revisión previa se conserva en https://viso-deck-android-g89ehkpun-manuelhaguilar8-4981s-projects.vercel.app .
 
 ## Navegación y recursos
 
@@ -30,11 +30,11 @@ Alexa queda para otro momento, según lo indicado por el propietario. Se mantien
 
 ## Artefactos y verificación
 
-APK preparada: `downloads/VISO-Deck-1.15.0-debug.apk`, `com.viso.deck`, versionCode 26. Conserva certificado y permisos de 1.14.0 y el SDK oficial Google Home 17.1.0. Su tamaño y SHA-256 están registrados en `panel-1.15-evidence/apk-report.json`.
+APK disponible: [VISO Deck 1.15.0](https://raw.githubusercontent.com/elkauce/visoapparg/fix/viso-deck-reference-layout/downloads/VISO-Deck-1.15.0-debug.apk), `com.viso.deck`, versionCode 26. Conserva certificado y permisos de 1.14.0 y el SDK oficial Google Home 17.1.0. Su tamaño y SHA-256 están registrados en `panel-1.15-evidence/apk-report.json`. La descarga pública volvió a verificarse tras la publicación y coincide con el artefacto firmado; el QR y el botón del panel apuntan a esa versión.
 
 Pasaron 709 pruebas Vitest en 75 archivos y 25 pruebas JVM; se repitieron las 80 pruebas del marketplace tras los últimos ajustes. TypeScript, ESLint de los archivos modificados, compilaciones Android/web y verificación del catálogo aprobaron. Los informes de navegador registran 30 comprobaciones locales con clientes y creadores técnicos, sincronización entre sesiones, tamaños de 1440/390/320 px y ausencia de errores JavaScript. La evidencia pública adicional es anónima.
 
-El preview Vercel quedó READY. Se comprobaron sus 80 archivos contra la compilación; para el HTML se identificó únicamente la inyección de la herramienta de comentarios de Vercel. El HTML de producción sigue coincidiendo exactamente con la versión 1.14.0.
+El preview Vercel quedó READY. Se comprobaron sus 80 archivos contra la compilación; para el HTML se identificó únicamente la inyección de la herramienta de comentarios de Vercel. Después de publicar, los 80 archivos del dominio de producción coincidieron exactamente con la compilación 1.15.0. Pasaron 42 comprobaciones anónimas del navegador en 1440/390/320 px, con acceso Google y contraseña disponibles, carrusel móvil automático y sin errores de ejecución JavaScript. El servidor expone las funciones nuevas de aplicación de recursos e instalación de páginas. Mercado Pago permanece sin credenciales y deshabilitado; no se crearon órdenes.
 
 No se autorizaron cuentas Google Home reales, no se enviaron comandos a luces físicas y no se realizaron compras. Antes de considerar comprobada la recuperación de Google Home en el dispositivo, instalar la APK como actualización y probar conexión, selección guardada, salida/regreso a la app y cambios de estado en un teléfono con luces autorizadas.
 

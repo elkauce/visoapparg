@@ -18,8 +18,10 @@
   "webBuildPassed": true,
   "androidBuildPassed": true,
   "apkSha256": "2aa54f7e0e2b44f6688d9679abaa4b918d6f34316783616c082282790366f52f",
-  "productionPublished": false,
-  "backendUpdated": false,
+  "productionPublished": true,
+  "backendUpdated": true,
   "physicalGoogleHomeTested": false,
-  "paidOrderTested": false
+  "paidOrderTested": false,
+  "productionMatchingStaticFiles": 80,
+  "productionBrowserChecks": 42
 }
