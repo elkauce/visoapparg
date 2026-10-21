@@ -142,6 +142,79 @@ describe("Marketplace payment controls and snapshots", () => {
     expect(await f.buyer.query(api.marketplace.library, {})).toEqual([]);
   });
 
+  it("delivers the original paid snapshot once after a signed approval for a 10 percent split checkout", async () => {
+    const f = await fixture(); await enable(f, 1000);
+    await f.t.run((ctx) => ctx.db.patch("marketplaceProducts", f.productId, { priceAmount: 10000 }));
+    let providerOrderId = "";
+    const fetchMock = vi.fn(async (url: string, request: RequestInit = {}) => {
+      if (url === "https://api.mercadopago.com/checkout/preferences") {
+        providerOrderId = JSON.parse(String(request.body)).external_reference;
+        return new Response(JSON.stringify({
+          id: "preference-ten-percent", sandbox_init_point: "https://sandbox.mercadopago.com.ar/checkout/test",
+        }), { status: 200 });
+      }
+      if (url === "https://api.mercadopago.com/v1/payments/777") {
+        return new Response(JSON.stringify({
+          id: 777, transaction_amount: 100, currency_id: "ARS", collector_id: 123,
+          external_reference: providerOrderId, live_mode: false, status: "approved",
+          date_last_updated: "2026-10-21T12:00:00Z",
+        }), { status: 200 });
+      }
+      throw new Error("Unexpected simulated provider request");
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const checkout = await f.buyer.action(api.marketplace_payments.createCheckout, { productId: f.productId });
+    const orderId = await f.t.run(async (ctx) => ctx.db.normalizeId("marketplaceOrders", checkout.orderId));
+    if (orderId === null) throw new Error("Checkout did not return a valid marketplace order ID");
+    const preference = JSON.parse(String(fetchMock.mock.calls[0][1]?.body));
+    expect(preference.items).toEqual([{ id: f.productId, title: "Iconos premium", quantity: 1, unit_price: 100, currency_id: "ARS" }]);
+    expect(preference.marketplace_fee).toBe(10);
+    expect(preference.external_reference).toBe(checkout.orderId);
+    expect(preference.notification_url).toContain(`order_id=${checkout.orderId}`);
+    expect(await f.buyer.query(api.marketplace.library, {})).toEqual([]);
+    expect(await f.t.run((ctx) => ctx.db.get("marketplaceOrders", orderId))).toMatchObject({
+      amount: 10000, commissionBps: 1000, commissionAmount: 1000, sellerAmount: 9000, status: "pending",
+    });
+
+    await f.admin.mutation(api.marketplace_payments.saveSettings, {
+      digitalCommissionBps: 2500, enabled: true, splitApproved: true, policiesAccepted: true,
+    });
+    await f.t.run((ctx) => ctx.db.patch("marketplaceProducts", f.productId, {
+      title: "Edición posterior", priceAmount: 20000, revision: 2,
+      assets: [{ id: "replacement", name: "Otro", mediaType: "image", builtinPath: "/marketplace/test/replaced.png" }],
+    }));
+
+    const webhookUrl = `/marketplace/payments/webhook?order_id=${checkout.orderId}&data.id=777`;
+    const body = JSON.stringify({ type: "payment", data: { id: "777" } });
+    expect((await f.t.fetch(webhookUrl, { method: "POST", body })).status).toBe(401);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(await f.buyer.query(api.marketplace.library, {})).toEqual([]);
+
+    const ts = String(Math.floor(Date.now() / 1000));
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode("local-test-only"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+    const hash = [...new Uint8Array(await crypto.subtle.sign("HMAC", key,
+      new TextEncoder().encode(`id:777;request-id:request-ten-percent;ts:${ts};`)))].map((value) => value.toString(16).padStart(2, "0")).join("");
+    const headers = { "x-request-id": "request-ten-percent", "x-signature": `ts=${ts},v1=${hash}` };
+    for (let attempt = 0; attempt < 2; attempt++) {
+      expect((await f.t.fetch(webhookUrl, { method: "POST", body, headers })).status).toBe(200);
+      const library = await f.buyer.query(api.marketplace.library, {});
+      expect(library).toHaveLength(1);
+      expect(library[0]).toMatchObject({ title: "Iconos premium", assets: [{ id: "first", builtinPath: "/marketplace/test/icon.png" }] });
+    }
+    expect(fetchMock.mock.calls.slice(1).map(([url]) => url)).toEqual([
+      "https://api.mercadopago.com/v1/payments/777", "https://api.mercadopago.com/v1/payments/777",
+    ]);
+    expect(await f.t.run((ctx) => ctx.db.get("marketplaceOrders", orderId))).toMatchObject({
+      amount: 10000, commissionBps: 1000, commissionAmount: 1000, sellerAmount: 9000,
+      status: "approved", paymentId: "777", productSnapshot: { title: "Iconos premium", revision: 1 },
+    });
+    expect(await f.t.run((ctx) => ctx.db.query("marketplacePaymentWebhookEvents").collect())).toHaveLength(1);
+    expect(await f.buyer.query(api.marketplace_payments.myOrders, {})).toEqual([
+      expect.objectContaining({ id: checkout.orderId, title: "Iconos premium", amount: 10000, status: "approved" }),
+    ]);
+  });
+
   it("consumes OAuth state once, rejects expiry, and replaces earlier pending authorizations", async () => {
     const f = await fixture(); providerEnvs();
     const hash = await hashPaymentState("first-state");

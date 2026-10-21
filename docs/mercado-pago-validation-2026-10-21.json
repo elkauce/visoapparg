@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-10-21T19:49:22.709303+00:00",
+  "sourceBaseCommit": "85c32df",
+  "testFile": "convex/marketplace_payments.test.ts",
+  "testFileSha256": "3834671f22e6001688ea7e9676bc417f06f6166c6911f1859e8074bbc1e88d70",
+  "automated": {
+    "tests": 21,
+    "passed": 21,
+    "failed": 0,
+    "providerSimulated": true,
+    "backendTypecheckPassed": true,
+    "changedTestEslintPassed": true
+  },
+  "integratedCase": {
+    "priceArs": 100,
+    "commissionPercent": 10,
+    "requestedMarketplaceFeeArs": 10,
+    "sellerAmountArsBeforeProcessorCosts": 90,
+    "unsignedWebhookRejected": true,
+    "signedApprovedWebhookVerified": true,
+    "providerPaymentQueried": true,
+    "originalSnapshotPreserved": true,
+    "duplicateEntitlementPrevented": true
+  },
+  "hostedWebhook": {
+    "invalidSignatureStatus": 401,
+    "signatureRejected": true,
+    "providerPaymentCreated": false,
+    "orderCreated": false
+  },
+  "hostedState": {
+    "configuredCommissionPercent": 10,
+    "effectiveMode": "test",
+    "hasAnyOrders": false,
+    "hasExplicitTestAccessToken": false,
+    "paymentsEnabled": false
+  },
+  "network": {
+    "unauthenticatedApiProbeStatus": 403,
+    "requiredHostsAbsentFromCurrentRuntime": true,
+    "allowedHostsSavedInDraft": true,
+    "sandboxHostAdded": "sandbox.mercadopago.com.ar",
+    "draftRequiresPublish": true,
+    "runtimeAccessVerified": false
+  },
+  "providerSplitTest": {
+    "status": "blocked",
+    "blockers": [
+      "apply saved environment network configuration",
+      "prepare provider-supported test accounts and credentials"
+    ],
+    "actualSplitVerified": false,
+    "settledCommissionVerified": false,
+    "accessTokenOwnerVerified": false,
+    "productionCredentialsUsedForPayment": false
+  },
+  "productionChanges": {
+    "paymentsEnabled": false,
+    "backendDeployed": false,
+    "webDeployed": false,
+    "apkRebuilt": false,
+    "credentialValuesChanged": false
+  }
+}

@@ -72,3 +72,5 @@ Las pruebas de código verifican estos controles con un proveedor simulado. No a
 - Mantener las variables del proveedor sólo en el backend y evitar registrar cuerpos de OAuth, notificaciones completas o cabeceras de autorización.
 
 Documentación oficial para la habilitación y condiciones vigentes: [Mercado Pago Developers Argentina](https://www.mercadopago.com.ar/developers/es/docs).
+
+Validación del 21 de octubre de 2026: [circuito simulado al 10 %, comprobación del webhook publicado y requisitos pendientes de la prueba externa](mercado-pago-validation-2026-10-21.md). Los cobros siguen desactivados; no se acredita una liquidación de Mercado Pago con pruebas simuladas.
