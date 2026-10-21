@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useReducedMotion } from "motion/react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Dialog,
   DialogContent,
@@ -48,6 +49,16 @@ export function ProductHero({
   demo?: boolean;
 }) {
   const reduced = useReducedMotion();
+  const mobile = useIsMobile();
+  const section = useRef<HTMLElement>(null);
+  const inputMode = useRef<"keyboard" | "pointer">("keyboard");
+  const [visible, setVisible] = useState(true);
+  const [pageVisible, setPageVisible] = useState(() => !document.hidden);
+  const [paused, setPaused] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [interaction, setInteraction] = useState(0);
   const [viewport, carousel] = useEmblaCarousel({
     loop: true,
     startIndex: 1,
@@ -59,18 +70,82 @@ export function ProductHero({
   }, [carousel]);
   useEffect(() => {
     if (!carousel) return;
-    carousel.on("select", sync).on("reInit", sync);
+    const startDrag = () => setDragging(true);
+    const endDrag = () => setDragging(false);
+    carousel
+      .on("select", sync)
+      .on("reInit", sync)
+      .on("pointerDown", startDrag)
+      .on("pointerUp", endDrag);
     return () => {
-      carousel.off("select", sync).off("reInit", sync);
+      carousel
+        .off("select", sync)
+        .off("reInit", sync)
+        .off("pointerDown", startDrag)
+        .off("pointerUp", endDrag);
     };
   }, [carousel, sync]);
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(!document.hidden);
+    const keyboardInteraction = () => {
+      inputMode.current = "keyboard";
+      if (section.current?.contains(document.activeElement)) setFocused(true);
+    };
+    document.addEventListener("visibilitychange", updateVisibility);
+    document.addEventListener("keydown", keyboardInteraction);
+    return () => {
+      document.removeEventListener("visibilitychange", updateVisibility);
+      document.removeEventListener("keydown", keyboardInteraction);
+    };
+  }, []);
+  useEffect(() => {
+    if (!section.current || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+    });
+    observer.observe(section.current);
+    return () => observer.disconnect();
+  }, []);
+  const autoplay =
+    mobile &&
+    !reduced &&
+    visible &&
+    pageVisible &&
+    !paused &&
+    !dragging &&
+    !hovered &&
+    !focused;
+  useEffect(() => {
+    if (!carousel || !autoplay) return;
+    const timer = window.setTimeout(() => {
+      if (carousel.canScrollNext()) carousel.scrollNext();
+      else carousel.scrollTo(0);
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [carousel, autoplay, selected, interaction]);
   return (
     <section
+      ref={section}
       className="viso-product-hero"
       aria-label="Productos VISO"
       aria-roledescription="carrusel"
       style={{ backgroundColor: color }}
       data-state-color={color}
+      onPointerEnter={(event) =>
+        event.pointerType === "mouse" && setHovered(true)
+      }
+      onPointerLeave={() => setHovered(false)}
+      onPointerDownCapture={() => {
+        inputMode.current = "pointer";
+        setFocused(false);
+        setInteraction((value) => value + 1);
+      }}
+      onPointerCancel={() => setDragging(false)}
+      onFocusCapture={() => setFocused(inputMode.current === "keyboard")}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget))
+          setFocused(false);
+      }}
     >
       {demo && <span className="viso-demo-label">Demo</span>}
       <div ref={viewport} className="viso-carousel-viewport">
@@ -124,6 +199,24 @@ export function ProductHero({
           </button>
         ))}
       </div>
+      {mobile && !reduced && (
+        <button
+          className="viso-carousel-playback"
+          aria-label={
+            paused
+              ? "Reanudar carrusel automático"
+              : "Pausar carrusel automático"
+          }
+          aria-pressed={paused}
+          onClick={() => {
+            setPaused(!paused);
+            // An explicit resume also allows playback while this control has focus.
+            if (paused) setFocused(false);
+          }}
+        >
+          {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
+        </button>
+      )}
     </section>
   );
 }

@@ -646,6 +646,24 @@
   background: #087b39;
   width: 16px;
 }
+.viso-carousel-playback {
+  position: absolute;
+  right: 10px;
+  bottom: 3px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid #ffffff8a;
+  background: #ffffff70;
+  color: #18261d;
+  cursor: pointer;
+}
+.viso-carousel-playback svg {
+  width: 14px;
+  height: 14px;
+}
 .viso-landing button:focus-visible {
   outline: 3px solid #9a3400;
   outline-offset: 4px;

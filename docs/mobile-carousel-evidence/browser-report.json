@@ -1,0 +1,22 @@
+{
+  "origin": "http://127.0.0.1:5192",
+  "checks": 13,
+  "results": [
+    "mobile starts with VISO Display in the centre",
+    "mobile hero advances automatically to the next product",
+    "manual touch selection still chooses a product",
+    "autoplay resumes after a touch without being stuck on button focus",
+    "explicit pause keeps the selected slide unchanged",
+    "explicit resume restarts automatic sliding",
+    "automatic product changes preserve the selected state colour",
+    "offscreen hero pauses its automatic movement",
+    "reduced motion does not auto-advance",
+    "reduced motion retains manual product navigation",
+    "desktop does not auto-advance",
+    "mobile page remains inside the viewport",
+    "browser flow has no JavaScript execution errors"
+  ],
+  "errors": [],
+  "scope": "Anonymous mobile home demo; no user login, state writes or physical light commands",
+  "completedAt": "2026-10-21T13:11:16.355Z"
+}
