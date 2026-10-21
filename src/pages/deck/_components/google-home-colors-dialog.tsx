@@ -1,4 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import type { PluginListenerHandle } from "@capacitor/core";
+import { isAndroidNative } from "@/lib/android-native.ts";
 import { LoaderCircle, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -23,6 +26,9 @@ import { readGoogleHomeColors } from "../_lib/google-home-colors.ts";
 interface Snapshot {
   status: GoogleHomeStatus | null;
   configuration: GoogleHomeConfiguration;
+  configurationLoaded: boolean;
+  configurationEdited: boolean;
+  savedSelectedIds: string[];
   lights: GoogleHomeLight[];
   discovered: boolean;
   loading: boolean;
@@ -34,16 +40,19 @@ const errorMessage = (failure: unknown): string =>
     ? failure.message
     : "Google Home no pudo completar la operación.";
 
-/** Configuration opens from Deck settings; every listed light is an SDK result. */
-export default function GoogleHomeColorsDialog({
-  userId,
-  open,
-  onOpenChange,
-}: {
+interface DialogProps {
   userId: string;
   open: boolean;
   onOpenChange(open: boolean): void;
-}) {
+}
+
+/** Never expose a previous owner's configuration while a different account loads. */
+export default function GoogleHomeColorsDialog(props: DialogProps) {
+  return <GoogleHomeAccountDialog key={props.userId} {...props} />;
+}
+
+/** Configuration opens from Deck settings; every listed light is an SDK result. */
+function GoogleHomeAccountDialog({ userId, open, onOpenChange }: DialogProps) {
   const [snapshot, setSnapshot] = useState<Snapshot>(() => ({
     status: null,
     configuration: {
@@ -52,152 +61,215 @@ export default function GoogleHomeColorsDialog({
       enabled: false,
       revision: "",
     },
+    configurationLoaded: false,
+    configurationEdited: false,
+    savedSelectedIds: [],
     lights: [],
     discovered: false,
     loading: true,
     error: null,
   }));
   const [busy, setBusy] = useState(false);
-  const operation = useRef(false);
+  const operation = useRef<number | null>(null);
   const generation = useRef(0);
+  const verificationRetries = useRef(0);
+
+  const discover = useCallback(
+    async (request: number) => {
+      const result = await googleHomeNative.discoverLights({
+        accountId: userId,
+      });
+      if (request !== generation.current) return;
+      setSnapshot((current) => ({
+        ...current,
+        status: result,
+        lights: result.lights.filter((light) => light.colorCapable === true),
+        discovered: true,
+        error: null,
+      }));
+    },
+    [userId],
+  );
+
+  const recheck = useCallback(
+    async (request: number) => {
+      // A transient permission lookup must not discard an independently readable,
+      // owner-scoped configuration or overwrite local edits made before resuming.
+      const [statusResult, configurationResult] = await Promise.allSettled([
+        googleHomeNative.getStatus({ accountId: userId }),
+        googleHomeNative.getConfiguration({ accountId: userId }),
+      ]);
+      if (request !== generation.current) return;
+      const status =
+        statusResult.status === "fulfilled" ? statusResult.value : null;
+      const configuration =
+        configurationResult.status === "fulfilled"
+          ? configurationResult.value
+          : null;
+      const failures = [statusResult, configurationResult]
+        .filter((result) => result.status === "rejected")
+        .map((result) =>
+          errorMessage((result as PromiseRejectedResult).reason),
+        );
+      setSnapshot((current) => ({
+        ...current,
+        status,
+        configuration:
+          configuration && !current.configurationEdited
+            ? configuration
+            : current.configuration,
+        configurationLoaded: !!configuration || current.configurationLoaded,
+        savedSelectedIds:
+          configuration?.selectedIds ?? current.savedSelectedIds,
+        lights: [],
+        discovered: false,
+        loading: false,
+        error: failures.length ? [...new Set(failures)].join(" ") : null,
+      }));
+      if (configuration) notifyGoogleHomeConfigurationChanged(userId);
+      if (!failures.length && status?.available && status.authorized)
+        await discover(request);
+    },
+    [discover, userId],
+  );
+
+  const perform = useCallback(
+    async (task: (request: number) => Promise<void>) => {
+      const request = generation.current;
+      if (operation.current === request) return;
+      operation.current = request;
+      setBusy(true);
+      try {
+        await task(request);
+      } catch (failure) {
+        if (request === generation.current) {
+          let status: GoogleHomeStatus | null = null;
+          try {
+            status = await googleHomeNative.getStatus({ accountId: userId });
+          } catch {
+            /* Keep permissions unverified if the official read also fails. */
+          }
+          if (request === generation.current)
+            setSnapshot((current) => ({
+              ...current,
+              status,
+              lights: [],
+              discovered: false,
+              loading: false,
+              error: errorMessage(failure),
+            }));
+        }
+      } finally {
+        if (operation.current === request) {
+          operation.current = null;
+          if (request === generation.current) setBusy(false);
+        }
+      }
+    },
+    [userId],
+  );
 
   useEffect(() => {
     const request = ++generation.current;
     if (!open) return;
-    const load = async () => {
-      await Promise.resolve();
+    void Promise.resolve().then(async () => {
       if (generation.current !== request) return;
       setSnapshot((current) => ({
         ...current,
         status: null,
         lights: [],
         discovered: false,
+        configurationEdited: false,
         loading: true,
         error: null,
       }));
-      try {
-        const [status, configuration] = await Promise.all([
-          googleHomeNative.getStatus({ accountId: userId }),
-          googleHomeNative.getConfiguration({ accountId: userId }),
-        ]);
-        if (generation.current !== request) return;
-        let lights: GoogleHomeLight[] = [];
-        let currentStatus = status;
-        let discovered = false;
-        let error: string | null = null;
-        if (status.authorized && status.available) {
-          try {
-            const result = await googleHomeNative.discoverLights({
-              accountId: userId,
-            });
-            lights = result.lights.filter(
-              (light) => light.colorCapable === true,
-            );
-            currentStatus = result;
-            discovered = true;
-          } catch (failure) {
-            error = errorMessage(failure);
-          }
-        }
-        if (generation.current === request)
-          setSnapshot({
-            status: currentStatus,
-            configuration,
-            lights,
-            discovered,
-            loading: false,
-            error,
-          });
-      } catch (failure) {
-        if (generation.current === request)
-          setSnapshot((current) => ({
-            ...current,
-            status: null,
-            lights: [],
-            discovered: false,
-            loading: false,
-            error: errorMessage(failure),
-          }));
-      }
-    };
-    void load();
+      verificationRetries.current = 0;
+      await perform(recheck);
+    });
     return () => {
       generation.current += 1;
     };
-  }, [open, userId]);
+  }, [open, perform, recheck]);
 
-  async function perform(task: (request: number) => Promise<void>) {
-    if (operation.current) return;
-    operation.current = true;
-    setBusy(true);
-    const request = generation.current;
-    try {
-      await task(request);
-    } catch (failure) {
-      if (request === generation.current) {
-        let status: GoogleHomeStatus | null = null;
-        try {
-          status = await googleHomeNative.getStatus({ accountId: userId });
-        } catch {
-          /* Keep permissions unverified if the official read also fails. */
-        }
-        if (request === generation.current)
-          setSnapshot((current) => ({
-            ...current,
-            status,
-            lights: [],
-            discovered: false,
-            error: errorMessage(failure),
-          }));
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    let listener: PluginListenerHandle | undefined;
+    const refresh = () => {
+      if (active && !document.hidden) {
+        verificationRetries.current = 0;
+        void perform(recheck);
       }
-    } finally {
-      operation.current = false;
-      setBusy(false);
+    };
+    window.addEventListener("online", refresh);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    if (isAndroidNative()) {
+      void CapacitorApp.addListener("resume", refresh)
+        .then((handle) => {
+          if (active) listener = handle;
+          else void handle.remove();
+        })
+        .catch(() => undefined);
     }
-  }
+    return () => {
+      active = false;
+      window.removeEventListener("online", refresh);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+      if (listener) void listener.remove();
+    };
+  }, [open, perform, recheck]);
 
-  async function discover(request: number) {
-    const result = await googleHomeNative.discoverLights({ accountId: userId });
-    if (request !== generation.current) return;
-    setSnapshot((current) => ({
-      ...current,
-      status: result,
-      lights: result.lights.filter((light) => light.colorCapable === true),
-      discovered: true,
-      error: null,
-    }));
-  }
-
-  async function recheck(request: number) {
-    const [status, configuration] = await Promise.all([
-      googleHomeNative.getStatus({ accountId: userId }),
-      googleHomeNative.getConfiguration({ accountId: userId }),
-    ]);
-    if (request !== generation.current) return;
-    setSnapshot({
-      status,
-      configuration,
-      lights: [],
-      discovered: false,
-      loading: false,
-      error: null,
-    });
-    notifyGoogleHomeConfigurationChanged(userId);
-    if (status.available && status.authorized) await discover(request);
-  }
+  useEffect(() => {
+    if (!open || busy || snapshot.loading) return;
+    const needsRecheck =
+      !snapshot.status?.requiresAuthorization &&
+      (snapshot.status?.verificationPending ||
+        (!!snapshot.error && (!snapshot.status || snapshot.status.authorized)));
+    if (!needsRecheck) {
+      verificationRetries.current = 0;
+      return;
+    }
+    if (verificationRetries.current >= 2) return;
+    const timer = window.setTimeout(
+      () => {
+        verificationRetries.current += 1;
+        void perform(recheck);
+      },
+      1500 * (verificationRetries.current + 1),
+    );
+    return () => window.clearTimeout(timer);
+  }, [open, busy, snapshot, perform, recheck]);
 
   const selected = snapshot.configuration.selectedIds;
+  const verificationPending =
+    snapshot.status?.verificationPending ?? !snapshot.status;
   const canAuthorize = !!(
-    snapshot.status?.sdkPresent && snapshot.status.available
+    snapshot.status?.sdkPresent &&
+    snapshot.status.available &&
+    !verificationPending
   );
   const authorized = !!(
-    snapshot.status?.authorized && snapshot.status.available
+    snapshot.status?.authorized &&
+    snapshot.status.available &&
+    !snapshot.status.verificationPending &&
+    !snapshot.status.requiresAuthorization
   );
   const missingSelected = snapshot.discovered
     ? selected.filter((id) => !snapshot.lights.some((light) => light.id === id))
     : [];
+  const unavailableSaved = snapshot.discovered
+    ? [...new Set([...snapshot.savedSelectedIds, ...selected])].filter(
+        (id) => !snapshot.lights.some((light) => light.id === id),
+      )
+    : [];
   const canSave =
-    !busy && !snapshot.loading && (authorized || selected.length === 0);
+    !busy &&
+    !snapshot.loading &&
+    snapshot.configurationLoaded &&
+    (authorized ||
+      selected.every((id) => snapshot.savedSelectedIds.includes(id)));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -235,7 +307,10 @@ export default function GoogleHomeColorsDialog({
           <Button
             variant="outline"
             disabled={busy || snapshot.loading}
-            onClick={() => void perform(recheck)}
+            onClick={() => {
+              verificationRetries.current = 0;
+              void perform(recheck);
+            }}
           >
             <RefreshCw className="size-4" />
             Comprobar de nuevo
@@ -246,6 +321,7 @@ export default function GoogleHomeColorsDialog({
               void perform(async (request) => {
                 const status = await googleHomeNative.authorize({
                   accountId: userId,
+                  ...(authorized ? { force: true } : {}),
                 });
                 if (request !== generation.current) return;
                 setSnapshot((current) => ({ ...current, status, error: null }));
@@ -273,7 +349,10 @@ export default function GoogleHomeColorsDialog({
           )}
         </div>
         {authorized && (
-          <fieldset className="space-y-2" disabled={busy}>
+          <fieldset
+            className="space-y-2"
+            disabled={busy || !snapshot.configurationLoaded}
+          >
             <legend className="mb-2 text-sm font-semibold">
               Luces compatibles con color
             </legend>
@@ -295,6 +374,7 @@ export default function GoogleHomeColorsDialog({
                     onCheckedChange={(checked) =>
                       setSnapshot((current) => ({
                         ...current,
+                        configurationEdited: true,
                         configuration: {
                           ...current.configuration,
                           selectedIds:
@@ -323,23 +403,63 @@ export default function GoogleHomeColorsDialog({
                 </label>
               ))
             )}
+            {unavailableSaved.map((id, index) => (
+              <label
+                key={id}
+                className="flex items-center gap-3 rounded-xl bg-secondary/50 px-3 py-3"
+              >
+                <Checkbox
+                  aria-label={`Conservar luz guardada ${index + 1}`}
+                  checked={selected.includes(id)}
+                  onCheckedChange={(checked) =>
+                    setSnapshot((current) => ({
+                      ...current,
+                      configurationEdited: true,
+                      configuration: {
+                        ...current.configuration,
+                        selectedIds:
+                          checked === true
+                            ? [
+                                ...new Set([
+                                  ...current.configuration.selectedIds,
+                                  id,
+                                ]),
+                              ]
+                            : current.configuration.selectedIds.filter(
+                                (selectedId) => selectedId !== id,
+                              ),
+                      },
+                    }))
+                  }
+                />
+                <span className="text-sm">
+                  Luz guardada {index + 1} · No disponible en esta consulta
+                </span>
+              </label>
+            ))}
           </fieldset>
         )}
         {!authorized && selected.length > 0 && (
           <p className="text-sm text-muted-foreground">
-            Hay {selected.length} luces guardadas. Vuelve a autorizar Google
-            para comprobarlas; no se enviarán colores mientras falten los
-            permisos.
+            Hay {selected.length} luces guardadas; tu selección y colores se
+            conservan.
+            {snapshot.status?.requiresAuthorization ||
+            (!verificationPending && snapshot.status?.status === "disconnected")
+              ? " Volvé a autorizar Google para usarlas."
+              : " Comprobá la conexión para verificar los permisos antes de usarlas."}
           </p>
         )}
         {missingSelected.length > 0 && (
           <p role="alert" className="text-sm text-muted-foreground">
-            {missingSelected.length} luces guardadas ya no aparecen entre las
-            autorizadas. Se quitarán de la selección si guardas esta
-            configuración.
+            {missingSelected.length} luces guardadas no aparecieron en esta
+            consulta. Se conservarán; desmarcalas únicamente si querés dejar de
+            usarlas.
           </p>
         )}
-        <fieldset className="space-y-2" disabled={busy || snapshot.loading}>
+        <fieldset
+          className="space-y-2"
+          disabled={busy || snapshot.loading || !snapshot.configurationLoaded}
+        >
           <legend className="mb-2 text-sm font-semibold">
             Color de cada estado
           </legend>
@@ -356,6 +476,7 @@ export default function GoogleHomeColorsDialog({
                 onChange={(event) =>
                   setSnapshot((current) => ({
                     ...current,
+                    configurationEdited: true,
                     configuration: {
                       ...current.configuration,
                       colorsByState: {
@@ -383,20 +504,18 @@ export default function GoogleHomeColorsDialog({
           disabled={!canSave}
           onClick={() =>
             void perform(async (request) => {
-              const selectedIds = snapshot.discovered
-                ? selected.filter((id) =>
-                    snapshot.lights.some((light) => light.id === id),
-                  )
-                : selected;
               const configuration = await googleHomeNative.saveConfiguration({
                 accountId: userId,
-                selectedIds,
+                selectedIds: selected,
                 colorsByState: snapshot.configuration.colorsByState,
               });
               if (request !== generation.current) return;
               setSnapshot((current) => ({
                 ...current,
                 configuration,
+                configurationLoaded: true,
+                configurationEdited: false,
+                savedSelectedIds: configuration.selectedIds,
                 error: null,
               }));
               notifyGoogleHomeConfigurationChanged(userId);
@@ -429,6 +548,9 @@ export default function GoogleHomeColorsDialog({
                   setSnapshot({
                     status,
                     configuration,
+                    configurationLoaded: true,
+                    configurationEdited: false,
+                    savedSelectedIds: configuration.selectedIds,
                     lights: [],
                     discovered: false,
                     loading: false,

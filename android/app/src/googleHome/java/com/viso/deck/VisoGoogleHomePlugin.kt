@@ -84,8 +84,8 @@ class VisoGoogleHomePlugin : Plugin() {
     }
 
     @PluginMethod
-    fun authorize(call: PluginCall) = operation(call, "No se pudo vincular Google Home. Revisá el cliente OAuth de esta APK en STATUS y la audiencia de prueba.") { account ->
-        home.authorize(account)
+    fun authorize(call: PluginCall) = operation(call, "No se pudo vincular Google Home. Revisá la conexión y Google Play; si continúa, contactá al soporte de VISO.") { account ->
+        home.authorize(account, call.getBoolean("force", false) == true)
     }
 
     @PluginMethod

@@ -1,0 +1,14 @@
+{
+  "checks": 7,
+  "results": [
+    "a creator asset is copied to media owned by the buyer",
+    "creator artwork preserves the buyer current key action",
+    "creator resources remain in the buyer account library",
+    "320px management route fits: /?section=display",
+    "320px management route fits: /?section=account",
+    "320px management route fits: /marketplace?view=library",
+    "creator and 320px checks have no JavaScript errors"
+  ],
+  "errors": [],
+  "scope": "Local technical users only, no real orders or physical device commands"
+}

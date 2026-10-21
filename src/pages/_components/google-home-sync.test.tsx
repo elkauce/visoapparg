@@ -413,3 +413,28 @@ it("keeps Google Home enabled only for a Deck account with automatic presence op
     }),
   );
 });
+
+it("checks saved permissions again on network recovery and does not reconnect after logout", async () => {
+  fixture.getStatus.mockRejectedValueOnce(
+    new Error("Sin conexión con Google Home"),
+  );
+  const view = render(<GoogleHomeSync />);
+  await waitFor(() => expect(fixture.getStatus).toHaveBeenCalled());
+  await settle();
+  expect(fixture.applyState).not.toHaveBeenCalled();
+  act(() => window.dispatchEvent(new Event("online")));
+  await waitFor(() => expect(fixture.applyState).toHaveBeenCalledTimes(1));
+  expect(fixture.applyState).toHaveBeenLastCalledWith({
+    accountId: "owner-A",
+    stateKey: "libre",
+    revision: "status-libre:libre",
+  });
+  fixture.authenticated = false;
+  view.rerender(<GoogleHomeSync />);
+  const reads = fixture.getStatus.mock.calls.length;
+  act(() => window.dispatchEvent(new Event("online")));
+  await settle();
+  expect(fixture.getStatus).toHaveBeenCalledTimes(reads);
+  expect(fixture.applyState).toHaveBeenCalledTimes(1);
+  view.unmount();
+});

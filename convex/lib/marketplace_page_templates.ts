@@ -21,6 +21,7 @@ export const MARKETPLACE_PAGE_KINDS = {
   clock: "standby",
   weather: "weather",
   spotify: "spotify",
+  visualizer: "visualizer",
 } as const;
 
 /** A creator configures a native VISO page. Uploaded scripts never run. */
@@ -45,10 +46,19 @@ export function normalizeMarketplacePageSettings(
     bad();
   const output: MarketplacePageSettings = {};
   if (input.screenSettings !== undefined) {
-    if (template !== "weather" && template !== "football") bad();
-    output.screenSettings = normalizeScreenSettings(
-      validateScreenSettingsPatch(input.screenSettings),
-    );
+    if (!["weather", "football", "visualizer"].includes(template)) bad();
+    const screenPatch = validateScreenSettingsPatch(input.screenSettings);
+    if (
+      template === "visualizer" &&
+      Object.keys(screenPatch).some(
+        (key) =>
+          !["audioSource", "visualizerStyle", "color", "sensitivity"].includes(
+            key,
+          ),
+      )
+    )
+      bad();
+    output.screenSettings = normalizeScreenSettings(screenPatch);
   }
   if (input.standbySettings !== undefined) {
     if (template !== "clock") bad();
@@ -61,7 +71,8 @@ export function normalizeMarketplacePageSettings(
     const clockInput = input.standbySettings as Record<string, unknown>;
     if (
       Object.keys(clockInput).some(
-        (key) => !Object.prototype.hasOwnProperty.call(DEFAULT_STANDBY_SETTINGS, key),
+        (key) =>
+          !Object.prototype.hasOwnProperty.call(DEFAULT_STANDBY_SETTINGS, key),
       )
     )
       bad();

@@ -3,7 +3,7 @@ import { Download, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const ANDROID_APK_URL =
-  "https://raw.githubusercontent.com/elkauce/visoapparg/fix/viso-deck-reference-layout/downloads/VISO-Deck-1.14.0-debug.apk";
+  "https://raw.githubusercontent.com/elkauce/visoapparg/fix/viso-deck-reference-layout/downloads/VISO-Deck-1.15.0-debug.apk";
 
 export default function AndroidDownloadPanel() {
   return (
@@ -32,7 +32,7 @@ export default function AndroidDownloadPanel() {
             <Download /> Descargar APK
           </a>
         </Button>
-        <p className="text-xs text-muted-foreground">Versión 1.14.0</p>
+        <p className="text-xs text-muted-foreground">Versión 1.15.0</p>
       </div>
     </section>
   );

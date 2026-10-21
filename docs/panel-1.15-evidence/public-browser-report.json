@@ -1,0 +1,14 @@
+{
+  "url": "https://viso-deck-android-g89ehkpun-manuelhaguilar8-4981s-projects.vercel.app",
+  "checks": 5,
+  "results": [
+    "public mobile product carousel advances automatically",
+    "public carousel has an explicit pause/resume control",
+    "public mobile home fits the viewport",
+    "public product routes require sign-in",
+    "public mobile preview has no JavaScript errors"
+  ],
+  "errors": [],
+  "authenticated": false,
+  "scope": "Anonymous preview only; no customer account or physical device accessed"
+}

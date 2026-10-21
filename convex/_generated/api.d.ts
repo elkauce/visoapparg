@@ -44,6 +44,7 @@ import type * as lib_vu_styles from "../lib/vu_styles.js";
 import type * as lib_webhook_payload from "../lib/webhook_payload.js";
 import type * as lights from "../lights.js";
 import type * as marketplace from "../marketplace.js";
+import type * as marketplace_apply from "../marketplace_apply.js";
 import type * as marketplace_files from "../marketplace_files.js";
 import type * as marketplace_import from "../marketplace_import.js";
 import type * as marketplace_pages from "../marketplace_pages.js";
@@ -100,6 +101,7 @@ declare const fullApi: ApiFromModules<{
   "lib/webhook_payload": typeof lib_webhook_payload;
   lights: typeof lights;
   marketplace: typeof marketplace;
+  marketplace_apply: typeof marketplace_apply;
   marketplace_files: typeof marketplace_files;
   marketplace_import: typeof marketplace_import;
   marketplace_pages: typeof marketplace_pages;

@@ -90,23 +90,28 @@
     },
     {
       "path": "covers/page-clock.png",
-      "bytes": 22790,
-      "sha256": "12fd9931badd68cefff4752c06081c4c46d5a7ba6782283c4f294d25adfbe9b7"
+      "bytes": 25697,
+      "sha256": "6f0492b6a520e1a21830e2502b02b2b3cfa32c8a73caa9b17b60c03c93108ccd"
     },
     {
       "path": "covers/page-football.png",
-      "bytes": 27320,
-      "sha256": "44e1ef91d9c4ca183ca8824464f56c325424f64bb9c2dfeecec69bb8e85a393f"
+      "bytes": 63063,
+      "sha256": "9d998af0108988618e21b42adaaf34f83d68eee7a6716d4ff0114cc47fff4b80"
     },
     {
       "path": "covers/page-spotify.png",
-      "bytes": 23416,
-      "sha256": "2de3551e9cf34f58b5b3a7e950b290f3d7b5cb75e647b2eb74ff21f939205379"
+      "bytes": 74848,
+      "sha256": "2b154abbd1cc70075c1131686ada8240568cf6620a1a2eef2d01608200606be8"
+    },
+    {
+      "path": "covers/page-visualizer.png",
+      "bytes": 40637,
+      "sha256": "0311fbb9ad57f37daba82ddf9e91631c9acb0742359cf30a8cb383552e8d46fd"
     },
     {
       "path": "covers/page-weather.png",
-      "bytes": 22941,
-      "sha256": "e03385a10c96864e70a66df37846e32d596726660213febcf8555210e4b96fda"
+      "bytes": 125702,
+      "sha256": "d1bbee94ecb48f099014a6a415f56efd04472f83a1b42142bd3ca48cc1e725f1"
     },
     {
       "path": "covers/soft-sounds.png",
@@ -214,6 +219,31 @@
       "sha256": "c4d9c1fce308f8eb44545b3ab790008e13f33854f96abe9c6ce15370812cc915"
     },
     {
+      "path": "previews/page-clock-vertical.png",
+      "bytes": 15720,
+      "sha256": "2bba7958fc5706e1de8f9b9478df142616b4e331078fcd41caec6acb9463b8fc"
+    },
+    {
+      "path": "previews/page-football-vertical.png",
+      "bytes": 101607,
+      "sha256": "c07af0b42ccd009d4cdc6d3565ce411a9511fb39b9c6b4c5636e9ed631ffe3f4"
+    },
+    {
+      "path": "previews/page-spotify-vertical.png",
+      "bytes": 55175,
+      "sha256": "161975fa50df18c4672961797bdeca26c4bd3316fbf7d31347f0e2be7b628948"
+    },
+    {
+      "path": "previews/page-visualizer-vertical.png",
+      "bytes": 40447,
+      "sha256": "b362b2b0b183e502d05cda02bec786e450fbab4340efad5eef28b7399c6d2f34"
+    },
+    {
+      "path": "previews/page-weather-vertical.png",
+      "bytes": 88376,
+      "sha256": "83a75640d0260729bf4cb01ddd3a2da0f44d641404fca074fbab975837d91a36"
+    },
+    {
       "path": "screensavers/aurora.mp4",
       "bytes": 64458,
       "sha256": "79d306f2f8d18625af2cdd558b87d3aa5cefd8780ddbb16a2fd5fcef544a4129"
@@ -236,6 +266,6 @@
   ],
   "generators": [
     "scripts/generate-marketplace-assets.py",
-    "scripts/generate-marketplace-page-covers.py"
+    "scripts/capture-marketplace-pages.mjs"
   ]
 }

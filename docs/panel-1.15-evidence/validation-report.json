@@ -1,0 +1,25 @@
+{
+  "vitest": {
+    "tests": 709,
+    "files": 75,
+    "passed": true,
+    "followupMarketplaceTests": 80
+  },
+  "native": {
+    "tests": 25,
+    "passed": true
+  },
+  "browser": {
+    "localChecks": 30,
+    "passed": true
+  },
+  "typescriptPassed": true,
+  "changedFileEslintPassed": true,
+  "webBuildPassed": true,
+  "androidBuildPassed": true,
+  "apkSha256": "2aa54f7e0e2b44f6688d9679abaa4b918d6f34316783616c082282790366f52f",
+  "productionPublished": false,
+  "backendUpdated": false,
+  "physicalGoogleHomeTested": false,
+  "paidOrderTested": false
+}

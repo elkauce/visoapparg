@@ -289,8 +289,229 @@ describe("Google Home shared-state synchronization", () => {
       sync.updateState("libre", "remote-libre");
       await settle();
       expect(native.applyState).toHaveBeenCalledTimes(1);
+      sync.setAccount(null);
     },
   );
+});
+
+describe("Google Home connection recovery", () => {
+  it("retries a transient foreground command without requiring authorization or a new state", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.applyState.mockRejectedValueOnce(
+        new Error("Conexión interrumpida"),
+      );
+      sync.setAccount("owner-A");
+      sync.updateState(null, "custom-playing", "#fab123");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(native.applyState).toHaveBeenCalledTimes(2);
+      expect(native.applyState).toHaveBeenLastCalledWith({
+        accountId: "owner-A",
+        stateKey: null,
+        revision: "custom-playing",
+        customColor: "#fab123",
+      });
+      expect(native.authorize).not.toHaveBeenCalled();
+      expect(native.saveConfiguration).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("recovers a temporary permission-read failure and retains the saved selected lights", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.getStatus.mockRejectedValueOnce(
+        new Error("Google temporalmente inaccesible"),
+      );
+      sync.setAccount("owner-A");
+      sync.updateState("reunion", "meeting");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(native.applyState).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      expect(native.getStatus).toHaveBeenCalledTimes(2);
+      expect(native.getConfiguration).toHaveBeenLastCalledWith({
+        accountId: "owner-A",
+      });
+      expect(native.saveConfiguration).not.toHaveBeenCalled();
+      expect(native.authorize).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("bounds failed permission reads and allows a real reconnection to recover the latest state", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.getStatus.mockRejectedValue(new Error("Sin conexión"));
+      sync.setAccount("owner-A");
+      sync.updateState("ocupado", "busy");
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.getStatus).toHaveBeenCalledTimes(3);
+      expect(native.applyState).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+      native.getStatus.mockResolvedValue(connected);
+      sync.reconnect();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      expect(native.applyState).toHaveBeenLastCalledWith({
+        accountId: "owner-A",
+        stateKey: "ocupado",
+        revision: "busy",
+      });
+      expect(native.authorize).not.toHaveBeenCalled();
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("cancels permission-read recovery on logout and never revives the previous account", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.getStatus.mockRejectedValueOnce(new Error("Sin conexión"));
+      sync.setAccount("owner-A");
+      sync.updateState("llamada", "old-call");
+      await vi.advanceTimersByTimeAsync(0);
+      expect(vi.getTimerCount()).toBe(1);
+      sync.setAccount(null);
+      sync.reconnect();
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.getStatus).toHaveBeenCalledTimes(1);
+      expect(native.applyState).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("retries a failed native account binding instead of reusing a permanently rejected promise", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.setActiveAccount.mockRejectedValueOnce(
+        new Error("Puente temporalmente ocupado"),
+      );
+      sync.setAccount("owner-A");
+      sync.updateState("libre", "free");
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(native.setActiveAccount).toHaveBeenCalledTimes(2);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      expect(native.authorize).not.toHaveBeenCalled();
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("recovers pending permission verification without treating a timeout as revoked consent", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    const pending: GoogleHomeStatus = {
+      ...connected,
+      status: "pending",
+      authorized: false,
+      permissionState: "unknown",
+      verificationPending: true,
+      requiresAuthorization: false,
+    };
+    try {
+      native.getStatus
+        .mockResolvedValueOnce(pending)
+        .mockResolvedValueOnce(pending)
+        .mockResolvedValue(connected);
+      sync.setAccount("owner-A");
+      sync.updateState("reunion", "meeting");
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(native.getStatus).toHaveBeenCalledTimes(2);
+      expect(native.applyState).not.toHaveBeenCalled();
+      await vi.advanceTimersByTimeAsync(2000);
+      expect(native.getStatus).toHaveBeenCalledTimes(3);
+      expect(native.applyState).toHaveBeenCalledTimes(1);
+      expect(native.applyState).toHaveBeenLastCalledWith({
+        accountId: "owner-A",
+        stateKey: "reunion",
+        revision: "meeting",
+      });
+      expect(native.saveConfiguration).not.toHaveBeenCalled();
+      expect(native.authorize).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("bounds pending permission verification instead of resetting the budget on each SDK response", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.getStatus.mockResolvedValue({
+        ...connected,
+        status: "pending",
+        authorized: false,
+        permissionState: "unknown",
+        verificationPending: true,
+        requiresAuthorization: false,
+      });
+      sync.setAccount("owner-A");
+      sync.updateState("libre", "free");
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.getStatus).toHaveBeenCalledTimes(3);
+      expect(native.applyState).not.toHaveBeenCalled();
+      expect(native.saveConfiguration).not.toHaveBeenCalled();
+      expect(native.authorize).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not retry revoked permission or launch authorization without user interaction", async () => {
+    vi.useFakeTimers();
+    const native = bridge();
+    const sync = new GoogleHomeSyncController(native);
+    try {
+      native.getStatus.mockResolvedValue({
+        ...connected,
+        status: "disconnected",
+        authorized: false,
+        permissionState: "not-granted",
+        verificationPending: false,
+        requiresAuthorization: true,
+      });
+      sync.setAccount("owner-A");
+      sync.updateState("libre", "free");
+      await vi.advanceTimersByTimeAsync(10000);
+      expect(native.getStatus).toHaveBeenCalledTimes(1);
+      expect(native.applyState).not.toHaveBeenCalled();
+      expect(native.authorize).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      sync.setAccount(null);
+      vi.useRealTimers();
+    }
+  });
 });
 
 it("synchronizes any valid custom RGB color, deduplicates it and sends a changed color", async () => {
@@ -486,28 +707,31 @@ describe("Google Home automatic Deck while covered", () => {
     }
   });
 
-  it("stops after two retries instead of polling lights indefinitely", async () => {
-    vi.useFakeTimers();
-    const native = bridge();
-    const sync = new GoogleHomeSyncController(native);
-    try {
-      native.applyState.mockResolvedValue({
-        applied: false,
-        skipped: true,
-        reason: "application-inactive",
-        results: [],
-      });
-      sync.setAccount("owner-A");
-      sync.setBackgroundEnabled(true);
-      sync.updateState("llamada", "call");
-      await vi.advanceTimersByTimeAsync(10000);
-      expect(native.applyState).toHaveBeenCalledTimes(3);
-      expect(vi.getTimerCount()).toBe(0);
-    } finally {
-      sync.setAccount(null);
-      vi.useRealTimers();
-    }
-  });
+  it.each([false, true])(
+    "stops after two retries instead of polling lights indefinitely (background: %s)",
+    async (background) => {
+      vi.useFakeTimers();
+      const native = bridge();
+      const sync = new GoogleHomeSyncController(native);
+      try {
+        native.applyState.mockResolvedValue({
+          applied: false,
+          skipped: true,
+          reason: "application-inactive",
+          results: [],
+        });
+        sync.setAccount("owner-A");
+        sync.setBackgroundEnabled(background);
+        sync.updateState("llamada", "call");
+        await vi.advanceTimersByTimeAsync(10000);
+        expect(native.applyState).toHaveBeenCalledTimes(3);
+        expect(vi.getTimerCount()).toBe(0);
+      } finally {
+        sync.setAccount(null);
+        vi.useRealTimers();
+      }
+    },
+  );
 
   it("cancels the retry on logout and stops when Google revokes permission", async () => {
     vi.useFakeTimers();

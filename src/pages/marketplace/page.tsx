@@ -43,6 +43,7 @@ import MarketProductDialog from "./product-detail";
 import MarketLibrary from "./library";
 import { MarketplaceOrders } from "./checkout";
 import { CATEGORY_LABELS, productPrice, type MarketProduct } from "./types";
+import PanelLayout from "../_components/panel-layout";
 import "./marketplace.css";
 
 const MarketplaceStudio = lazy(() => import("./studio"));
@@ -189,11 +190,11 @@ export default function MarketplacePage() {
     );
   }
   return (
-    <div className="viso-marketplace">
+    <PanelLayout section="marketplace" className="viso-marketplace">
       <MarketBoundary>
         <MarketplaceContent />
       </MarketBoundary>
-    </div>
+    </PanelLayout>
   );
 }
 
@@ -276,19 +277,21 @@ function MarketplaceContent() {
 
   return (
     <>
-      <header className="vm-header">
-        <Link
-          to="/"
-          className="vm-brand-link"
-          aria-label="Volver al panel VISO"
-        >
-          <VisoBrand />
-          <span>Marketplace</span>
-        </Link>
+      <header className="viso-panel-header vm-workspace-header">
+        <div>
+          <VisoBrand className="viso-panel-mobile-brand" />
+          <p className="vm-workspace-title">Marketplace</p>
+          <p>Recursos para tu espacio VISO.</p>
+        </div>
         <nav aria-label="Tu espacio en Marketplace" className="vm-header-nav">
-          <Link to="/" className="vm-return-link" aria-label="Volver al panel">
-            <ArrowLeft /> <span>Volver al panel</span>
-          </Link>
+          <button
+            type="button"
+            aria-label="Descubrir recursos"
+            aria-current={view === "discover" ? "page" : undefined}
+            onClick={() => chooseCategory("discover")}
+          >
+            <Compass /> <span>Descubrir</span>
+          </button>
           <button
             type="button"
             aria-label="Mi biblioteca"
@@ -318,9 +321,8 @@ function MarketplaceContent() {
         </nav>
       </header>
 
-      <div className="vm-shell">
-        <aside className="vm-sidebar">
-          <p className="vm-sidebar-label">EXPLORAR</p>
+      <div className="vm-shell vm-unified-shell">
+        <section className="vm-filters" aria-label="Explorar marketplace">
           <nav
             aria-label="Categorías del marketplace"
             className="vm-categories"
@@ -346,15 +348,7 @@ function MarketplaceContent() {
           >
             <BookOpen aria-hidden="true" /> Guía para creadores
           </button>
-          <div className="vm-sidebar-creator">
-            <Sparkles aria-hidden="true" />
-            <h2>Tu talento tiene lugar.</h2>
-            <p>Compartí tus creaciones con quienes usan VISO.</p>
-            <button type="button" onClick={() => chooseView("studio")}>
-              Ser creador <ArrowUpRight aria-hidden="true" />
-            </button>
-          </div>
-        </aside>
+        </section>
 
         <main className="vm-main" id="marketplace-content">
           {!productId && (
@@ -528,37 +522,6 @@ function MarketplaceContent() {
           )}
         </main>
       </div>
-
-      <nav className="vm-mobile-nav" aria-label="Navegación del marketplace">
-        <Link to="/">
-          <PanelsTopLeft />
-          <span>Panel</span>
-        </Link>
-        <button
-          type="button"
-          aria-current={view === "discover" ? "page" : undefined}
-          onClick={() => chooseCategory("discover")}
-        >
-          <Compass />
-          <span>Descubrir</span>
-        </button>
-        <button
-          type="button"
-          aria-current={view === "library" ? "page" : undefined}
-          onClick={() => chooseView("library")}
-        >
-          <Library />
-          <span>Biblioteca</span>
-        </button>
-        <button
-          type="button"
-          aria-current={view === "studio" ? "page" : undefined}
-          onClick={() => chooseView("studio")}
-        >
-          <Users />
-          <span>Creador</span>
-        </button>
-      </nav>
     </>
   );
 }

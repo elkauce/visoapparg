@@ -2,11 +2,8 @@ import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import {
-  Home,
   LayoutGrid,
-  Monitor,
   Plug,
-  Settings2,
   UserRound,
   Power,
   Download,
@@ -15,7 +12,6 @@ import {
   ExternalLink,
   Copy,
   ChevronRight,
-  ShoppingBag,
 } from "lucide-react";
 import { toast } from "sonner";
 import { api } from "@/convex/_generated/api";
@@ -38,21 +34,23 @@ import AndroidDownloadPanel, {
 } from "./android-download-panel";
 import StreamDeckPanel from "./stream-deck-panel";
 import LightSync from "./light-sync";
-import "./panel.css";
-
-const TABS = [
-  { id: "states", label: "Estados", icon: LayoutGrid },
-  { id: "display", label: "Display", icon: Monitor },
-  { id: "connections", label: "Conexiones", icon: Plug },
-] as const;
-type PanelTab = (typeof TABS)[number]["id"];
+import PanelLayout, { type PanelSection } from "./panel-layout";
 
 export default function ControlPanel() {
   const [params, setParams] = useSearchParams();
   const section = params.get("section");
-  const tab: PanelTab =
-    section === "display" || section === "connections" ? section : "states";
-  const [accountOpen, setAccountOpen] = useState(false);
+  const tab: Exclude<PanelSection, "marketplace"> =
+    section === "display" || section === "connections" || section === "account"
+      ? section
+      : "states";
+  const title =
+    tab === "states"
+      ? "Panel"
+      : tab === "display"
+        ? "Display"
+        : tab === "connections"
+          ? "Conexiones"
+          : "Cuenta";
   const [googlePending, setGooglePending] = useState(false);
   const [androidOpen, setAndroidOpen] = useState(false);
   const data = useQuery(api.statuses.list, {});
@@ -62,7 +60,7 @@ export default function ControlPanel() {
   const active =
     data?.statuses.find((status) => status._id === data.activeStatusId) ?? null;
   const displayUrl = slug ? `/s/${slug}` : undefined;
-  const selectTab = (next: PanelTab) =>
+  const selectTab = (next: Exclude<PanelSection, "marketplace">) =>
     setParams(
       (previous) => {
         const nextParams = new URLSearchParams(previous);
@@ -72,25 +70,6 @@ export default function ControlPanel() {
       },
       { replace: true },
     );
-  const tabKey = (
-    event: React.KeyboardEvent<HTMLButtonElement>,
-    index: number,
-  ) => {
-    const next =
-      event.key === "ArrowRight"
-        ? (index + 1) % TABS.length
-        : event.key === "ArrowLeft"
-          ? (index + TABS.length - 1) % TABS.length
-          : event.key === "Home"
-            ? 0
-            : event.key === "End"
-              ? TABS.length - 1
-              : null;
-    if (next === null) return;
-    event.preventDefault();
-    selectTab(TABS[next].id);
-    document.getElementById(`viso-tab-${TABS[next].id}`)?.focus();
-  };
   const copyDisplay = async () => {
     if (!displayUrl) return;
     try {
@@ -104,147 +83,110 @@ export default function ControlPanel() {
   };
 
   return (
-    <div className="viso-control-panel min-h-screen">
-      <aside className="viso-panel-rail" aria-label="Panel VISO">
-        <VisoBrand className="viso-panel-brand" />
-        <nav className="viso-panel-rail-nav" aria-label="Secciones del panel">
-          <button
-            aria-current={tab === "states" ? "page" : undefined}
-            onClick={() => selectTab("states")}
-          >
-            <Home />
-            <span>Panel</span>
-          </button>
-          <button
-            aria-current={tab === "display" ? "page" : undefined}
-            onClick={() => selectTab("display")}
-          >
-            <Monitor />
-            <span>Display</span>
-          </button>
-          <button
-            aria-current={tab === "connections" ? "page" : undefined}
-            onClick={() => selectTab("connections")}
-          >
-            <Plug />
-            <span>Conexiones</span>
-          </button>
-          <Link to="/marketplace">
-            <ShoppingBag />
-            <span>Marketplace</span>
-          </Link>
-          <button onClick={() => setAccountOpen(true)}>
-            <Settings2 />
-            <span>Cuenta</span>
-          </button>
-        </nav>
-      </aside>
-      <div className="viso-panel-shell">
-        <header className="viso-panel-header">
-          <div>
-            <VisoBrand className="viso-panel-mobile-brand" />
-            <h1>Panel</h1>
-            <p>Tu espacio, conectado.</p>
-          </div>
-          <div className="viso-panel-header-actions">
-            <Button asChild>
-              <Link to="/deck">
-                <LayoutGrid />
-                Abrir deck
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              className="viso-panel-account"
-              aria-label="Abrir mi cuenta"
-              onClick={() => setAccountOpen(true)}
-            >
-              <UserRound />
-            </Button>
-          </div>
-        </header>
-        <div className="viso-panel-statusbar" aria-live="polite">
-          <div className="viso-panel-status-text">
-            <span
-              className="viso-panel-status-dot"
-              style={{
-                backgroundColor: active?.color ?? "#8b8e93",
-                boxShadow: active ? `0 0 14px ${active.color}66` : undefined,
-              }}
-            />
-            <span>
-              Estado actual: <strong>{active?.name ?? "Sin estado"}</strong>
-            </span>
-          </div>
+    <PanelLayout section={tab}>
+      <header className="viso-panel-header">
+        <div>
+          <VisoBrand className="viso-panel-mobile-brand" />
+          <h1>{title}</h1>
+          <p>Tu espacio, conectado.</p>
+        </div>
+        <div className="viso-panel-header-actions">
+          <Button asChild>
+            <Link to="/deck">
+              <LayoutGrid />
+              Abrir deck
+            </Link>
+          </Button>
           <Button
-            variant="secondary"
-            size="sm"
-            disabled={!active}
-            onClick={() => {
-              void setActive({ statusId: null }).catch(() =>
-                toast.error("No se pudo apagar el estado"),
-              );
-            }}
+            variant="ghost"
+            className="viso-panel-account"
+            aria-label="Abrir mi cuenta"
+            onClick={() => selectTab("account")}
           >
-            <Power />
-            Apagar
+            <UserRound />
           </Button>
         </div>
-        <main className="viso-panel-workspace">
-          <section
-            className="viso-panel-primary"
-            aria-label="Configuración del panel"
+      </header>
+      <div className="viso-panel-statusbar" aria-live="polite">
+        <div className="viso-panel-status-text">
+          <span
+            className="viso-panel-status-dot"
+            style={{
+              backgroundColor: active?.color ?? "#8b8e93",
+              boxShadow: active ? `0 0 14px ${active.color}66` : undefined,
+            }}
+          />
+          <span>
+            Estado actual: <strong>{active?.name ?? "Sin estado"}</strong>
+          </span>
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={!active}
+          onClick={() => {
+            void setActive({ statusId: null }).catch(() =>
+              toast.error("No se pudo apagar el estado"),
+            );
+          }}
+        >
+          <Power />
+          Apagar
+        </Button>
+      </div>
+      <main
+        className={`viso-panel-workspace${tab === "states" ? "" : " viso-panel-workspace-single"}`}
+      >
+        <section
+          className="viso-panel-primary"
+          aria-label="Configuración del panel"
+        >
+          <div
+            id="viso-panel-states"
+            role="region"
+            aria-label="Estados del deck"
+            className="viso-panel-section-content"
+            hidden={tab !== "states"}
           >
-            <div
-              className="viso-panel-tabs"
-              role="tablist"
-              aria-label="Sección del panel"
-            >
-              {TABS.map(({ id, label, icon: Icon }, index) => (
-                <button
-                  key={id}
-                  id={`viso-tab-${id}`}
-                  role="tab"
-                  aria-selected={tab === id}
-                  aria-controls={`viso-panel-${id}`}
-                  tabIndex={tab === id ? 0 : -1}
-                  onKeyDown={(event) => tabKey(event, index)}
-                  onClick={() => selectTab(id)}
-                >
-                  <Icon />
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div
-              id="viso-panel-states"
-              role="tabpanel"
-              aria-labelledby="viso-tab-states"
-              className="viso-panel-tab-content"
-              hidden={tab !== "states"}
-            >
-              <Deck compact />
-            </div>
-            <div
-              id="viso-panel-display"
-              role="tabpanel"
-              aria-labelledby="viso-tab-display"
-              className="viso-panel-tab-content"
-              hidden={tab !== "display"}
-            >
-              <SharePanel />
-            </div>
-            <div
-              id="viso-panel-connections"
-              role="tabpanel"
-              aria-labelledby="viso-tab-connections"
-              className="viso-panel-tab-content"
-              hidden={tab !== "connections"}
-            >
-              <StreamDeckPanel />
-              <AndroidDownloadPanel />
-            </div>
+            <Deck compact />
+          </div>
+          <div
+            id="viso-panel-display"
+            role="region"
+            aria-label="Configuración del Display"
+            className="viso-panel-section-content"
+            hidden={tab !== "display"}
+          >
+            <SharePanel />
+          </div>
+          <div
+            id="viso-panel-connections"
+            role="region"
+            aria-label="Conexiones del panel"
+            className="viso-panel-section-content"
+            hidden={tab !== "connections"}
+          >
+            <StreamDeckPanel />
+            <AndroidDownloadPanel />
+          </div>
+          <section
+            role="region"
+            aria-label="Tu cuenta VISO"
+            className="viso-panel-section-content viso-panel-account-content"
+            hidden={tab !== "account"}
+          >
+            <h2>Tu cuenta VISO</h2>
+            <p>Tu deck y tus dispositivos están vinculados a esta cuenta.</p>
+            <p className="break-all text-sm">{user?.email}</p>
+            <GoogleAccountSettings onPendingChange={setGooglePending} />
+            <SignInButton
+              variant="secondary"
+              signOutText="Cerrar sesión"
+              disabled={googlePending}
+            />
           </section>
+        </section>
+        {tab === "states" && (
           <aside className="viso-panel-quick" aria-label="Accesos rápidos">
             <h2>Accesos rápidos</h2>
             <section className="viso-panel-quick-card">
@@ -315,70 +257,8 @@ export default function ControlPanel() {
               </div>
             </section>
           </aside>
-        </main>
-      </div>
-      <nav className="viso-panel-mobile-nav" aria-label="Navegación del panel">
-        <button
-          aria-current={tab === "states" ? "page" : undefined}
-          onClick={() => selectTab("states")}
-        >
-          <Home />
-          <span>Panel</span>
-        </button>
-        <button
-          aria-current={tab === "display" ? "page" : undefined}
-          onClick={() => selectTab("display")}
-        >
-          <Monitor />
-          <span>Display</span>
-        </button>
-        <button
-          aria-current={tab === "connections" ? "page" : undefined}
-          onClick={() => selectTab("connections")}
-        >
-          <Plug />
-          <span>Conexiones</span>
-        </button>
-        <Link to="/marketplace">
-          <ShoppingBag />
-          <span>Marketplace</span>
-        </Link>
-        <button onClick={() => setAccountOpen(true)}>
-          <UserRound />
-          <span>Cuenta</span>
-        </button>
-      </nav>
-      <Dialog
-        open={accountOpen}
-        onOpenChange={(open) => {
-          if (!googlePending) setAccountOpen(open);
-        }}
-      >
-        <DialogContent
-          className="viso-panel-account-dialog"
-          showCloseButton={!googlePending}
-          onEscapeKeyDown={(event) => {
-            if (googlePending) event.preventDefault();
-          }}
-          onPointerDownOutside={(event) => {
-            if (googlePending) event.preventDefault();
-          }}
-        >
-          <DialogHeader>
-            <DialogTitle>Tu cuenta</DialogTitle>
-            <DialogDescription>
-              Tu deck y tus dispositivos están vinculados a esta cuenta VISO.
-            </DialogDescription>
-          </DialogHeader>
-          <p className="break-all text-sm">{user?.email}</p>
-          <GoogleAccountSettings onPendingChange={setGooglePending} />
-          <SignInButton
-            variant="secondary"
-            signOutText="Cerrar sesión"
-            disabled={googlePending}
-          />
-        </DialogContent>
-      </Dialog>
+        )}
+      </main>
       <Dialog open={androidOpen} onOpenChange={setAndroidOpen}>
         <DialogContent>
           <DialogHeader>
@@ -391,6 +271,6 @@ export default function ControlPanel() {
         </DialogContent>
       </Dialog>
       <LightSync />
-    </div>
+    </PanelLayout>
   );
 }

@@ -1,0 +1,30 @@
+{
+  "checks": 23,
+  "results": [
+    "one shared menu has exactly five management destinations",
+    "duplicate states/display/connections tabs have been removed",
+    "Display opens its section and marks the same left menu",
+    "Display configuration opens in the central content area",
+    "Connections shares the menu and active selection",
+    "Account opens as a section rather than another navigation surface",
+    "marketplace retains the same single global menu",
+    "marketplace no longer duplicates the global menu",
+    "free acquisition immediately opens use options in the product instead of sending the customer away",
+    "choosing and previewing a key does not save media or change its action",
+    "GIF is stored as media owned by the acquiring account",
+    "applying key artwork preserves the complete current action",
+    "a page is acquired before installation and requires confirmation",
+    "VISO VU page installs the real native visualizer kind",
+    "repeated page installation does not duplicate or replace existing pages",
+    "library identifies a native page and explains its destination",
+    "each acquired product exposes the same primary Use action",
+    "a second mobile session of the same account sees the acquired page and artwork pack",
+    "mobile library fits the viewport without horizontal page scrolling",
+    "the shared mobile menu becomes a bottom app bar",
+    "fullscreen Deck retains no management menu",
+    "the installed page is the same account-owned page in both sessions",
+    "the complete desktop/mobile flow has no JavaScript errors"
+  ],
+  "errors": [],
+  "scope": "Isolated local backend and a new technical account. No live users, physical light commands, paid orders or real provider authorizations."
+}

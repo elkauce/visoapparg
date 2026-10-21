@@ -18,6 +18,10 @@ import type { MarketplacePageTemplate } from "@/convex/lib/marketplace_catalog";
 /** Install an acquired native preset, preserving existing deck configuration. */
 export default function MarketplacePageInstall({
   product,
+  open: controlledOpen,
+  onOpenChange,
+  showTrigger = true,
+  triggerLabel = "Agregar al deck",
 }: {
   product: {
     productId: string;
@@ -25,9 +29,18 @@ export default function MarketplacePageInstall({
     category: string;
     pageTemplate?: MarketplacePageTemplate;
   };
+  open?: boolean;
+  onOpenChange?(open: boolean): void;
+  showTrigger?: boolean;
+  triggerLabel?: string;
 }) {
   const installPage = useMutation(api.marketplace_pages.installPage);
-  const [open, setOpen] = useState(false);
+  const [localOpen, setLocalOpen] = useState(false);
+  const open = controlledOpen ?? localOpen;
+  const setOpen = (next: boolean) => {
+    setLocalOpen(next);
+    onOpenChange?.(next);
+  };
   const [pending, setPending] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [updateExisting, setUpdateExisting] = useState(false);
@@ -48,8 +61,8 @@ export default function MarketplacePageInstall({
         result.updated
           ? "Aplicamos la configuración de esta versión a tu página."
           : result.existing
-          ? "Esta página ya está en tu deck. Conservamos tus ajustes."
-          : "La página ya está en tu deck, en la web y en la app.",
+            ? "Esta página ya está en tu deck. Conservamos tus ajustes."
+            : "La página ya está en tu deck, en la web y en la app.",
       );
       setInstalled(true);
       setOpen(false);
@@ -64,25 +77,26 @@ export default function MarketplacePageInstall({
   };
   return (
     <>
-      {installed ? (
-        <Button asChild variant="outline" size="sm">
-          <Link to="/deck">
-            <Check /> Abrir mi deck
-          </Link>
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          variant="secondary"
-          onClick={() => {
-            setError(null);
-            setUpdateExisting(false);
-            setOpen(true);
-          }}
-        >
-          <PanelsTopLeft /> Agregar al deck
-        </Button>
-      )}
+      {showTrigger &&
+        (installed ? (
+          <Button asChild variant="outline" size="sm">
+            <Link to="/deck">
+              <Check /> Abrir mi deck
+            </Link>
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              setError(null);
+              setUpdateExisting(false);
+              setOpen(true);
+            }}
+          >
+            <PanelsTopLeft /> {triggerLabel}
+          </Button>
+        ))}
       <Dialog
         open={open}
         onOpenChange={(next) => {
@@ -110,15 +124,28 @@ export default function MarketplacePageInstall({
               onChange={(event) => setUpdateExisting(event.target.checked)}
               className="mt-1"
             />
-            Si ya existe, reemplazar sus ajustes por los de esta versión de mi biblioteca.
+            Si ya existe, reemplazar sus ajustes por los de esta versión de mi
+            biblioteca.
           </label>
-          {error && <p role="alert" className="vm-error">{error}</p>}
+          {error && (
+            <p role="alert" className="vm-error">
+              {error}
+            </p>
+          )}
           <DialogFooter>
-            <Button variant="outline" disabled={pending} onClick={() => setOpen(false)}>
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={() => setOpen(false)}
+            >
               Cancelar
             </Button>
             <Button disabled={pending} onClick={() => void install()}>
-              {pending ? <Loader2 className="animate-spin" /> : <PanelsTopLeft />}
+              {pending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <PanelsTopLeft />
+              )}
               {pending ? "Agregando…" : "Confirmar y agregar"}
             </Button>
           </DialogFooter>

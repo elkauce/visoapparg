@@ -13,13 +13,19 @@ import javax.crypto.spec.GCMParameterSpec
 
 /** AES-256-GCM values; the encryption key is generated inside AndroidKeyStore. */
 internal class SecureVault(context: Context) {
+    companion object {
+        // Foreground integrations and background services use separate vault
+        // instances. Key lookup/creation must share a lock so that the second
+        // instance reuses the existing alias instead of replacing its key.
+        private val keyLock = Any()
+    }
+
     private val preferences = context.getSharedPreferences("viso_encrypted_vault", Context.MODE_PRIVATE)
     private val alias = "${context.packageName}.vault.aes256.v1"
 
-    @Synchronized
-    private fun key(): SecretKey {
+    private fun key(): SecretKey = synchronized(keyLock) {
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        (store.getKey(alias, null) as? SecretKey)?.let { return it }
+        (store.getKey(alias, null) as? SecretKey)?.let { return@synchronized it }
         val generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         generator.init(
             KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
@@ -29,7 +35,7 @@ internal class SecureVault(context: Context) {
                 .setRandomizedEncryptionRequired(true)
                 .build()
         )
-        return generator.generateKey()
+        generator.generateKey()
     }
 
     private fun storageKey(name: String): String = MessageDigest.getInstance("SHA-256")

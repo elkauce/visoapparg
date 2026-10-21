@@ -20,6 +20,7 @@ import {
   integrationStatusLabel,
   mediaStatusLabel,
 } from "./_components/integration-state.ts";
+import { useGoogleHomeStatus } from "./_components/google-home-status.ts";
 
 function IntegrationRow({
   icon: Icon,
@@ -61,6 +62,10 @@ function IntegrationRow({
 function IntegrationMenu() {
   const { capabilities, loading, error, refresh } = useNativeIntegrations();
   const settings = useQuery(api.lights.getSettings);
+  const currentUser = useQuery(api.users.getCurrentUser);
+  const googleHome = useGoogleHomeStatus(
+    currentUser === undefined ? undefined : (currentUser?._id ?? null),
+  );
   const android = isAndroidNative();
   const homeAssistantStatus = capabilities
     ? integrationStatusLabel(capabilities.homeAssistant)
@@ -74,8 +79,10 @@ function IntegrationMenu() {
         <Button
           variant="ghost"
           size="sm"
-          disabled={loading}
-          onClick={() => void refresh()}
+          disabled={loading || googleHome.loading}
+          onClick={() =>
+            void Promise.allSettled([refresh(), googleHome.refresh()])
+          }
         >
           <RefreshCw className={`size-4 ${loading ? "animate-spin" : ""}`} />
           Actualizar
@@ -98,7 +105,7 @@ function IntegrationMenu() {
             icon={House}
             name="Google Home"
             description="Tus dispositivos y tu casa conectada."
-            status="Pendiente de habilitación"
+            status={googleHome.label}
             route="google-home"
           />
           <IntegrationRow

@@ -101,8 +101,12 @@ export default function GoogleHomeSync() {
     const visibility = (reconcile = false) =>
       controller.setForeground(foreground && !document.hidden, reconcile);
     const visibilityChanged = () => visibility();
+    const networkRestored = () => {
+      if (alive) controller.reconnect();
+    };
     visibility();
     document.addEventListener("visibilitychange", visibilityChanged);
+    window.addEventListener("online", networkRestored);
     const configurationChanged = (event: Event) => {
       const detail: unknown = (event as CustomEvent<unknown>).detail;
       if (
@@ -150,6 +154,7 @@ export default function GoogleHomeSync() {
     return () => {
       alive = false;
       document.removeEventListener("visibilitychange", visibilityChanged);
+      window.removeEventListener("online", networkRestored);
       window.removeEventListener(
         GOOGLE_HOME_CONFIGURATION_EVENT,
         configurationChanged,

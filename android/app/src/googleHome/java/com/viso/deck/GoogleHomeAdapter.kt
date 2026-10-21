@@ -66,6 +66,7 @@ internal class GoogleHomeAdapter(
     private var client: HomeClient? = null
     private var initializationFailed = false
     private val commandMutex = Mutex()
+    private val authorizationMutex = Mutex()
     private var lastSuccessfulSignature: String? = null
 
     fun register(caller: ActivityResultCaller) {
@@ -114,51 +115,67 @@ internal class GoogleHomeAdapter(
         } catch (cancelled: CancellationException) { throw cancelled }
           catch (failure: Exception) { queryError = GoogleHomeFailure.describe("Consultar casa", failure); null }
         else null
-        val accessRevoked = state == PermissionsState.NOT_GRANTED ||
-            (state == PermissionsState.GRANTED && structures != null && structures.isEmpty())
-        if (accessRevoked && owner.isOwner(account)) {
+        val permissionState = when (state) {
+            PermissionsState.GRANTED -> GoogleHomeConnectionPolicy.Permission.GRANTED
+            PermissionsState.NOT_GRANTED -> GoogleHomeConnectionPolicy.Permission.NOT_GRANTED
+            else -> GoogleHomeConnectionPolicy.Permission.UNKNOWN
+        }
+        val verification = GoogleHomeConnectionPolicy.verify(available, permissionState, structures?.size)
+        if (verification.requiresAuthorization && owner.isOwner(account)) {
             // Revoked device IDs never stay eligible for later commands.
             // Keep choices for reauthorization; permission checks still block every command.
             owner.invalidate()
             lastSuccessfulSignature = null
         }
         // Google documents GRANTED + no structures after revocation in Home.
-        val authorized = state == PermissionsState.GRANTED && !structures.isNullOrEmpty()
+        val authorized = verification.authorized
         val config = preferences.get(account)
         val message = queryError ?: messageOverride ?: when {
             Build.VERSION.SDK_INT < 29 -> "Google Home necesita Android 10 o posterior."
             !runtimeAvailable() -> "Google Home necesita servicios Google Play actualizados en este teléfono."
             !available -> "No se pudo iniciar Home APIs. Volvé a abrir VISO."
+            verification.verificationPending -> "No se pudo verificar Google Home en este momento. Tus luces y colores guardados se conservan. Tocá Comprobar de nuevo."
             authorized && config.enabled -> "Google Home autorizado; VISO usa únicamente tus luces seleccionadas."
             authorized -> "Google Home autorizado. Buscá y elegí las luces que utilizará VISO."
             state == PermissionsState.GRANTED -> "Google Home no confirmó acceso a una casa. Revisá permisos en Google Home y volvé a autorizar."
-            state == PermissionsState.NOT_GRANTED -> "Autorizá Google Home con tu cuenta y casa. El cliente OAuth debe corresponder a esta APK."
-            else -> "Google Home todavía no confirmó permisos. Revisá conexión, cuenta y configuración OAuth de VISO."
+            state == PermissionsState.NOT_GRANTED -> "Autorizá Google Home y elegí la casa y las luces que querés usar con VISO."
+            else -> "Google Home todavía no confirmó los permisos. Revisá la conexión y tocá Comprobar de nuevo."
         }
         return JSObject().put("sdkPresent", true).put("available", available)
             .put("status", if (!available) "unavailable" else if (authorized) "connected" else "pending")
             .put("authorized", authorized).put("configured", authorized && config.enabled)
+            .put("permissionState", permissionState.value)
+            .put("verificationPending", verification.verificationPending)
+            .put("requiresAuthorization", verification.requiresAuthorization)
             .put("selectedCount", config.selectedIds.size).put("message", message)
     }
 
-    suspend fun authorize(account: String): JSObject {
+    suspend fun authorize(account: String, force: Boolean = false): JSObject = authorizationMutex.withLock {
         owner.requireOwner(account)
+        val current = status(account)
+        owner.requireOwner(account)
+        // Normal connection reuses verified consent. A temporary check failure
+        // offers retry, rather than sending the owner through consent again.
+        if (!current.optBoolean("available") || (!force && !current.optBoolean("requiresAuthorization"))) {
+            return@withLock current
+        }
         owner.invalidate()
         lastSuccessfulSignature = null
-        val result = requireClient().requestPermissions(forcePermissionFlow = ForcePermissionFlow.FORCE_LAUNCH)
+        val permissionFlow = if (force || current.optString("permissionState") == "granted")
+            ForcePermissionFlow.FORCE_LAUNCH else ForcePermissionFlow.DO_NOT_FORCE_LAUNCH
+        val result = requireClient().requestPermissions(forcePermissionFlow = permissionFlow)
         // The official Google activity can return before JS receives appStateChange.
         // A temporarily null owner is safe for this permission-only response: it
         // neither saves a selection nor issues a light command nor reactivates VISO.
         check(!owner.isDifferentOwner(account)) { "La cuenta VISO cambió durante el consentimiento." }
-        return when (result.status) {
+        when (result.status) {
             PermissionsResultStatus.SUCCESS -> status(account)
             PermissionsResultStatus.CANCELLED -> status(account, "Google Home devolvió vinculación cancelada. Podés volver a intentarlo.")
-            else -> status(account, "Google Home rechazó la vinculación. Revisá el cliente OAuth Android de VISO en el proyecto STATUS y la audiencia de prueba.")
+            else -> status(account, "Google Home no pudo completar la vinculación. Volvé a intentarlo; si continúa, contactá al soporte de VISO.")
         }
     }
 
     private fun colorCapable(light: ExtendedColorLightDevice): Boolean {
-        var commandFailure: Exception? = null
         val matter = light.standardTraits.colorControl
         val google = light.googleTraits.extendedColorControl
         return matter?.supports(ColorControl.Command.MoveToHueAndSaturation) == true ||
@@ -193,7 +210,6 @@ internal class GoogleHomeAdapter(
 
     suspend fun discover(account: String): JSObject = withTimeout(25_000) {
         val lights = permittedLights(account, refresh = true)
-        val configuration = preferences.get(account)
         // A partial SDK discovery is not an explicit request to forget a light.
         val rows = JSArray()
         lights.forEach { (id, pair) ->
@@ -210,8 +226,9 @@ internal class GoogleHomeAdapter(
         owner.requireOwner(account)
         val validated = GoogleHomePolicy.selected(ids)
         val normalized = GoogleHomePolicy.colors(colors)
-        if (validated.isNotEmpty()) {
-            GoogleHomePolicy.requireAuthorizedSelection(validated, withTimeout(25_000) { permittedLights(account, false).keys })
+        val added = GoogleHomeConnectionPolicy.newSelections(validated, preferences.get(account).selectedIds)
+        if (added.isNotEmpty()) {
+            GoogleHomePolicy.requireAuthorizedSelection(added, withTimeout(25_000) { permittedLights(account, false).keys })
         }
         owner.requireOwner(account)
         owner.invalidate()

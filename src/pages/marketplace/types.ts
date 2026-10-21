@@ -1,4 +1,7 @@
-import type { MarketplaceCategory } from "@/convex/lib/marketplace_catalog";
+import type {
+  MarketplaceCategory,
+  MarketplacePageTemplate,
+} from "@/convex/lib/marketplace_catalog";
 
 export type MarketAsset = {
   id: string;
@@ -24,7 +27,7 @@ export type MarketProduct = {
   gallery?: MarketGalleryItem[];
   details?: MarketDetails;
   changelog?: MarketChangelog[];
-  pageTemplate?: "football" | "clock" | "weather" | "spotify";
+  pageTemplate?: MarketplacePageTemplate;
   profileTemplate?: "essential";
   pageSettings?: Record<string, unknown>;
   canEdit?: boolean;
@@ -95,7 +98,7 @@ export type MarketLibraryEntry = {
   latestVersion?: string;
   updateAvailable?: boolean;
   profileTemplate?: "essential";
-  pageTemplate?: "football" | "clock" | "weather" | "spotify";
+  pageTemplate?: MarketplacePageTemplate;
   pageSettings?: Record<string, unknown>;
   assets: MarketAsset[];
 };

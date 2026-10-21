@@ -30,6 +30,7 @@ const state = vi.hoisted(() => ({
   media: vi.fn(),
   setWebhook: vi.fn(),
   testWebhook: vi.fn(),
+  googleHomeStatus: vi.fn(),
   error: vi.fn(),
   success: vi.fn(),
 }));
@@ -55,6 +56,10 @@ vi.mock("convex/react", () => ({
 }));
 vi.mock("@/components/ui/signin.tsx", () => ({
   SignInButton: () => <button>Entrar</button>,
+}));
+vi.mock("@/lib/google-home-native.ts", () => ({
+  GOOGLE_HOME_CONFIGURATION_EVENT: "viso:google-home-configuration",
+  googleHomeNative: { getStatus: state.googleHomeStatus },
 }));
 vi.mock("sonner", () => ({
   toast: { error: state.error, success: state.success },
@@ -123,6 +128,14 @@ beforeEach(() => {
   state.inflight = false;
   state.settings = { homeWebhookUrl: null };
   state.capabilities.mockResolvedValue(structuredClone(androidCapabilities));
+  state.googleHomeStatus.mockResolvedValue({
+    sdkPresent: true,
+    available: true,
+    status: "connected",
+    authorized: true,
+    configured: true,
+    selectedCount: 2,
+  });
   state.homeAssistantStatus.mockResolvedValue(
     androidCapabilities.homeAssistant,
   );
@@ -132,6 +145,19 @@ beforeEach(() => {
 });
 
 describe("Android integration navigation", () => {
+  it("shows the verified Google Home connection instead of a fixed pending label", async () => {
+    open();
+    const googleHome = screen.getByRole("link", {
+      name: "Configurar Google Home",
+    });
+    expect(
+      await within(googleHome).findByText("Activa · 2 luces"),
+    ).toBeInTheDocument();
+    expect(state.googleHomeStatus).toHaveBeenCalledWith({
+      accountId: "owner-A",
+    });
+  });
+
   it("groups all six integrations in the requested order and leaves controls inside details", async () => {
     open();
     await screen.findByText("Permiso de reproducción pendiente");

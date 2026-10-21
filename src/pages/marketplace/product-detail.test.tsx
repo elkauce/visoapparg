@@ -15,6 +15,15 @@ vi.mock("convex/react", () => ({
   useMutation: () => fixture.acquire,
 }));
 vi.mock("sonner", () => ({ toast: { success: fixture.success } }));
+vi.mock("./resource-use", () => ({
+  ResourceUsage: () => null,
+  MarketplaceUseDialog: ({ open }: { open: boolean }) =>
+    open ? (
+      <div role="dialog" aria-label="Usar recurso">
+        Elegir destino
+      </div>
+    ) : null,
+}));
 const base: MarketProduct = {
   id: "free-pack",
   title: "Pack del creador",
@@ -52,13 +61,14 @@ describe("Marketplace acquisition", () => {
   it("adds a free resource through the backend before reporting success", async () => {
     const user = userEvent.setup();
     const acquired = show();
-    await user.click(
-      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Obtener y usar" }));
     expect(fixture.acquire).toHaveBeenCalledExactlyOnceWith({
       productId: "free-pack",
     });
-    expect(acquired).toHaveBeenCalledOnce();
+    expect(acquired).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("dialog", { name: "Usar recurso" }),
+    ).toBeInTheDocument();
     expect(fixture.success).toHaveBeenCalledOnce();
   });
 
@@ -66,9 +76,7 @@ describe("Marketplace acquisition", () => {
     fixture.acquire.mockRejectedValueOnce(new Error("Private diagnostics"));
     const user = userEvent.setup();
     const acquired = show();
-    await user.click(
-      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
-    );
+    await user.click(screen.getByRole("button", { name: "Obtener y usar" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "No pudimos agregar el recurso",
     );
@@ -78,7 +86,7 @@ describe("Marketplace acquisition", () => {
     expect(acquired).not.toHaveBeenCalled();
     expect(fixture.success).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
+      screen.getByRole("button", { name: "Obtener y usar" }),
     ).toBeEnabled();
   });
 
@@ -100,7 +108,7 @@ describe("Marketplace acquisition", () => {
       screen.getByText(/VISO puede recibir una comisión/),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Agregar a mi biblioteca" }),
+      screen.queryByRole("button", { name: "Obtener y usar" }),
     ).not.toBeInTheDocument();
     expect(fixture.acquire).not.toHaveBeenCalled();
   });
@@ -143,7 +151,7 @@ describe("Marketplace acquisition", () => {
       ).toBeInTheDocument(),
     );
     expect(
-      screen.queryByRole("button", { name: "Agregar a mi biblioteca" }),
+      screen.queryByRole("button", { name: "Obtener y usar" }),
     ).not.toBeInTheDocument();
     expect(fixture.acquire).not.toHaveBeenCalled();
   });

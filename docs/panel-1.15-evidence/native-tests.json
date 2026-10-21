@@ -1,0 +1,5 @@
+{
+  "tests": 25,
+  "failures": 0,
+  "scope": "JVM policy tests; official SDK build compiled. No physical AndroidKeyStore or Google Home authorization test."
+}

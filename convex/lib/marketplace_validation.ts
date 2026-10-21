@@ -55,6 +55,7 @@ export const marketplacePageTemplate = v.union(
   v.literal("clock"),
   v.literal("weather"),
   v.literal("spotify"),
+  v.literal("visualizer"),
 );
 export const marketplaceGalleryItem = v.object({
   id: v.string(),

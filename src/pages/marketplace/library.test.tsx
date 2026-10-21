@@ -20,6 +20,9 @@ vi.mock("convex/react", () => ({
     return fixture.mutations[name];
   },
 }));
+vi.mock("./key-apply", () => ({
+  default: () => <button>Usar en una tecla</button>,
+}));
 vi.mock("./display-apply", () => ({
   default: () => <button>Usar en Display</button>,
 }));
@@ -50,67 +53,160 @@ afterEach(() => {
 
 describe("Marketplace library", () => {
   it("updates a newer compatible library version only after confirmation and leaves installed content alone", async () => {
-    fixture.entries = [{ ...profile, revision: 1, latestRevision: 2, latestVersion: "2.0.0", updateAvailable: true }];
+    fixture.entries = [
+      {
+        ...profile,
+        revision: 1,
+        latestRevision: 2,
+        latestVersion: "2.0.0",
+        updateAvailable: true,
+      },
+    ];
     const user = userEvent.setup();
-    render(<MemoryRouter><MarketLibrary onExplore={vi.fn()} /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
     const update = fixture.mutations["marketplace:updateLibrary"];
-    await user.click(screen.getByRole("button", { name: "Actualizar Deck Esencial en mi biblioteca" }));
-    expect(screen.getByRole("dialog")).toHaveTextContent("Tus teclas, fondos y páginas ya instaladas se conservan");
+    await user.click(
+      screen.getByRole("button", {
+        name: "Actualizar Deck Esencial en mi biblioteca",
+      }),
+    );
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Tus teclas, fondos y páginas ya instaladas se conservan",
+    );
     expect(screen.getByRole("dialog")).toHaveTextContent("2.0.0");
     expect(update).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Cancelar" }));
     expect(update).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Actualizar Deck Esencial en mi biblioteca" }));
-    await user.click(screen.getByRole("button", { name: "Actualizar mi biblioteca" }));
-    await waitFor(() => expect(update).toHaveBeenCalledExactlyOnceWith({ productId: profile.productId }));
-    expect(fixture.mutations["marketplace:installProfile"]).not.toHaveBeenCalled();
-    expect(fixture.mutations["marketplace:removeFromLibrary"]).not.toHaveBeenCalled();
+    await user.click(
+      screen.getByRole("button", {
+        name: "Actualizar Deck Esencial en mi biblioteca",
+      }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Actualizar mi biblioteca" }),
+    );
+    await waitFor(() =>
+      expect(update).toHaveBeenCalledExactlyOnceWith({
+        productId: profile.productId,
+      }),
+    );
+    expect(
+      fixture.mutations["marketplace:installProfile"],
+    ).not.toHaveBeenCalled();
+    expect(
+      fixture.mutations["marketplace:removeFromLibrary"],
+    ).not.toHaveBeenCalled();
   });
 
   it("does not offer an update for an unchanged, paid or incompatible published version", () => {
-    fixture.entries = [{ ...profile, revision: 1, latestRevision: 3, updateAvailable: false }];
-    render(<MemoryRouter><MarketLibrary onExplore={vi.fn()} /></MemoryRouter>);
-    expect(screen.queryByRole("button", { name: "Actualizar Deck Esencial en mi biblioteca" })).not.toBeInTheDocument();
+    fixture.entries = [
+      { ...profile, revision: 1, latestRevision: 3, updateAvailable: false },
+    ];
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
+    expect(
+      screen.queryByRole("button", {
+        name: "Actualizar Deck Esencial en mi biblioteca",
+      }),
+    ).not.toBeInTheDocument();
   });
 
   it("keeps the previous acquisition and allows retry when updating the library fails", async () => {
-    fixture.entries = [{ ...profile, revision: 1, latestRevision: 2, updateAvailable: true }];
+    fixture.entries = [
+      { ...profile, revision: 1, latestRevision: 2, updateAvailable: true },
+    ];
     const user = userEvent.setup();
-    render(<MemoryRouter><MarketLibrary onExplore={vi.fn()} /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
     const update = fixture.mutations["marketplace:updateLibrary"];
     update.mockRejectedValueOnce(new Error("Connection failed"));
-    await user.click(screen.getByRole("button", { name: "Actualizar Deck Esencial en mi biblioteca" }));
-    await user.click(screen.getByRole("button", { name: "Actualizar mi biblioteca" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Tu versión anterior se conserva");
-    await user.click(screen.getByRole("button", { name: "Actualizar mi biblioteca" }));
+    await user.click(
+      screen.getByRole("button", {
+        name: "Actualizar Deck Esencial en mi biblioteca",
+      }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Actualizar mi biblioteca" }),
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Tu versión anterior se conserva",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Actualizar mi biblioteca" }),
+    );
     await waitFor(() => expect(update).toHaveBeenCalledTimes(2));
-    expect(fixture.mutations["marketplace:installProfile"]).not.toHaveBeenCalled();
+    expect(
+      fixture.mutations["marketplace:installProfile"],
+    ).not.toHaveBeenCalled();
   });
 
   it("offers acquired native pages and confirms installation without replacing other pages", async () => {
-    fixture.entries = [{
-      productId: "viso-page-clock", title: "Reloj", category: "pages",
-      creatorName: "VISO", delivery: "page", acquiredAt: 2,
-      pageTemplate: "clock", assets: [],
-    }];
+    fixture.entries = [
+      {
+        productId: "viso-page-clock",
+        title: "Reloj",
+        category: "pages",
+        creatorName: "VISO",
+        delivery: "page",
+        acquiredAt: 2,
+        pageTemplate: "clock",
+        assets: [],
+      },
+    ];
     const user = userEvent.setup();
-    render(<MemoryRouter><MarketLibrary onExplore={vi.fn()} /></MemoryRouter>);
+    render(
+      <MemoryRouter>
+        <MarketLibrary onExplore={vi.fn()} />
+      </MemoryRouter>,
+    );
     const installPage = fixture.mutations["marketplace_pages:installPage"];
-    installPage.mockResolvedValue({ pageId: "new-native-page", existing: false });
+    installPage.mockResolvedValue({
+      pageId: "new-native-page",
+      existing: false,
+    });
     await user.click(screen.getByRole("button", { name: "Agregar al deck" }));
-    expect(screen.getByRole("dialog")).toHaveTextContent("Tus otras páginas no se reemplazan");
+    expect(screen.getByRole("dialog")).toHaveTextContent(
+      "Tus otras páginas no se reemplazan",
+    );
     expect(installPage).not.toHaveBeenCalled();
-    await user.click(screen.getByRole("button", { name: "Confirmar y agregar" }));
-    await waitFor(() => expect(installPage).toHaveBeenCalledExactlyOnceWith({ productId: "viso-page-clock" }));
-    expect(await screen.findByRole("link", { name: "Abrir mi deck" })).toHaveAttribute("href", "/deck");
+    await user.click(
+      screen.getByRole("button", { name: "Confirmar y agregar" }),
+    );
+    await waitFor(() =>
+      expect(installPage).toHaveBeenCalledExactlyOnceWith({
+        productId: "viso-page-clock",
+      }),
+    );
+    expect(
+      await screen.findByRole("link", { name: "Abrir mi deck" }),
+    ).toHaveAttribute("href", "/deck");
   });
 
   it("makes visual icon resources available to Display as well as screensavers", () => {
-    render(<LibraryAsset
-      asset={{ id: "logo", name: "Mi logo", mediaType: "image", url: "https://files.example.test/logo.png" }}
-      product={{ productId: "brand-icons", category: "icons" }}
-    />);
-    expect(screen.getByRole("button", { name: "Usar en Display" })).toBeInTheDocument();
+    render(
+      <LibraryAsset
+        asset={{
+          id: "logo",
+          name: "Mi logo",
+          mediaType: "image",
+          url: "https://files.example.test/logo.png",
+        }}
+        product={{ productId: "brand-icons", category: "icons" }}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Usar en Display" }),
+    ).toBeInTheDocument();
   });
 
   it("requires explicit confirmation before creating a page and sends only the licensed product", async () => {
@@ -221,13 +317,10 @@ describe("Marketplace library", () => {
   it("preserves the installable Elgato plugin extension instead of adding zip", async () => {
     vi.stubGlobal(
       "fetch",
-      vi
-        .fn()
-        .mockResolvedValue({
-          ok: true,
-          blob: async () =>
-            new Blob(["PK plugin"], { type: "application/zip" }),
-        }),
+      vi.fn().mockResolvedValue({
+        ok: true,
+        blob: async () => new Blob(["PK plugin"], { type: "application/zip" }),
+      }),
     );
     Object.defineProperty(URL, "createObjectURL", {
       configurable: true,

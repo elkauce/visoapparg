@@ -1,0 +1,66 @@
+{
+  "scope": "Captures of production React components and VU renderer with clearly labelled example data. No account login or physical device access.",
+  "errors": [],
+  "captures": [
+    {
+      "kind": "football",
+      "viewport": "960x600",
+      "file": "public/marketplace/covers/page-football.png",
+      "sha256": "9d998af0108988618e21b42adaaf34f83d68eee7a6716d4ff0114cc47fff4b80"
+    },
+    {
+      "kind": "football",
+      "viewport": "390x844",
+      "file": "public/marketplace/previews/page-football-vertical.png",
+      "sha256": "c07af0b42ccd009d4cdc6d3565ce411a9511fb39b9c6b4c5636e9ed631ffe3f4"
+    },
+    {
+      "kind": "clock",
+      "viewport": "960x600",
+      "file": "public/marketplace/covers/page-clock.png",
+      "sha256": "6f0492b6a520e1a21830e2502b02b2b3cfa32c8a73caa9b17b60c03c93108ccd"
+    },
+    {
+      "kind": "clock",
+      "viewport": "390x844",
+      "file": "public/marketplace/previews/page-clock-vertical.png",
+      "sha256": "2bba7958fc5706e1de8f9b9478df142616b4e331078fcd41caec6acb9463b8fc"
+    },
+    {
+      "kind": "weather",
+      "viewport": "960x600",
+      "file": "public/marketplace/covers/page-weather.png",
+      "sha256": "d1bbee94ecb48f099014a6a415f56efd04472f83a1b42142bd3ca48cc1e725f1"
+    },
+    {
+      "kind": "weather",
+      "viewport": "390x844",
+      "file": "public/marketplace/previews/page-weather-vertical.png",
+      "sha256": "83a75640d0260729bf4cb01ddd3a2da0f44d641404fca074fbab975837d91a36"
+    },
+    {
+      "kind": "spotify",
+      "viewport": "960x600",
+      "file": "public/marketplace/covers/page-spotify.png",
+      "sha256": "2b154abbd1cc70075c1131686ada8240568cf6620a1a2eef2d01608200606be8"
+    },
+    {
+      "kind": "spotify",
+      "viewport": "390x844",
+      "file": "public/marketplace/previews/page-spotify-vertical.png",
+      "sha256": "161975fa50df18c4672961797bdeca26c4bd3316fbf7d31347f0e2be7b628948"
+    },
+    {
+      "kind": "visualizer",
+      "viewport": "960x600",
+      "file": "public/marketplace/covers/page-visualizer.png",
+      "sha256": "0311fbb9ad57f37daba82ddf9e91631c9acb0742359cf30a8cb383552e8d46fd"
+    },
+    {
+      "kind": "visualizer",
+      "viewport": "390x844",
+      "file": "public/marketplace/previews/page-visualizer-vertical.png",
+      "sha256": "b362b2b0b183e502d05cda02bec786e450fbab4340efad5eef28b7399c6d2f34"
+    }
+  ]
+}

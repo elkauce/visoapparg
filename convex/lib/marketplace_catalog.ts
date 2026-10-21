@@ -12,7 +12,8 @@ export type MarketplaceCategory =
   | "new"
   | "pages";
 
-export type MarketplacePageTemplate = "football" | "clock" | "weather" | "spotify";
+export type MarketplacePageTemplate =
+  "football" | "clock" | "weather" | "spotify" | "visualizer";
 
 export type BuiltinMarketplaceAsset = {
   id: string;
@@ -203,6 +204,14 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     priceMode: "free",
     delivery: "page",
     pageTemplate: "football",
+    gallery: [
+      {
+        id: "actual-page",
+        name: "Captura de la página VISO · datos de ejemplo",
+        mediaType: "image",
+        builtinPath: "/marketplace/previews/page-football-vertical.png",
+      },
+    ],
     details: {
       type: "Página de deportes",
       device: "Deck y Display VISO",
@@ -210,8 +219,10 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
       compatibility: "VISO 1.14 o posterior. Requiere conexión a Internet.",
       version: "1.0.0",
       language: "Español",
-      included: "Página de deportes integrada, favoritos y consulta de resultados anteriores.",
-      setup: "Agregá la página al deck y hacé doble toque para elegir equipos, fecha y competiciones.",
+      included:
+        "Página de deportes integrada, favoritos y consulta de resultados anteriores.",
+      setup:
+        "Agregá la página al deck y hacé doble toque para elegir equipos, fecha y competiciones.",
     },
     assets: [],
   },
@@ -226,6 +237,14 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     priceMode: "free",
     delivery: "page",
     pageTemplate: "clock",
+    gallery: [
+      {
+        id: "actual-page",
+        name: "Captura de la página VISO · datos de ejemplo",
+        mediaType: "image",
+        builtinPath: "/marketplace/previews/page-clock-vertical.png",
+      },
+    ],
     details: {
       type: "Página de reloj",
       device: "Deck y Display VISO",
@@ -233,7 +252,8 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
       compatibility: "VISO 1.14 o posterior",
       version: "1.0.0",
       language: "Español",
-      included: "Reloj con estilos, fecha, colores y fotografías configurables.",
+      included:
+        "Reloj con estilos, fecha, colores y fotografías configurables.",
       setup: "Agregá la página y hacé doble toque para elegir su diseño.",
     },
     assets: [],
@@ -249,6 +269,14 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     priceMode: "free",
     delivery: "page",
     pageTemplate: "weather",
+    gallery: [
+      {
+        id: "actual-page",
+        name: "Captura de la página VISO · datos de ejemplo",
+        mediaType: "image",
+        builtinPath: "/marketplace/previews/page-weather-vertical.png",
+      },
+    ],
     details: {
       type: "Página de clima",
       device: "Deck y Display VISO",
@@ -272,15 +300,59 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     priceMode: "free",
     delivery: "page",
     pageTemplate: "spotify",
+    gallery: [
+      {
+        id: "actual-page",
+        name: "Captura de la página VISO · datos de ejemplo",
+        mediaType: "image",
+        builtinPath: "/marketplace/previews/page-spotify-vertical.png",
+      },
+    ],
     details: {
       type: "Página de música",
       device: "Deck y Display VISO",
       os: "Android y navegador web",
-      compatibility: "VISO 1.14 o posterior. Las funciones de Spotify requieren su servicio.",
+      compatibility:
+        "VISO 1.14 o posterior. Las funciones de Spotify requieren su servicio.",
       version: "1.0.0",
       language: "Español",
       included: "Página de música integrada con acceso a Spotify.",
-      setup: "Agregá la página al deck. Usá los accesos de música disponibles en tu dispositivo.",
+      setup:
+        "Agregá la página al deck. Usá los accesos de música disponibles en tu dispositivo.",
+    },
+    assets: [],
+  },
+  {
+    id: "viso-page-visualizer",
+    title: "Vúmetro",
+    description:
+      "La página de audio de VISO a pantalla completa: medidores LED, agujas, barras, ondas y espectros. Elegí micrófono o música, diseño y sensibilidad. La captura de música depende de los permisos y de que la aplicación o el navegador permitan compartir su audio.",
+    category: "pages",
+    creatorName: "VISO",
+    coverPath: "/marketplace/covers/page-visualizer.png",
+    priceMode: "free",
+    delivery: "page",
+    pageTemplate: "visualizer",
+    gallery: [
+      {
+        id: "actual-page",
+        name: "Captura de la página VISO · datos de ejemplo",
+        mediaType: "image",
+        builtinPath: "/marketplace/previews/page-visualizer-vertical.png",
+      },
+    ],
+    details: {
+      type: "Página de audio",
+      device: "Deck y Display VISO",
+      os: "Android y navegador web",
+      compatibility:
+        "VISO 1.15 o posterior. Requiere autorizar la fuente de audio en cada dispositivo.",
+      version: "1.0.0",
+      language: "Español",
+      included:
+        "13 diseños de medidor, selector de micrófono o música y sensibilidad configurable.",
+      setup:
+        "Agregá la página al deck, hacé doble toque para configurar el diseño y la fuente, y tocá Iniciar para autorizar la captura. La música protegida o de aplicaciones que no permiten captura puede no estar disponible.",
     },
     assets: [],
   },

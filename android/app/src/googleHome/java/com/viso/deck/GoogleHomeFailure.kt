@@ -15,7 +15,7 @@ internal object GoogleHomeFailure {
         if (google != null) {
             val hint = when (google.statusCode) {
                 7 -> "Google informó un error de red."
-                10 -> "Google rechazó la configuración de la app: revisá paquete, firma y cliente OAuth."
+                10 -> "La configuración de VISO necesita revisión. Contactá al soporte de VISO."
                 else -> "Google no completó la operación."
             }
             return "$stage. $hint Código Google: ${google.statusCode}."

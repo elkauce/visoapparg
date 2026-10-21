@@ -16,6 +16,9 @@ export interface GoogleHomeStatus {
   configured: boolean;
   selectedCount: number;
   message: string;
+  permissionState?: "granted" | "not-granted" | "unknown";
+  verificationPending?: boolean;
+  requiresAuthorization?: boolean;
 }
 export interface GoogleHomeLight {
   id: string;
@@ -48,7 +51,10 @@ export interface GoogleHomeBridge {
     enabled: boolean;
   }): Promise<void>;
   getStatus(options: { accountId: string }): Promise<GoogleHomeStatus>;
-  authorize(options: { accountId: string }): Promise<GoogleHomeStatus>;
+  authorize(options: {
+    accountId: string;
+    force?: boolean;
+  }): Promise<GoogleHomeStatus>;
   discoverLights(options: {
     accountId: string;
   }): Promise<GoogleHomeStatus & { lights: GoogleHomeLight[] }>;

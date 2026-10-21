@@ -38,6 +38,9 @@ export class GoogleHomeSyncController {
   private retryTimer: ReturnType<typeof setTimeout> | null = null;
   private retrySignature: string | null = null;
   private retryCount = 0;
+  private configurationRetryTimer: ReturnType<typeof setTimeout> | null = null;
+  private configurationRetryCount = 0;
+  private ownerBindingFailed = false;
   private generation = 0;
   private latest: StateSnapshot | null = null;
   private configuration: GoogleHomeConfiguration | null = null;
@@ -59,6 +62,7 @@ export class GoogleHomeSyncController {
     this.accountId = accountId;
     this.backgroundEnabled = false;
     this.cancelRetry();
+    this.cancelConfigurationRetry();
     this.generation += 1;
     this.latest = null;
     this.configuration = null;
@@ -77,6 +81,7 @@ export class GoogleHomeSyncController {
     this.foreground = active;
     if (wasPermitted && this.permitted() && !reconcile) return;
     this.cancelRetry();
+    this.cancelConfigurationRetry();
     this.generation += 1;
     this.status = null;
     this.configuration = null;
@@ -92,6 +97,7 @@ export class GoogleHomeSyncController {
     if (this.backgroundEnabled === next) return;
     this.backgroundEnabled = next;
     this.cancelRetry();
+    this.cancelConfigurationRetry();
     this.generation += 1;
     this.status = null;
     this.configuration = null;
@@ -113,7 +119,7 @@ export class GoogleHomeSyncController {
   }
 
   private retry(signature: string): void {
-    if (!this.backgroundEnabled || !this.accountId || !this.permitted()) return;
+    if (!this.accountId || !this.permitted()) return;
     if (this.retrySignature !== signature) {
       this.cancelRetry();
       this.retrySignature = signature;
@@ -136,6 +142,41 @@ export class GoogleHomeSyncController {
     }, this.retryCount * 1000);
   }
 
+  private cancelConfigurationRetry(): void {
+    if (this.configurationRetryTimer !== null)
+      clearTimeout(this.configurationRetryTimer);
+    this.configurationRetryTimer = null;
+    this.configurationRetryCount = 0;
+  }
+
+  private retryConfiguration(): void {
+    if (
+      !this.accountId ||
+      !this.permitted() ||
+      this.configurationRetryTimer !== null ||
+      this.configurationRetryCount >= 2
+    )
+      return;
+    const accountId = this.accountId;
+    const generation = this.generation;
+    this.configurationRetryCount += 1;
+    this.configurationRetryTimer = setTimeout(() => {
+      this.configurationRetryTimer = null;
+      if (!this.current(accountId, generation)) return;
+      if (this.ownerBindingFailed) this.bindOwner();
+      void this.refreshConfiguration();
+    }, this.configurationRetryCount * 1000);
+  }
+
+  /** A real network reconnection starts a fresh, bounded recovery attempt. */
+  reconnect(): void {
+    if (!this.accountId || !this.permitted()) return;
+    this.cancelRetry();
+    this.cancelConfigurationRetry();
+    if (this.ownerBindingFailed) this.bindOwner();
+    void this.refreshConfiguration();
+  }
+
   updateState(
     stateKey: GoogleHomeStateKey | null,
     revision: string,
@@ -145,13 +186,19 @@ export class GoogleHomeSyncController {
       !stateKey && customColor && /^#[0-9a-fA-F]{6}$/.test(customColor)
         ? customColor
         : undefined;
-    if (
+    const changed =
       this.latest?.stateKey !== stateKey ||
       this.latest?.revision !== revision ||
-      this.latest?.customColor !== validColor
-    )
+      this.latest?.customColor !== validColor;
+    if (changed) {
       this.cancelRetry();
+      this.cancelConfigurationRetry();
+    }
     this.latest = { stateKey, revision, customColor: validColor };
+    if (changed && !this.refreshing && (!this.status || !this.configuration)) {
+      if (this.ownerBindingFailed) this.bindOwner();
+      void this.refreshConfiguration();
+    }
     void this.drain();
   }
 
@@ -177,6 +224,19 @@ export class GoogleHomeSyncController {
       this.status = status;
       this.configuration = configuration;
       this.lastAttempted = null;
+      if (status.verificationPending && !status.requiresAuthorization) {
+        // An SDK timeout can return a status instead of rejecting the call.
+        // Keep the retry budget until Google confirms the permission result.
+        this.retryConfiguration();
+      } else {
+        this.cancelConfigurationRetry();
+        if (
+          !status.available ||
+          !status.authorized ||
+          status.requiresAuthorization
+        )
+          this.cancelRetry();
+      }
     } catch (failure) {
       if (this.current(accountId, generation)) {
         this.status = null;
@@ -186,6 +246,7 @@ export class GoogleHomeSyncController {
             ? failure.message
             : "No se pudieron verificar los permisos de Google Home.",
         );
+        this.retryConfiguration();
       }
     } finally {
       this.refreshing = false;
@@ -200,6 +261,7 @@ export class GoogleHomeSyncController {
     const accountId = this.accountId;
     const generation = this.generation;
     const enabled = this.backgroundEnabled;
+    this.ownerBindingFailed = false;
     const bound = this.bridge.setActiveAccount({
       accountId: this.permitted() ? accountId : null,
     });
@@ -213,7 +275,10 @@ export class GoogleHomeSyncController {
         });
     });
     // A bridge unavailable in this build must never enable synchronization.
-    void this.ownerReady.catch(() => undefined);
+    void this.ownerReady.catch(() => {
+      if (accountId === this.accountId && generation === this.generation)
+        this.ownerBindingFailed = true;
+    });
   }
 
   private current(accountId: string, generation: number): boolean {
@@ -243,6 +308,8 @@ export class GoogleHomeSyncController {
       this.permitted() &&
       this.status?.available &&
       this.status.authorized &&
+      !this.status.verificationPending &&
+      !this.status.requiresAuthorization &&
       this.status.configured &&
       this.status.selectedCount > 0 &&
       this.configuration?.enabled &&

@@ -4,6 +4,105 @@
   color: #24272d;
   font-family: inherit;
 }
+.vm-resource-usage {
+  display: grid;
+  gap: 7px;
+  padding: 16px 18px;
+  margin-block: 12px 20px;
+  border: 1px solid #e2dcd2;
+  border-radius: 14px;
+  background: #faf8f4;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.vm-resource-usage > strong { color: #9f390c; }
+.vm-key-preview {
+  display: grid;
+  width: min(100%, 200px);
+  aspect-ratio: 1;
+  margin: 12px auto;
+  padding: 8px;
+  border-radius: 24px;
+  background: #232529;
+}
+.vm-workspace-header {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.vm-workspace-title {
+  color: #24272d;
+  font-size: 30px;
+  font-weight: 750;
+  line-height: 1.15;
+  letter-spacing: -0.045em;
+}
+.viso-panel-header .vm-workspace-title {
+  margin-top: 0;
+  color: #24272d;
+  font-size: 30px;
+}
+.vm-unified-shell.vm-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+.vm-filters {
+  min-width: 0;
+  padding-bottom: 22px;
+  border-bottom: 1px solid #e2dcd2;
+}
+.vm-filters .vm-categories {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.vm-filters .vm-categories button {
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #e1d9cd;
+  background: #fffcf7;
+  font-size: 12px;
+}
+.vm-filters .vm-categories [aria-current="page"] {
+  color: #c94312;
+  background: #f7e3d6;
+  border-color: #ecc8ad;
+}
+.vm-filters .vm-docs-link {
+  margin: 16px 0 0;
+}
+@media (max-width: 899px) {
+  .vm-workspace-header .vm-header-nav {
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 6px;
+  }
+  .viso-marketplace .vm-workspace-header .vm-header-nav button {
+    display: inline-flex;
+    min-height: 38px;
+    padding: 8px 10px;
+    font-size: 11px;
+    background: #fffcf7;
+    border-color: #e2dcd2;
+  }
+  .vm-workspace-header .vm-header-nav button > span {
+    display: inline;
+  }
+  .vm-filters .vm-categories {
+    flex-wrap: nowrap;
+    margin-inline: 0;
+    padding: 2px 0 6px;
+  }
+  .vm-filters .vm-categories button {
+    flex: 0 0 auto;
+    font-size: 11px;
+  }
+}
 .viso-marketplace *,
 .vm-product-dialog *,
 .vm-confirm-dialog * {
@@ -838,6 +937,7 @@
 }
 .vm-library-entry-heading {
   min-width: 0;
+  flex: 1;
 }
 .vm-library-entry-heading > span {
   color: #a28d78;

@@ -34,7 +34,7 @@ import {
   externalMarketplaceNavigation,
   marketplaceConnectionsPath,
 } from "@/lib/marketplace-navigation";
-import PageInstall from "./page-install";
+import { MarketplaceUseDialog, ResourceUsage } from "./resource-use";
 import ProductCheckout from "./checkout";
 
 function gallerySource(item: MarketGalleryItem): string | null {
@@ -76,6 +76,7 @@ export default function MarketProductPage({
   const product = useQuery(api.marketplace.get, { productId });
   const acquire = useMutation(api.marketplace.acquire);
   const [pending, setPending] = useState(false);
+  const [useOpen, setUseOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<MarketGalleryItem | null>(null);
   const busy = useRef(false);
@@ -87,7 +88,7 @@ export default function MarketProductPage({
     try {
       await acquire({ productId: product.id });
       toast.success("Listo. El recurso ya está en tu biblioteca.");
-      onAcquired();
+      setUseOpen(true);
     } catch {
       setError("No pudimos agregar el recurso. Volvé a intentarlo.");
     } finally {
@@ -168,9 +169,11 @@ export default function MarketProductPage({
             pending={pending}
             onAdd={() => void add()}
             onLibrary={onAcquired}
+            onUse={() => setUseOpen(true)}
           />
         </div>
       </header>
+      <ResourceUsage product={product} />
       {error && (
         <p role="alert" className="vm-error">
           {error}
@@ -277,9 +280,9 @@ export default function MarketProductPage({
           {product.priceMode === "free" &&
             ["icons", "screensavers"].includes(product.category) && (
               <p className="vm-detail-help">
-                Después de agregarlo, elegí una imagen o animación desde la
-                biblioteca al editar una tecla o el fondo del Display. La acción
-                de la tecla se conserva.
+                Tocá Obtener y usar para elegir una imagen o animación y
+                aplicarla directamente a una tecla o al fondo del Display. La
+                acción de la tecla se conserva.
               </p>
             )}
           {product.priceMode === "info" && (
@@ -353,6 +356,12 @@ export default function MarketProductPage({
           </DialogContent>
         </Dialog>
       )}
+      <MarketplaceUseDialog
+        key={product.id}
+        productId={product.id}
+        open={useOpen}
+        onOpenChange={setUseOpen}
+      />
     </article>
   );
 }
@@ -362,23 +371,23 @@ function ProductAction({
   pending,
   onAdd,
   onLibrary,
+  onUse,
 }: {
   product: MarketProduct;
   pending: boolean;
   onAdd: () => void;
   onLibrary: () => void;
+  onUse: () => void;
 }) {
   const external = externalPurchaseUrl(product.externalUrl);
-  if (product.acquired && product.delivery === "page")
+  if (product.acquired && product.priceMode !== "external")
     return (
-      <PageInstall
-        product={{
-          productId: product.id,
-          title: product.title,
-          pageTemplate: product.pageTemplate,
-          category: product.category,
-        }}
-      />
+      <div className="vm-detail-actions">
+        <Button onClick={onUse}>Usar</Button>
+        <Button variant="ghost" onClick={onLibrary}>
+          Ver en mi biblioteca
+        </Button>
+      </div>
     );
   if (product.priceMode === "info") return null;
   if (product.priceMode === "paid")
@@ -419,22 +428,6 @@ function ProductAction({
       </div>
     );
   }
-  if (product.id === "viso-stream-deck")
-    return (
-      <div className="vm-detail-actions">
-        <Button asChild>
-          <Link to={marketplaceConnectionsPath()}>
-            Descargar mi plugin <ArrowUpRight />
-          </Link>
-        </Button>
-        {!product.acquired && (
-          <Button variant="outline" disabled={pending} onClick={onAdd}>
-            {pending ? <Loader2 className="animate-spin" /> : <Library />}
-            Guardar en mi biblioteca
-          </Button>
-        )}
-      </div>
-    );
   return (
     <div className="vm-detail-actions">
       {product.acquired ? (
@@ -444,7 +437,7 @@ function ProductAction({
       ) : (
         <Button disabled={pending} onClick={onAdd}>
           {pending ? <Loader2 className="animate-spin" /> : <Library />}
-          {pending ? "Agregando…" : "Agregar a mi biblioteca"}
+          {pending ? "Preparando…" : "Obtener y usar"}
         </Button>
       )}
     </div>

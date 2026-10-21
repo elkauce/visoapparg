@@ -723,6 +723,7 @@ export default function ProductForm({
                   <option value="clock">Reloj</option>
                   <option value="weather">Clima</option>
                   <option value="spotify">Spotify</option>
+                  <option value="visualizer">Vúmetro</option>
                 </select>
                 <p className="vm-studio-help">
                   Se instala como una página del deck. La configuración se
