@@ -77,4 +77,16 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_page_and_position", ["pageId", "position"]),
+  doorbells: defineTable({
+    userId: v.id("users"), slug: v.string(), enabled: v.boolean(),
+    allowAudio: v.boolean(), allowVideo: v.boolean(), lightAlert: v.boolean(),
+  }).index("by_user",["userId"]).index("by_slug",["slug"]),
+  doorbellCalls: defineTable({
+    bellId: v.id("doorbells"), userId: v.id("users"), visitorToken: v.string(),
+    mode: v.union(v.literal("audio"),v.literal("video")),
+    state: v.union(v.literal("ringing"),v.literal("accepted"),v.literal("rejected"),v.literal("ended")),
+    createdAt: v.number(),
+    ownerSignals: v.array(v.object({type:v.string(),data:v.string()})),
+    visitorSignals: v.array(v.object({type:v.string(),data:v.string()})),
+  }).index("by_user",["userId"]).index("by_bell_created",["bellId","createdAt"]),
 });
