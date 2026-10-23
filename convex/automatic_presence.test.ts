@@ -83,6 +83,67 @@ describe("automatic shared status transactions", () => {
       activeStatusRevision: 2,
     });
   });
+  it("allows the next legacy call after a manual override without an ending transition", async () => {
+    const { t, alice, args, aliceId, statusId } = await fixture();
+    const occupied = await alice.mutation(api.statuses.create, {
+      name: "Ocupado",
+      color: "#ff0000",
+      icon: "ban",
+    });
+    await alice.mutation(api.deck_actions.activateAutomaticStatus, args);
+    await alice.mutation(api.statuses.setActive, { statusId: occupied });
+    // The installed PresenceController suppresses this first episode and sends
+    // no automatic restore when the first physical call ends.
+    const second = { ...args, expectedRevision: 2, requestId: nextRequestId };
+    expect(
+      await alice.mutation(api.deck_actions.activateAutomaticStatus, second),
+    ).toEqual({ applied: true, revision: 3 });
+    expect(await alice.query(api.statuses.list, {})).toMatchObject({
+      activeStatusId: statusId,
+      activeStatusRevision: 3,
+    });
+    expect(
+      await alice.mutation(api.deck_actions.activateAutomaticStatus, {
+        ...args,
+        statusId: occupied,
+        expectedRevision: 3,
+        requestId: "44444444-4444-4444-8444-444444444444",
+      }),
+    ).toEqual({ applied: true, revision: 4 });
+    expect(await alice.query(api.statuses.list, {})).toMatchObject({
+      activeStatusId: occupied,
+      activeStatusRevision: 4,
+    });
+    expect(
+      await t.run((ctx) =>
+        ctx.db
+          .query("presenceSources")
+          .withIndex("by_user", (q) => q.eq("userId", aliceId))
+          .collect(),
+      ),
+    ).toHaveLength(0);
+  });
+  it("keeps legacy same-state writes and recovery receipts on the same revision", async () => {
+    const { alice, args, statusId } = await fixture();
+    await alice.mutation(api.statuses.setActive, { statusId });
+    const sameState = { ...args, expectedRevision: 1 };
+    expect(
+      await alice.mutation(api.deck_actions.activateAutomaticStatus, sameState),
+    ).toEqual({ applied: true, revision: 2 });
+    expect(
+      await alice.query(api.deck_actions.getAutomaticReceipt, {
+        accountId: args.accountId,
+        requestId: args.requestId,
+      }),
+    ).toEqual({ applied: true, statusId, revision: 2 });
+    expect(
+      await alice.mutation(api.deck_actions.activateAutomaticStatus, sameState),
+    ).toEqual({ applied: true, revision: 2 });
+    expect(await alice.query(api.statuses.list, {})).toMatchObject({
+      activeStatusId: statusId,
+      activeStatusRevision: 2,
+    });
+  });
   it("restores null only when the automatic change still owns the revision", async () => {
     const { alice, args } = await fixture();
     await alice.mutation(api.deck_actions.activateAutomaticStatus, args);

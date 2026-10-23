@@ -10,7 +10,6 @@ import {
   removePresenceSource,
   setPresenceSource,
 } from "./lib/timbre_presence";
-import { findVisoStatus, VISO_STATES } from "./lib/viso_preset_states";
 
 const RECEIPT_LIFETIME_MS = 24 * 60 * 60 * 1000;
 const MAX_RECEIPTS_PER_DAY = 2048;
@@ -173,49 +172,12 @@ export const activateAutomaticStatus = mutation({
         code: "RATE_LIMITED",
         message: "Demasiadas acciones automáticas.",
       });
-    const sourceKey = `foreground:${args.deviceId}`;
-    const existingSource = await ctx.db
-      .query("presenceSources")
-      .withIndex("by_user_source", (q) =>
-        q.eq("userId", user._id).eq("sourceKey", sourceKey),
-      )
-      .unique();
-    const arbiter = await ctx.db
-      .query("presenceArbiters")
-      .withIndex("by_user", (q) => q.eq("userId", user._id))
-      .unique();
-    const status = args.statusId
-      ? await ctx.db.get("statuses", args.statusId)
-      : null;
-    const legacyDefinition = status
-      ? VISO_STATES.find(
-          (definition) =>
-            (definition.key === "llamada" || definition.key === "reunion") &&
-            findVisoStatus(definition, [status]),
-        )
-      : undefined;
-    const legacyRestoring =
-      existingSource &&
-      (args.statusId ?? null) === (arbiter?.baselineStatusId ?? null);
-    const mode = legacyRestoring
-      ? null
-      : legacyDefinition?.key === "llamada"
-        ? "call"
-        : legacyDefinition?.key === "reunion"
-          ? "meeting"
-          : null;
-    if (mode && args.statusId) {
-      await setPresenceSource(ctx, user._id, {
-        sourceKey,
-        kind: mode === "call" ? "telephone" : "meeting",
-        statusId: args.statusId,
-        // Legacy clients send only transitions. Their existing CAS behavior is
-        // retained, but updating the APK is required for reliable heartbeats.
-        expiresAt: Date.now() + 8 * 60 * 60 * 1000,
-      });
-    } else if (existingSource) {
-      await removePresenceSource(ctx, user._id, sourceKey);
-    } else await setActiveStatus(ctx, user._id, args.statusId);
+    // Installed APKs without presenceMode send transitions, not leases or an
+    // explicit end after a manual override. Preserve their original CAS write
+    // and receipt semantics. Inferring a long-lived source from a status name
+    // would leave a suppressed episode behind and block the next real call.
+    // Source coordination is opt-in through the versioned presenceMode field.
+    await setActiveStatus(ctx, user._id, args.statusId);
     await ctx.db.insert("deckActionRequests", {
       userId: user._id,
       requestId: args.requestId,
