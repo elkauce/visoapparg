@@ -35,9 +35,7 @@
     "android.permission.WAKE_LOCK",
     "com.viso.deck.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
   ],
-  "permissionsAddedSince1_15_0": [
-    "android.permission.CAMERA"
-  ],
+  "permissionsAddedSince1_15_0": ["android.permission.CAMERA"],
   "optionalCamera": true,
   "junit": {
     "tests": 27,
@@ -47,5 +45,7 @@
   },
   "assembleDebug": "passed",
   "physicalDeviceTested": false,
-  "publicDownloadVerified": false
+  "publicDownloadVerified": true,
+  "publicDownloadUrl": "https://raw.githubusercontent.com/elkauce/visoapparg/feat/viso-timbre/downloads/VISO-Deck-1.16.0-debug.apk",
+  "immutableDownloadUrl": "https://raw.githubusercontent.com/elkauce/visoapparg/28a928e8c9d1928ba3eb2e8df0f52e0673138272/downloads/VISO-Deck-1.16.0-debug.apk"
 }

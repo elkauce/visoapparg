@@ -1,6 +1,12 @@
 # VISO
 
-## Timbre — rama de revisión
+## Versión publicada 1.16
+
+[Abrir VISO](https://viso-deck-android.vercel.app/) · [Descargar APK 1.16.0](https://raw.githubusercontent.com/elkauce/visoapparg/28a928e8c9d1928ba3eb2e8df0f52e0673138272/downloads/VISO-Deck-1.16.0-debug.apk) · [Entrega y verificaciones](docs/timbre-release-1.16.md).
+
+La APK conserva la firma de 1.15.0 y el SDK Google Home. Web y Android comparten cuentas y datos. Timbre incluye su administración y configuración, pero las llamadas aún requieren Cloudflare y una licencia válida. Los avisos Android en segundo plano requieren configurar Firebase y compilar la variante FCM; no están activados en esta APK.
+
+## Timbre — configuración
 
 La rama `feat/viso-timbre` integra Timbre con las cuentas, el panel, Android y el marketplace existentes. No activa licencias por registrarse ni publica cambios automáticamente.
 
@@ -8,15 +14,15 @@ Consultar [arquitectura](docs/timbre-integration.md), [alcance y límites](docs/
 
 Copia independiente con React, Vite y Convex. El registro, inicio y cierre de sesión usan email y contraseña propios con Convex Auth. No requiere Hercules.
 
-## APK 1.1 de prueba
+## APK 1.1 de prueba (histórica)
 
-[Descargar la nueva APK VISO Deck 1.1](https://raw.githubusercontent.com/elkauce/visoapparg/feature/viso-deck-android-improvements/downloads/VISO-Deck-1.1-debug.apk). Se instala como actualización de la APK anterior y utiliza la misma cuenta. [Web candidata para probar junto a la app](https://viso-deck-mejoras-npgfwlf4l-manuelhaguilar8-4981s-projects.vercel.app/). La rama `feature/viso-deck-android-improvements` contiene las mejoras de inicio, editor, aplicaciones e integraciones. La web estable permanece sin cambios hasta aprobar la candidata. [Cambios, verificaciones y pendientes](docs/android-improvements.md).
+[Descargar la APK histórica VISO Deck 1.1](https://raw.githubusercontent.com/elkauce/visoapparg/feature/viso-deck-android-improvements/downloads/VISO-Deck-1.1-debug.apk). La rama `feature/viso-deck-android-improvements` conserva esa revisión anterior. [Cambios y verificaciones de esa entrega](docs/android-improvements.md).
 
 ## Web vinculada a la APK Android
 
-**Web completa: https://viso-deck-android.vercel.app/**. Usa el mismo correo y contraseña que en la APK. Desde el panel, abre **Pantalla completa → Abrir** en el dispositivo que funcionará como Display; ese enlace público no requiere iniciar sesión. Deja **Deck** abierto en Android y pulsa un estado: el Display cambia en tiempo real. También puedes controlar el estado desde el panel web o **Abrir deck**.
+**Web completa: https://viso-deck-android.vercel.app/**. Usa la misma cuenta que en la APK. Desde el panel, pulsa **Abrir display** en el dispositivo que funcionará como Display; ese enlace público no requiere iniciar sesión. Deja **Deck** abierto en Android y pulsa un estado: el Display cambia en tiempo real. También puedes controlar el estado desde el panel web o **Abrir deck**.
 
-[Descargar APK Android](https://viso-deck-android.vercel.app/downloads/VISO-Deck-debug.apk). Es una compilación de depuración. La APK ya descargada también funciona con esta web; no requiere una nueva cuenta ni reinstalación para sincronizar.
+[Descargar APK Android 1.16.0](https://raw.githubusercontent.com/elkauce/visoapparg/28a928e8c9d1928ba3eb2e8df0f52e0673138272/downloads/VISO-Deck-1.16.0-debug.apk). Es una compilación de depuración. Conserva la cuenta y el backend; no requiere otra cuenta para sincronizar.
 
 Esta web conserva el sitio completo original y comparte `vivid-nightingale-785` con la APK. El navegador muestra la portada y el panel completos; la app nativa conserva su menú Android. Se verificaron inicio de sesión, Deck → Display, panel web → Display y persistencia tras recargar con dos sesiones de navegador independientes. Los detalles y límites de la comprobación están en [android-validation.md](docs/android-validation.md).
 

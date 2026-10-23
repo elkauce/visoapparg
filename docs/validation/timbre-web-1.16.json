@@ -1,0 +1,31 @@
+{
+  "verifiedAt": "2026-10-23T18:26:10.794153+00:00",
+  "publicUrl": "https://viso-deck-android.vercel.app",
+  "deploymentId": "dpl_C6ZzNXfd6Y9FL2WXEFySfFFAQpKV",
+  "sourceCommit": "28a928e8c9d1928ba3eb2e8df0f52e0673138272",
+  "matchedFiles": 93,
+  "mismatchedFiles": 0,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "entries": ["/assets/index--loKk1Mu.js"]
+    },
+    {
+      "path": "/timbre",
+      "status": 200,
+      "entries": ["/assets/index--loKk1Mu.js"]
+    },
+    {
+      "path": "/t/0000000000000000000000000000000000000000000000000000000000000000",
+      "status": 200,
+      "entries": ["/assets/index--loKk1Mu.js"]
+    },
+    {
+      "path": "/android",
+      "status": 200,
+      "entries": ["/assets/index--loKk1Mu.js"]
+    }
+  ],
+  "scope": "Static publication, JavaScript/CSS/assets and SPA routing verified. No physical call or authenticated browser regression asserted."
+}
