@@ -24,7 +24,7 @@ Se comprobó que la cuenta de servicio guardada en el servidor pertenece al mism
 
 El 23 de octubre de 2026 el diagnóstico real confirmó coincidencia de proyecto, credenciales OAuth aceptadas y autorización FCM válida. El [informe del proveedor](validation/timbre-firebase-check.json) conserva sólo esos estados. Las pruebas de esta entrega incluyen 912 casos de revisión en 95 archivos, 27 pruebas Android sin fallos, tipos backend/frontend y lint de los archivos backend cambiados. La recepción con el teléfono bloqueado sigue pendiente de una prueba física después de instalar y habilitar los avisos en el dispositivo.
 
-La web estable y su QR de descarga siguen apuntando a 1.16.0 hasta una actualización web autorizada; instalar el archivo 1.16.1 entregado para probar las notificaciones. No hace falta desplegar un cambio de interfaz para activar el servicio del servidor.
+El propietario autorizó actualizar la descarga web y el 23 de octubre de 2026 se publicó el botón y QR de 1.16.1 en [la web estable](https://viso-deck-android.vercel.app). La misma URL inmutable se utiliza en Conexiones, el diálogo del QR y el acceso rápido del panel. La etiqueta visible indica 1.16.1. Se verificaron el componente renderizado, la descarga HTTP 200 y los 93 archivos del despliegue, tanto antes como después de promoverlo al dominio público. El [informe de publicación](validation/timbre-web-1.16.1-download.json) conserva la evidencia y el despliegue previo para reversión. Esta actualización del enlace no sustituye la prueba de notificaciones en el teléfono.
 
 ## Reconstrucción
 

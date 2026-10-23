@@ -1,0 +1,43 @@
+{
+  "verifiedAt": "2026-10-23T19:47:37.532Z",
+  "origin": "https://viso-deck-android.vercel.app",
+  "matchedFiles": 93,
+  "mismatchedFiles": [],
+  "apkUrlBundles": 1,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/timbre",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/android",
+      "status": 200,
+      "matchesIndex": true
+    }
+  ],
+  "downloadUrl": "https://raw.githubusercontent.com/elkauce/visoapparg/8fb92f60f1311ea1524eb06c24f85b512a64849e/downloads/VISO-Deck-1.16.1-debug.apk",
+  "downloadStatus": 200,
+  "scope": "Static files match the reviewed build; download button and QR share the rendered component constant. No authenticated browser session or physical notification/call asserted.",
+  "sourceCommit": "f360e4e27f68362306ce01d31617fc2d1e7ab6c1",
+  "deploymentId": "dpl_QuEXKupSQMVxyY9mPSyUbHWgvyvy",
+  "previousDeploymentId": "dpl_C6ZzNXfd6Y9FL2WXEFySfFFAQpKV",
+  "stagingVerified": true,
+  "renderChecks": {
+    "downloadHrefCorrect": true,
+    "versionLabel": "1.16.1",
+    "qrSvgPresent": true,
+    "sharedApkUrlForQrAndButtons": true
+  },
+  "codeChecks": {
+    "build": "passed",
+    "typescript": "passed",
+    "changedFileEslint": "passed",
+    "diffCheck": "passed"
+  }
+}
