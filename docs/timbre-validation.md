@@ -1,21 +1,23 @@
 # VISO Timbre — registro de validación de la revisión
 
-Rama: `feat/viso-timbre`. Base: `97195af`. Controles de esta revisión: 22 y 23 de octubre de 2026. No se publicaron funciones ni datos en producción, no se habilitaron cobros y no se realizaron cargos.
+Rama: `feat/viso-timbre`. Base: `97195af`. Controles de esta revisión: 22 y 23 de octubre de 2026. La revisión inicial se completó sin publicar. El 23 de octubre, con autorización del usuario, se actualizaron las funciones del backend compartido `vivid-nightingale-785` hasta `50029f5`; se creó una web de revisión sin promoverla al dominio estable. No se crearon planes ni licencias productivas, no se habilitaron cobros y no se realizaron cargos. La configuración pública de llamadas y las notificaciones Android seguían pendientes; el usuario pidió completar las llamadas antes de promover la web.
 
 ## Resultados
 
-| Control | Resultado | Alcance |
-| --- | --- | --- |
-| Suite completa Vitest | 871 pruebas aprobadas en 92 archivos | Funcionalidad anterior y ampliación Timbre, con proveedores simulados en las pruebas de pagos y push. |
-| TypeScript frontend y backend | Aprobado | Compilación de la aplicación y comprobación del esquema/API Convex. |
-| Vite web y paquete web Android | Aprobado | Rutas, componentes y recursos empaquetados. Una compilación no valida el backend productivo ni publica la aplicación. |
-| Capacitor y Gradle | `testDebugUnitTest` y `assembleDebug` aprobados; 27 pruebas JUnit, cero fallos | Variante Android normal con el SDK Home existente y FCM explícitamente no disponible sin configuración. |
-| ESLint sobre todos los archivos TypeScript/JavaScript modificados y nuevos | Aprobado, sin avisos | Incluye backend, rutas, editor, pagos, push, pruebas y conexiones con presencia existente. |
-| ESLint global del repositorio | 13 errores y 4 avisos previos en 10 archivos | Todos esos archivos son idénticos a la base `97195af`; se conservaron para respetar el alcance. No se presenta el lint global como aprobado. |
-| `git diff --check` | Aprobado | Sin errores de espacios en el cambio. |
-| Exportación QR en Chromium | 15 exportaciones verificadas | PNG/SVG/PDF; vertical y horizontal; código solo y diseño completo; imágenes propias y Unicode. Se decodificaron también los PDF rasterizados finales. |
-| Llamada de audio/video real con TURN | Aprobado en laboratorio local | Dos contextos Chromium aislados, interfaz VISO, backend Convex local y coturn por TCP; audio y video bidireccionales con candidatos relay en ambos extremos. |
-| Navegación y diseño | Revisado en escritorio y móvil | Capturas y resultado en `docs/validation/`; datos sintéticos locales. |
+| Control                                                                    | Resultado                                                                      | Alcance                                                                                                                                                         |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Suite completa Vitest hasta `50029f5`                                      | 873 pruebas aprobadas en 92 archivos                                           | Funcionalidad anterior y ampliación Timbre, incluida la corrección de compatibilidad con APK anteriores y proveedores simulados en las pruebas de pagos y push. |
+| TypeScript frontend y backend                                              | Aprobado                                                                       | Compilación de la aplicación y comprobación del esquema/API Convex.                                                                                             |
+| Vite web y paquete web Android                                             | Aprobado                                                                       | Rutas, componentes y recursos empaquetados. Una compilación no valida el backend productivo ni publica la aplicación.                                           |
+| Capacitor y Gradle                                                         | `testDebugUnitTest` y `assembleDebug` aprobados; 27 pruebas JUnit, cero fallos | Variante Android normal con el SDK Home existente y FCM explícitamente no disponible sin configuración.                                                         |
+| ESLint sobre todos los archivos TypeScript/JavaScript modificados y nuevos | Aprobado, sin avisos                                                           | Incluye backend, rutas, editor, pagos, push, pruebas y conexiones con presencia existente.                                                                      |
+| ESLint global del repositorio                                              | 13 errores y 4 avisos previos en 10 archivos                                   | Todos esos archivos son idénticos a la base `97195af`; se conservaron para respetar el alcance. No se presenta el lint global como aprobado.                    |
+| `git diff --check`                                                         | Aprobado                                                                       | Sin errores de espacios en el cambio.                                                                                                                           |
+| Exportación QR en Chromium                                                 | 15 exportaciones verificadas                                                   | PNG/SVG/PDF; vertical y horizontal; código solo y diseño completo; imágenes propias y Unicode. Se decodificaron también los PDF rasterizados finales.           |
+| Llamada de audio/video real con TURN                                       | Aprobado en laboratorio local                                                  | Dos contextos Chromium aislados, interfaz VISO, backend Convex local y coturn por TCP; audio y video bidireccionales con candidatos relay en ambos extremos.    |
+| Navegación y diseño                                                        | Revisado en escritorio y móvil                                                 | Capturas y resultado en `docs/validation/`; datos sintéticos locales.                                                                                           |
+
+La ampliación posterior para Cloudflare Realtime TURN pasó **884 pruebas en los mismos 92 archivos**, TypeScript de frontend/backend y ESLint de los cuatro archivos de código modificados. La revisión independiente pasó además las 30 pruebas focalizadas de RTC/llamadas. La API del proveedor estuvo simulada: estos resultados no prueban que una clave real esté configurada ni que exista conectividad pública. La [guía Cloudflare](timbre-cloudflare.md) identifica la configuración y la comprobación entre redes pendientes.
 
 Los comandos de verificación usaron los ejecutables instalados en `node_modules` directamente. En este entorno `pnpm exec` intentaba abrir un almacén SQLite fuera del espacio disponible; eso no impidió ejecutar TypeScript, Vitest, ESLint, Vite, Capacitor y Gradle.
 

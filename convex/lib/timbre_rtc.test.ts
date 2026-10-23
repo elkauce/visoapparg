@@ -1,12 +1,262 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createTurnCredentials,
+  createCloudflareTurnCredentials,
   hashCapability,
   randomCapability,
   turnConfiguration,
+  timbreTurnProviderConfiguration,
+  TIMBRE_CLOUDFLARE_TIMEOUT_MS,
   validateSignal,
   withinTimbreSchedule,
 } from "./timbre_rtc";
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.useRealTimers();
+});
+
+const cloudflareConfig = {
+  provider: "cloudflare" as const,
+  keyId: "local-test-turn-key",
+  apiToken: "server-only-api-token-test-123456789",
+};
+function cloudflareResponse() {
+  // Shape documented by Cloudflare generate-ice-servers (201 Created).
+  return {
+    iceServers: [
+      { urls: ["stun:stun.cloudflare.com:3478"] },
+      {
+        urls: [
+          "turn:turn.cloudflare.com:3478?transport=udp",
+          "turn:turn.cloudflare.com:443?transport=udp",
+          "turn:turn.cloudflare.com:3478?transport=tcp",
+          "turn:turn.cloudflare.com:80?transport=tcp",
+          "turns:turn.cloudflare.com:5349?transport=tcp",
+          "turns:turn.cloudflare.com:443?transport=tcp",
+        ],
+        username: "opaque-short-lived-user",
+        credential: "opaque-short-lived-password",
+      },
+    ],
+  };
+}
+
+describe("Cloudflare managed TURN", () => {
+  it("requires explicit complete configuration without falling back to coturn", () => {
+    const coturn = {
+      TIMBRE_TURN_URLS: "turn:relay.example.org:3478",
+      TIMBRE_TURN_SECRET: "a".repeat(32),
+    };
+    expect(timbreTurnProviderConfiguration(coturn)).toMatchObject({
+      provider: "coturn",
+    });
+    expect(
+      timbreTurnProviderConfiguration({
+        ...coturn,
+        TIMBRE_TURN_PROVIDER: "unknown",
+      }),
+    ).toBeNull();
+    expect(
+      timbreTurnProviderConfiguration({
+        ...coturn,
+        TIMBRE_TURN_PROVIDER: "cloudflare",
+      }),
+    ).toBeNull();
+    expect(
+      timbreTurnProviderConfiguration({
+        TIMBRE_TURN_PROVIDER: "cloudflare",
+        TIMBRE_CLOUDFLARE_TURN_KEY_ID: cloudflareConfig.keyId,
+        TIMBRE_CLOUDFLARE_TURN_API_TOKEN: cloudflareConfig.apiToken,
+      }),
+    ).toEqual(cloudflareConfig);
+    expect(
+      timbreTurnProviderConfiguration({
+        TIMBRE_TURN_PROVIDER: "cloudflare",
+        TIMBRE_CLOUDFLARE_TURN_KEY_ID: "../../bad?query",
+        TIMBRE_CLOUDFLARE_TURN_API_TOKEN: cloudflareConfig.apiToken,
+      }),
+    ).toBeNull();
+    expect(
+      timbreTurnProviderConfiguration({
+        TIMBRE_TURN_PROVIDER: "cloudflare",
+        TIMBRE_CLOUDFLARE_TURN_KEY_ID: cloudflareConfig.keyId,
+        TIMBRE_CLOUDFLARE_TURN_API_TOKEN: "token\r\nheader: injected",
+      }),
+    ).toBeNull();
+  });
+  it("uses the documented fixed API and returns only short-lived Cloudflare relays", async () => {
+    const response = cloudflareResponse();
+    response.iceServers[1].urls.push(
+      "turn:turn.cloudflare.com:53?transport=udp",
+    );
+    const request = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(JSON.stringify(response), { status: 201 }),
+      );
+    vi.stubGlobal("fetch", request);
+    const now = 1_000_000;
+    const result = await createCloudflareTurnCredentials(
+      cloudflareConfig,
+      now,
+      now + 20 * 60_000,
+    );
+    expect(request).toHaveBeenCalledWith(
+      "https://rtc.live.cloudflare.com/v1/turn/keys/local-test-turn-key/credentials/generate-ice-servers",
+      expect.objectContaining({
+        method: "POST",
+        redirect: "error",
+        headers: {
+          authorization: `Bearer ${cloudflareConfig.apiToken}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ ttl: 1255 }),
+        signal: expect.any(AbortSignal),
+      }),
+    );
+    expect(result.iceTransportPolicy).toBe("relay");
+    expect(result.iceServers).toHaveLength(1);
+    expect(result.iceServers[0].urls).toHaveLength(6);
+    expect(JSON.stringify(result)).not.toMatch(
+      /stun:|:53\?|server-only-api-token|local-test-turn-key/,
+    );
+    expect(result.expiresAt).toBe(now + 1_255_000);
+    expect(result.expiresAt).toBeGreaterThan(now + 20 * 60_000);
+  });
+  it("bounds TTL by the authorized deadline and clamps oversized deadlines", async () => {
+    const request = vi
+      .fn()
+      .mockImplementation(() =>
+        Promise.resolve(
+          new Response(JSON.stringify(cloudflareResponse()), { status: 201 }),
+        ),
+      );
+    vi.stubGlobal("fetch", request);
+    const now = 1_000_999;
+    const shorter = await createCloudflareTurnCredentials(
+      cloudflareConfig,
+      now,
+      now + 40_000,
+    );
+    expect(JSON.parse(request.mock.calls[0][1].body).ttl).toBe(94);
+    expect(shorter.expiresAt).toBeLessThanOrEqual(now + 40_000 + 60_000);
+    await createCloudflareTurnCredentials(
+      cloudflareConfig,
+      now,
+      now + 365 * 24 * 60 * 60_000,
+    );
+    expect(JSON.parse(request.mock.calls[1][1].body).ttl).toBeLessThanOrEqual(
+      1260,
+    );
+  });
+  it("rejects malicious hosts, ports, missing relays and leaked server secrets", async () => {
+    const invalid = [
+      {
+        urls: ["turn:turn.cloudflare.com.evil.test:3478?transport=udp"],
+        username: "a",
+        credential: "b",
+      },
+      {
+        urls: ["turn:attacker@turn.cloudflare.com:3478?transport=udp"],
+        username: "a",
+        credential: "b",
+      },
+      {
+        urls: ["turn:127.0.0.1:3478?transport=udp"],
+        username: "a",
+        credential: "b",
+      },
+      {
+        urls: ["turn:turn.cloudflare.com:9999?transport=udp"],
+        username: "a",
+        credential: "b",
+      },
+      { urls: ["turn:turn.cloudflare.com:3478?transport=udp"], username: "a" },
+      { urls: ["stun:stun.cloudflare.com:3478"] },
+      {
+        urls: ["turn:turn.cloudflare.com:53?transport=udp"],
+        username: "a",
+        credential: "b",
+      },
+      {
+        urls: ["turn:turn.cloudflare.com:3478?transport=udp"],
+        username: "a",
+        credential: cloudflareConfig.apiToken,
+      },
+      {
+        urls: ["turn:turn.cloudflare.com:3478?transport=udp"],
+        username: "a\u0000",
+        credential: "b",
+      },
+    ];
+    for (const server of invalid) {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue(
+          new Response(JSON.stringify({ iceServers: [server] }), {
+            status: 201,
+          }),
+        ),
+      );
+      await expect(
+        createCloudflareTurnCredentials(cloudflareConfig, 1_000_000, 2_200_000),
+      ).rejects.toThrow(/^TIMBRE_TURN_UNAVAILABLE$/);
+    }
+  });
+  it("does not expose provider error bodies, redirects or oversized responses", async () => {
+    for (const response of [
+      new Response(`private provider error ${cloudflareConfig.apiToken}`, {
+        status: 401,
+      }),
+      new Response("", {
+        status: 302,
+        headers: { location: "https://evil.test" },
+      }),
+      new Response("x".repeat(65_537), { status: 201 }),
+      new Response("not-json", { status: 201 }),
+    ]) {
+      vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response));
+      await expect(
+        createCloudflareTurnCredentials(cloudflareConfig, 1_000_000, 2_200_000),
+      ).rejects.toThrow(/^TIMBRE_TURN_UNAVAILABLE$/);
+    }
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValue(new Error(`network ${cloudflareConfig.apiToken}`)),
+    );
+    await expect(
+      createCloudflareTurnCredentials(cloudflareConfig, 1_000_000, 2_200_000),
+    ).rejects.toThrow(/^TIMBRE_TURN_UNAVAILABLE$/);
+  });
+  it("aborts a slow credential request after the bounded timeout", async () => {
+    vi.useFakeTimers();
+    const request = vi.fn(
+      (_url, init: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init.signal!.addEventListener(
+            "abort",
+            () => reject(new Error("provider request aborted")),
+            { once: true },
+          );
+        }),
+    );
+    vi.stubGlobal("fetch", request);
+    const pending = createCloudflareTurnCredentials(
+      cloudflareConfig,
+      1_000_000,
+      2_200_000,
+    );
+    const rejected = expect(pending).rejects.toThrow(
+      /^TIMBRE_TURN_UNAVAILABLE$/,
+    );
+    await vi.advanceTimersByTimeAsync(TIMBRE_CLOUDFLARE_TIMEOUT_MS);
+    await rejected;
+    expect(request.mock.calls[0][1].signal!.aborted).toBe(true);
+  });
+});
 
 describe("Timbre RTC configuration", () => {
   it("fails closed without complete trusted TURN configuration", () => {

@@ -18,21 +18,24 @@ Preparar una base de revisión separada y un dominio HTTPS estable antes de crea
 
 Configurar los valores privados desde la administración del backend o el gestor de secretos del despliegue. No guardarlos en archivos versionados, parámetros de URL, capturas, formularios del panel ni variables `VITE_`.
 
-| Variable o archivo | Dónde se configura | Uso |
-| --- | --- | --- |
-| `VITE_CONVEX_URL` | Compilación web | URL pública del backend Convex del entorno. |
-| `VITE_CONVEX_SITE_URL` | Compilación web | Origen HTTP Convex del mismo entorno. |
-| `VITE_PUBLIC_APP_URL` | Compilación web y APK | Origen público HTTPS de VISO para enlaces `/t/:qr` y archivos impresos. Debe ser un dominio estable, accesible por visitantes. |
-| `VITE_VISO_WEB_URL` | Compilación APK | URL pública web de la navegación Android existente y alternativa para el origen canónico de Timbre cuando no se definió `VITE_PUBLIC_APP_URL`. |
-| `SITE_URL` | Backend | Origen HTTPS web usado por autenticación y retornos del checkout. |
-| `CONVEX_SITE_URL` | Backend | Origen HTTPS del backend HTTP, usado para webhooks. |
-| `MARKETPLACE_ADMIN_USER_IDS` | Backend | Identificadores inmutables de los administradores VISO autorizados; se reutiliza la administración existente. |
-| `TIMBRE_TURN_URLS` | Backend | Lista JSON o lista separada por comas de URI `turn:`/`turns:` de un servicio TURN compatible con autenticación REST. |
-| `TIMBRE_TURN_SECRET` | Secreto backend | Secreto compartido TURN REST de al menos 32 caracteres. Nunca enviarlo al navegador ni a la APK. |
-| `TIMBRE_FCM_SERVICE_ACCOUNT` | Secreto backend | JSON de cuenta de servicio del proyecto Firebase autorizado para FCM HTTP v1. Contiene `project_id`, `client_email`, `private_key` y `type: service_account`. |
-| `TIMBRE_RECURRING_ENABLED` | Backend | La cadena exacta `true` permite contratar recurrencia únicamente si también están preparados Mercado Pago live y sus controles existentes. Ausente o distinto de `true`: deshabilitada. No activarla para probar la UI. |
-| `android/app/google-services.json` | Configuración local Android | Configuración Firebase de la aplicación `com.viso.deck`, del mismo proyecto que el backend FCM. Mantener fuera de Git. |
-| `VISO_TIMBRE_FCM_ENABLED=1` | Compilación Android | Incluye Firebase Messaging cuando también existe `google-services.json`. Sin ambos, la APK informa que push no está disponible. |
+| Variable o archivo                 | Dónde se configura          | Uso                                                                                                                                                                                                                     |
+| ---------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_CONVEX_URL`                  | Compilación web             | URL pública del backend Convex del entorno.                                                                                                                                                                             |
+| `VITE_CONVEX_SITE_URL`             | Compilación web             | Origen HTTP Convex del mismo entorno.                                                                                                                                                                                   |
+| `VITE_PUBLIC_APP_URL`              | Compilación web y APK       | Origen público HTTPS de VISO para enlaces `/t/:qr` y archivos impresos. Debe ser un dominio estable, accesible por visitantes.                                                                                          |
+| `VITE_VISO_WEB_URL`                | Compilación APK             | URL pública web de la navegación Android existente y alternativa para el origen canónico de Timbre cuando no se definió `VITE_PUBLIC_APP_URL`.                                                                          |
+| `SITE_URL`                         | Backend                     | Origen HTTPS web usado por autenticación y retornos del checkout.                                                                                                                                                       |
+| `CONVEX_SITE_URL`                  | Backend                     | Origen HTTPS del backend HTTP, usado para webhooks.                                                                                                                                                                     |
+| `MARKETPLACE_ADMIN_USER_IDS`       | Backend                     | Identificadores inmutables de los administradores VISO autorizados; se reutiliza la administración existente.                                                                                                           |
+| `TIMBRE_TURN_PROVIDER`             | Backend                     | `cloudflare` para el servicio administrado o `coturn` para TURN REST. Sin valor se conserva el modo coturn existente; un proveedor desconocido no habilita llamadas.                                                    |
+| `TIMBRE_CLOUDFLARE_TURN_KEY_ID`    | Backend                     | Identificador de la clave TURN de Cloudflare, cuando el proveedor es `cloudflare`.                                                                                                                                      |
+| `TIMBRE_CLOUDFLARE_TURN_API_TOKEN` | Secreto backend             | API token de esa clave TURN; se utiliza solamente en el servidor para pedir credenciales temporales. No es un secreto coturn.                                                                                           |
+| `TIMBRE_TURN_URLS`                 | Backend                     | En modo coturn: lista JSON o lista separada por comas de URI `turn:`/`turns:` de un servicio TURN compatible con autenticación REST.                                                                                    |
+| `TIMBRE_TURN_SECRET`               | Secreto backend             | En modo coturn: secreto compartido TURN REST de al menos 32 caracteres. Nunca enviarlo al navegador ni a la APK.                                                                                                        |
+| `TIMBRE_FCM_SERVICE_ACCOUNT`       | Secreto backend             | JSON de cuenta de servicio del proyecto Firebase autorizado para FCM HTTP v1. Contiene `project_id`, `client_email`, `private_key` y `type: service_account`.                                                           |
+| `TIMBRE_RECURRING_ENABLED`         | Backend                     | La cadena exacta `true` permite contratar recurrencia únicamente si también están preparados Mercado Pago live y sus controles existentes. Ausente o distinto de `true`: deshabilitada. No activarla para probar la UI. |
+| `android/app/google-services.json` | Configuración local Android | Configuración Firebase de la aplicación `com.viso.deck`, del mismo proyecto que el backend FCM. Mantener fuera de Git.                                                                                                  |
+| `VISO_TIMBRE_FCM_ENABLED=1`        | Compilación Android         | Incluye Firebase Messaging cuando también existe `google-services.json`. Sin ambos, la APK informa que push no está disponible.                                                                                         |
 
 La autenticación Google existente mantiene sus propias credenciales y certificados; no sustituirlos por la cuenta de servicio FCM ni modificar el vínculo de Google Home para agregar Timbre.
 
@@ -40,9 +43,9 @@ La APK utiliza un origen interno como `https://localhost`. Ese origen no sirve p
 
 ### TURN
 
-Contratar o administrar un servidor TURN con autenticación REST compatible con coturn. Configurar un nombre DNS, certificados válidos para `turns:`, puertos anunciados accesibles y el rango de puertos de relay en el firewall del servidor. Utilizar las URI reales del proveedor; no publicar una contraseña TURN permanente como configuración del cliente.
+Se puede usar [Cloudflare Realtime TURN con esta guía](timbre-cloudflare.md) o administrar un servidor TURN con autenticación REST compatible con coturn. Para coturn, configurar un nombre DNS, certificados válidos para `turns:`, puertos anunciados accesibles y el rango de puertos de relay en el firewall del servidor. Utilizar las URI reales del proveedor; no publicar una contraseña TURN permanente como configuración del cliente. Cloudflare necesita su adaptador de API; su token no funciona como secreto HMAC coturn.
 
-El backend firma credenciales temporales para una llamada autorizada hasta su vencimiento más 60 segundos, con un máximo de 21 minutos desde su emisión. Las llamadas están acotadas a 20 minutos. La configuración usa `iceTransportPolicy: relay`; no depende de que ambas personas compartan Wi-Fi ni expone un secreto compartido. Si falta configuración válida, no se habilitan llamadas reales de audio o video. El chat puede funcionar sin TURN cuando el plan lo permite.
+El backend firma las credenciales coturn o solicita credenciales temporales a Cloudflare para una llamada autorizada hasta su vencimiento más 60 segundos, con un máximo de 21 minutos. Las llamadas están acotadas a 20 minutos. Cloudflare reserva cinco segundos de esa vigencia para la solicitud de red. La configuración usa `iceTransportPolicy: relay`; no depende de que ambas personas compartan Wi-Fi ni expone un secreto compartido. Si falta configuración válida, no se habilitan llamadas reales de audio o video. El chat puede funcionar sin TURN cuando el plan lo permite.
 
 Verificar al menos una ruta UDP y una TCP/TLS cuando el proveedor las ofrezca. Probar audio y video entre Wi-Fi y red móvil, y entre dos redes empresariales distintas. Incluir una llamada de más de cinco minutos para comprobar la vigencia del relay hasta el límite de la sesión y probar pérdida de conectividad. No hay reinicio ICE automático; si la red no se recupera, finalizar y volver a llamar. La validación de configuración o de HMAC en una prueba automatizada no demuestra conectividad del relay.
 
@@ -85,12 +88,12 @@ Una respuesta incierta al crear una autorización no se repite automáticamente:
 
 ## Rutas y contratos principales
 
-| Ruta | Público | Función |
-| --- | --- | --- |
-| `/timbre` | Cuenta VISO para administrar | Timbres, disponibilidad, integrantes, unidades, QR, historial, catálogo y administración autorizada. |
-| `/t/:qr` | Sí | Directorio mínimo de unidades y comunicación del visitante según licencia y disponibilidad. El QR contiene un token aleatorio, no información de la cuenta. |
-| `/timbre/call/:callId` | Depende del participante | Sesión de llamada autorizada por la cuenta destinataria o una capacidad temporal del visitante. El identificador de llamada solo no autoriza. |
-| `/marketplace` | Navegación existente | Acceso comercial integrado a Timbre; no es otro marketplace. |
+| Ruta                   | Público                      | Función                                                                                                                                                     |
+| ---------------------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/timbre`              | Cuenta VISO para administrar | Timbres, disponibilidad, integrantes, unidades, QR, historial, catálogo y administración autorizada.                                                        |
+| `/t/:qr`               | Sí                           | Directorio mínimo de unidades y comunicación del visitante según licencia y disponibilidad. El QR contiene un token aleatorio, no información de la cuenta. |
+| `/timbre/call/:callId` | Depende del participante     | Sesión de llamada autorizada por la cuenta destinataria o una capacidad temporal del visitante. El identificador de llamada solo no autoriza.               |
+| `/marketplace`         | Navegación existente         | Acceso comercial integrado a Timbre; no es otro marketplace.                                                                                                |
 
 El alojamiento web debe servir la aplicación en rutas directas y aplicar el fallback SPA. Mantener HTTPS, WebSocket hacia Convex y las políticas de cámara/micrófono correspondientes al origen. No incrustar la página visitante en un iframe que bloquee `getUserMedia`.
 
@@ -166,17 +169,17 @@ No se efectuó un despliegue de producción ni se cargaron secretos como parte d
 
 ## Matriz de validación física y del proveedor
 
-| Área | Comprobación pendiente fuera de las pruebas unitarias |
-| --- | --- |
-| QR | Escanear PNG, SVG rasterizado y PDF desde teléfonos distintos; imprimir al tamaño real, medir márgenes y probar sobre cada acabado ofrecido. Verificar el dominio público. |
-| Audio/video | Dos cuentas/dispositivos y redes diferentes; conexión por TURN, permiso denegado, audio sin cámara, cambio de red, más de cinco minutos y colgado de ambas partes. |
-| Visitante | Acceso sin cuenta, directorio de unidades, datos privados ausentes, horario/silencio/desactivación, mensajes de ausencia y límites de abuso. |
-| Android | S9, S26 y tablet; permiso de avisos y micrófono/cámara; primer plano, fondo, bloqueo, proceso eliminado y force-stop; cambio de cuenta, token FCM rotado y aviso tardío. |
-| Concurrencia | Dos residentes atendiendo a la vez; usuario eliminado de una unidad; revocación de QR/licencia durante una sesión; telefonía/agenda/Timbre superpuestos y cambio manual de estado. |
+| Área            | Comprobación pendiente fuera de las pruebas unitarias                                                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| QR              | Escanear PNG, SVG rasterizado y PDF desde teléfonos distintos; imprimir al tamaño real, medir márgenes y probar sobre cada acabado ofrecido. Verificar el dominio público.                                     |
+| Audio/video     | Dos cuentas/dispositivos y redes diferentes; conexión por TURN, permiso denegado, audio sin cámara, cambio de red, más de cinco minutos y colgado de ambas partes.                                             |
+| Visitante       | Acceso sin cuenta, directorio de unidades, datos privados ausentes, horario/silencio/desactivación, mensajes de ausencia y límites de abuso.                                                                   |
+| Android         | S9, S26 y tablet; permiso de avisos y micrófono/cámara; primer plano, fondo, bloqueo, proceso eliminado y force-stop; cambio de cuenta, token FCM rotado y aviso tardío.                                       |
+| Concurrencia    | Dos residentes atendiendo a la vez; usuario eliminado de una unidad; revocación de QR/licencia durante una sesión; telefonía/agenda/Timbre superpuestos y cambio manual de estado.                             |
 | Luces y equipos | Google Home realmente autorizado y luces seleccionadas, Display/Deck y dispositivo físico disponible. Confirmar color y restauración; no prometer drivers nuevos o reacción con proceso cerrado no comprobada. |
-| Mercado Pago | Prueba del proveedor en el modo correcto, receptor/importe, pago pendiente/rechazado/aprobado, callback sin webhook, webhook repetido, devolución/contracargo y activación única de hardware elegible. |
-| Placas | Dirección/envío real configurado, copia del diseño, token inmutable durante fabricación, archivo archivado, fabricación, seguimiento y entrega. |
-| Regresión | Inicio Google/password, vínculo Google Home, editor completo del Deck, contenido de páginas, Display, marketplace y estados existentes. |
+| Mercado Pago    | Prueba del proveedor en el modo correcto, receptor/importe, pago pendiente/rechazado/aprobado, callback sin webhook, webhook repetido, devolución/contracargo y activación única de hardware elegible.         |
+| Placas          | Dirección/envío real configurado, copia del diseño, token inmutable durante fabricación, archivo archivado, fabricación, seguimiento y entrega.                                                                |
+| Regresión       | Inicio Google/password, vínculo Google Home, editor completo del Deck, contenido de páginas, Display, marketplace y estados existentes.                                                                        |
 
 Registrar para cada prueba fecha, versión, dispositivo/navegador, entorno, resultado y evidencia sin secretos. Hasta completarlas, describir audio/video entre redes, recepción nativa y fabricación como pendientes de validación externa, aunque las pruebas de autorización y estado pasen.
 

@@ -24,12 +24,13 @@ import {
 } from "./lib/timbre_presence";
 import {
   createTurnCredentials,
+  createCloudflareTurnCredentials,
   hashCapability,
   randomCapability,
   TIMBRE_CALL_MS,
   TIMBRE_LEASE_MS,
   TIMBRE_RING_MS,
-  turnConfiguration,
+  timbreTurnProviderConfiguration,
   validateSignal,
 } from "./lib/timbre_rtc";
 import { timbreCallMode, timbreSignalKind } from "./timbre_calls_tables";
@@ -57,6 +58,11 @@ const rtcAuthRef = makeFunctionReference<
   { callId: Id<"timbreCalls">; visitorToken?: string },
   { callId: string; role: "visitor" | "owner"; expiresAt: number }
 >("timbre_calls:rtcAuthorization");
+const rtcClaimRef = makeFunctionReference<
+  "mutation",
+  { callId: Id<"timbreCalls">; visitorToken?: string },
+  null
+>("timbre_calls:claimManagedRtcConfiguration");
 const MINUTE = 60_000;
 const DAY = 24 * 60 * MINUTE;
 
@@ -301,7 +307,7 @@ export const rtcAvailability = query({
   args: { qrToken: v.string() },
   handler: async (ctx, { qrToken }) => {
     await resolvePublicQr(ctx, qrToken);
-    return { available: turnConfiguration(process.env) !== null };
+    return { available: timbreTurnProviderConfiguration(process.env) !== null };
   },
 });
 
@@ -322,7 +328,7 @@ export const startCall = mutation({
     if (!effectiveFeatures[args.mode])
       unavailable("Esta modalidad no está habilitada.");
     if (site.kind === "building" && !unit) unavailable("Elegí una unidad.");
-    if (args.mode !== "chat" && !turnConfiguration(process.env))
+    if (args.mode !== "chat" && !timbreTurnProviderConfiguration(process.env))
       unavailable(
         "Las llamadas todavía no están habilitadas. Falta configurar el servicio de conexión.",
       );
@@ -719,12 +725,51 @@ export const rtcAuthorization = internalQuery({
   },
 });
 
+export const claimManagedRtcConfiguration = internalMutation({
+  args: sessionArgs,
+  handler: async (ctx, args) => {
+    const { call, role } = await participant(ctx, args, {
+      ownerWinner: !args.visitorToken,
+    });
+    requireLive(call);
+    if (call.status !== "accepted" || call.mode === "chat") unavailable();
+    // One public call capability cannot issue unlimited provider requests.
+    // Reuse the existing transactional limiter instead of client-side counters.
+    await rateLimit(ctx, `rtc:${call._id}:${role}`, 3, MINUTE, 5_000);
+    return null;
+  },
+});
+
 export const getRtcConfiguration = action({
   args: sessionArgs,
   handler: async (ctx, args) => {
     const authorization = await ctx.runQuery(rtcAuthRef, args);
-    const config = turnConfiguration(process.env);
+    const config = timbreTurnProviderConfiguration(process.env);
     if (!config) unavailable("El servicio de conexión no está configurado.");
+    if (config.provider === "cloudflare") {
+      await ctx.runMutation(rtcClaimRef, args);
+      let credentials;
+      try {
+        credentials = await createCloudflareTurnCredentials(
+          config,
+          Date.now(),
+          authorization.expiresAt,
+        );
+      } catch {
+        unavailable(
+          "No pudimos conectar con el servicio de llamadas. Intentá nuevamente.",
+        );
+      }
+      // A call, member, QR or license may be revoked while the provider is slow.
+      // Never return newly minted credentials after that access is withdrawn.
+      const current = await ctx.runQuery(rtcAuthRef, args);
+      if (
+        current.expiresAt !== authorization.expiresAt ||
+        current.role !== authorization.role
+      )
+        unavailable();
+      return credentials;
+    }
     return await createTurnCredentials(
       config,
       `${authorization.callId}:${authorization.role}`,

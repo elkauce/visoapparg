@@ -11,6 +11,7 @@ function capability(call: { callId: Id<"timbreCalls">; visitorToken: string }) {
 
 beforeEach(() => {
   vi.useFakeTimers();
+  vi.stubEnv("TIMBRE_TURN_PROVIDER", "coturn");
   vi.stubEnv("TIMBRE_TURN_URLS", "turns:relay.example.test:5349?transport=tcp");
   vi.stubEnv(
     "TIMBRE_TURN_SECRET",
@@ -19,8 +20,31 @@ beforeEach(() => {
 });
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
   vi.useRealTimers();
 });
+
+const cloudflareApiToken = "server-only-cloudflare-api-token-123456789";
+function useCloudflare() {
+  vi.stubEnv("TIMBRE_TURN_PROVIDER", "cloudflare");
+  vi.stubEnv("TIMBRE_CLOUDFLARE_TURN_KEY_ID", "local-test-turn-key");
+  vi.stubEnv("TIMBRE_CLOUDFLARE_TURN_API_TOKEN", cloudflareApiToken);
+}
+function managedRelayResponse() {
+  return new Response(
+    JSON.stringify({
+      iceServers: [
+        { urls: ["stun:stun.cloudflare.com:3478"] },
+        {
+          urls: ["turns:turn.cloudflare.com:443?transport=tcp"],
+          username: "issued-peer-user",
+          credential: "issued-peer-password",
+        },
+      ],
+    }),
+    { status: 201 },
+  );
+}
 
 async function fixture() {
   const t = convexTest(schema, modules);
@@ -255,6 +279,134 @@ describe("licensed anonymous calls", () => {
     await expect(
       t.query(api.timbre_calls.session, capability(call)),
     ).rejects.toThrow();
+  });
+});
+
+describe("managed TURN action authorization", () => {
+  it("fails closed for explicit incomplete Cloudflare even with valid coturn settings", async () => {
+    const { t, qrToken, start } = await fixture();
+    vi.stubEnv("TIMBRE_TURN_PROVIDER", "cloudflare");
+    vi.stubEnv("TIMBRE_CLOUDFLARE_TURN_KEY_ID", "");
+    vi.stubEnv("TIMBRE_CLOUDFLARE_TURN_API_TOKEN", "");
+    expect(
+      await t.query(api.timbre_calls.rtcAvailability, { qrToken }),
+    ).toEqual({ available: false });
+    await expect(start()).rejects.toThrow(/conexión/);
+    useCloudflare();
+    expect(
+      await t.query(api.timbre_calls.rtcAvailability, { qrToken }),
+    ).toEqual({ available: true });
+    expect((await start()).status).toBe("ringing");
+  });
+  it("authorizes a live accepted participant before issuing any provider request", async () => {
+    const { t, signed, stranger, start } = await fixture();
+    useCloudflare();
+    const request = vi
+      .fn()
+      .mockImplementation(async () => managedRelayResponse());
+    vi.stubGlobal("fetch", request);
+    const call = await start();
+    await expect(
+      t.action(api.timbre_calls.getRtcConfiguration, {
+        callId: call.callId,
+        visitorToken: "c".repeat(64),
+      }),
+    ).rejects.toThrow();
+    await expect(
+      stranger.action(api.timbre_calls.getRtcConfiguration, {
+        callId: call.callId,
+      }),
+    ).rejects.toThrow();
+    await expect(
+      t.action(api.timbre_calls.getRtcConfiguration, capability(call)),
+    ).rejects.toThrow();
+    expect(request).not.toHaveBeenCalled();
+    await signed.mutation(api.timbre_calls.accept, { callId: call.callId });
+    const issued = await t.action(
+      api.timbre_calls.getRtcConfiguration,
+      capability(call),
+    );
+    expect(request).toHaveBeenCalledOnce();
+    expect(issued.iceServers).toEqual([
+      {
+        urls: ["turns:turn.cloudflare.com:443?transport=tcp"],
+        username: "issued-peer-user",
+        credential: "issued-peer-password",
+      },
+    ]);
+    expect(issued.expiresAt).toBeGreaterThan(Date.now() + 20 * 60_000);
+    expect(JSON.stringify(issued)).not.toContain(cloudflareApiToken);
+    expect(JSON.parse(request.mock.calls[0][1].body).ttl).toBeLessThanOrEqual(
+      1260,
+    );
+  });
+  it("rechecks access after a slow provider response and never returns revoked-call credentials", async () => {
+    const { t, signed, qrId, start } = await fixture();
+    useCloudflare();
+    const call = await start();
+    await signed.mutation(api.timbre_calls.accept, { callId: call.callId });
+    const request = vi.fn().mockImplementation(async () => {
+      await t.run((ctx) => ctx.db.patch("timbreQrs", qrId, { enabled: false }));
+      return managedRelayResponse();
+    });
+    vi.stubGlobal("fetch", request);
+    await expect(
+      t.action(api.timbre_calls.getRtcConfiguration, capability(call)),
+    ).rejects.toThrow(/disponible/);
+    expect(request).toHaveBeenCalledOnce();
+  });
+  it("caps provider issuance transactionally per call/role before network access", async () => {
+    const { t, signed, start } = await fixture();
+    useCloudflare();
+    const call = await start();
+    await signed.mutation(api.timbre_calls.accept, { callId: call.callId });
+    const request = vi
+      .fn()
+      .mockImplementation(async () => managedRelayResponse());
+    vi.stubGlobal("fetch", request);
+    await t.action(api.timbre_calls.getRtcConfiguration, capability(call));
+    await expect(
+      t.action(api.timbre_calls.getRtcConfiguration, capability(call)),
+    ).rejects.toThrow(/Esperá/);
+    expect(request).toHaveBeenCalledOnce();
+    for (let count = 0; count < 2; count++) {
+      vi.setSystemTime(Date.now() + 6_000);
+      await t.action(api.timbre_calls.getRtcConfiguration, capability(call));
+    }
+    vi.setSystemTime(Date.now() + 6_000);
+    await expect(
+      t.action(api.timbre_calls.getRtcConfiguration, capability(call)),
+    ).rejects.toThrow(/Esperá/);
+    expect(request).toHaveBeenCalledTimes(3);
+    // The answering resident retains an independent, authorized request budget.
+    await signed.action(api.timbre_calls.getRtcConfiguration, {
+      callId: call.callId,
+    });
+    expect(request).toHaveBeenCalledTimes(4);
+  });
+  it("sanitizes provider errors without exposing the server API token", async () => {
+    const { t, signed, start } = await fixture();
+    useCloudflare();
+    const call = await start();
+    await signed.mutation(api.timbre_calls.accept, { callId: call.callId });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue(
+        new Response(`provider internal detail ${cloudflareApiToken}`, {
+          status: 401,
+        }),
+      ),
+    );
+    const failure = await t
+      .action(api.timbre_calls.getRtcConfiguration, capability(call))
+      .then(
+        () => null,
+        (error: unknown) => error,
+      );
+    expect(failure).toBeTruthy();
+    expect(String(failure)).toContain("No pudimos conectar");
+    expect(String(failure)).not.toContain(cloudflareApiToken);
+    expect(String(failure)).not.toContain("provider internal detail");
   });
 });
 
