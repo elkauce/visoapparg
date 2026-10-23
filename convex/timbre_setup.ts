@@ -1,8 +1,9 @@
-import { query } from "./_generated/server";
+import { internalAction, query } from "./_generated/server";
 import { requireCurrentUser } from "./lib/current_user";
 import { marketplaceError } from "./lib/marketplace_validation";
 import { timbreFcmConfiguration } from "./lib/timbre_push";
 import {
+  createCloudflareTurnCredentials,
   timbreTurnProviderConfiguration,
   turnConfiguration,
 } from "./lib/timbre_rtc";
@@ -76,5 +77,62 @@ export const configuration = query({
       // Readiness cannot attest a real call or a physical Android notification.
       callTested: false as const,
     };
+  },
+});
+
+/** Deployment-operator diagnostic, never a public credential endpoint. It
+ * validates the provider API without creating a call, license or media relay. */
+export const verifyCloudflare = internalAction({
+  args: {},
+  handler: async () => {
+    const config = timbreTurnProviderConfiguration(process.env);
+    const result = {
+      configured: config?.provider === "cloudflare",
+      credentialsAccepted: false,
+      relayUrlCount: 0,
+      revokeConfirmed: false,
+      connectivityTested: false as const,
+    };
+    if (config?.provider !== "cloudflare") return result;
+
+    let issued;
+    try {
+      const now = Date.now();
+      // Diagnostic authorization: 30s plus the helper's bounded grace. Any
+      // credential orphaned by a network error expires in less than 90 seconds.
+      issued = await createCloudflareTurnCredentials(config, now, now + 30_000);
+    } catch {
+      return result;
+    }
+
+    result.credentialsAccepted = true;
+    result.relayUrlCount = issued.iceServers.reduce(
+      (count, server) => count + server.urls.length,
+      0,
+    );
+    result.revokeConfirmed = true;
+    const usernames = new Set(
+      issued.iceServers.map((server) => server.username),
+    );
+    // No credential leaves this action. Attempt cleanup for every distinct
+    // credential even if an earlier revocation failed.
+    for (const username of usernames) {
+      try {
+        const response = await fetch(
+          `https://rtc.live.cloudflare.com/v1/turn/keys/${encodeURIComponent(config.keyId)}/credentials/${encodeURIComponent(username)}/revoke`,
+          {
+            method: "POST",
+            headers: { authorization: `Bearer ${config.apiToken}` },
+            redirect: "error",
+            signal: AbortSignal.timeout(5_000),
+          },
+        );
+        if (response.status !== 204) result.revokeConfirmed = false;
+        await response.body?.cancel();
+      } catch {
+        result.revokeConfirmed = false;
+      }
+    }
+    return result;
   },
 });
