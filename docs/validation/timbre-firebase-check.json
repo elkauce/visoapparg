@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-10-23T19:39:39.889Z",
+  "deployment": "vivid-nightingale-785",
+  "sourceCommit": "296c162",
+  "result": {
+    "configured": true,
+    "credentialsAccepted": true,
+    "notificationSent": false,
+    "sameProject": true,
+    "validationAccepted": true
+  },
+  "method": "Internal operator diagnostic: matching Android Firebase project, server OAuth, HTTP v1 validate_only request with a fixed topic and no device tokens.",
+  "scope": "No notifications sent, no calls created, no devices registered. This does not verify delivery to a physical phone or audio/video."
+}

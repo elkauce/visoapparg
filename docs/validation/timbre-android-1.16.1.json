@@ -1,0 +1,70 @@
+{
+  "verifiedAt": "2026-10-23T19:34:12.272924+00:00",
+  "apk": {
+    "versionName": "1.16.1",
+    "versionCode": 28,
+    "package": "com.viso.deck",
+    "sizeBytes": 22865489,
+    "sha256": "ef6f46eb6f5cd13b38a32af3aa5ca60fd381fbfa1be2691893fc31826219fa0e"
+  },
+  "signing": {
+    "verified": true,
+    "compatibleWithVersion": "1.16.0",
+    "sameCertificate": true,
+    "certificateSha256": "9664805aed9f244425531734609e107ebfac5d0e038cb9260ccbef3879fb12da",
+    "type": "debug"
+  },
+  "packageChecks": {
+    "package": "com.viso.deck",
+    "versionCode": "28",
+    "versionName": "1.16.1",
+    "fcmServiceEnabled": true,
+    "fcmServicePrivate": true,
+    "firebaseInitProvider": true,
+    "notificationPermission": true,
+    "fcmAutoInitOptOut": true,
+    "realMessagingServiceClass": true,
+    "firebaseMessagingClass": true,
+    "googleHomeSdkClasses": true,
+    "buildConfigFcmEnabled": true,
+    "google_app_idMatchesProvidedConfig": true,
+    "project_idMatchesProvidedConfig": true,
+    "gcm_defaultSenderIdMatchesProvidedConfig": true,
+    "google_api_keyMatchesProvidedConfig": true,
+    "providedConfigIgnoredByGit": true,
+    "providedConfigUntracked": true
+  },
+  "tests": {
+    "focusedPushBackendAndUiTestsPassed": 15,
+    "focusedTestFilesPassed": 2,
+    "androidUnitTests": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "reviewSuite": {
+      "tests": 912,
+      "files": 95,
+      "passed": true
+    },
+    "backendTypes": "passed",
+    "frontendTypes": "passed",
+    "changedBackendFilesLint": "passed"
+  },
+  "backendFcmConfigurationVerified": true,
+  "serverCredentialAuthTested": true,
+  "physicalDeviceDeliveryTested": false,
+  "physicalAudioVideoCallTested": false,
+  "scope": "Packaged APK, matching Firebase client/server projects, server OAuth and FCM HTTP v1 validate_only authorization verified. No notification or call originated. No physical install, device registration, notification delivery or audio/video between real devices asserted. No project IDs, API keys, service account credentials or device tokens included.",
+  "artifact": "downloads/VISO-Deck-1.16.1-debug.apk",
+  "sourceCommit": "8fb92f60f1311ea1524eb06c24f85b512a64849e",
+  "assembleDebug": "passed",
+  "backendProjectMatchesAndroidConfig": true,
+  "immutableDownloadUrl": "https://raw.githubusercontent.com/elkauce/visoapparg/8fb92f60f1311ea1524eb06c24f85b512a64849e/downloads/VISO-Deck-1.16.1-debug.apk",
+  "publicDownloadVerified": true,
+  "publicDownloadStatus": 200,
+  "serverFcmValidationAccepted": true,
+  "serverCredentialValidationReport": "timbre-firebase-check.json",
+  "notificationSentDuringValidation": false
+}
