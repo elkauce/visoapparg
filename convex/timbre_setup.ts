@@ -1,7 +1,11 @@
+import { v } from "convex/values";
 import { internalAction, query } from "./_generated/server";
 import { requireCurrentUser } from "./lib/current_user";
 import { marketplaceError } from "./lib/marketplace_validation";
-import { timbreFcmConfiguration } from "./lib/timbre_push";
+import {
+  timbreFcmAccessToken,
+  timbreFcmConfiguration,
+} from "./lib/timbre_push";
 import {
   createCloudflareTurnCredentials,
   timbreTurnProviderConfiguration,
@@ -132,6 +136,64 @@ export const verifyCloudflare = internalAction({
       } catch {
         result.revokeConfirmed = false;
       }
+    }
+    return result;
+  },
+});
+
+/** Operator-only verification of the server credentials against the Android
+ * project's identity. FCM dry-run validation never delivers a notification. */
+export const verifyFirebase = internalAction({
+  args: { expectedProjectId: v.string() },
+  handler: async (_ctx, { expectedProjectId }) => {
+    const credentials = timbreFcmConfiguration(process.env);
+    const sameProject =
+      expectedProjectId.trim() === expectedProjectId &&
+      /^[a-z][a-z0-9-]{4,61}[a-z0-9]$/.test(expectedProjectId) &&
+      credentials?.projectId === expectedProjectId;
+    const result = {
+      configured: credentials !== null,
+      sameProject,
+      credentialsAccepted: false,
+      validationAccepted: false,
+      notificationSent: false as const,
+    };
+    // Never contact a project that differs from the supplied Android config.
+    if (!credentials || !sameProject) return result;
+
+    let accessToken: string;
+    try {
+      accessToken = await timbreFcmAccessToken(credentials);
+      result.credentialsAccepted = true;
+    } catch {
+      return result;
+    }
+
+    try {
+      const response = await fetch(
+        `https://fcm.googleapis.com/v1/projects/${credentials.projectId}/messages:send`,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${accessToken}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            validate_only: true,
+            message: {
+              topic: "viso-setup-validation",
+              data: { type: "viso_setup_validation" },
+            },
+          }),
+          redirect: "error",
+          signal: AbortSignal.timeout(5_000),
+        },
+      );
+      result.validationAccepted = response.status === 200;
+      // Do not read or reflect Google's response, including its error details.
+      await response.body?.cancel();
+    } catch {
+      // The result intentionally contains no provider body, exception or token.
     }
     return result;
   },

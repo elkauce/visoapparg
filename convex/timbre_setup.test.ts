@@ -197,6 +197,262 @@ describe("internal Cloudflare credential verification", () => {
     ).toEqual({ calls: 0, plans: 0, licenses: 0, orders: 0 });
   });
 });
+
+let firebaseVerificationIndex = 0;
+async function firebaseVerificationConfiguration() {
+  // Fresh synthetic identities keep the production OAuth cache from influencing
+  // individual network assertions. No real Firebase project or key is used.
+  const projectId = `viso-setup-test-${++firebaseVerificationIndex}`;
+  const keys = await crypto.subtle.generateKey(
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      modulusLength: 2048,
+      publicExponent: new Uint8Array([1, 0, 1]),
+      hash: "SHA-256",
+    },
+    true,
+    ["sign", "verify"],
+  );
+  const bytes = new Uint8Array(
+    await crypto.subtle.exportKey("pkcs8", keys.privateKey),
+  );
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  const credentials = {
+    type: "service_account",
+    project_id: projectId,
+    client_email: `setup@${projectId}.iam.gserviceaccount.com`,
+    private_key: `-----BEGIN PRIVATE KEY-----\n${btoa(binary)}\n-----END PRIVATE KEY-----\n`,
+  };
+  vi.stubEnv("TIMBRE_FCM_SERVICE_ACCOUNT", JSON.stringify(credentials));
+  return credentials;
+}
+
+function firebaseOAuthResponse() {
+  return new Response(
+    JSON.stringify({
+      access_token: "private-local-verification-access-token",
+      token_type: "Bearer",
+      expires_in: 300,
+    }),
+    { status: 200 },
+  );
+}
+
+describe("internal Firebase credential verification", () => {
+  it("does not contact Google for missing or malformed server configuration", async () => {
+    const { t } = await fixture();
+    const request = vi.fn();
+    vi.stubGlobal("fetch", request);
+    const missing = await t.action(internal.timbre_setup.verifyFirebase, {
+      expectedProjectId: "viso-setup-test",
+    });
+    expect(missing).toEqual({
+      configured: false,
+      sameProject: false,
+      credentialsAccepted: false,
+      validationAccepted: false,
+      notificationSent: false,
+    });
+    for (const invalid of [
+      "not-json",
+      JSON.stringify({ type: "service_account", private_key: "private-test" }),
+    ]) {
+      vi.stubEnv("TIMBRE_FCM_SERVICE_ACCOUNT", invalid);
+      expect(
+        await t.action(internal.timbre_setup.verifyFirebase, {
+          expectedProjectId: "viso-setup-test",
+        }),
+      ).toEqual(missing);
+    }
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("requires a valid exact Android project match before OAuth or FCM requests", async () => {
+    const { t } = await fixture();
+    const credentials = await firebaseVerificationConfiguration();
+    const request = vi.fn();
+    vi.stubGlobal("fetch", request);
+    for (const expectedProjectId of [
+      "",
+      "../another-project",
+      "https://outside.example/",
+      "another-valid-project",
+      credentials.project_id + "\n",
+    ]) {
+      const result = await t.action(internal.timbre_setup.verifyFirebase, {
+        expectedProjectId,
+      });
+      expect(result).toEqual({
+        configured: true,
+        sameProject: false,
+        credentialsAccepted: false,
+        validationAccepted: false,
+        notificationSent: false,
+      });
+    }
+    expect(request).not.toHaveBeenCalled();
+  });
+
+  it("authenticates and validates only a fixed topic dry run without delivering notifications or mutating service data", async () => {
+    const { t } = await fixture();
+    const credentials = await firebaseVerificationConfiguration();
+    const request = vi
+      .fn()
+      .mockImplementationOnce(async () => firebaseOAuthResponse())
+      .mockImplementationOnce(
+        async () =>
+          new Response("private-google-validation-response", { status: 200 }),
+      );
+    vi.stubGlobal("fetch", request);
+    const result = await t.action(internal.timbre_setup.verifyFirebase, {
+      expectedProjectId: credentials.project_id,
+    });
+    expect(result).toEqual({
+      configured: true,
+      sameProject: true,
+      credentialsAccepted: true,
+      validationAccepted: true,
+      notificationSent: false,
+    });
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(request.mock.calls[0][0]).toBe(
+      "https://oauth2.googleapis.com/token",
+    );
+    expect(request.mock.calls[0][1]).toMatchObject({
+      method: "POST",
+      redirect: "error",
+      signal: expect.any(AbortSignal),
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+    });
+    const oauthBody = new URLSearchParams(request.mock.calls[0][1].body);
+    expect(oauthBody.get("grant_type")).toBe(
+      "urn:ietf:params:oauth:grant-type:jwt-bearer",
+    );
+    expect(oauthBody.get("assertion")?.split(".")).toHaveLength(3);
+    expect(request.mock.calls[1][0]).toBe(
+      `https://fcm.googleapis.com/v1/projects/${credentials.project_id}/messages:send`,
+    );
+    expect(request.mock.calls[1][1]).toMatchObject({
+      method: "POST",
+      redirect: "error",
+      signal: expect.any(AbortSignal),
+      headers: {
+        authorization: "Bearer private-local-verification-access-token",
+        "content-type": "application/json",
+      },
+    });
+    expect(JSON.parse(request.mock.calls[1][1].body)).toEqual({
+      validate_only: true,
+      message: {
+        topic: "viso-setup-validation",
+        data: { type: "viso_setup_validation" },
+      },
+    });
+    for (const value of [
+      credentials.project_id,
+      credentials.client_email,
+      credentials.private_key,
+      "private-local-verification-access-token",
+      "private-google-validation-response",
+    ])
+      expect(JSON.stringify(result)).not.toContain(value);
+    expect(
+      await t.run(async (ctx) => ({
+        calls: (await ctx.db.query("timbreCalls").collect()).length,
+        licenses: (await ctx.db.query("timbreLicenses").collect()).length,
+        plans: (await ctx.db.query("timbrePlans").collect()).length,
+        orders: (await ctx.db.query("marketplaceOrders").collect()).length,
+        devices: (await ctx.db.query("timbrePushDevices").collect()).length,
+        deliveries: (await ctx.db.query("timbrePushDeliveries").collect()).length,
+      })),
+    ).toEqual({
+      calls: 0,
+      licenses: 0,
+      plans: 0,
+      orders: 0,
+      devices: 0,
+      deliveries: 0,
+    });
+  });
+
+  it("sanitizes rejected OAuth credentials and does not attempt FCM validation", async () => {
+    const { t } = await fixture();
+    const credentials = await firebaseVerificationConfiguration();
+    const request = vi.fn(async () =>
+      new Response(`private Google OAuth detail ${credentials.client_email}`, {
+        status: 401,
+      }),
+    );
+    vi.stubGlobal("fetch", request);
+    const result = await t.action(internal.timbre_setup.verifyFirebase, {
+      expectedProjectId: credentials.project_id,
+    });
+    expect(result).toEqual({
+      configured: true,
+      sameProject: true,
+      credentialsAccepted: false,
+      validationAccepted: false,
+      notificationSent: false,
+    });
+    expect(request).toHaveBeenCalledOnce();
+    expect(JSON.stringify(result)).not.toMatch(/private|setup@|viso-setup/);
+  });
+
+  it("distinguishes accepted OAuth from refused FCM permissions without reflecting provider details", async () => {
+    const { t } = await fixture();
+    const credentials = await firebaseVerificationConfiguration();
+    const request = vi
+      .fn()
+      .mockImplementationOnce(async () => firebaseOAuthResponse())
+      .mockImplementationOnce(
+        async () =>
+          new Response(`private FCM detail ${credentials.project_id}`, {
+            status: 403,
+          }),
+      );
+    vi.stubGlobal("fetch", request);
+    const result = await t.action(internal.timbre_setup.verifyFirebase, {
+      expectedProjectId: credentials.project_id,
+    });
+    expect(result).toEqual({
+      configured: true,
+      sameProject: true,
+      credentialsAccepted: true,
+      validationAccepted: false,
+      notificationSent: false,
+    });
+    expect(request).toHaveBeenCalledTimes(2);
+    expect(JSON.stringify(result)).not.toMatch(/private|setup@|viso-setup/);
+  });
+
+  it("contains OAuth and FCM network errors without exposing their messages", async () => {
+    for (const stage of ["oauth", "fcm"] as const) {
+      const { t } = await fixture();
+      const credentials = await firebaseVerificationConfiguration();
+      const request = vi.fn();
+      if (stage === "fcm")
+        request.mockImplementationOnce(async () => firebaseOAuthResponse());
+      request.mockRejectedValueOnce(
+        new Error(`private error ${credentials.client_email}`),
+      );
+      vi.stubGlobal("fetch", request);
+      const result = await t.action(internal.timbre_setup.verifyFirebase, {
+        expectedProjectId: credentials.project_id,
+      });
+      expect(result).toEqual({
+        configured: true,
+        sameProject: true,
+        credentialsAccepted: stage === "fcm",
+        validationAccepted: false,
+        notificationSent: false,
+      });
+      expect(request).toHaveBeenCalledTimes(stage === "oauth" ? 1 : 2);
+      expect(JSON.stringify(result)).not.toMatch(/private|setup@|viso-setup/);
+    }
+  });
+});
+
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
