@@ -1,0 +1,50 @@
+{
+  "verifiedAt": "2026-10-23T19:01:58.275Z",
+  "deployment": "vivid-nightingale-785",
+  "sourceCommit": "173224b",
+  "authorization": "Explicit approval for one existing allowlisted administrator account only.",
+  "source": "internal_trial",
+  "expiresAt": "2026-10-30T19:01:26.544Z",
+  "features": {
+    "audio": true,
+    "video": true
+  },
+  "limits": {
+    "maxSites": 1,
+    "maxQrs": 1,
+    "maxMembers": 1,
+    "maxUnits": 1
+  },
+  "publicQr": {
+    "available": true,
+    "audioEnabled": true,
+    "videoEnabled": true
+  },
+  "rtcConfigurationAvailable": true,
+  "publicVisitorRouteStatus": 200,
+  "paymentsActivated": false,
+  "fcmConfigured": false,
+  "physicalCallTested": false,
+  "checks": {
+    "vitestTests": 906,
+    "vitestFiles": 95,
+    "focusedTrialTests": 6,
+    "backendTypes": "pass",
+    "frontendTypes": "pass",
+    "changedFileLint": "pass"
+  },
+  "scope": "Trial granted to approved account. Public QR and RTC readiness verified; no call originated or notifications sent. QR token, owner identity and record IDs excluded.",
+  "liveRecordChecks": {
+    "active": true,
+    "durationDays": 7,
+    "fcmConfigured": false,
+    "noSourceOrder": true,
+    "ownerMembershipReady": true,
+    "ownerRecipientReady": true,
+    "planDisabled": true,
+    "qrCount": 1,
+    "siteCount": 1,
+    "trialCount": 1,
+    "unpriced": true
+  }
+}

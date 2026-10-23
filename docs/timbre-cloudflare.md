@@ -60,6 +60,8 @@ El comando crea una licencia con origen `internal_trial`, un plan deshabilitado 
 
 Para probar, el propietario debe ingresar a [Timbre](https://viso-deck-android.vercel.app/timbre) y mantener VISO abierto. En otro dispositivo y, preferentemente, otra red, abrir el enlace del QR y tocar **Llamar** o **Videollamar**, permitiendo micrófono/cámara. En la sesión propietaria, abrir **Ver llamada** y tocar **Atender**. Comprobar audio en ambos sentidos, video y finalización. La disponibilidad del QR y las credenciales aceptadas por Cloudflare no reemplazan esa prueba entre dispositivos reales.
 
+El 23 de octubre de 2026 se otorgó la prueba individual aprobada, con vencimiento el 30 de octubre a las 16:01 de Argentina. Se verificaron la licencia, membresía y destinatario, un inmueble y un QR, disponibilidad pública de audio/video y transporte configurado. El [registro de validación](validation/timbre-internal-trial.json) omite la identidad y el enlace del propietario. No se originaron llamadas ni se activaron cobros. La recepción con VISO cerrado continúa pendiente de Firebase y una compilación Android compatible.
+
 ## Recepción con Android en segundo plano
 
 Cloudflare transporta audio/video; no despierta la app. Para recibir avisos con VISO en segundo plano faltan Firebase Cloud Messaging, su cuenta de servicio privada en Convex y una APK nueva compilada para ese proyecto. El envío de avisos FCM es gratuito; seguir [la preparación de Firebase](timbre-firebase.md) y [las capacidades nativas](timbre-native-capabilities.md). La web abierta puede recibir el aviso implementado sin FCM. No se garantiza recepción después de forzar la detención de la app ni continuidad de una llamada con el WebView suspendido.
