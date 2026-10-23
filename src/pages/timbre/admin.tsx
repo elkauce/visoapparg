@@ -8,6 +8,7 @@ import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { downloadTimbreExport, exportTimbreQr } from "@/lib/timbre-qr";
 import { timbrePublicQrUrl } from "@/lib/timbre-public-url";
+import TimbreServiceSetup from "./service-setup";
 import "./admin.css";
 
 type Overview = FunctionReturnType<typeof api.timbre_commerce.adminOverview>;
@@ -55,10 +56,10 @@ export default function TimbreAdmin() {
   const [tab, setTab] = useState("plans");
   if (!data) return <p role="status">Cargando administración…</p>;
   const sections = [{ id: "plans", label: "Planes" }, { id: "plates", label: "Placas" }, { id: "shipping", label: "Envíos" },
-    { id: "discounts", label: "Cupones" }, { id: "hardware", label: "Hardware" }, { id: "orders", label: "Pedidos" }, { id: "licenses", label: "Licencias" }];
+    { id: "discounts", label: "Cupones" }, { id: "hardware", label: "Hardware" }, { id: "orders", label: "Pedidos" }, { id: "licenses", label: "Licencias" }, { id: "connection", label: "Conexión de llamadas" }];
   return <div className="vt-stack vta-admin"><div className="vt-notice"><strong>Administración comercial de Timbre</strong><p>Los precios, materiales y condiciones se publican con lo que guardes acá. Una cuenta VISO o un recurso gratuito del marketplace nunca activa el servicio.</p></div>
     <nav className="vt-segmented" aria-label="Administración comercial">{sections.map((section) => <button key={section.id} aria-pressed={tab === section.id} onClick={() => setTab(section.id)}>{section.label}</button>)}</nav>
-    {tab === "plans" ? <Plans data={data} /> : tab === "plates" ? <Variants data={data} /> : tab === "shipping" ? <Shipping data={data} /> : tab === "discounts" ? <Discounts data={data} /> : tab === "hardware" ? <Hardware data={data} /> : tab === "orders" ? <Orders data={data} /> : <Licenses data={data} />}
+    {tab === "plans" ? <Plans data={data} /> : tab === "plates" ? <Variants data={data} /> : tab === "shipping" ? <Shipping data={data} /> : tab === "discounts" ? <Discounts data={data} /> : tab === "hardware" ? <Hardware data={data} /> : tab === "orders" ? <Orders data={data} /> : tab === "connection" ? <TimbreServiceSetup /> : <Licenses data={data} />}
   </div>;
 }
 

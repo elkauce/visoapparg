@@ -1,0 +1,75 @@
+.vt-service-setup .vt-toolbar h2 {
+  margin-bottom: 0;
+}
+.vt-setup-checks {
+  list-style: none;
+  padding: 0;
+  margin: 18px 0;
+}
+.vt-setup-checks li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee9e1;
+}
+.vt-setup-checks svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #62656b;
+}
+.vt-setup-checks code {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.vt-setup-checks span {
+  font-size: 12px;
+  color: #62656b;
+}
+.vt-setup-steps {
+  list-style: decimal;
+  padding-left: 22px;
+  margin: 16px 0 20px;
+}
+.vt-setup-steps li {
+  margin: 12px 0;
+  line-height: 1.65;
+}
+.vt-service-setup a:not([data-slot]) {
+  color: #bd3908;
+  text-decoration: underline;
+}
+.vt-service-setup .vt-notice {
+  line-height: 1.65;
+}
+.vt-setup-template {
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid #e5dfd6;
+  border-radius: 12px;
+  background: #f5f3ef;
+  font-size: 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .vt-service-setup .vta-actions > * {
+    flex-basis: 100%;
+    white-space: normal;
+    height: auto;
+    min-height: 40px;
+    text-align: center;
+  }
+  .vt-setup-checks li {
+    flex-wrap: wrap;
+  }
+  .vt-setup-checks code {
+    flex-basis: calc(100% - 30px);
+  }
+  .vt-setup-checks span {
+    margin-left: 28px;
+  }
+}

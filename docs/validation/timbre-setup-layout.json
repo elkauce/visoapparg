@@ -1,0 +1,26 @@
+{
+  "scope": "Local synthetic configuration fixture; no credentials, user sessions or provider requests.",
+  "results": [
+    {
+      "label": "desktop",
+      "width": 1440,
+      "height": 1000,
+      "overflow": false,
+      "pageErrors": []
+    },
+    {
+      "label": "mobile",
+      "width": 390,
+      "height": 844,
+      "overflow": false,
+      "pageErrors": []
+    },
+    {
+      "label": "small",
+      "width": 320,
+      "height": 800,
+      "overflow": false,
+      "pageErrors": []
+    }
+  ]
+}

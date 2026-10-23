@@ -13,7 +13,9 @@ Según la [tarifa oficial consultada el 23 de octubre de 2026](https://developer
 
 ## 2. Guardar las credenciales en el backend correcto
 
-En [Convex Dashboard](https://dashboard.convex.dev), seleccionar el proyecto `c4-maguilar/visoapparg`, despliegue **`vivid-nightingale-785`**, y abrir **Settings → Environment Variables**. Es el backend compartido actualmente por la web y la APK; no usar el antiguo `useful-egret-915`.
+En **Timbre → Administración → Conexión de llamadas**, el administrador VISO tiene el listado de variables pendientes y un botón que abre la configuración privada de Convex del backend compilado. El panel informa la configuración guardada; no revela las claves ni afirma que una llamada real haya sido probada.
+
+También se puede abrir directamente [las variables del backend compartido](https://dashboard.convex.dev/d/vivid-nightingale-785/settings/environment-variables). Seleccionar el proyecto `c4-maguilar/visoapparg`, despliegue **`vivid-nightingale-785`**, y abrir **Settings → Environment Variables**. Es el backend compartido actualmente por la web y la APK; no usar el antiguo `useful-egret-915`.
 
 Agregar estas variables, sin prefijo `VITE_`:
 
@@ -24,6 +26,10 @@ Agregar estas variables, sin prefijo `VITE_`:
 | `TIMBRE_CLOUDFLARE_TURN_API_TOKEN` | El API token de esa clave TURN. Es privado. |
 
 Este modo requiere la versión del backend que incluye el adaptador Cloudflare. No copiar el API token a `TIMBRE_TURN_SECRET`: esa variable pertenece al modo coturn y usa otro protocolo de autenticación. No poner valores privados en Vercel, archivos públicos, URLs, QR ni configuración de la APK.
+
+Los lugares vacíos están documentados también en `.env.example`. Ese archivo es una plantilla y no carga variables en el servidor. Después de guardar las tres variables reales en Convex, volver a la sección de configuración y comprobar su estado. No hace falta modificar código ni recompilar la web por cambiar estas credenciales del backend. La publicación del frontend, las licencias comerciales y la compilación Android compatible se gestionan por separado.
+
+El 23 de octubre de 2026 se crearon en `vivid-nightingale-785` los campos de Cloudflare y `TIMBRE_FCM_SERVICE_ACCOUNT`: proveedor `cloudflare`, Key ID vacío, API token vacío y cuenta de servicio vacía. No se reemplazaron variables previas. Este paso deja los lugares preparados y no habilita audio/video, notificaciones ni cobros. El propietario debe editar esos campos desde Convex con sus datos reales.
 
 El servidor pide credenciales temporales para cada participante autorizado a la API oficial `https://rtc.live.cloudflare.com/v1/turn/keys/{TURN_KEY_ID}/credentials/generate-ice-servers`. La app recibe esas credenciales temporales, nunca el API token. La vigencia queda limitada por el vencimiento de la llamada y un margen de un minuto. La conexión utiliza relay y descarta el puerto 53, que puede bloquear el navegador.
 
@@ -40,7 +46,7 @@ Si el entorno de desarrollo usa una política de red restringida, las pruebas de
 
 ## Recepción con Android en segundo plano
 
-Cloudflare transporta audio/video; no despierta la app. Para recibir avisos con VISO en segundo plano faltan Firebase Cloud Messaging, su cuenta de servicio privada en Convex y una APK nueva compilada para ese proyecto. Seguir [las capacidades nativas](timbre-native-capabilities.md). La web abierta puede recibir el aviso implementado sin FCM. No se garantiza recepción después de forzar la detención de la app ni continuidad de una llamada con el WebView suspendido.
+Cloudflare transporta audio/video; no despierta la app. Para recibir avisos con VISO en segundo plano faltan Firebase Cloud Messaging, su cuenta de servicio privada en Convex y una APK nueva compilada para ese proyecto. El envío de avisos FCM es gratuito; seguir [la preparación de Firebase](timbre-firebase.md) y [las capacidades nativas](timbre-native-capabilities.md). La web abierta puede recibir el aviso implementado sin FCM. No se garantiza recepción después de forzar la detención de la app ni continuidad de una llamada con el WebView suspendido.
 
 ## Rotación y reversión
 

@@ -73,6 +73,7 @@ import type * as timbre_push_tables from "../timbre_push_tables.js";
 import type * as timbre_recurring from "../timbre_recurring.js";
 import type * as timbre_recurring_http from "../timbre_recurring_http.js";
 import type * as timbre_recurring_tables from "../timbre_recurring_tables.js";
+import type * as timbre_setup from "../timbre_setup.js";
 import type * as timbre_tables from "../timbre_tables.js";
 import type * as users from "../users.js";
 import type * as weather from "../weather.js";
@@ -149,6 +150,7 @@ declare const fullApi: ApiFromModules<{
   timbre_recurring: typeof timbre_recurring;
   timbre_recurring_http: typeof timbre_recurring_http;
   timbre_recurring_tables: typeof timbre_recurring_tables;
+  timbre_setup: typeof timbre_setup;
   timbre_tables: typeof timbre_tables;
   users: typeof users;
   weather: typeof weather;

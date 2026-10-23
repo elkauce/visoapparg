@@ -19,6 +19,8 @@ Rama: `feat/viso-timbre`. Base: `97195af`. Controles de esta revisión: 22 y 23 
 
 La ampliación posterior para Cloudflare Realtime TURN pasó **884 pruebas en los mismos 92 archivos**, TypeScript de frontend/backend y ESLint de los cuatro archivos de código modificados. La revisión independiente pasó además las 30 pruebas focalizadas de RTC/llamadas. La API del proveedor estuvo simulada: estos resultados no prueban que una clave real esté configurada ni que exista conectividad pública. La [guía Cloudflare](timbre-cloudflare.md) identifica la configuración y la comprobación entre redes pendientes.
 
+La preparación del panel de configuración pasó después **895 pruebas en 94 archivos**, TypeScript, ESLint focalizado y build web. Incluye autorización administrativa por identificador, estado sin valores secretos, plantilla con credenciales vacías y enlace privado al despliegue correcto. La vista local con configuración sintética se comprobó en anchos de 1440, 390 y 320 píxeles, sin desbordamiento horizontal ni errores de página; la evidencia está en `docs/validation/timbre-setup-layout.json`. Esto no verifica llamadas, credenciales de proveedor, licencias comerciales ni entrega Android.
+
 Los comandos de verificación usaron los ejecutables instalados en `node_modules` directamente. En este entorno `pnpm exec` intentaba abrir un almacén SQLite fuera del espacio disponible; eso no impidió ejecutar TypeScript, Vitest, ESLint, Vite, Capacitor y Gradle.
 
 ## Qué cubren las pruebas nuevas
