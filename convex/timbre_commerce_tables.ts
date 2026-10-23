@@ -12,7 +12,7 @@ export const timbreLimits = v.object({ maxSites: v.number(), maxQrs: v.number(),
 export const timbreLicenseStatus = v.union(v.literal("pending_payment"), v.literal("active"), v.literal("past_due"),
   v.literal("suspended"), v.literal("expired"), v.literal("revoked"));
 export const timbreLicenseSource = v.union(v.literal("subscription"), v.literal("one_time_purchase"),
-  v.literal("hardware_bundle"), v.literal("building_contract"), v.literal("admin_grant"));
+  v.literal("hardware_bundle"), v.literal("building_contract"), v.literal("admin_grant"), v.literal("internal_trial"));
 export const timbreAddress = v.object({
   name: v.string(), street: v.string(), city: v.string(), region: v.string(), postalCode: v.string(),
   country: v.string(), phone: v.string(), notes: v.optional(v.string()),

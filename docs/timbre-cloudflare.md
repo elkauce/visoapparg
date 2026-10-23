@@ -44,6 +44,22 @@ Si el entorno de desarrollo usa una política de red restringida, las pruebas de
 5. Comprobar estados y luces con los equipos reales, además de la restauración al finalizar y el respeto de los cambios manuales.
 6. Revisar los datos de uso del servicio y el manejo de errores antes de aprobar el pase público. Tener las variables guardadas no demuestra conectividad ni equivale a una prueba de llamada.
 
+### Comprobación privada del proveedor
+
+El operador con acceso administrativo al despliegue puede ejecutar `convex run timbre_setup:verifyCloudflare '{}' --deployment vivid-nightingale-785 --codegen disable --typecheck disable`. Es una acción interna: no se publica como un endpoint para visitantes, no impersona una cuenta VISO y no requiere recuperar las claves del servidor.
+
+El diagnóstico solicita credenciales con vigencia menor a 90 segundos y revoca inmediatamente cada usuario temporal distinto. Devuelve únicamente estado y cantidad de direcciones relay: nunca el Key ID, el API token, usuarios o contraseñas temporales, ni el cuerpo de errores del proveedor. No crea llamadas, licencias ni tráfico multimedia. Si la revocación no se confirma, lo informa y las credenciales caducan pronto.
+
+El 23 de octubre de 2026 Cloudflare aceptó los datos reales guardados por el propietario, emitió credenciales con seis direcciones relay y confirmó su revocación. El [registro sin secretos](validation/timbre-cloudflare-check.json) conserva ese resultado. **Esto comprueba la API de credenciales; no demuestra audio/video ni conectividad entre dos redes.** Los planes, las licencias y la configuración Firebase se comprueban por separado.
+
+### Prueba interna autorizada
+
+El propietario autorizó expresamente una prueba de siete días para su cuenta administradora existente: audio y video, un inmueble y un QR, sin cobros ni acceso gratuito para otros usuarios. El operador del despliegue puede otorgarla con la mutación interna `timbre_trial:grantApprovedTrial`, indicando el correo exacto autorizado. No es una función pública ni permite impersonar una sesión VISO. El correo sólo identifica una cuenta cuyo ID ya debe pertenecer a la lista inmutable de administradores.
+
+El comando crea una licencia con origen `internal_trial`, un plan deshabilitado sin precio, el inmueble «Timbre de prueba», su membresía de propietario y un QR «Prueba VISO». No crea compras ni pagos. Repetirlo conserva el vencimiento y el QR; una prueba vencida o revocada requiere revisión y no se renueva automáticamente. El enlace devuelto se entrega únicamente al propietario y no se incorpora a este repositorio ni a los informes públicos.
+
+Para probar, el propietario debe ingresar a [Timbre](https://viso-deck-android.vercel.app/timbre) y mantener VISO abierto. En otro dispositivo y, preferentemente, otra red, abrir el enlace del QR y tocar **Llamar** o **Videollamar**, permitiendo micrófono/cámara. En la sesión propietaria, abrir **Ver llamada** y tocar **Atender**. Comprobar audio en ambos sentidos, video y finalización. La disponibilidad del QR y las credenciales aceptadas por Cloudflare no reemplazan esa prueba entre dispositivos reales.
+
 ## Recepción con Android en segundo plano
 
 Cloudflare transporta audio/video; no despierta la app. Para recibir avisos con VISO en segundo plano faltan Firebase Cloud Messaging, su cuenta de servicio privada en Convex y una APK nueva compilada para ese proyecto. El envío de avisos FCM es gratuito; seguir [la preparación de Firebase](timbre-firebase.md) y [las capacidades nativas](timbre-native-capabilities.md). La web abierta puede recibir el aviso implementado sin FCM. No se garantiza recepción después de forzar la detención de la app ni continuidad de una llamada con el WebView suspendido.

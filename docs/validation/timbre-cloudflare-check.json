@@ -1,0 +1,13 @@
+{
+  "verifiedAt": "2026-10-23T18:51:28.046646+00:00",
+  "deployment": "vivid-nightingale-785",
+  "result": {
+    "configured": true,
+    "connectivityTested": false,
+    "credentialsAccepted": true,
+    "relayUrlCount": 6,
+    "revokeConfirmed": true
+  },
+  "method": "Internal deployment-operator diagnostic. Short-lived credentials issued and immediately revoked. No secrets returned, no calls, licenses, payments or media relay traffic created.",
+  "scope": "Actual Cloudflare credential API acceptance only; public audio/video and physical-device connectivity remain untested."
+}
