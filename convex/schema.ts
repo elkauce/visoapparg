@@ -2,6 +2,12 @@ import { screenKind } from "./lib/screen_settings";
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
+import { timbreTables } from "./timbre_tables";
+import { timbreCommerceTables } from "./timbre_commerce_tables";
+import { timbrePresenceTables } from "./timbre_presence_tables";
+import { timbreCallTables } from "./timbre_calls_tables";
+import { timbrePushTables } from "./timbre_push_tables";
+import { timbreRecurringTables } from "./timbre_recurring_tables";
 import { deckKeyContent } from "./lib/deck_key_content.ts";
 import { deckGrid } from "./lib/deck_grid.ts";
 import { deckAppearance, deckCanvas } from "./lib/deck_appearance.ts";
@@ -18,6 +24,12 @@ import {
 
 export default defineSchema({
   ...authTables,
+  ...timbreTables,
+  ...timbreCommerceTables,
+  ...timbrePresenceTables,
+  ...timbreCallTables,
+  ...timbrePushTables,
+  ...timbreRecurringTables,
   users: defineTable({
     ...authTables.users.validator.fields,
     // Se conserva para filas antiguas; las cuentas propias se identifican por _id.

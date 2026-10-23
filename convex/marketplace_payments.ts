@@ -4,6 +4,8 @@ import { internal } from "./_generated/api";
 import { requireCurrentUser } from "./lib/current_user";
 import { marketplaceError } from "./lib/marketplace_validation";
 import { acquireProductSnapshot, isMarketplaceAdmin, paymentProductFor } from "./marketplace";
+import { applyTimbreOrderPayment, snapshotMarketplaceTimbreBenefit } from "./lib/timbre_commerce";
+import { confirmedRefundedAmount } from "./lib/timbre_recurring_provider";
 import {
   commissionFor, decryptPaymentToken, encryptPaymentToken, hashPaymentState,
   providerAmountToMinor, providerPaymentStatus, providerRequest,
@@ -235,6 +237,7 @@ export const reserveOrder = internalMutation({
         profileTemplate: product.profileTemplate, pageTemplate: product.pageTemplate, pageSettings: product.pageSettings, revision: product.revision },
       status: "pending", createdAt: now, updatedAt: now,
     });
+    await snapshotMarketplaceTimbreBenefit(ctx, orderId, args.productId);
     return { orderId, amount: product.priceAmount, commissionAmount, title: product.title, ownViso,
       sellerId: product.sellerId, currency: product.currency };
   },
@@ -316,11 +319,12 @@ export const orderForNotification = internalQuery({
 
 export const applyVerifiedPayment = internalMutation({
   args: { orderId: v.id("marketplaceOrders"), paymentId: v.string(), amount: v.number(), currency: v.string(),
-    collectorId: v.string(), externalReference: v.string(), liveMode: v.boolean(), status: paymentStatus, eventKey: v.string() },
+    collectorId: v.string(), externalReference: v.string(), liveMode: v.boolean(), status: paymentStatus, eventKey: v.string(), refundedAmount: v.optional(v.number()) },
   handler: async (ctx, args) => {
     const order = await ctx.db.get("marketplaceOrders", args.orderId);
     if (!order || args.externalReference !== order._id || args.collectorId !== order.sellerProviderUserId ||
-        args.amount !== order.amount || args.currency !== order.currency || args.liveMode !== (order.providerMode === "live")) {
+        args.amount !== order.amount || args.currency !== order.currency || args.liveMode !== (order.providerMode === "live") ||
+        (args.refundedAmount !== undefined && (!Number.isSafeInteger(args.refundedAmount) || args.refundedAmount < 0 || args.refundedAmount > order.amount))) {
       marketplaceError("El pago no coincide con la compra.");
     }
     const existingPayment = await ctx.db.query("marketplaceOrders").withIndex("by_payment", (q) => q.eq("paymentId", args.paymentId)).unique();
@@ -345,6 +349,7 @@ export const applyVerifiedPayment = internalMutation({
       if (args.status === "approved" && order.productSnapshot && order.productSnapshot.delivery !== "inquiry") {
         await acquireProductSnapshot(ctx, order.buyerId, order.productId, order.productSnapshot, order.productSnapshot.revision, true);
       }
+      await applyTimbreOrderPayment(ctx, order, (args.refundedAmount ?? 0) > 0 ? "refunded" : args.status);
       // Previously downloaded resources cannot be recalled from a device. The
       // order records refunds/chargebacks for support without silently deleting
       // user pages or media; the commercial policy must address these cases.
@@ -362,6 +367,7 @@ export const processNotification = internalAction({
     const token = await ctx.runAction(internal.marketplace_payments.sellerToken, { userId: order.sellerId, allowDisconnected: true });
     const data = await providerRequest(`/v1/payments/${args.paymentId}`, { headers: { Authorization: `Bearer ${token}` } });
     const amount = providerAmountToMinor(data.transaction_amount);
+    const refundedAmount = confirmedRefundedAmount(data);
     if (String(data.id) !== args.paymentId || amount === null || typeof data.currency_id !== "string" ||
       typeof data.external_reference !== "string" || typeof data.live_mode !== "boolean" || !data.collector_id) {
       marketplaceError("No se pudo comprobar el pago.");
@@ -370,7 +376,8 @@ export const processNotification = internalAction({
       orderId: args.orderId, paymentId: args.paymentId, amount, currency: data.currency_id,
       collectorId: String(data.collector_id), externalReference: data.external_reference,
       liveMode: data.live_mode, status: providerPaymentStatus(data.status),
-      eventKey: `${args.paymentId}:${String(data.status)}:${String(data.date_last_updated ?? "")}`,
+      refundedAmount,
+      eventKey: `${args.paymentId}:${String(data.status)}:${String(data.date_last_updated ?? "")}:${refundedAmount}`,
     });
     return null;
   },

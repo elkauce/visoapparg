@@ -550,6 +550,12 @@
     width: 21px;
     height: 21px;
   }
+  .viso-panel-rail-nav a span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .viso-panel-rail-nav [data-section="account"] {
     margin-top: 0;
     border: 0;

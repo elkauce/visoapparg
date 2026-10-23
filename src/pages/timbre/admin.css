@@ -1,0 +1,18 @@
+.vta-admin .vt-toolbar { margin-bottom:20px; }
+.vta-admin h3 { font-weight:650;margin:12px 0 6px; }
+.vta-fieldset { display:flex;flex-direction:column;gap:17px;min-width:0;border:0;padding:0;margin:0; }
+.vta-fieldset:disabled { opacity:.65; }
+.vta-options { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:1px solid #e7dfd2;border-radius:14px;padding:16px;min-width:0; }
+.vta-options legend { padding:0 7px;font-weight:650;font-size:14px; }
+.vta-check { display:flex!important;flex-direction:row!important;align-items:center;gap:9px!important;font-size:13px; }
+.vta-check input { width:18px;height:18px;accent-color:#e84300;flex-shrink:0; }
+.vta-actions { display:flex;flex-wrap:wrap;gap:10px;margin:18px 0; }
+.vta-order summary { display:flex;justify-content:space-between;gap:12px;align-items:center; }
+.vta-order summary>span:first-child { display:flex;gap:9px;align-items:center; }
+.vta-order summary svg { width:18px;height:18px;flex-shrink:0; }
+.vta-status { background:#f1e9de;padding:5px 10px;border-radius:100px;font-size:12px;white-space:nowrap; }
+.vta-search { display:flex;flex-direction:column;gap:8px;margin:12px 0 18px; }
+.vta-search button { display:flex;flex-direction:column;align-items:start;gap:5px;border:1px solid #d9d3c9;border-radius:12px;padding:12px; }
+.vta-search button[aria-pressed=true] { background:#fff0e6;border-color:#e84300; }
+.vta-search span { color:#6b6d73;font-size:12px; }
+@media(max-width:600px) { .vta-options { grid-template-columns:1fr; }.vta-order summary { align-items:start;flex-direction:column; }.vta-actions>* { flex:1; }.vta-admin .vt-history-row { flex-direction:column;align-items:start; } }

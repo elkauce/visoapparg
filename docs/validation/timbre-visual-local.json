@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-10-23T12:12:33.208Z",
+  "scope": "Current VISO management UI on loopback Convex; synthetic local licensed and unlicensed accounts, no production/customer/payment data. QR is an inert-to-public local fixture. No credentials or auth tokens included in PNGs.",
+  "results": [
+    {
+      "name": "timbre-owner-desktop",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-settings-desktop",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-unlicensed-desktop",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-catalog-desktop",
+      "viewport": 1440,
+      "documentWidth": 1440,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-owner-mobile",
+      "viewport": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-settings-mobile",
+      "viewport": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-unlicensed-mobile",
+      "viewport": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "name": "timbre-catalog-mobile",
+      "viewport": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    }
+  ],
+  "pageErrors": []
+}

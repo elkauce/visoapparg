@@ -4,6 +4,7 @@ import { api, internal } from "./_generated/api";
 import { auth } from "./auth.ts";
 import { MAX_DECK_MEDIA_BYTES, deckMediaType } from "./deck_media.ts";
 import { oauthCallback, paymentWebhook } from "./marketplace_payment_http";
+import { timbreRecurringWebhook } from "./timbre_recurring_http";
 import {
   MAX_MARKETPLACE_BYTES,
   marketplaceType,
@@ -22,6 +23,11 @@ http.route({
   path: "/marketplace/payments/webhook",
   method: "POST",
   handler: paymentWebhook,
+});
+http.route({
+  path: "/timbre/payments/webhook",
+  method: "POST",
+  handler: timbreRecurringWebhook,
 });
 
 // Texto plano mínimo, fácil de leer desde un microcontrolador

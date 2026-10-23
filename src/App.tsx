@@ -20,8 +20,30 @@ import { isAndroidNative } from "./lib/android-native.ts";
 import WebSurfaceTheme from "./components/web-surface-theme";
 import GoogleAuthReturn from "./components/google-auth-return";
 import { NativeGoogleAuthProvider } from "./components/native-google-auth";
+import TimbreIncoming from "./components/timbre-incoming";
+import TimbrePush from "./components/timbre-push";
 
 const MarketplacePage = lazy(() => import("./pages/marketplace/page.tsx"));
+const TimbrePage = lazy(() => import("./pages/timbre/page.tsx"));
+const TimbreVisitorPage = lazy(() => import("./pages/timbre/visitor.tsx"));
+const TimbreCallPage = lazy(() => import("./pages/timbre/call-session.tsx"));
+
+function TimbreRoute({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense
+      fallback={
+        <div
+          role="status"
+          className="min-h-dvh bg-[#f5f3ef] p-8 text-[#181a1f]"
+        >
+          Cargando Timbre…
+        </div>
+      }
+    >
+      {children}
+    </Suspense>
+  );
+}
 
 function MarketplaceRoute() {
   return (
@@ -51,6 +73,8 @@ export default function App() {
           <DeckAwake />
           <AutomaticPresence />
           <GoogleHomeSync />
+          <TimbreIncoming />
+          <TimbrePush />
           <Routes>
             <Route
               path="/"
@@ -84,6 +108,30 @@ export default function App() {
             />
             <Route path="/deck" element={<AndroidDeck />} />
             <Route path="/s/:slug" element={<PublicStatusPage />} />
+            <Route
+              path="/timbre"
+              element={
+                <TimbreRoute>
+                  <TimbrePage />
+                </TimbreRoute>
+              }
+            />
+            <Route
+              path="/t/:qr"
+              element={
+                <TimbreRoute>
+                  <TimbreVisitorPage />
+                </TimbreRoute>
+              }
+            />
+            <Route
+              path="/timbre/call/:callId"
+              element={
+                <TimbreRoute>
+                  <TimbreCallPage />
+                </TimbreRoute>
+              }
+            />
             <Route path="/marketplace" element={<MarketplaceRoute />} />
             <Route
               path="/marketplace/products/:productId"

@@ -21,6 +21,9 @@ if (homeSdkPath) {
     }
 }
 def hasHomeSdk = !homeSdkFiles.isEmpty()
+// FCM is opt-in. A normal checkout builds an explicitly unavailable bridge and
+// does not package Firebase Messaging or initialize registration in the background.
+def hasTimbreFcm = System.getenv('VISO_TIMBRE_FCM_ENABLED') == '1' && file('google-services.json').isFile()
 
 android {
     namespace = "com.viso.deck"
@@ -32,6 +35,8 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 26
         versionName "1.15.0"
+        buildConfigField 'boolean', 'TIMBRE_FCM_ENABLED', hasTimbreFcm.toString()
+        manifestPlaceholders.timbreFcmEnabled = hasTimbreFcm.toString()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -48,6 +53,7 @@ android {
     }
     sourceSets {
         main.java.srcDirs += ['src/googleHome/shared', hasHomeSdk ? 'src/googleHome/java' : 'src/googleHomeUnavailable/java']
+        main.java.srcDirs += [hasTimbreFcm ? 'src/timbreFcm/java' : 'src/timbreFcmUnavailable/java']
     }
     // Signing material is supplied by the release operator, never committed.
     def releaseStore = System.getenv('VISO_RELEASE_STORE_FILE')
@@ -91,6 +97,7 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
+    if (hasTimbreFcm) implementation 'com.google.firebase:firebase-messaging:24.1.2'
     if (hasHomeSdk) {
         implementation files(homeSdkFiles)
         // Dependencies of the reviewed STATUS/viso-safe SDK integration.

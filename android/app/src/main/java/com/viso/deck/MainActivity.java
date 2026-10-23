@@ -16,6 +16,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(VisoNativePlugin.class);
         registerPlugin(VisoPresencePlugin.class);
         registerPlugin(VisoAudioPlugin.class);
+        registerPlugin(VisoTimbrePlugin.class);
         // Plugin.load runs while creating the bridge, before Activity STARTED.
         // Home APIs can therefore register the official permission launcher.
         registerPlugin(VisoGoogleHomePlugin.class);

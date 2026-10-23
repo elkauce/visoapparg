@@ -3,6 +3,12 @@ import { mutation, internalMutation } from "./_generated/server";
 import { v, ConvexError } from "convex/values";
 import { requireCurrentUser } from "./lib/current_user";
 import { setActiveStatus } from "./lib/activate_status";
+import {
+  getAutomaticPresenceStatus,
+  removePresenceSource,
+  setPresenceSource,
+  TELEPHONE_PRESENCE_LEASE_MS,
+} from "./lib/timbre_presence";
 const DAY = 86400000;
 async function digest(secret: string) {
   const bytes = await crypto.subtle.digest(
@@ -58,7 +64,20 @@ export const revoke = mutation({
       )
       .unique();
     if (!device) return;
-    if (
+    const coordinated = await ctx.db
+      .query("presenceSources")
+      .withIndex("by_user_source", (q) =>
+        q.eq("userId", user._id).eq("sourceKey", `phone:${device._id}`),
+      )
+      .unique();
+    const arbiter = await ctx.db
+      .query("presenceArbiters")
+      .withIndex("by_user", (q) => q.eq("userId", user._id))
+      .unique();
+    if (coordinated) {
+      await removePresenceSource(ctx, user._id, `phone:${device._id}`);
+    } else if (
+      !arbiter &&
       device.calling &&
       !device.suppressed &&
       device.appliedRevision === (user.activeStatusRevision ?? 0)
@@ -103,61 +122,54 @@ export const signal = mutation({
       await ctx.db.patch("presenceDevices", registered._id, {
         lastSeen: Date.now(),
       });
-    let suppressed = registered.suppressed;
-    if (registered.calling && registered.appliedRevision !== revision)
-      suppressed = true;
-    if (calling && !registered.calling) {
-      const other = await ctx.db
-        .query("presenceDevices")
-        .withIndex("by_owner", (q) => q.eq("userId", user._id))
-        .collect();
-      if (
-        other.some(
-          (d) =>
-            d._id !== registered._id &&
-            d.enabled &&
-            d.calling &&
-            !d.suppressed &&
-            d.expires > Date.now(),
-        )
-      )
-        return snapshot(ctx, user._id);
-      const statuses = await ctx.db
-        .query("statuses")
-        .withIndex("by_user_and_order", (q) => q.eq("userId", user._id))
-        .collect();
-      let status = statuses.find(
-        (s) =>
-          s.name
-            .trim()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toUpperCase() === "LLAMADA",
+    const sourceKey = `phone:${registered._id}`;
+    if (calling) {
+      const statusId = await getAutomaticPresenceStatus(
+        ctx,
+        user._id,
+        "telephone",
       );
-      if (!status) {
-        const id = await ctx.db.insert("statuses", {
-          userId: user._id,
-          name: "LLAMADA",
-          color: "#00A9F4",
-          icon: "phone",
-          order: statuses.length,
-        });
-        status = (await ctx.db.get("statuses", id))!;
-      }
-      await setActiveStatus(ctx, user._id, status._id);
-      await ctx.scheduler.runAfter(
-        90000,
-        internal.background_presence.expireCall,
-        { deviceId: registered._id, revision: revision + 1 },
-      );
+      await setPresenceSource(ctx, user._id, {
+        sourceKey,
+        kind: "telephone",
+        statusId,
+        expiresAt: Date.now() + TELEPHONE_PRESENCE_LEASE_MS,
+      });
+      const arbiter = await ctx.db
+        .query("presenceArbiters")
+        .withIndex("by_user", (q) => q.eq("userId", user._id))
+        .unique();
       await ctx.db.patch("presenceDevices", registered._id, {
         calling: true,
-        suppressed: false,
-        previous: user.activeStatusId,
-        appliedRevision: revision + 1,
+        suppressed: arbiter?.suppressed ?? false,
+        // Recovery now belongs only to the arbiter. Absence of the old revision
+        // also distinguishes this episode from a pre-upgrade native call.
+        previous: undefined,
+        appliedRevision: undefined,
       });
-    } else if (!calling && registered.calling) {
-      if (!suppressed && revision === registered.appliedRevision) {
+      if (!registered.calling)
+        await ctx.scheduler.runAfter(
+          TELEPHONE_PRESENCE_LEASE_MS,
+          internal.background_presence.expireCall,
+          { deviceId: registered._id },
+        );
+    } else if (registered.calling) {
+      const source = await ctx.db
+        .query("presenceSources")
+        .withIndex("by_user_source", (q) =>
+          q.eq("userId", user._id).eq("sourceKey", sourceKey),
+        )
+        .unique();
+      if (source) await removePresenceSource(ctx, user._id, sourceKey);
+      // An installed pre-coordinator APK may end a call created before migration.
+      else if (
+        !(await ctx.db
+          .query("presenceArbiters")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .unique()) &&
+        !registered.suppressed &&
+        revision === registered.appliedRevision
+      ) {
         const prev = registered.previous
           ? await ctx.db.get("statuses", registered.previous)
           : null;
@@ -173,10 +185,7 @@ export const signal = mutation({
         previous: undefined,
         appliedRevision: undefined,
       });
-    } else if (suppressed && !registered.suppressed)
-      await ctx.db.patch("presenceDevices", registered._id, {
-        suppressed: true,
-      });
+    }
     if (args.disable)
       await ctx.db.patch("presenceDevices", registered._id, {
         enabled: false,
@@ -219,7 +228,20 @@ export const expireCall = internalMutation({
       return;
     }
     const user = await ctx.db.get("users", device.userId);
-    if (
+    const source = await ctx.db
+      .query("presenceSources")
+      .withIndex("by_user_source", (q) =>
+        q.eq("userId", device.userId).eq("sourceKey", `phone:${device._id}`),
+      )
+      .unique();
+    const arbiter = await ctx.db
+      .query("presenceArbiters")
+      .withIndex("by_user", (q) => q.eq("userId", device.userId))
+      .unique();
+    if (source)
+      await removePresenceSource(ctx, device.userId, source.sourceKey);
+    else if (
+      !arbiter &&
       user &&
       !device.suppressed &&
       user.activeStatusRevision === device.appliedRevision
@@ -234,8 +256,8 @@ export const expireCall = internalMutation({
       );
     }
     await ctx.db.patch("presenceDevices", device._id, {
-      calling: true,
-      suppressed: true,
+      calling: false,
+      suppressed: false,
       previous: undefined,
       appliedRevision: undefined,
     });

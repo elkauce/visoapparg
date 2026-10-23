@@ -1,5 +1,11 @@
 # VISO
 
+## Timbre — rama de revisión
+
+La rama `feat/viso-timbre` integra Timbre con las cuentas, el panel, Android y el marketplace existentes. No activa licencias por registrarse ni publica cambios automáticamente.
+
+Consultar [arquitectura](docs/timbre-integration.md), [alcance y límites](docs/timbre-status.md), [configuración y despliegue](docs/timbre-deployment.md), [suscripciones y pagos](docs/timbre-recurring.md), [capacidades Android](docs/timbre-native-capabilities.md) y [validación](docs/timbre-validation.md). TURN, Firebase y la contratación recurrente requieren configuración y comprobaciones externas antes de habilitar el servicio comercial.
+
 Copia independiente con React, Vite y Convex. El registro, inicio y cierre de sesión usan email y contraseña propios con Convex Auth. No requiere Hercules.
 
 ## APK 1.1 de prueba

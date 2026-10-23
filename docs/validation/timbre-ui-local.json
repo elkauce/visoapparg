@@ -1,0 +1,51 @@
+{
+  "timestamp": "2026-10-23T03:48:14.178Z",
+  "scope": "Real VISO UI and Convex local binary, two isolated Chromium contexts, synthetic licensed fixture and fake media, relay-only coturn TCP on loopback. No hosted data, paid transaction, Android or physical networks tested.",
+  "checks": {
+    "noMediaBeforeClick": true,
+    "ringStatus": true,
+    "atomicAcceptedPresence": true,
+    "realSignaling": true,
+    "relayOnly": true,
+    "bidirectionalAudioVideo": true,
+    "hangupSynchronized": true,
+    "mediaTracksStopped": true,
+    "baselineRestored": true,
+    "signalsPurged": true,
+    "pageErrors": 0
+  },
+  "peers": [
+    {
+      "connected": true,
+      "localCandidateType": "relay",
+      "remoteCandidateType": "relay",
+      "inbound": [
+        {
+          "kind": "audio",
+          "bytesReceived": 6520
+        },
+        {
+          "kind": "video",
+          "bytesReceived": 41636,
+          "framesDecoded": 44
+        }
+      ]
+    },
+    {
+      "connected": true,
+      "localCandidateType": "relay",
+      "remoteCandidateType": "relay",
+      "inbound": [
+        {
+          "kind": "audio",
+          "bytesReceived": 6172
+        },
+        {
+          "kind": "video",
+          "bytesReceived": 92163,
+          "framesDecoded": 46
+        }
+      ]
+    }
+  ]
+}

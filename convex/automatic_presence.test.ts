@@ -59,9 +59,11 @@ describe("automatic shared status transactions", () => {
       await t.run((ctx) => ctx.db.query("deckActionRequests").collect()),
     ).toHaveLength(1);
     expect(
-      await t.run((ctx) =>
-        ctx.db.system.query("_scheduled_functions").collect(),
-      ),
+      (
+        await t.run((ctx) =>
+          ctx.db.system.query("_scheduled_functions").collect(),
+        )
+      ).filter((task) => task.name === "lights:fireWebhook"),
     ).toHaveLength(1);
   });
   it("refuses to restore after a manual selection of the same state", async () => {

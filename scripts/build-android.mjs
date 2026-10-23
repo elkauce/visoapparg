@@ -27,6 +27,7 @@ const env = {
   VITE_ANDROID_DECK_EXTENSIONS: extensions,
   VITE_ANDROID_PREVIEW: "false",
   VITE_VISO_WEB_URL: process.env.VISO_ANDROID_WEB_URL ?? (localTest ? "" : "https://viso-deck-android.vercel.app"),
+  VITE_PUBLIC_APP_URL: process.env.VISO_ANDROID_WEB_URL ?? (localTest ? "" : "https://viso-deck-android.vercel.app"),
   VISO_ANDROID_LOCAL_TEST: localTest ? "1" : "0",
 };
 function run(command, args, cwd = root) {

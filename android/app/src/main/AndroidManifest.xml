@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- Optional foreground Timbre video. Capacitor asks at getUserMedia time. -->
+    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -54,6 +56,13 @@
         <service android:name=".BackgroundPresenceService" android:exported="false" android:foregroundServiceType="specialUse" android:stopWithTask="false">
           <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="User-enabled telephone presence detection and synchronization of selected status indicator lights; no call audio or dialer functions." />
         </service>
+        <!-- Registration starts only after the user's explicit notification opt-in. -->
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+        <service android:name=".VisoTimbreMessagingService" android:exported="false" android:enabled="${timbreFcmEnabled}">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
         <service
             android:name=".VisoNotificationListener"
             android:label="VISO · control multimedia"
@@ -67,6 +76,8 @@
 
     <!-- Calls are optional: Deck and Display also run on tablets. -->
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
     <!-- Permissions -->
 

@@ -1,12 +1,19 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { Home, Monitor, Plug, Settings2, ShoppingBag } from "lucide-react";
+import {
+  BellRing,
+  Home,
+  Monitor,
+  Plug,
+  Settings2,
+  ShoppingBag,
+} from "lucide-react";
 import { VisoBrand } from "@/components/viso-brand";
 import { isAndroidNative } from "@/lib/android-native";
 import "./panel.css";
 
 export type PanelSection =
-  "states" | "display" | "connections" | "marketplace" | "account";
+  "states" | "display" | "connections" | "marketplace" | "timbre" | "account";
 
 const SECTIONS = [
   { id: "states", label: "Panel", icon: Home, web: "/", android: "/android" },
@@ -30,6 +37,13 @@ const SECTIONS = [
     icon: ShoppingBag,
     web: "/marketplace",
     android: "/marketplace",
+  },
+  {
+    id: "timbre",
+    label: "Timbre",
+    icon: BellRing,
+    web: "/timbre",
+    android: "/timbre",
   },
   {
     id: "account",
@@ -67,6 +81,7 @@ export default function PanelLayout({
             ({ id, label, icon: Icon, web, android: nativePath }) => (
               <Link
                 key={id}
+                title={label}
                 to={android ? nativePath : web}
                 data-section={id}
                 aria-current={section === id ? "page" : undefined}

@@ -1,0 +1,56 @@
+{
+  "timestamp": "2026-10-22T19:31:32.329Z",
+  "scope": "Two isolated Chromium contexts, fake camera/microphone, real coturn4.6.3 on local Docker, relay-only; no physical-network or Android validation",
+  "peers": [
+    {
+      "connectionState": "connected",
+      "gatheringState": "complete",
+      "signalingState": "stable",
+      "errors": [],
+      "candidateCount": 2,
+      "localSdpLength": 6245,
+      "remoteSdpLength": 5829,
+      "localCandidateType": "relay",
+      "remoteCandidateType": "relay",
+      "receivedTracks": ["audio", "video"],
+      "inbound": [
+        {
+          "kind": "audio",
+          "bytesReceived": 4394,
+          "packetsReceived": 81
+        },
+        {
+          "kind": "video",
+          "bytesReceived": 48272,
+          "packetsReceived": 77,
+          "framesDecoded": 36
+        }
+      ]
+    },
+    {
+      "connectionState": "connected",
+      "gatheringState": "complete",
+      "signalingState": "stable",
+      "errors": [],
+      "candidateCount": 1,
+      "localSdpLength": 5829,
+      "remoteSdpLength": 6245,
+      "localCandidateType": "relay",
+      "remoteCandidateType": "relay",
+      "receivedTracks": ["audio", "video"],
+      "inbound": [
+        {
+          "kind": "audio",
+          "bytesReceived": 4414,
+          "packetsReceived": 80
+        },
+        {
+          "kind": "video",
+          "bytesReceived": 48243,
+          "packetsReceived": 75,
+          "framesDecoded": 36
+        }
+      ]
+    }
+  ]
+}

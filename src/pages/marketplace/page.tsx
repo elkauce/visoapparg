@@ -44,6 +44,7 @@ import MarketLibrary from "./library";
 import { MarketplaceOrders } from "./checkout";
 import { CATEGORY_LABELS, productPrice, type MarketProduct } from "./types";
 import PanelLayout from "../_components/panel-layout";
+import TimbreMarketplaceOffer from "../timbre/offers";
 import "./marketplace.css";
 
 const MarketplaceStudio = lazy(() => import("./studio"));
@@ -405,6 +406,7 @@ function MarketplaceContent() {
             </Suspense>
           ) : view === "discover" ? (
             <>
+              {category === "discover" && !search && <TimbreMarketplaceOffer />}
               {category === "discover" && !search && featured && (
                 <section className="vm-featured" aria-label="Destacado de VISO">
                   <div className="vm-featured-copy">

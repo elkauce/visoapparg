@@ -8,7 +8,8 @@ import "./web-surface-theme.css";
 export default function WebSurfaceTheme() {
   const { pathname } = useLocation();
   const light =
-    pathname === "/marketplace" ||
+    pathname.startsWith("/marketplace") ||
+    pathname === "/timbre" ||
     (pathname === "/" &&
       !isAndroidNative() &&
       import.meta.env.VITE_ANDROID_PREVIEW !== "true");

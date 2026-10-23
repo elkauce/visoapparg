@@ -59,6 +59,9 @@ export default function AndroidSettings() {
         </Button>
       </section>
       <Button asChild variant="outline">
+        <Link to="/timbre">Configurar Timbre</Link>
+      </Button>
+      <Button asChild variant="outline">
         <Link to="/android/integrations">Configurar integraciones</Link>
       </Button>
     </AndroidScreen>

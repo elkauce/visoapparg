@@ -6,6 +6,7 @@ import {
   Settings2,
   Plug,
   ShoppingBag,
+  BellRing,
 } from "lucide-react";
 import { SignInButton } from "@/components/ui/signin.tsx";
 import { Button } from "@/components/ui/button.tsx";
@@ -55,6 +56,16 @@ export default function AndroidHome() {
               </Link>
             </Button>
             <div className="grid grid-cols-2 gap-3">
+              <Button
+                asChild
+                variant="secondary"
+                className="col-span-2 h-16 justify-start rounded-2xl px-6"
+              >
+                <Link to="/timbre">
+                  <BellRing className="mr-3 size-6" />
+                  Timbre
+                </Link>
+              </Button>
               <Button asChild variant="outline" className="h-14">
                 <Link to="/android/settings">
                   <Settings2 />
