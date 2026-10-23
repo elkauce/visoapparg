@@ -33,8 +33,8 @@ android {
         applicationId "com.viso.deck"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 27
-        versionName "1.16.0"
+        versionCode 28
+        versionName "1.16.1"
         buildConfigField 'boolean', 'TIMBRE_FCM_ENABLED', hasTimbreFcm.toString()
         manifestPlaceholders.timbreFcmEnabled = hasTimbreFcm.toString()
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
