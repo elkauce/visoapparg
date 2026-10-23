@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-23T18:21:23.969773+00:00",
+  "package": "com.viso.deck",
+  "versionCode": 27,
+  "versionName": "1.16.0",
+  "minSdk": 24,
+  "targetSdk": 36,
+  "artifact": "downloads/VISO-Deck-1.16.0-debug.apk",
+  "bytes": 22562751,
+  "sha256": "798284ef8035aa93f5b4b8135933b1c63db7fe2ea4999f25d2557295eed50cbb",
+  "certificateSha1": "f3e392aed08c29514f1d6d25176120213c5a77a6",
+  "certificateSha256": "9664805aed9f244425531734609e107ebfac5d0e038cb9260ccbef3879fb12da",
+  "sameCertificateAs1_15_0": true,
+  "googleHomeSdkBundled": true,
+  "sharedBackendSelected": true,
+  "canonicalPublicWebSelected": true,
+  "timbreRoutesBundled": true,
+  "fcmEnabled": false,
+  "fcmLibraryBundled": false,
+  "backgroundNotificationsAvailable": false,
+  "requiresCloudflareConfigurationAndValidLicenseForCalls": true,
+  "bundledApkFiles": [],
+  "sensitiveConfigurationFileNames": [],
+  "permissions": [
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.CAMERA",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+    "android.permission.INTERNET",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.POST_NOTIFICATIONS",
+    "android.permission.READ_CALENDAR",
+    "android.permission.READ_PHONE_STATE",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.WAKE_LOCK",
+    "com.viso.deck.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "permissionsAddedSince1_15_0": [
+    "android.permission.CAMERA"
+  ],
+  "optionalCamera": true,
+  "junit": {
+    "tests": 27,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "assembleDebug": "passed",
+  "physicalDeviceTested": false,
+  "publicDownloadVerified": false
+}
