@@ -276,6 +276,21 @@ describe("Business service authorization and verified payments", () => {
         enabled: false,
       }),
     ).rejects.toThrow(/cuenta/);
+    await f.me.mutation(api.teaviso.saveQrTemplate, {
+      kind: "business",
+      id,
+      template: "urban",
+    });
+    expect(
+      (await f.me.query(api.teaviso.myBusinessRequests, {}))[0].qrTemplate,
+    ).toBe("urban");
+    await expect(
+      f.stranger.mutation(api.teaviso.saveQrTemplate, {
+        kind: "business",
+        id,
+        template: "night",
+      }),
+    ).rejects.toThrow(/cuenta/);
     await f.me.mutation(api.teaviso.updateBusinessContact, {
       requestId: id,
       message: "Hola",
@@ -458,5 +473,44 @@ describe("Te a Viso exact OAuth destination", () => {
       "https://a.example.evil\\@ok.example",
     ])
       expect(teavisoOrigin(value)).toBeNull();
+  });
+});
+
+describe("Plate template ownership", () => {
+  it("persists a template without rotating the QR and rejects foreign, archived or invalid records", async () => {
+    const f = await fixture();
+    const id = await f.me.mutation(api.teaviso.saveWhatsappQr, form);
+    const token = (await f.me.query(api.teaviso.myWhatsappQrs, {}))[0].token;
+    await f.me.mutation(api.teaviso.saveQrTemplate, {
+      kind: "personal",
+      id,
+      template: "night",
+    });
+    expect((await f.me.query(api.teaviso.myWhatsappQrs, {}))[0]).toMatchObject({
+      qrTemplate: "night",
+      token,
+    });
+    await expect(
+      f.stranger.mutation(api.teaviso.saveQrTemplate, {
+        kind: "personal",
+        id,
+        template: "urban",
+      }),
+    ).rejects.toThrow(/cuenta/);
+    await expect(
+      f.me.mutation(api.teaviso.saveQrTemplate, {
+        kind: "business",
+        id,
+        template: "urban",
+      }),
+    ).rejects.toThrow(/cuenta/);
+    await f.me.mutation(api.teaviso.archiveWhatsappQr, { id });
+    await expect(
+      f.me.mutation(api.teaviso.saveQrTemplate, {
+        kind: "personal",
+        id,
+        template: "signal",
+      }),
+    ).rejects.toThrow(/cuenta/);
   });
 });

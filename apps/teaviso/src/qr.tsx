@@ -1,67 +1,147 @@
-import { useRef, useState } from "react";
-import { QRCodeSVG } from "qrcode.react";
-import QRCode from "qrcode";
+import { useId, useMemo, useRef, useState } from "react";
+import {
+  makeQrPlate,
+  normalizeTemplate,
+  qrPlatePng,
+  qrTemplates,
+  type QrTemplate,
+} from "./qr-templates";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useParams, Link } from "react-router-dom";
 import { errorText, qrUrl } from "./config";
 
-export function QrDownload({ url, label }: { url: string; label: string }) {
-  const ref = useRef<HTMLDivElement>(null);
+export function QrDownload({
+  url,
+  label,
+  initialTemplate,
+  onSaveTemplate,
+}: {
+  url: string;
+  label: string;
+  initialTemplate?: QrTemplate;
+  onSaveTemplate?: (template: QrTemplate) => Promise<unknown>;
+}) {
+  const [selected, setSelected] = useState<QrTemplate>(
+    normalizeTemplate(initialTemplate),
+  );
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const lock = useRef(false);
+  const [saved, setSaved] = useState(false);
+  const groupId = useId();
+  const plate = useMemo(
+    () => makeQrPlate(url, label, selected),
+    [url, label, selected],
+  );
   const name =
     label.replace(/[^a-zA-Z0-9_-]/g, "-").slice(0, 50) || "te-a-viso";
   async function download(kind: "svg" | "png") {
+    if (lock.current) return;
+    lock.current = true;
+    setBusy(true);
     setError("");
     let objectUrl: string | undefined;
     try {
       let href: string;
       if (kind === "png")
-        href = await QRCode.toDataURL(url, {
-          width: 1200,
-          margin: 4,
-          errorCorrectionLevel: "H",
-          color: { dark: "#123e36", light: "#ffffff" },
-        });
+        href = await qrPlatePng(plate.svg, plate.width, plate.height);
       else {
-        const svg = ref.current?.querySelector("svg");
-        if (!svg) throw new Error();
         objectUrl = URL.createObjectURL(
-          new Blob([new XMLSerializer().serializeToString(svg)], {
-            type: "image/svg+xml",
-          }),
+          new Blob([plate.svg], { type: "image/svg+xml" }),
         );
         href = objectUrl;
       }
       const a = document.createElement("a");
       a.href = href;
-      a.download = `${name}.${kind}`;
+      a.download = `${name}-${selected}.${kind}`;
       a.click();
     } catch {
-      setError("No pudimos descargar el QR. Intentá nuevamente.");
+      setError("No pudimos descargar el diseño. Intentá nuevamente.");
     } finally {
       if (objectUrl) setTimeout(() => URL.revokeObjectURL(objectUrl!), 1000);
+      lock.current = false;
+      setBusy(false);
+    }
+  }
+  async function save() {
+    if (lock.current || !onSaveTemplate) return;
+    lock.current = true;
+    setBusy(true);
+    setError("");
+    setSaved(false);
+    try {
+      await onSaveTemplate(selected);
+      setSaved(true);
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      lock.current = false;
+      setBusy(false);
     }
   }
   return (
     <div className="tea-qr-preview">
-      <div ref={ref}>
-        <QRCodeSVG
-          value={url}
-          size={224}
-          marginSize={4}
-          level="H"
-          title={`QR de ${label}`}
-        />
-      </div>
+      <fieldset className="tea-template-picker" disabled={busy}>
+        <legend>Elegí el diseño de tu placa</legend>
+        <div>
+          {qrTemplates.map((template) => (
+            <label
+              key={template.id}
+              className={`tea-template-choice ${selected === template.id ? "selected" : ""}`}
+            >
+              <input
+                type="radio"
+                name={groupId}
+                value={template.id}
+                checked={selected === template.id}
+                onChange={() => {
+                  setSelected(template.id);
+                  setSaved(false);
+                }}
+              />
+              <span
+                className={`tea-template-swatch ${template.id}`}
+                aria-hidden="true"
+              />
+              <strong>{template.name}</strong>
+              <small>{template.description}</small>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <div
+        className="tea-plate-preview"
+        dangerouslySetInnerHTML={{ __html: plate.svg }}
+      />
+      <p className="tea-print-size">
+        {plate.width / 10} × {plate.height / 10} mm · listo para imprimir
+      </p>
       <div className="tea-actions">
-        <button className="button" onClick={() => void download("png")}>
+        <button
+          disabled={busy}
+          className="button"
+          onClick={() => void download("png")}
+        >
           Descargar PNG
         </button>
-        <button className="tea-secondary" onClick={() => void download("svg")}>
+        <button
+          disabled={busy}
+          className="tea-secondary"
+          onClick={() => void download("svg")}
+        >
           Descargar SVG
         </button>
+        {onSaveTemplate && (
+          <button
+            disabled={busy}
+            className="tea-secondary"
+            onClick={() => void save()}
+          >
+            Guardar diseño
+          </button>
+        )}
       </div>
       <a
         className="tea-link"
@@ -71,6 +151,7 @@ export function QrDownload({ url, label }: { url: string; label: string }) {
       >
         Probar mi QR
       </a>
+      {saved && <p role="status">Diseño guardado en tu cuenta.</p>}
       {error && <p role="alert">{error}</p>}
     </div>
   );
@@ -78,6 +159,7 @@ export function QrDownload({ url, label }: { url: string; label: string }) {
 export default function WhatsappPanel() {
   const rows = useQuery(api.teaviso.myWhatsappQrs, {});
   const save = useMutation(api.teaviso.saveWhatsappQr);
+  const saveTemplate = useMutation(api.teaviso.saveQrTemplate);
   const archive = useMutation(api.teaviso.archiveWhatsappQr);
   const [editing, setEditing] = useState<
     Id<"teavisoWhatsappQrs"> | undefined
@@ -142,8 +224,8 @@ export default function WhatsappPanel() {
   return (
     <div className="tea-stack">
       <header>
-        <span className="eyebrow">GRATIS · SIN SUSCRIPCIÓN</span>
-        <h1>Mis QR de WhatsApp</h1>
+        <span className="eyebrow">TU ENTRADA · A TU ESTILO</span>
+        <h1>Mis entradas</h1>
         <p>Editá el número o el mensaje sin cambiar el QR que ya imprimiste.</p>
       </header>
       <section className="tea-card">
@@ -202,7 +284,7 @@ export default function WhatsappPanel() {
             </label>
             <div className="tea-actions">
               <button className="button" type="submit">
-                {busy ? "Guardando…" : "Guardar QR gratis"}
+                {busy ? "Guardando…" : "Guardar entrada"}
               </button>
               {item && (
                 <button
@@ -227,7 +309,7 @@ export default function WhatsappPanel() {
       ) : rows.length === 0 ? (
         <section className="tea-card">
           <h2>Tu primer QR empieza acá</h2>
-          <p>Guardá tu WhatsApp arriba y descargá el código para imprimirlo.</p>
+          <p>Configurá tu contacto y elegí una placa lista para imprimir.</p>
         </section>
       ) : (
         <div className="tea-grid">
@@ -240,7 +322,14 @@ export default function WhatsappPanel() {
                 </span>
               </div>
               <p>+{row.phone}</p>
-              <QrDownload url={qrUrl(row.token)} label={row.label} />
+              <QrDownload
+                url={qrUrl(row.token)}
+                label={row.label}
+                initialTemplate={row.qrTemplate}
+                onSaveTemplate={(template) =>
+                  saveTemplate({ kind: "personal", id: row._id, template })
+                }
+              />
               {!row.enabled && (
                 <p className="tea-muted">
                   El QR está pausado. Activálo al editar para que vuelva a

@@ -109,10 +109,10 @@ function Shell({ children }: { children: ReactNode }) {
             <LayoutDashboard /> Mi panel
           </NavLink>
           <NavLink to="/panel/whatsapp">
-            <QrCode /> WhatsApp gratis
+            <QrCode /> Mis entradas
           </NavLink>
           <NavLink to="/panel/business">
-            <MessageCircle /> WhatsApp Business
+            <MessageCircle /> Servicio asistido
           </NavLink>
           <NavLink to="/timbre">
             <BellRing /> Timbre digital
@@ -177,19 +177,19 @@ function Dashboard() {
       <div className="tea-dashboard-cards">
         <article className="tea-card">
           <QrCode />
-          <span className="tea-badge">Gratis</span>
-          <h2>Tu WhatsApp con QR</h2>
+          <span className="tea-badge">Esencial</span>
+          <h2>Tu entrada, a tu estilo</h2>
           <p>
             Creá, editá y descargá tus QR. Cambiá el número sin reimprimirlos.
           </p>
           <Link className="button" to="/panel/whatsapp">
-            Administrar mis QR
+            Administrar mis entradas
           </Link>
         </article>
         <article className="tea-card">
           <MessageCircle />
-          <span className="tea-badge">Pago</span>
-          <h2>WhatsApp Business</h2>
+          <span className="tea-badge">Asistido</span>
+          <h2>Servicio asistido</h2>
           <p>
             Número dedicado, QR y configuración inicial. Seguí tu solicitud y su
             preparación.

@@ -4,6 +4,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { errorText, money, qrUrl } from "./config";
 import { QrDownload } from "./qr";
+import type { QrTemplate } from "./qr-templates";
 
 const labels = {
   requested: "Solicitud recibida",
@@ -20,11 +21,13 @@ function ActiveBusiness({
     _id: Id<"teavisoBusinessRequests">;
     businessName: string;
     assignedPhone?: string;
+    qrTemplate?: QrTemplate;
     token: string;
     message: string;
     enabled: boolean;
   };
 }) {
+  const saveTemplate = useMutation(api.teaviso.saveQrTemplate);
   const update = useMutation(api.teaviso.updateBusinessContact);
   const [busy, setBusy] = useState(false);
   const lock = useRef(false);
@@ -33,7 +36,14 @@ function ActiveBusiness({
   return (
     <>
       <p>WhatsApp del servicio: +{row.assignedPhone}</p>
-      <QrDownload url={qrUrl(row.token)} label={row.businessName} />
+      <QrDownload
+        url={qrUrl(row.token)}
+        label={row.businessName}
+        initialTemplate={row.qrTemplate}
+        onSaveTemplate={(template) =>
+          saveTemplate({ kind: "business", id: row._id, template })
+        }
+      />
       <form
         onSubmit={(e) => {
           e.preventDefault();

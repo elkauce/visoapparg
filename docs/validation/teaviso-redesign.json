@@ -1,0 +1,19 @@
+{
+  "checks": 30,
+  "widths": [1440, 390, 320],
+  "allEightQrExportsDecoded": true,
+  "publicCopyNoWhatsappOrFree": true,
+  "fixtures": "synthetic accounts; actual components and exporters",
+  "published": false,
+  "status": "pending_visual_approval",
+  "tests": {
+    "passed": 935,
+    "files": 98
+  },
+  "build": "passed",
+  "backendTypecheck": "passed",
+  "eslint": "passed",
+  "webPublished": false,
+  "backendPublished": false,
+  "existingFreeTierUnchanged": true
+}

@@ -121,7 +121,7 @@ export default function Auth() {
               {pending
                 ? "Procesando…"
                 : flow === "signUp"
-                  ? "Crear cuenta gratis"
+                  ? "Crear cuenta"
                   : "Ingresar"}
             </button>
           </fieldset>
@@ -138,7 +138,8 @@ export default function Auth() {
           {flow === "signIn" ? "Crear una cuenta" : "Ya tengo una cuenta"}
         </button>
         <small>
-          El registro no contrata servicios pagos. Tu QR a WhatsApp es gratuito.
+          El registro no contrata servicios pagos. Elegí cómo recibir desde tu
+          panel.
         </small>
       </section>
     </main>

@@ -24,6 +24,7 @@ const f = vi.hoisted(() => ({
   request: vi.fn(),
   checkout: vi.fn(),
   archive: vi.fn(),
+  template: vi.fn(),
 }));
 vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: f.signIn }),
@@ -43,6 +44,7 @@ vi.mock("convex/react", () => ({
       "teaviso:saveWhatsappQr": f.save,
       "teaviso:requestBusiness": f.request,
       "teaviso:archiveWhatsappQr": f.archive,
+      "teaviso:saveQrTemplate": f.template,
     })[getFunctionName(ref)],
   useAction: () => f.checkout,
 }));
@@ -56,11 +58,19 @@ beforeEach(() => {
   f.qrs = [];
   f.requests = [];
   f.contact = null;
-  for (const mock of [f.signIn, f.save, f.request, f.checkout, f.archive])
+  for (const mock of [
+    f.signIn,
+    f.save,
+    f.request,
+    f.checkout,
+    f.archive,
+    f.template,
+  ])
     mock.mockReset();
   f.signIn.mockResolvedValue({});
   f.save.mockResolvedValue("id");
   f.request.mockResolvedValue("request");
+  f.template.mockResolvedValue(null);
 });
 describe("Te a Viso own account", () => {
   it("signs in with existing VISO credentials and normalizes email", async () => {
@@ -92,9 +102,7 @@ describe("Te a Viso own account", () => {
       "new@example.com",
     );
     await userEvent.type(screen.getByLabelText("Contraseña"), "newpassword");
-    await userEvent.click(
-      screen.getByRole("button", { name: "Crear cuenta gratis" }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
     expect(f.signIn).toHaveBeenCalledWith("password", {
       email: "new@example.com",
       password: "newpassword",
@@ -132,7 +140,7 @@ describe("QR account panel", () => {
     );
     await userEvent.click(screen.getByLabelText(/Tengo permiso/));
     await userEvent.click(
-      screen.getByRole("button", { name: "Guardar QR gratis" }),
+      screen.getByRole("button", { name: "Guardar entrada" }),
     );
     expect(f.save).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -170,7 +178,7 @@ describe("QR account panel", () => {
     );
     await userEvent.click(screen.getByLabelText(/Tengo permiso/));
     await userEvent.click(
-      screen.getByRole("button", { name: "Guardar QR gratis" }),
+      screen.getByRole("button", { name: "Guardar entrada" }),
     );
     expect(f.save).toHaveBeenCalledWith(
       expect.objectContaining({ id: "qr1", phone: "5491187654321" }),
@@ -265,5 +273,38 @@ describe("Business purchase clarity", () => {
         name: "Pagar configuración con Mercado Pago",
       }),
     ).toBeDisabled();
+  });
+});
+
+describe("Plate selection", () => {
+  it("previews all four templates and saves the chosen design for the exact account entry", async () => {
+    f.qrs = [
+      {
+        _id: "qr1",
+        label: "Mi oficina",
+        phone: "5491112345678",
+        message: "Hola",
+        enabled: true,
+        token: "a".repeat(64),
+      },
+    ];
+    mount(<WhatsappPanel />);
+    expect(screen.getAllByRole("radio")).toHaveLength(4);
+    await userEvent.click(screen.getByRole("radio", { name: /Noche/ }));
+    expect(screen.getByRole("radio", { name: /Noche/ })).toBeChecked();
+    expect(
+      screen.getByRole("img", { name: "Placa Noche: Mi oficina" }),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Guardar diseño" }),
+    );
+    expect(f.template).toHaveBeenCalledWith({
+      kind: "personal",
+      id: "qr1",
+      template: "night",
+    });
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Diseño guardado",
+    );
   });
 });

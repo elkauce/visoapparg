@@ -1,5 +1,11 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+export const teavisoQrTemplate = v.union(
+  v.literal("minimal"),
+  v.literal("night"),
+  v.literal("signal"),
+  v.literal("urban"),
+);
 export const businessStatus = v.union(
   v.literal("requested"),
   v.literal("awaiting_payment"),
@@ -15,6 +21,7 @@ export const teavisoTables = {
     phone: v.string(),
     message: v.string(),
     token: v.string(),
+    qrTemplate: v.optional(teavisoQrTemplate),
     enabled: v.boolean(),
     archived: v.boolean(),
     consentAt: v.number(),
@@ -40,6 +47,7 @@ export const teavisoTables = {
     status: businessStatus,
     enabled: v.boolean(),
     token: v.string(),
+    qrTemplate: v.optional(teavisoQrTemplate),
     assignedPhone: v.optional(v.string()),
     message: v.string(),
     orderId: v.optional(v.id("marketplaceOrders")),

@@ -139,3 +139,9 @@ de navegador publicadas correctas. No se creó usuario de prueba ni se completó
 consentimiento Google, pago o llamada real. Oferta Business sin precio configurado
 y cobros globales deshabilitados. Informe: `docs/validation/teaviso-production.json`.
 Convex informó límites del plan gratuito; las funciones se publicaron y respondieron.
+
+## Revisión visual pendiente
+
+La propuesta grafito/azul, la nueva comunicación y las cuatro placas imprimibles
+están listas en código pero **todavía no publicadas**. La web pública conserva
+la identidad anterior. Detalles y validación en `docs/teaviso-redesign.md`.

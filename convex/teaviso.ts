@@ -1,3 +1,4 @@
+import { teavisoQrTemplate } from "./teaviso_tables";
 import { v, ConvexError } from "convex/values";
 import { query, mutation, internalMutation, action } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
@@ -427,5 +428,43 @@ export const updateBusinessContact = mutation({
       enabled: args.enabled,
       updatedAt: Date.now(),
     });
+  },
+});
+
+export const saveQrTemplate = mutation({
+  args: {
+    kind: v.union(v.literal("personal"), v.literal("business")),
+    id: v.string(),
+    template: teavisoQrTemplate,
+  },
+  handler: async (ctx, args) => {
+    const user = await requireCurrentUser(ctx);
+    if (args.kind === "personal") {
+      const id = ctx.db.normalizeId("teavisoWhatsappQrs", args.id);
+      const row = id ? await ctx.db.get("teavisoWhatsappQrs", id) : null;
+      if (!row || row.ownerId !== user._id || row.archived)
+        throw new ConvexError("No se encontró esa entrada en tu cuenta.");
+      await ctx.db.patch("teavisoWhatsappQrs", row._id, {
+        qrTemplate: args.template,
+        updatedAt: Date.now(),
+      });
+    } else {
+      const id = ctx.db.normalizeId("teavisoBusinessRequests", args.id);
+      const row = id ? await ctx.db.get("teavisoBusinessRequests", id) : null;
+      if (
+        !row ||
+        row.ownerId !== user._id ||
+        row.status !== "active" ||
+        !row.orderId
+      )
+        throw new ConvexError("El servicio no está activo en tu cuenta.");
+      const order = await ctx.db.get("marketplaceOrders", row.orderId);
+      if (order?.status !== "approved" || order.buyerId !== user._id)
+        throw new ConvexError("El pago del servicio no está aprobado.");
+      await ctx.db.patch("teavisoBusinessRequests", row._id, {
+        qrTemplate: args.template,
+        updatedAt: Date.now(),
+      });
+    }
   },
 });
