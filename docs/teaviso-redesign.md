@@ -42,3 +42,16 @@ backend y ESLint correctos. 30 comprobaciones de navegador en anchos 1440, 390 y
 con jsQR y devolvieron el enlace original. Navegador con cuentas sintéticas,
 sin acceso a producción, mensajes ni cobros. Capturas en
 `artifacts/teaviso/redesign/`.
+
+## Latido y colores del cuadro principal
+
+El cuadro del hero muestra un doble latido de luz cada 3,2 segundos. Recorre los
+seis colores de `VISO_STATES` en un ciclo de 36 segundos con transiciones suaves:
+Libre, Ocupado, Reunión, Llamada, No molestar y Ausente. Es una demostración visual;
+no modifica estados, luces, llamadas ni datos de la cuenta. No usa temporizadores
+JavaScript. Con movimiento reducido se desactivan ambas animaciones.
+
+Verificación real en Chromium: 22 comprobaciones en escritorio y móvil, incluyendo
+los seis colores exactos, cambio de luminosidad, ausencia de desbordamiento y
+movimiento reducido. Vista animada local en `artifacts/teaviso/heartbeat/latidos.gif`.
+Sigue pendiente de aprobación y publicación junto con el resto de la revisión.

@@ -780,3 +780,81 @@ footer > a:last-child {
     top: -4px;
   }
 }
+@property --tea-state-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #22c55e;
+}
+.tea-status-scene {
+  --tea-state-color: #22c55e;
+  isolation: isolate;
+  background: #17191d;
+  border-color: color-mix(in srgb, var(--tea-state-color) 44%, #17191d);
+  box-shadow:
+    0 24px 70px #17191d18,
+    0 0 40px color-mix(in srgb, var(--tea-state-color) 12%, transparent);
+  animation: tea-state-cycle 36s linear infinite;
+}
+.tea-status-scene::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 65% 35%,
+    var(--tea-state-color),
+    transparent 68%
+  );
+  opacity: 0.33;
+  transform: scale(0.96);
+  animation: tea-scene-heartbeat 3.2s ease-in-out infinite;
+}
+.tea-status-scene .scene-label,
+.tea-status-scene .scene-foot {
+  color: color-mix(in srgb, var(--tea-state-color) 24%, #fff);
+}
+.tea-status-scene .scene-label .dot {
+  background: var(--tea-state-color);
+  box-shadow: 0 0 12px
+    color-mix(in srgb, var(--tea-state-color) 80%, transparent);
+}
+.tea-status-scene .notice > span:first-child {
+  background: color-mix(in srgb, var(--tea-state-color) 15%, white);
+  color: #17191d;
+}
+@keyframes tea-scene-heartbeat {
+  0%,
+  36%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.96);
+  }
+  12% {
+    opacity: 0.54;
+    transform: scale(1.025);
+  }
+  23% {
+    opacity: 0.36;
+    transform: scale(0.985);
+  }
+  29% {
+    opacity: 0.47;
+    transform: scale(1.012);
+  }
+  65% {
+    opacity: 0.34;
+    transform: scale(0.975);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tea-status-scene {
+    animation: none;
+    --tea-state-color: #22c55e;
+  }
+  .tea-status-scene::before {
+    animation: none;
+    transform: none;
+    opacity: 0.33;
+  }
+}

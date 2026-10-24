@@ -1,0 +1,8 @@
+{
+  "checks": 22,
+  "widths": [1440, 390],
+  "sixExactVisoColors": true,
+  "doublePulse": true,
+  "reducedMotionRespected": true,
+  "published": false
+}

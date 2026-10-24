@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { makeQrPlate, qrTemplates } from "./qr-templates";
 import "./style.css";
+import StatusScene from "./status-scene";
 
 const configuredViso =
   import.meta.env.VITE_VISO_ORIGIN || "https://viso-deck-android.vercel.app";
@@ -72,7 +73,7 @@ export default function Landing() {
               atender.
             </div>
           </div>
-          <div className="scene">
+          <StatusScene>
             <span className="scene-label">
               <span className="dot" /> TU ENTRADA YA ESTÁ CONECTADA
             </span>
@@ -97,7 +98,7 @@ export default function Landing() {
               <span className="notice-time">ahora</span>
             </div>
             <span className="scene-foot">DISEÑADO PARA RECIBIR MEJOR</span>
-          </div>
+          </StatusScene>
         </section>
         <section id="opciones" className="options">
           <div className="section-heading">
