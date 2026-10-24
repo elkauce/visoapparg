@@ -24,13 +24,13 @@ export const timbreTables = {
     messagesEnabled: v.boolean(), notificationsEnabled: v.boolean(),
     mutedUntil: v.optional(v.number()), schedule: timbreSchedule,
     recipientIds: v.array(v.id("users")), fallbackRecipientIds: v.optional(v.array(v.id("users"))), fallbackAfterSeconds: v.number(),
-    absenceMessage: v.optional(v.string()),
+    absenceMessage: v.optional(v.string()), telegramUsername: v.optional(v.string()),
     signalStatusOnAccept: v.optional(v.boolean()), ringStatusId: v.optional(v.id("statuses")),
     createdAt: v.number(), updatedAt: v.number(),
   }).index("by_owner", ["ownerId"]).index("by_license", ["licenseId"]),
   timbreUnits: defineTable({
     siteId: v.id("timbreSites"), name: v.string(), enabled: v.boolean(),
-    recipientIds: v.array(v.id("users")), order: v.number(),
+    recipientIds: v.array(v.id("users")), order: v.number(), telegramUsername: v.optional(v.string()),
     createdAt: v.number(), updatedAt: v.number(),
   }).index("by_site", ["siteId"]).index("by_site_enabled", ["siteId", "enabled"]),
   timbreMembers: defineTable({

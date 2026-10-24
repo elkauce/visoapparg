@@ -9,6 +9,8 @@ const fixture = vi.hoisted(() => ({
   qr: null as null | Record<string, unknown>,
   rtc: true,
   session: null as null | Record<string, unknown>,
+  telegram: null as null | { username: string; url: string },
+  telegramUnitId: null as string | null,
   mutations: {} as Record<string, ReturnType<typeof vi.fn>>,
   query: vi.fn(),
 }));
@@ -24,6 +26,14 @@ vi.mock("convex/react", () => ({
     if (name === "timbre_calls:rtcAvailability")
       return { available: fixture.rtc };
     if (name === "timbre_calls:session") return fixture.session;
+    if (name === "timbre_telegram:publicContact") {
+      if (
+        fixture.telegramUnitId &&
+        (args as { unitId?: string }).unitId !== fixture.telegramUnitId
+      )
+        return null;
+      return fixture.telegram;
+    }
     return [];
   },
   useMutation: (reference: Parameters<typeof getFunctionName>[0]) => {
@@ -76,6 +86,8 @@ beforeEach(() => {
     reason: "available",
   };
   fixture.rtc = true;
+  fixture.telegram = null;
+  fixture.telegramUnitId = null;
   fixture.session = {
     siteName: "Oficina VISO",
     mode: "audio",
@@ -95,6 +107,75 @@ afterEach(() => {
 });
 
 describe("Timbre public visitor", () => {
+  it("opens the configured Telegram profile without media capture or a VISO call, even without TURN", async () => {
+    const user = userEvent.setup();
+    const getUserMedia = vi.fn();
+    vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });
+    fixture.rtc = false;
+    fixture.telegram = {
+      username: "visit_owner",
+      url: "https://t.me/visit_owner",
+    };
+    show();
+    const link = screen.getByRole("link", { name: "Abrir Telegram" });
+    expect(link).toHaveAttribute("href", "https://t.me/visit_owner");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    expect(link).toHaveAttribute("referrerpolicy", "no-referrer");
+    expect(screen.getByText(/Necesitás Telegram/)).toBeInTheDocument();
+    link.addEventListener("click", (event) => event.preventDefault());
+    await user.click(link);
+    expect(getUserMedia).not.toHaveBeenCalled();
+    expect(fixture.mutations["timbre_calls:startCall"]).not.toHaveBeenCalled();
+  });
+  it("hides even a stale Telegram contact while the site is muted or the QR is unavailable", () => {
+    fixture.telegram = {
+      username: "visit_owner",
+      url: "https://t.me/visit_owner",
+    };
+    fixture.qr = { ...fixture.qr!, available: false, reason: "muted" };
+    const view = show();
+    expect(
+      screen.queryByRole("link", { name: "Abrir Telegram" }),
+    ).not.toBeInTheDocument();
+    expect(fixture.query).toHaveBeenCalledWith(
+      "timbre_telegram:publicContact",
+      "skip",
+    );
+    view.unmount();
+    fixture.qr = null;
+    show();
+    expect(
+      screen.queryByRole("link", { name: "Abrir Telegram" }),
+    ).not.toBeInTheDocument();
+  });
+  it("resolves an office unit's own contact after selection without requiring a unit for native general calls", async () => {
+    const user = userEvent.setup();
+    fixture.qr = {
+      ...fixture.qr!,
+      units: [{ id: "unit-telegram", name: "Consultorio 2" }],
+    };
+    fixture.telegram = {
+      username: "unit_owner",
+      url: "https://t.me/unit_owner",
+    };
+    fixture.telegramUnitId = "unit-telegram";
+    show();
+    expect(
+      screen.queryByRole("link", { name: "Abrir Telegram" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Llamar" })).toBeEnabled();
+    await user.selectOptions(
+      screen.getByRole("combobox", { name: "¿A quién visitás?" }),
+      "unit-telegram",
+    );
+    expect(fixture.query).toHaveBeenCalledWith(
+      "timbre_telegram:publicContact",
+      { qrToken: "opaque-qr", unitId: "unit-telegram" },
+    );
+    expect(
+      screen.getByRole("link", { name: "Abrir Telegram" }),
+    ).toHaveAttribute("href", "https://t.me/unit_owner");
+  });
   it("needs no account and requests no devices until a call gesture", () => {
     const getUserMedia = vi.fn();
     vi.stubGlobal("navigator", { mediaDevices: { getUserMedia } });

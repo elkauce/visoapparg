@@ -127,6 +127,17 @@
   accent-color: #e84300;
   flex-shrink: 0;
 }
+.vt-form .vt-telegram-consent {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+}
+.vt-telegram-consent > span {
+  flex: 1;
+}
+.vt-telegram-consent > input {
+  margin-top: 2px;
+}
 .vt-notice {
   padding: 20px;
   background: #fff2dc;

@@ -23,6 +23,7 @@ import { TimbreMessages } from "./call-session";
 import { TimbreNotificationSettings } from "@/components/timbre-incoming";
 import { TimbrePushSettings } from "@/components/timbre-push";
 import { timbrePublicOrigin, timbrePublicQrUrl } from "@/lib/timbre-public-url";
+import TelegramContactSettings from "./telegram-settings";
 import "./timbre.css";
 
 type Site = FunctionReturnType<typeof api.timbre.workspace>["sites"][number];
@@ -592,6 +593,16 @@ function SiteQrs({ site, manager }: { site: Site; manager: boolean }) {
 
 function SiteSettings({ site }: { site: Site }) {
   const save = useMutation(api.timbre.saveSiteSettings);
+  const units = useQuery(
+    api.timbre.listUnits,
+    site.kind === "home" ? "skip" : { siteId: site._id },
+  );
+  const unitContactsRequired =
+    site.kind === "building" ||
+    (site.kind === "office" && units?.some((unit) => unit.enabled));
+  const telegramLicensed =
+    site.licenseActive &&
+    !!(site.licensedFeatures?.audio || site.licensedFeatures?.video);
   const update = (
     patch: Partial<
       Pick<
@@ -669,6 +680,39 @@ function SiteSettings({ site }: { site: Site }) {
             Quitar silencio
           </Button>
         </div>
+      </Card>
+      <Card title="Atender por Telegram (opcional)">
+        {site.kind === "office" && units === undefined ? (
+          <p role="status">Cargando los contactos del Timbre…</p>
+        ) : unitContactsRequired ? (
+          <>
+            <p>
+              Configurá Telegram de cada unidad en Integrantes y unidades →
+              Unidades y sectores. Cada visitante verá el contacto de la unidad
+              que elija.
+            </p>
+            {site.telegramUsername && (
+              <details className="vt-details">
+                <summary>Contacto general anterior</summary>
+                <p>
+                  Este contacto general deja de aparecer cuando se usan
+                  unidades. Podés quitarlo aquí.
+                </p>
+                <TelegramContactSettings
+                  siteId={site._id}
+                  username={site.telegramUsername}
+                  canEnable={false}
+                />
+              </details>
+            )}
+          </>
+        ) : (
+          <TelegramContactSettings
+            siteId={site._id}
+            username={site.telegramUsername}
+            canEnable={telegramLicensed}
+          />
+        )}
       </Card>
       <Card title="Nombre y respuesta de ausencia">
         <form
@@ -1219,6 +1263,22 @@ function SiteMembers({ site }: { site: Site }) {
                   void timbreTask(() => saveUnit({ unitId: unit._id, enabled }))
                 }
               />
+              <section className="vt-stack">
+                <h3>Telegram de esta unidad</h3>
+                <TelegramContactSettings
+                  siteId={site._id}
+                  unitId={unit._id}
+                  username={unit.telegramUsername}
+                  canEnable={
+                    unit.enabled &&
+                    site.licenseActive &&
+                    !!(
+                      site.licensedFeatures?.audio ||
+                      site.licensedFeatures?.video
+                    )
+                  }
+                />
+              </section>
               {members
                 ?.filter(
                   (member) =>
