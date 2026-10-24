@@ -16,15 +16,14 @@ describe("Printable plate integrity", () => {
         "image/svg+xml",
       );
       expect(document.querySelector("parsererror")).toBeNull();
+      const qrPath = document.querySelector(
+        'path[shape-rendering="crispEdges"]',
+      );
+      expect(qrPath).not.toBeNull();
       expect(
-        document.querySelector('svg svg path[shape-rendering="crispEdges"]'),
-      ).not.toBeNull();
-      expect(document.querySelector("svg svg rect")?.getAttribute("fill")).toBe(
-        "#fff",
-      );
-      expect(document.querySelector("svg svg path")?.getAttribute("d")).toMatch(
-        /M4 /,
-      );
+        qrPath?.parentElement?.querySelector("rect")?.getAttribute("fill"),
+      ).toBe("#fff");
+      expect(qrPath?.getAttribute("d")).toMatch(/M4 /);
     }
     expect(urls[3].width).toBeGreaterThan(urls[3].height);
   });

@@ -70,8 +70,10 @@ export default function Auth() {
   return (
     <main className="tea-auth">
       <Link className="brand" to="/">
-        <img src="/symbol.svg" alt="" />
-        te a viso
+        <span className="tea-original-symbol" aria-hidden="true">
+          <img src="/brand/viso-logo.png" alt="" />
+        </span>
+        Te a Viso
       </Link>
       <section className="tea-card">
         <span className="eyebrow">TU PUERTA, CONECTADA</span>

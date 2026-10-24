@@ -1,26 +1,26 @@
 :root {
-  --background: #f5f7fb;
-  --foreground: #172033;
-  --primary: #315bff;
+  --background: #f5f3ef;
+  --foreground: #17191d;
+  --primary: #e84300;
   --primary-foreground: #fff;
   --card: #fff;
-  --card-foreground: #172033;
-  --muted: #edf1f8;
-  --muted-foreground: #627087;
+  --card-foreground: #17191d;
+  --muted: #eee9e1;
+  --muted-foreground: #60646c;
   --popover: #fff;
-  --popover-foreground: #172033;
-  --border: #e0e5ef;
-  --input: #e0e5ef;
-  --accent: #e5ecff;
-  --accent-foreground: #315bff;
-  --secondary: #edf1f8;
-  --secondary-foreground: #172033;
+  --popover-foreground: #17191d;
+  --border: #e2ddd5;
+  --input: #e2ddd5;
+  --accent: #f9e5d7;
+  --accent-foreground: #e84300;
+  --secondary: #eee9e1;
+  --secondary-foreground: #17191d;
   --destructive: #a6352c;
-  --ring: #315bff;
+  --ring: #e84300;
 }
 body {
-  background: #f5f7fb;
-  color: #172033;
+  background: #f5f3ef;
+  color: #17191d;
 }
 .tea-shell h1,
 .tea-auth h1,
@@ -47,7 +47,7 @@ body {
   font-size: 14px;
   line-height: 1.8;
   margin: 8px 0 18px;
-  color: #627087;
+  color: #60646c;
 }
 .tea-shell {
   display: grid;
@@ -55,8 +55,8 @@ body {
   min-height: 100dvh;
 }
 .tea-sidebar {
-  border-right: 1px solid #e0e5ef;
-  background: #f0f3fa;
+  border-right: 1px solid #e2ddd5;
+  background: #f0ede7;
   padding: 32px 20px;
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@ body {
   height: 19px;
 }
 .tea-sidebar nav a.active {
-  background: #315bff;
+  background: #e84300;
   color: #fff;
 }
 .tea-sidebar-bottom {
@@ -114,7 +114,7 @@ body {
 }
 .tea-card {
   padding: 28px;
-  border: 1px solid #e0e5ef;
+  border: 1px solid #e2ddd5;
   border-radius: 22px;
   background: #fff;
   min-width: 0;
@@ -141,8 +141,8 @@ body {
   display: inline-flex;
   padding: 5px 11px;
   border-radius: 20px;
-  background: #edf1ff;
-  color: #315bff;
+  background: #fff0e6;
+  color: #e84300;
   font-size: 10px;
   font-weight: 600;
 }
@@ -177,9 +177,9 @@ body {
   max-width: 100%;
   padding: 12px 14px;
   background: #fff;
-  border: 1px solid #d3dbea;
+  border: 1px solid #d5d0c6;
   border-radius: 10px;
-  color: #172033;
+  color: #17191d;
 }
 .tea-shell textarea {
   min-height: 95px;
@@ -200,24 +200,24 @@ body {
   padding: 0;
   margin-top: 3px;
   flex-shrink: 0;
-  accent-color: #315bff;
+  accent-color: #e84300;
 }
 .tea-shell small,
 .tea-auth small,
 .tea-visitor small {
   display: block;
-  color: #627087;
+  color: #60646c;
   font-size: 11px;
   line-height: 1.7;
 }
 .tea-secondary {
   padding: 12px 18px;
-  border: 1px solid #d3dbea;
+  border: 1px solid #d5d0c6;
   border-radius: 40px;
-  background: #f0f3fa;
+  background: #f0ede7;
   font-size: 12px;
   cursor: pointer;
-  color: #172033;
+  color: #17191d;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -232,7 +232,7 @@ body {
 }
 .tea-muted {
   font-size: 12px !important;
-  color: #627087 !important;
+  color: #60646c !important;
 }
 .tea-link {
   font-size: 12px;
@@ -286,8 +286,8 @@ body {
   margin: 20px 0;
 }
 .tea-welcome {
-  background: #edf1ff;
-  border: 1px solid #d5dfff;
+  background: #fff0e6;
+  border: 1px solid #efd6c6;
   display: flex;
   align-items: center;
   gap: 18px;
@@ -341,22 +341,22 @@ body {
   font:
     800 26px Manrope,
     sans-serif;
-  color: #315bff;
+  color: #e84300;
 }
 .tea-brand-mark img {
   width: 38px;
   height: 38px;
 }
 .vt-public {
-  --primary: #315bff;
-  color: #172033;
+  --primary: #e84300;
+  color: #17191d;
 }
 .tea-shell .vt-eyebrow {
-  color: #315bff;
+  color: #e84300;
 }
 .tea-shell .vt-segmented button[aria-pressed="true"] {
-  color: #315bff;
-  background: #edf1ff;
+  color: #e84300;
+  background: #fff0e6;
 }
 .tea-shell .vt-form input[type="checkbox"] {
   max-width: 20px;
@@ -398,7 +398,7 @@ body {
     padding: 18px 18px 14px;
     gap: 18px;
     border-right: 0;
-    border-bottom: 1px solid #e0e5ef;
+    border-bottom: 1px solid #e2ddd5;
   }
   .tea-sidebar nav {
     display: flex;
@@ -469,8 +469,8 @@ body {
   width: 100%;
 }
 .tea-template-choice {
-  border: 1px solid #dbe2ef;
-  background: #f7f9fc;
+  border: 1px solid #e0d9d0;
+  background: #faf8f4;
   padding: 12px;
   border-radius: 13px;
   cursor: pointer;
@@ -478,9 +478,9 @@ body {
   gap: 5px !important;
 }
 .tea-template-choice.selected {
-  border-color: #315bff;
-  background: #edf1ff;
-  box-shadow: 0 0 0 1px #315bff;
+  border-color: #e84300;
+  background: #fff0e6;
+  box-shadow: 0 0 0 1px #e84300;
 }
 .tea-template-choice input {
   position: absolute;
@@ -488,7 +488,7 @@ body {
   top: 10px;
   width: 15px;
   height: 15px;
-  accent-color: #315bff;
+  accent-color: #e84300;
 }
 .tea-template-choice strong {
   font-size: 12px;
@@ -501,28 +501,28 @@ body {
   width: 24px;
   height: 30px;
   border-radius: 4px;
-  border: 1px solid #c9d2e4;
+  border: 1px solid #d8cec4;
   margin-bottom: 5px;
   background: white;
 }
 .tea-template-swatch.night {
-  background: #111827;
-  border-color: #111827;
+  background: #17191d;
+  border-color: #17191d;
 }
 .tea-template-swatch.signal {
-  background: #315bff;
-  border-color: #315bff;
+  background: #e84300;
+  border-color: #e84300;
 }
 .tea-template-swatch.urban {
   width: 36px;
   height: 24px;
-  background: linear-gradient(90deg, #111827 47%, #f5f7fc 47%);
+  background: linear-gradient(90deg, #17191d 47%, #f5f3ef 47%);
 }
 .tea-plate-preview {
   width: 100%;
   padding: 20px;
-  background: #eef1f7;
-  border: 1px solid #e0e5ef;
+  background: #ede8e1;
+  border: 1px solid #e2ddd5;
   border-radius: 17px;
   display: flex;
   align-items: center;
@@ -533,25 +533,25 @@ body {
   max-width: 100%;
   width: auto;
   height: auto;
-  filter: drop-shadow(0 7px 12px #1118271a);
+  filter: drop-shadow(0 7px 12px #17191d1a);
 }
 .tea-print-size {
   margin: 0 !important;
   font-size: 11px !important;
-  color: #627087;
+  color: #60646c;
 }
 .tea-panel .tea-qr-preview > p[role="status"] {
-  color: #315bff;
+  color: #e84300;
 }
 .tea-sidebar {
-  background: #f0f3fa;
+  background: #f0ede7;
 }
 .tea-sidebar nav a.active {
-  background: #111827;
+  background: #17191d;
 }
 .tea-welcome {
-  background: #edf1ff;
+  background: #fff0e6;
 }
 .tea-brand-mark {
-  color: #172033;
+  color: #17191d;
 }

@@ -1,11 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
   font-family: "DM Sans", sans-serif;
-  color: #172033;
-  background: #f5f7fb;
+  color: #17191d;
+  background: #f5f3ef;
   font-synthesis: none;
-  --brand: #315bff;
-  --tint: #e6ecff;
+  --brand: #e84300;
+  --tint: #ffe5d7;
 }
 * {
   box-sizing: border-box;
@@ -28,7 +28,7 @@ a {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible {
-  outline: 3px solid #315bff;
+  outline: 3px solid #e84300;
   outline-offset: 5px;
 }
 html {
@@ -91,7 +91,7 @@ footer {
   cursor: pointer;
 }
 .button:hover {
-  background: #2448dd;
+  background: #c93b00;
 }
 .button.small {
   padding: 13px 19px;
@@ -115,7 +115,7 @@ footer {
   height: 7px;
   width: 7px;
   border-radius: 50%;
-  background: #315bff;
+  background: #e84300;
 }
 h1,
 h2,
@@ -131,13 +131,13 @@ h1 {
 }
 h1 em {
   font-style: normal;
-  color: #315bff;
+  color: #e84300;
 }
 .hero p {
   max-width: 410px;
   font-size: 16px;
   line-height: 1.8;
-  color: #627087;
+  color: #60646c;
 }
 .actions {
   display: flex;
@@ -157,14 +157,14 @@ h1 em {
   gap: 8px;
   align-items: center;
   font-size: 11px;
-  color: #627087;
+  color: #60646c;
   margin-top: 29px;
 }
 .scene {
   height: 580px;
   border-radius: 32px;
   background:
-    radial-gradient(ellipse at 80% 10%, #dce5ff, transparent), #e9eefa;
+    radial-gradient(ellipse at 80% 10%, #f1c4ae, transparent), #eee9e1;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -180,8 +180,8 @@ h1 em {
 .door {
   height: 422px;
   width: 252px;
-  background: linear-gradient(100deg, #b4bfd8, #7b89a4);
-  border: 12px solid #c9d3e7;
+  background: linear-gradient(100deg, #d9c8bd, #8e7568);
+  border: 12px solid #ded6cc;
   border-bottom: 0;
   box-shadow: 16px 22px 40px #233c382e;
   position: relative;
@@ -192,14 +192,14 @@ h1 em {
   position: absolute;
   top: 22px;
   left: 23px;
-  color: #e4eaff;
+  color: #f5e8dc;
   font-size: 19px;
 }
 .door-handle {
   position: absolute;
   width: 8px;
   height: 65px;
-  background: #e2e9f8;
+  background: #f5e8dc;
   right: 17px;
   top: 208px;
   border-radius: 8px;
@@ -225,11 +225,11 @@ h1 em {
   display: block;
 }
 .sample-qr {
-  border: 1px solid #ccd7ef;
+  border: 1px solid #e5d8ce;
   border-radius: 8px;
   margin: 10px 0;
   padding: 13px;
-  color: #315bff;
+  color: #e84300;
 }
 .plaque span {
   font-size: 8px;
@@ -267,7 +267,7 @@ h1 em {
 .notice small {
   display: block;
   font-size: 11px;
-  color: #627087;
+  color: #60646c;
   margin-top: 5px;
 }
 .scene-foot {
@@ -293,7 +293,7 @@ h2 {
 }
 .cards article {
   position: relative;
-  border: 1px solid #e0e5ef;
+  border: 1px solid #e2ddd5;
   border-radius: 24px;
   padding: 29px;
   display: flex;
@@ -318,7 +318,7 @@ h2 {
 .ecosystem p {
   font-size: 14px;
   line-height: 1.8;
-  color: #627087;
+  color: #60646c;
 }
 .cards ul {
   list-style: none;
@@ -342,7 +342,7 @@ h2 {
   font-size: 13px;
   margin-top: auto;
   padding-top: 18px;
-  border-top: 1px solid #e0e5ef;
+  border-top: 1px solid #e2ddd5;
 }
 .cards .featured {
   background: var(--brand);
@@ -350,14 +350,14 @@ h2 {
   border-color: var(--brand);
 }
 .cards .featured p {
-  color: #d4dfff;
+  color: #f1d9ca;
 }
 .cards .featured > svg {
   color: var(--tint);
 }
 .soon {
   font-size: 12px;
-  color: #627087;
+  color: #60646c;
   margin-top: auto;
   padding-top: 18px;
 }
@@ -367,7 +367,7 @@ h2 {
   grid-template-columns: 1fr 1fr;
   gap: 65px;
   padding: 44px;
-  background: #edf1ff;
+  background: #fff0e6;
   border-radius: 28px;
 }
 .generator p.fine {
@@ -386,7 +386,7 @@ h2 {
 .qr-form input {
   width: 100%;
   margin: 12px 0 8px;
-  border: 1px solid #d3dbea;
+  border: 1px solid #d5d0c6;
   background: white;
   padding: 14px;
   border-radius: 10px;
@@ -394,7 +394,7 @@ h2 {
 }
 .qr-form small {
   display: block;
-  color: #627087;
+  color: #60646c;
   line-height: 1.6;
   font-size: 11px;
 }
@@ -436,7 +436,7 @@ h2 {
 }
 footer {
   padding: 28px 36px;
-  border-top: 1px solid #e0e5ef;
+  border-top: 1px solid #e2ddd5;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -539,17 +539,17 @@ footer > a:last-child {
     scroll-behavior: auto;
   }
 }
-/* Urban identity: graphite, white and electric blue. */
+/* VISO identity: warm neutral background, graphite and orange. */
 .scene {
   background:
-    radial-gradient(ellipse at 80% 15%, #315bff44, transparent 65%),
-    linear-gradient(140deg, #111827, #19243e);
-  border: 1px solid #263550;
-  box-shadow: 0 25px 70px #162a5b14;
+    radial-gradient(ellipse at 80% 15%, #e8430044, transparent 65%),
+    linear-gradient(140deg, #17191d, #30201c);
+  border: 1px solid #4a332a;
+  box-shadow: 0 25px 70px #351e1414;
 }
 .scene-label,
 .scene-foot {
-  color: #b5c3e0;
+  color: #dec3b4;
 }
 .scene-label {
   display: flex;
@@ -557,7 +557,7 @@ footer > a:last-child {
   gap: 8px;
 }
 .scene-label .dot {
-  background: #8da8ff;
+  background: #ffb080;
 }
 .hero-plate {
   width: 265px;
@@ -586,7 +586,7 @@ footer > a:last-child {
   bottom: 23px;
 }
 .section-heading > p {
-  color: #627087;
+  color: #60646c;
   font-size: 15px;
   line-height: 1.8;
   max-width: 500px;
@@ -596,7 +596,7 @@ footer > a:last-child {
   margin: 0 36px 80px;
   padding: 42px;
   border-radius: 30px;
-  background: #edf1f8;
+  background: #eee9e1;
 }
 .plate-showcase-grid {
   display: grid;
@@ -608,8 +608,8 @@ footer > a:last-child {
 }
 .plate-sample {
   height: 270px;
-  background: #e0e6f1;
-  border: 1px solid #d5ddea;
+  background: #e9e3db;
+  border: 1px solid #ded6cb;
   border-radius: 16px;
   display: flex;
   align-items: center;
@@ -622,7 +622,7 @@ footer > a:last-child {
   max-width: 100%;
   width: auto;
   height: auto;
-  filter: drop-shadow(0 8px 12px #11182718);
+  filter: drop-shadow(0 8px 12px #17191d18);
 }
 .plate-showcase-grid article > span {
   display: block;
@@ -634,7 +634,7 @@ footer > a:last-child {
   font-size: 11px;
   line-height: 1.7;
   margin-top: 5px;
-  color: #627087;
+  color: #60646c;
 }
 .showcase-footer {
   display: flex;
@@ -644,7 +644,7 @@ footer > a:last-child {
   margin-top: 30px;
 }
 .showcase-footer > small {
-  color: #627087;
+  color: #60646c;
   font-size: 11px;
   line-height: 1.7;
 }
@@ -652,14 +652,14 @@ footer > a:last-child {
   font-weight: 600;
 }
 .cards .featured {
-  background: #111827;
-  border-color: #111827;
+  background: #17191d;
+  border-color: #17191d;
 }
 .cards .featured > svg {
-  color: #93adff;
+  color: #ffc29a;
 }
 .cards .featured > a {
-  border-color: #354361;
+  border-color: #5b3b2e;
 }
 .brand img {
   border-radius: 12px;
@@ -732,5 +732,51 @@ footer > a:last-child {
   }
   .notice-time {
     display: none;
+  }
+}
+/* Original VISO symbol, displayed without altering the supplied image. */
+.brand .tea-original-symbol,
+.tea-brand-mark .tea-original-symbol {
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+  flex: 0 0 43px;
+  width: 43px;
+  height: 43px;
+  margin: 0;
+  border-radius: 12px;
+}
+.brand .tea-original-symbol > img,
+.tea-brand-mark .tea-original-symbol > img {
+  position: absolute;
+  max-width: none !important;
+  width: 121px !important;
+  height: auto !important;
+  left: -5px;
+  top: -5px;
+  border-radius: 0 !important;
+}
+.brand {
+  letter-spacing: -1.1px;
+}
+.hero h1 em {
+  color: #e84300;
+}
+.scene-label .dot {
+  background: #22c55e;
+}
+@media (max-width: 760px) {
+  .brand .tea-original-symbol,
+  .tea-brand-mark .tea-original-symbol {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    border-radius: 10px;
+  }
+  .brand .tea-original-symbol > img,
+  .tea-brand-mark .tea-original-symbol > img {
+    width: 101px !important;
+    left: -4px;
+    top: -4px;
   }
 }

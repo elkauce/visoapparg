@@ -12,14 +12,14 @@ La modalidad Esencial mantiene su precio cero y la configuración continúa
 identificando WhatsApp y advirtiendo que el número será visible. No se presenta
 como tecnología de llamadas propia un chat de un tercero.
 
-Paleta propuesta: grafito `#111827`, blanco y fondo `#F5F7FB`, azul `#315BFF`.
+Paleta solicitada de VISO: fondo `#F5F3EF`, texto `#17191D`, blanco y naranja `#E84300`. El símbolo original de cuatro colores se muestra desde el PNG suministrado, sin modificar sus píxeles, junto al nombre **Te a Viso**. Para impresión y favicon se utiliza su representación vectorial de cuatro colores.
 Logo, portada, panel, formularios y selector comparten la nueva identidad.
 
 ## Diseños de placas
 
 - Minimal: vertical, blanco y tipografía oscura.
-- Noche: vertical, grafito y acentos azules.
-- Señal: vertical, azul y contraste alto.
+- Noche: vertical, grafito y acentos VISO.
+- Señal: vertical, naranja VISO y contraste alto.
 - Urbano: horizontal, composición dividida.
 
 La misma representación SVG genera la vista previa y la descarga SVG/PNG.

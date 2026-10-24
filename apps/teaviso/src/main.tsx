@@ -29,8 +29,10 @@ export default function Landing() {
     <>
       <header className="header">
         <a className="brand" href="/" aria-label="Te a Viso, inicio">
-          <img src="/symbol.svg" alt="" />
-          te a viso<span>POR VISO</span>
+          <span className="tea-original-symbol" aria-hidden="true">
+            <img src="/brand/viso-logo.png" alt="" />
+          </span>
+          Te a Viso<span>POR VISO</span>
         </a>
         <nav aria-label="Principal">
           <a href="#opciones">La experiencia</a>
@@ -214,8 +216,10 @@ export default function Landing() {
       </main>
       <footer>
         <a className="brand" href="/">
-          <img src="/symbol.svg" alt="" />
-          te a viso
+          <span className="tea-original-symbol" aria-hidden="true">
+            <img src="/brand/viso-logo.png" alt="" />
+          </span>
+          Te a Viso
         </a>
         <span>Tu puerta, conectada.</span>
         <a href={visoOrigin.href}>

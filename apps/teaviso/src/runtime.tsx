@@ -101,8 +101,10 @@ function Shell({ children }: { children: ReactNode }) {
     <div className="tea-shell">
       <aside className="tea-sidebar">
         <Link className="brand" to="/">
-          <img src="/symbol.svg" alt="" />
-          te a viso
+          <span className="tea-original-symbol" aria-hidden="true">
+            <img src="/brand/viso-logo.png" alt="" />
+          </span>
+          Te a Viso
         </Link>
         <nav aria-label="Panel Te a Viso">
           <NavLink to="/panel" end>

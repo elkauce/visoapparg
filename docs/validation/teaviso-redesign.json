@@ -1,6 +1,10 @@
 {
   "checks": 30,
-  "widths": [1440, 390, 320],
+  "widths": [
+    1440,
+    390,
+    320
+  ],
   "allEightQrExportsDecoded": true,
   "publicCopyNoWhatsappOrFree": true,
   "fixtures": "synthetic accounts; actual components and exporters",
@@ -15,5 +19,29 @@
   "eslint": "passed",
   "webPublished": false,
   "backendPublished": false,
-  "existingFreeTierUnchanged": true
+  "existingFreeTierUnchanged": true,
+  "identity": {
+    "background": "#F5F3EF",
+    "text": "#17191D",
+    "accent": "#E84300",
+    "name": "Te a Viso",
+    "originalSymbolAssetUnchanged": true,
+    "vectorPrintSymbol": "four VISO colors"
+  },
+  "currentTargetedTests": {
+    "passed": 13,
+    "files": 2
+  },
+  "browserCurrentIdentity": {
+    "checks": 30,
+    "widths": [
+      1440,
+      390,
+      320
+    ],
+    "allEightQrExportsDecoded": true,
+    "publicCopyNoWhatsappOrFree": true,
+    "fixtures": "synthetic accounts; actual components and exporters",
+    "published": false
+  }
 }

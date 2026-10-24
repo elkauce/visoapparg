@@ -374,8 +374,10 @@ export function WhatsappVisitor() {
   return (
     <main className="tea-visitor">
       <Link className="brand" to="/">
-        <img src="/symbol.svg" alt="" />
-        te a viso
+        <span className="tea-original-symbol" aria-hidden="true">
+          <img src="/brand/viso-logo.png" alt="" />
+        </span>
+        Te a Viso
       </Link>
       <section className="tea-card">
         {contact === undefined ? (
