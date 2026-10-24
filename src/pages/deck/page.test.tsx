@@ -288,7 +288,9 @@ describe("Deck real synchronisation and legacy compatibility", () => {
   it("exits native immersive mode on Android Back before leaving the Deck", async () => {
     state.native = true;
     openDeck();
-    fireEvent.click(screen.getByRole("button", { name: "Pantalla completa" }));
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Pantalla completa" }));
+    });
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Salir de pantalla completa" }),
