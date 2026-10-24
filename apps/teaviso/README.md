@@ -2,8 +2,8 @@
 
 Web con identidad propia, registro, panel y QR a WhatsApp, vinculada a las cuentas
 y al servicio de llamadas existentes de VISO. Proyecto dentro del repositorio para
-reutilizar código sin duplicar cuentas, inmuebles ni licencias. No está publicado.
-No se cambió el servidor, dominio, APK ni web de producción.
+reutilizar código sin duplicar cuentas, inmuebles ni licencias. Publicado en https://teaviso-manuelhaguilar8-4981s-projects.vercel.app tras autorización del propietario.
+Se actualizaron las funciones del backend compartido. La APK y la web VISO de producción se conservaron; no se habilitaron cobros.
 
 ## Ejecutar desde la raíz del repositorio
 
@@ -82,7 +82,7 @@ habilita Mercado Pago, split o cobros. Sin condiciones/importes/dominio y provee
 preparados, solo se registra interés sin cobrar ni activar nada. No se probaron
 pagos reales ni se enviaron mensajes o llamadas a terceros.
 
-## Configuración y publicación pendiente de autorización
+## Configuración y publicación
 
 ### Web, variables públicas
 
@@ -128,3 +128,14 @@ la implementación previa permanece en su rama anterior, sin publicar.
   externa; no equivalen a un ingreso Google, pago ni llamada reales en producción.
 - PNG descargado decodificado y comprobado contra el enlace esperado; SVG comprobado.
 - Capturas e informe local en `artifacts/teaviso/`, ignorados por Git.
+
+## Publicación del 24 de octubre de 2026
+
+Web pública: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app .
+Proyecto Vercel independiente: `teaviso`, ID `prj_hEhkg9sAvj5fdk2CWK1fw61oe2nC`.
+Despliegue `dpl_CpJQCkvRH8K47Z1K1nSDvWZg2vvj`. Google y callback del origen
+aprobado configurados. 22 archivos estáticos comparados, 8 rutas y 27 comprobaciones
+de navegador publicadas correctas. No se creó usuario de prueba ni se completó
+consentimiento Google, pago o llamada real. Oferta Business sin precio configurado
+y cobros globales deshabilitados. Informe: `docs/validation/teaviso-production.json`.
+Convex informó límites del plan gratuito; las funciones se publicaron y respondieron.

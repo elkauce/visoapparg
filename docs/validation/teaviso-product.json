@@ -1,7 +1,7 @@
 {
   "product": "Te a Viso",
   "branch": "feat/teaviso-product",
-  "status": "implemented_not_deployed",
+  "status": "published",
   "tests": {
     "files": 97,
     "passed": 930,
@@ -15,11 +15,7 @@
   },
   "browser": {
     "checks": 33,
-    "widths": [
-      1440,
-      390,
-      320
-    ],
+    "widths": [1440, 390, 320],
     "fixtures": "synthetic account and backend, real UI components",
     "pngQrDecoded": true,
     "svgDownload": "verified",
@@ -29,18 +25,18 @@
     "realPayment": "not attempted"
   },
   "production": {
-    "webChanged": false,
-    "backendChanged": false,
+    "webChanged": true,
+    "backendChanged": true,
     "paymentsEnabled": false,
     "businessNumberProvisioned": false,
     "domainRegistered": false,
-    "separateApkBuilt": false
+    "separateApkBuilt": false,
+    "visoWebChanged": false
   },
   "pending": [
-    "publication authorization",
-    "separate hosting origin and TEAVISO_WEB_ORIGIN",
     "real Business price and conditions set by administrator",
     "number preparation for each paid Business service",
     "separate Android APK configuration and build"
-  ]
+  ],
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app"
 }

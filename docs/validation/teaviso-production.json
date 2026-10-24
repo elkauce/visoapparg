@@ -1,0 +1,40 @@
+{
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app",
+  "staticFilesMatched": 22,
+  "publicRoutesChecked": 8,
+  "googleConfigured": true,
+  "businessOffer": null,
+  "unauthenticatedAccountIsolated": true,
+  "visoWebUnchanged": true,
+  "realPayment": false,
+  "realCall": false,
+  "realUserSignup": false,
+  "browser": {
+    "checks": 27,
+    "widths": [1440, 390, 320],
+    "googleServerRedirectVerified": true,
+    "googleConsentCompleted": false,
+    "whatsappLinkAndSvgDownload": true,
+    "realPasswordFailureHandled": true,
+    "productionAccountCreated": false,
+    "tls": "Node verified CA/proxy forwarding; no TLS bypass"
+  },
+  "backendAfter": {
+    "businessRequests": 0,
+    "freeQrs": 0,
+    "licenses": 1,
+    "paymentSettings": {
+      "enabled": false,
+      "policiesAccepted": true,
+      "splitApproved": true
+    },
+    "sites": 1
+  },
+  "deploymentId": "dpl_CpJQCkvRH8K47Z1K1nSDvWZg2vvj",
+  "projectId": "prj_hEhkg9sAvj5fdk2CWK1fw61oe2nC",
+  "sourceCommit": "6fa39ba",
+  "publicAccess": true,
+  "backend": "vivid-nightingale-785",
+  "productionAuthorization": "User: Publicala",
+  "quotaNotice": "Convex CLI reported projects above Free plan limits; functions and checks succeeded."
+}
