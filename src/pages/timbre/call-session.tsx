@@ -1,3 +1,4 @@
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { Component, useEffect, useMemo, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { useAction, useConvexAuth, useMutation, useQuery } from "convex/react";
@@ -118,6 +119,7 @@ export function TimbreCallSession({
   initialStream,
   onClose,
 }: CallProps) {
+  const brand = useTimbreBrand();
   const credentials = useMemo(
     () => (visitorToken ? { callId, visitorToken } : { callId }),
     [callId, visitorToken],
@@ -391,7 +393,7 @@ export function TimbreCallSession({
     <div className="vt-call-card" ref={screen}>
       <header className="vt-call-heading">
         <div>
-          <span className="vt-eyebrow">VISO TIMBRE</span>
+          <span className="vt-eyebrow">{brand.name}</span>
           <h1>{session.siteName}</h1>
         </div>
         <span className="vt-status" role="status">

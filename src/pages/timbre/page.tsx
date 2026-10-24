@@ -1,3 +1,4 @@
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -23,7 +24,6 @@ import { TimbreMessages } from "./call-session";
 import { TimbreNotificationSettings } from "@/components/timbre-incoming";
 import { TimbrePushSettings } from "@/components/timbre-push";
 import { timbrePublicOrigin, timbrePublicQrUrl } from "@/lib/timbre-public-url";
-import TelegramContactSettings from "./telegram-settings";
 import "./timbre.css";
 
 type Site = FunctionReturnType<typeof api.timbre.workspace>["sites"][number];
@@ -87,7 +87,8 @@ export default function TimbrePage() {
   );
 }
 
-function TimbreWorkspace() {
+export function TimbreWorkspace() {
+  const brand = useTimbreBrand();
   const workspace = useQuery(api.timbre.workspace, {});
   const license = useQuery(api.timbre_commerce.myLicense, {});
   const [params, setParams] = useSearchParams();
@@ -151,7 +152,7 @@ function TimbreWorkspace() {
             </button>
           )}
         </div>
-        <Link to="/marketplace">Marketplace VISO</Link>
+        {!brand.standalone && <Link to="/marketplace">Marketplace VISO</Link>}
       </div>
       {view === "offers" ? (
         <TimbreCommercial />
@@ -343,6 +344,7 @@ function SiteWorkspace({ site }: { site: Site }) {
 }
 
 function SiteQrs({ site, manager }: { site: Site; manager: boolean }) {
+  const brand = useTimbreBrand();
   const qrs = useQuery(api.timbre.listQrs, { siteId: site._id });
   const units = useQuery(api.timbre.listUnits, { siteId: site._id });
   const library = useQuery(api.marketplace.library, {});
@@ -560,7 +562,7 @@ function SiteQrs({ site, manager }: { site: Site; manager: boolean }) {
             key={`${qr._id}:${qr.token}`}
             url={url}
             label={qr.label}
-            initialDesign={fullQr.qr.design}
+            initialDesign={fullQr.qr.design ?? (brand.standalone ? { ...defaultTimbreQrDesign(qr.label), title: "Te a Viso" } : undefined)}
             onDesignChange={setDraft}
             libraryImages={images}
           />
@@ -573,13 +575,13 @@ function SiteQrs({ site, manager }: { site: Site; manager: boolean }) {
                     design:
                       draft ??
                       fullQr.qr.design ??
-                      defaultTimbreQrDesign(qr.label),
+                      { ...defaultTimbreQrDesign(qr.label), ...(brand.standalone ? { title: "Te a Viso" } : {}) },
                   }),
                 "Diseño guardado en tu cuenta",
               )
             }
           >
-            Guardar diseño en VISO
+            Guardar diseño en {brand.standalone ? "Te a Viso" : "VISO"}
           </Button>
           <p className="vt-caption">
             Para encargar una placa, guardá el diseño y elegí una variante en
@@ -593,16 +595,6 @@ function SiteQrs({ site, manager }: { site: Site; manager: boolean }) {
 
 function SiteSettings({ site }: { site: Site }) {
   const save = useMutation(api.timbre.saveSiteSettings);
-  const units = useQuery(
-    api.timbre.listUnits,
-    site.kind === "home" ? "skip" : { siteId: site._id },
-  );
-  const unitContactsRequired =
-    site.kind === "building" ||
-    (site.kind === "office" && units?.some((unit) => unit.enabled));
-  const telegramLicensed =
-    site.licenseActive &&
-    !!(site.licensedFeatures?.audio || site.licensedFeatures?.video);
   const update = (
     patch: Partial<
       Pick<
@@ -680,39 +672,6 @@ function SiteSettings({ site }: { site: Site }) {
             Quitar silencio
           </Button>
         </div>
-      </Card>
-      <Card title="Atender por Telegram (opcional)">
-        {site.kind === "office" && units === undefined ? (
-          <p role="status">Cargando los contactos del Timbre…</p>
-        ) : unitContactsRequired ? (
-          <>
-            <p>
-              Configurá Telegram de cada unidad en Integrantes y unidades →
-              Unidades y sectores. Cada visitante verá el contacto de la unidad
-              que elija.
-            </p>
-            {site.telegramUsername && (
-              <details className="vt-details">
-                <summary>Contacto general anterior</summary>
-                <p>
-                  Este contacto general deja de aparecer cuando se usan
-                  unidades. Podés quitarlo aquí.
-                </p>
-                <TelegramContactSettings
-                  siteId={site._id}
-                  username={site.telegramUsername}
-                  canEnable={false}
-                />
-              </details>
-            )}
-          </>
-        ) : (
-          <TelegramContactSettings
-            siteId={site._id}
-            username={site.telegramUsername}
-            canEnable={telegramLicensed}
-          />
-        )}
       </Card>
       <Card title="Nombre y respuesta de ausencia">
         <form
@@ -1263,22 +1222,6 @@ function SiteMembers({ site }: { site: Site }) {
                   void timbreTask(() => saveUnit({ unitId: unit._id, enabled }))
                 }
               />
-              <section className="vt-stack">
-                <h3>Telegram de esta unidad</h3>
-                <TelegramContactSettings
-                  siteId={site._id}
-                  unitId={unit._id}
-                  username={unit.telegramUsername}
-                  canEnable={
-                    unit.enabled &&
-                    site.licenseActive &&
-                    !!(
-                      site.licensedFeatures?.audio ||
-                      site.licensedFeatures?.video
-                    )
-                  }
-                />
-              </section>
               {members
                 ?.filter(
                   (member) =>

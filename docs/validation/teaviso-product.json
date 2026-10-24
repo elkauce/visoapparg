@@ -1,0 +1,46 @@
+{
+  "product": "Te a Viso",
+  "branch": "feat/teaviso-product",
+  "status": "implemented_not_deployed",
+  "tests": {
+    "files": 97,
+    "passed": 930,
+    "failed": 0
+  },
+  "builds": {
+    "teaviso": "passed",
+    "viso": "passed",
+    "backendTypecheck": "passed",
+    "changedFilesEslint": "passed"
+  },
+  "browser": {
+    "checks": 33,
+    "widths": [
+      1440,
+      390,
+      320
+    ],
+    "fixtures": "synthetic account and backend, real UI components",
+    "pngQrDecoded": true,
+    "svgDownload": "verified",
+    "noHorizontalOverflow": true,
+    "productionLogin": "not attempted",
+    "realCall": "not attempted",
+    "realPayment": "not attempted"
+  },
+  "production": {
+    "webChanged": false,
+    "backendChanged": false,
+    "paymentsEnabled": false,
+    "businessNumberProvisioned": false,
+    "domainRegistered": false,
+    "separateApkBuilt": false
+  },
+  "pending": [
+    "publication authorization",
+    "separate hosting origin and TEAVISO_WEB_ORIGIN",
+    "real Business price and conditions set by administrator",
+    "number preparation for each paid Business service",
+    "separate Android APK configuration and build"
+  ]
+}

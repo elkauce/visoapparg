@@ -1,3 +1,4 @@
+import { teavisoOrigin } from "./teaviso";
 /**
  * The Google OAuth callback remains on Convex's HTTPS origin. Only its final
  * destination may return to the installed APK, with an app-generated nonce.
@@ -10,6 +11,7 @@ const NATIVE_GOOGLE_RETURN =
 export function googleAuthRedirect(
   redirectTo: string,
   configuredSiteUrl: string | undefined = process.env.SITE_URL,
+  configuredTeavisoOrigin: string | undefined = process.env.TEAVISO_WEB_ORIGIN,
 ): string {
   if (
     redirectTo.length > 8192 ||
@@ -22,6 +24,14 @@ export function googleAuthRedirect(
   )
     throw new Error("Invalid sign-in destination.");
   if (NATIVE_GOOGLE_RETURN.test(redirectTo)) return redirectTo;
+
+  const teaviso = teavisoOrigin(configuredTeavisoOrigin);
+  if (teaviso && redirectTo.startsWith(`${teaviso}/`)) {
+    const target = new URL(redirectTo);
+    // Only the app-owned callback, never arbitrary cross-domain destinations.
+    if (target.origin === teaviso && target.pathname === "/panel" && target.search === "?google=return" && !target.hash)
+      return redirectTo;
+  }
 
   const baseUrl = configuredSiteUrl?.replace(/\/$/, "");
   if (!baseUrl) throw new Error("SITE_URL must be configured for sign-in.");

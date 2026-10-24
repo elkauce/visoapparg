@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run teaviso:build",
+  "outputDirectory": "apps/teaviso/dist",
+  "framework": null,
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}

@@ -1,3 +1,4 @@
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { useState } from "react";
 import { cn } from "@/lib/utils.ts";
 
@@ -12,6 +13,8 @@ export function VisoBrand({
   className?: string;
 }) {
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
+  const product = useTimbreBrand();
+  if (product.standalone) return <span className={cn("tea-brand-mark", className)}><img src="/symbol.svg" alt=""/>te a viso</span>;
   const configuredSource = logoUrl?.trim() || OFFICIAL_LOGO_URL;
   const source = failedUrls.includes(configuredSource) ? OFFICIAL_LOGO_URL : configuredSource;
 

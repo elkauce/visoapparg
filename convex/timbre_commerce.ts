@@ -18,7 +18,7 @@ async function adminUser(ctx: QueryCtx | MutationCtx) {
   if (!isMarketplaceAdmin(user._id)) marketplaceError("No tenés permiso para administrar Timbre.");
   return user;
 }
-async function paymentReadiness(ctx: Pick<QueryCtx, "db">) {
+export async function paymentReadiness(ctx: Pick<QueryCtx, "db">) {
   const settings = await ctx.db.query("marketplacePaymentSettings").withIndex("by_key", (q) => q.eq("key", "mercadopago-ar")).unique();
   return !!(process.env.MP_APPLICATION_ID && process.env.MP_CLIENT_SECRET && process.env.MP_ACCESS_TOKEN &&
     process.env.MP_WEBHOOK_SECRET && process.env.MP_TOKEN_ENCRYPTION_KEY && process.env.MP_COLLECTOR_ID &&
@@ -145,7 +145,7 @@ export const saveDiscount = mutation({
   },
 });
 
-async function createServiceOrder(ctx: MutationCtx, ownerId: Id<"users">, sellerId: Id<"users">, productId: string, title: string,
+export async function createServiceOrder(ctx: MutationCtx, ownerId: Id<"users">, sellerId: Id<"users">, productId: string, title: string,
   amount: number, currency: string, physical = false) {
   validateMoney(amount);
   if (!await paymentReadiness(ctx)) marketplaceError("Los cobros todavía no están habilitados.");
@@ -191,11 +191,12 @@ export const createCheckout = action({
   },
 });
 
-async function checkoutPreference(ctx: Pick<ActionCtx, "runAction" | "runMutation">,
-  order: { orderId: Id<"marketplaceOrders">; sellerId: Id<"users">; title: string; amount: number; currency: string }) {
+export async function checkoutPreference(ctx: Pick<ActionCtx, "runAction" | "runMutation">,
+  order: { orderId: Id<"marketplaceOrders">; sellerId: Id<"users">; title: string; amount: number; currency: string },
+  destination?: { origin: string | undefined; returnPath: string }) {
   let origin: URL; let webhook: URL;
   try {
-    origin = new URL(process.env.SITE_URL ?? ""); webhook = new URL(process.env.CONVEX_SITE_URL ?? "");
+    origin = new URL(destination ? destination.origin ?? "" : process.env.SITE_URL ?? ""); webhook = new URL(process.env.CONVEX_SITE_URL ?? "");
     if ([origin, webhook].some((url) => url.protocol !== "https:" || url.username || url.password)) throw new Error();
   } catch { return marketplaceError("Falta configurar las direcciones de VISO."); }
   const token = await ctx.runAction(internal.marketplace_payments.sellerToken, { userId: order.sellerId });
@@ -203,7 +204,7 @@ async function checkoutPreference(ctx: Pick<ActionCtx, "runAction" | "runMutatio
     "Content-Type": "application/json", Authorization: `Bearer ${token}`, "X-Idempotency-Key": order.orderId,
   }, body: JSON.stringify({ items: [{ id: order.orderId, title: order.title, quantity: 1, unit_price: order.amount / 100, currency_id: order.currency }],
     external_reference: order.orderId, notification_url: `${webhook.origin}/marketplace/payments/webhook?order_id=${order.orderId}`,
-    back_urls: { success: `${origin.origin}/marketplace?order=${order.orderId}`, pending: `${origin.origin}/marketplace?order=${order.orderId}`, failure: `${origin.origin}/marketplace?order=${order.orderId}` }, auto_return: "approved" }) });
+    back_urls: { success: `${origin.origin}${destination?.returnPath ?? "/marketplace"}?order=${order.orderId}`, pending: `${origin.origin}${destination?.returnPath ?? "/marketplace"}?order=${order.orderId}`, failure: `${origin.origin}${destination?.returnPath ?? "/marketplace"}?order=${order.orderId}` }, auto_return: "approved" }) });
   const value = process.env.MP_MODE === "live" ? result.init_point : result.sandbox_init_point;
   if (typeof result.id !== "string" || typeof value !== "string") marketplaceError("Mercado Pago no devolvió un enlace de compra.");
   let url: URL; try { url = new URL(value); } catch { return marketplaceError("El enlace de compra no es válido."); }

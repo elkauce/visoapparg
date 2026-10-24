@@ -175,20 +175,6 @@
   gap: 10px;
   margin: 24px 0 18px;
 }
-.vt-telegram-contact {
-  display: grid;
-  gap: 10px;
-  margin: 18px 0;
-  padding: 16px;
-  border: 1px solid #c9e1ed;
-  border-radius: 16px;
-  background: #f1f8fc;
-}
-.vt-telegram-contact > p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-}
 .vt-availability,
 .vt-error {
   font-size: 14px;

@@ -1,3 +1,4 @@
+import { applyTeavisoOrderPayment } from "./lib/teaviso";
 import { v } from "convex/values";
 import { action, internalAction, internalMutation, internalQuery, mutation, query } from "./_generated/server";
 import { internal } from "./_generated/api";
@@ -350,6 +351,7 @@ export const applyVerifiedPayment = internalMutation({
         await acquireProductSnapshot(ctx, order.buyerId, order.productId, order.productSnapshot, order.productSnapshot.revision, true);
       }
       await applyTimbreOrderPayment(ctx, order, (args.refundedAmount ?? 0) > 0 ? "refunded" : args.status);
+      await applyTeavisoOrderPayment(ctx, order, (args.refundedAmount ?? 0) > 0 ? "refunded" : args.status);
       // Previously downloaded resources cannot be recalled from a device. The
       // order records refunds/chargebacks for support without silently deleting
       // user pages or media; the commercial policy must address these cases.

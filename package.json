@@ -15,7 +15,9 @@
     "setup:local-auth": "node scripts/setup-local-auth.mjs",
     "android:build": "node scripts/build-android.mjs",
     "android:sync": "cap sync android",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "teaviso:dev": "vite --config apps/teaviso/vite.config.ts",
+    "teaviso:build": "tsc --project apps/teaviso/tsconfig.json && vite build --config apps/teaviso/vite.config.ts"
   },
   "dependencies": {
     "@auth/core": "0.41.1",

@@ -135,52 +135,6 @@ beforeEach(() => {
 });
 
 describe("Timbre account workspace", () => {
-  it("saves an explicitly confirmed Telegram contact for a licensed home through the dedicated channel API", async () => {
-    fixture.sites = [
-      site({ kind: "home", licensedFeatures: { audio: true, video: true } }),
-    ];
-    const user = userEvent.setup();
-    show();
-    await user.click(screen.getByRole("button", { name: "Disponibilidad" }));
-    await user.type(
-      screen.getByRole("textbox", { name: "Usuario de Telegram" }),
-      "@home_owner",
-    );
-    expect(
-      screen.getByRole("button", { name: "Guardar Telegram" }),
-    ).toBeDisabled();
-    await user.click(
-      screen.getByRole("checkbox", { name: /Confirmo que el perfil/ }),
-    );
-    await user.click(screen.getByRole("button", { name: "Guardar Telegram" }));
-    await waitFor(() =>
-      expect(
-        fixture.mutations["timbre_telegram:saveContact"],
-      ).toHaveBeenCalledWith({ siteId: "site-1", username: "@home_owner" }),
-    );
-    expect(fixture.mutations["timbre:saveSiteSettings"]).not.toHaveBeenCalled();
-  });
-  it("directs a unit-based office to its unit contacts without offering a general Telegram destination", async () => {
-    fixture.sites = [site({ licensedFeatures: { audio: true, video: true } })];
-    fixture.units = [
-      {
-        _id: "unit-one",
-        name: "Oficina 1",
-        enabled: true,
-        order: 0,
-        recipientIds: [],
-      },
-    ];
-    const user = userEvent.setup();
-    show();
-    await user.click(screen.getByRole("button", { name: "Disponibilidad" }));
-    expect(
-      screen.getByText(/Configurá Telegram de cada unidad/),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("textbox", { name: "Usuario de Telegram" }),
-    ).not.toBeInTheDocument();
-  });
   it("requires authentication before reading memberships, licenses or QR data", () => {
     fixture.authenticated = false;
     show();

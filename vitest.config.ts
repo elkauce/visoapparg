@@ -34,7 +34,7 @@ export default defineConfig({
         test: {
           name: "frontend",
           environment: "jsdom",
-          include: ["src/**/*.test.{ts,tsx}"],
+          include: ["src/**/*.test.{ts,tsx}", "apps/teaviso/src/**/*.test.{ts,tsx}"],
           setupFiles: ["./src/vitest.setup.ts"],
         },
       },

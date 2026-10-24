@@ -1,3 +1,4 @@
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { Link, useParams } from "react-router-dom";
@@ -43,13 +44,6 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
   const [message, setMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
-  const target = qr?.unitId ?? (unit ? (unit as Id<"timbreUnits">) : undefined);
-  const telegram = useQuery(
-    api.timbre_telegram.publicContact,
-    qr?.available && !call
-      ? { qrToken, ...(target ? { unitId: target } : {}) }
-      : "skip",
-  );
   const nonce = useRef<string | null>(null);
   const alive = useRef(true);
   const pendingStream = useRef<MediaStream | null>(null);
@@ -115,8 +109,8 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
         </p>
       </div>
     );
+  const target = qr.unitId ?? (unit ? (unit as Id<"timbreUnits">) : undefined);
   const needsUnit = qr.kind === "building" && !qr.unitId;
-  const showUnitSelector = !qr.unitId && (needsUnit || qr.units.length > 0);
   const canSelect = !needsUnit || Boolean(target);
   const canCall = qr.available && canSelect && !pending;
 
@@ -197,7 +191,7 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
       <span className="vt-eyebrow">TIMBRE DIGITAL</span>
       <h1>{qr.siteName}</h1>
       <p className="vt-location-label">{qr.label}</p>
-      {showUnitSelector && (
+      {needsUnit && (
         <div className="vt-field">
           <label htmlFor="vt-unit">¿A quién visitás?</label>
           <select
@@ -209,9 +203,7 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
             }}
             disabled={pending}
           >
-            <option value="">
-              {needsUnit ? "Elegí una unidad" : "Contacto general"}
-            </option>
+            <option value="">Elegí una unidad</option>
             {qr.units.map((entry) => (
               <option key={entry.id} value={entry.id}>
                 {entry.name}
@@ -223,13 +215,8 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
       )}
       {qr.available ? (
         <p>
-          {telegram?.url &&
-          !qr.audioEnabled &&
-          !qr.videoEnabled &&
-          !qr.chatEnabled &&
-          !qr.messagesEnabled
-            ? "Podés comunicarte con el lugar por Telegram."
-            : "Tocá para avisar que llegaste. Para comunicarte en VISO no necesitás instalar una app ni crear una cuenta."}
+          Tocá para avisar que llegaste. No necesitás instalar una app ni crear
+          una cuenta.
         </p>
       ) : (
         <p className="vt-availability" role="status">
@@ -278,27 +265,6 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
           </button>
         )}
       </div>
-      {qr.available && canSelect && telegram?.url && (
-        <section
-          className="vt-telegram-contact"
-          aria-label="Contacto por Telegram"
-        >
-          <a
-            className="vt-secondary"
-            href={telegram.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            referrerPolicy="no-referrer"
-          >
-            <Send size={20} />
-            Abrir Telegram
-          </a>
-          <p>
-            Necesitás Telegram. Se abrirá el perfil del lugar: tocá Llamar o
-            Videollamada para comunicarte allí.
-          </p>
-        </section>
-      )}
       {qr.available &&
         (qr.audioEnabled || qr.videoEnabled) &&
         rtc &&
@@ -357,19 +323,19 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
       )}
       <p className="vt-privacy">
         <ShieldCheck size={16} />
-        {telegram?.url && qr.available && canSelect
-          ? "Las llamadas de VISO no muestran teléfonos personales. En Telegram se aplican los ajustes de privacidad del perfil."
-          : "La comunicación se realiza en VISO. No mostramos números de teléfono personales."}
+        La comunicación se realiza en VISO. No mostramos números de teléfono
+        personales.
       </p>
     </div>
   );
 }
 
 export default function TimbreVisitorPage() {
+  const brand = useTimbreBrand();
   const { qr } = useParams<{ qr: string }>();
   return (
     <main className="vt-public">
-      <Link className="vt-brand-link" to="/" aria-label="VISO">
+      <Link className="vt-brand-link" to="/" aria-label={brand.name}>
         <VisoBrand />
       </Link>
       <TimbreCallBoundary key={qr}>
@@ -382,7 +348,7 @@ export default function TimbreVisitorPage() {
           </div>
         )}
       </TimbreCallBoundary>
-      <footer className="vt-public-footer">Timbre digital · VISO</footer>
+      <footer className="vt-public-footer">Timbre digital · {brand.name}</footer>
     </main>
   );
 }

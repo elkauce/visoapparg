@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as teaviso from "../teaviso.js";
 import type * as auth from "../auth.js";
 import type * as background_presence from "../background_presence.js";
 import type * as deck_actions from "../deck_actions.js";
@@ -45,7 +46,6 @@ import type * as lib_timbre_presence from "../lib/timbre_presence.js";
 import type * as lib_timbre_push from "../lib/timbre_push.js";
 import type * as lib_timbre_recurring_provider from "../lib/timbre_recurring_provider.js";
 import type * as lib_timbre_rtc from "../lib/timbre_rtc.js";
-import type * as lib_timbre_telegram from "../lib/timbre_telegram.js";
 import type * as lib_viso_preset_states from "../lib/viso_preset_states.js";
 import type * as lib_vu_styles from "../lib/vu_styles.js";
 import type * as lib_webhook_payload from "../lib/webhook_payload.js";
@@ -76,7 +76,6 @@ import type * as timbre_recurring_http from "../timbre_recurring_http.js";
 import type * as timbre_recurring_tables from "../timbre_recurring_tables.js";
 import type * as timbre_setup from "../timbre_setup.js";
 import type * as timbre_tables from "../timbre_tables.js";
-import type * as timbre_telegram from "../timbre_telegram.js";
 import type * as timbre_trial from "../timbre_trial.js";
 import type * as users from "../users.js";
 import type * as weather from "../weather.js";
@@ -88,6 +87,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  teaviso: typeof teaviso;
   auth: typeof auth;
   background_presence: typeof background_presence;
   deck_actions: typeof deck_actions;
@@ -125,7 +125,6 @@ declare const fullApi: ApiFromModules<{
   "lib/timbre_push": typeof lib_timbre_push;
   "lib/timbre_recurring_provider": typeof lib_timbre_recurring_provider;
   "lib/timbre_rtc": typeof lib_timbre_rtc;
-  "lib/timbre_telegram": typeof lib_timbre_telegram;
   "lib/viso_preset_states": typeof lib_viso_preset_states;
   "lib/vu_styles": typeof lib_vu_styles;
   "lib/webhook_payload": typeof lib_webhook_payload;
@@ -156,7 +155,6 @@ declare const fullApi: ApiFromModules<{
   timbre_recurring_tables: typeof timbre_recurring_tables;
   timbre_setup: typeof timbre_setup;
   timbre_tables: typeof timbre_tables;
-  timbre_telegram: typeof timbre_telegram;
   timbre_trial: typeof timbre_trial;
   users: typeof users;
   weather: typeof weather;
