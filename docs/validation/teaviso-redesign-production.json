@@ -1,0 +1,31 @@
+{
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app",
+  "staticFilesMatched": 23,
+  "publicRoutesChecked": 8,
+  "googleConfigured": true,
+  "businessOffer": null,
+  "unauthenticatedAccountIsolated": true,
+  "visoWebUnchanged": true,
+  "realPayment": false,
+  "realCall": false,
+  "realUserSignup": false,
+  "browser": {
+    "checks": 51,
+    "widths": [1440, 390, 320],
+    "fourQrDesigns": true,
+    "sixExactStateColors": true,
+    "heartbeat": true,
+    "reducedMotion": true,
+    "googleVisible": true,
+    "registrationVisible": true,
+    "tls": "Verified Node CA/proxy forwarding; no TLS bypass"
+  },
+  "deploymentId": "dpl_F9uSfemx1sdbLZJ1AU4jtFCn3N1Q",
+  "sourceCommit": "fce4665",
+  "projectId": "prj_hEhkg9sAvj5fdk2CWK1fw61oe2nC",
+  "backend": "vivid-nightingale-785",
+  "authorization": "User: Publica todo",
+  "paymentsEnabled": false,
+  "designEndpointAuthenticationVerified": true,
+  "status": "published"
+}

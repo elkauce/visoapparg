@@ -1,15 +1,11 @@
 {
   "checks": 30,
-  "widths": [
-    1440,
-    390,
-    320
-  ],
+  "widths": [1440, 390, 320],
   "allEightQrExportsDecoded": true,
   "publicCopyNoWhatsappOrFree": true,
   "fixtures": "synthetic accounts; actual components and exporters",
-  "published": false,
-  "status": "pending_visual_approval",
+  "published": true,
+  "status": "published",
   "tests": {
     "passed": 935,
     "files": 98
@@ -17,8 +13,8 @@
   "build": "passed",
   "backendTypecheck": "passed",
   "eslint": "passed",
-  "webPublished": false,
-  "backendPublished": false,
+  "webPublished": true,
+  "backendPublished": true,
   "existingFreeTierUnchanged": true,
   "identity": {
     "background": "#F5F3EF",
@@ -34,14 +30,11 @@
   },
   "browserCurrentIdentity": {
     "checks": 30,
-    "widths": [
-      1440,
-      390,
-      320
-    ],
+    "widths": [1440, 390, 320],
     "allEightQrExportsDecoded": true,
     "publicCopyNoWhatsappOrFree": true,
     "fixtures": "synthetic accounts; actual components and exporters",
     "published": false
-  }
+  },
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app"
 }

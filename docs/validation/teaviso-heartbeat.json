@@ -4,5 +4,7 @@
   "sixExactVisoColors": true,
   "doublePulse": true,
   "reducedMotionRespected": true,
-  "published": false
+  "published": true,
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app",
+  "status": "published"
 }

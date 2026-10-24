@@ -140,8 +140,11 @@ consentimiento Google, pago o llamada real. Oferta Business sin precio configura
 y cobros globales deshabilitados. Informe: `docs/validation/teaviso-production.json`.
 Convex informó límites del plan gratuito; las funciones se publicaron y respondieron.
 
-## Revisión visual pendiente
+## Revisión visual publicada
 
-La propuesta grafito/azul, la nueva comunicación y las cuatro placas imprimibles
-están listas en código pero **todavía no publicadas**. La web pública conserva
-la identidad anterior. Detalles y validación en `docs/teaviso-redesign.md`.
+Publicada el 24 de octubre de 2026 con autorización «Publica todo»: identidad y
+símbolo VISO con nombre Te a Viso, comunicación simplificada, cuatro placas con
+selección guardada y cuadro principal con latidos y colores de los estados.
+URL vigente: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app .
+Detalles en `docs/teaviso-redesign.md`; verificación en
+`docs/validation/teaviso-redesign-production.json`. Cobros deshabilitados.

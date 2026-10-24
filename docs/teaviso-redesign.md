@@ -1,7 +1,7 @@
-# Te a Viso — propuesta de identidad y placas, pendiente de publicación
+# Te a Viso — propuesta de identidad y placas, publicada
 
-La versión publicada de Te a Viso se mantiene sin cambios. Esta revisión local
-requiere aprobación antes de actualizar web o backend.
+Revisión publicada el 24 de octubre de 2026 tras la autorización «Publica todo».
+URL: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app .
 
 ## Comunicación e identidad
 
@@ -54,4 +54,12 @@ JavaScript. Con movimiento reducido se desactivan ambas animaciones.
 Verificación real en Chromium: 22 comprobaciones en escritorio y móvil, incluyendo
 los seis colores exactos, cambio de luminosidad, ausencia de desbordamiento y
 movimiento reducido. Vista animada local en `artifacts/teaviso/heartbeat/latidos.gif`.
-Sigue pendiente de aprobación y publicación junto con el resto de la revisión.
+Publicado con la identidad y las placas aprobadas.
+
+## Comprobación posterior a la publicación
+
+23 archivos estáticos coincidieron con la compilación; 8 rutas y 51 comprobaciones
+de navegador en 1440, 390 y 320 px correctas. Los seis colores reales, el latido,
+movimiento reducido, registro y botón Google están presentes. El endpoint para
+guardar diseños exige sesión. Cobros deshabilitados; web y APK VISO conservadas.
+Informe: `docs/validation/teaviso-redesign-production.json`.
