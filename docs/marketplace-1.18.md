@@ -46,8 +46,18 @@ La actualización no cambia las vistas operativas del Deck, Display, clima, relo
 
 La versión Android es `1.18.0`, código `30`. El informe de validación y los artefactos de revisión se conservan en `artifacts/marketplace-redesign/` y `artifacts/android/`.
 
-Esta implementación incorpora API nuevas y requiere publicar primero el servidor compartido correcto (`vivid-nightingale-785`), después la web y finalmente actualizar la descarga/QR de la APK. La APK de revisión utiliza ese servidor y necesita esa activación para cargar el nuevo Marketplace. La publicación se realiza después de la autorización correspondiente del propietario. El enlace estable de descarga continúa en 1.17.0 durante la preparación.
+Esta implementación incorpora API nuevas y requiere publicar primero el servidor compartido correcto (`vivid-nightingale-785`), después la web y finalmente actualizar la descarga/QR de la APK. La APK de revisión utiliza ese servidor y necesita esa activación para cargar el nuevo Marketplace. El enlace estable se conservó en 1.17.0 durante la preparación; después de la autorización del propietario se actualizó a 1.18.0.
 
 Las pruebas de navegador locales utilizan los componentes reales con cuentas y respuestas de prueba aisladas. Los permisos, archivos, configuración y datos de cuenta se verifican adicionalmente mediante las funciones reales en `convex-test`. Las pruebas no ejecutan cobros, llamadas, cambios de luces ni altas reales de usuarios. La instalación y el recorrido en un teléfono físico quedan para la prueba del propietario después de activar el servidor.
 
 La validación final comprende 955 pruebas en 103 archivos, 123 comprobaciones de navegador en anchos de 320, 390, 844 y 1440 píxeles, y seis comprobaciones adicionales del recorrido para seguir y dejar de seguir tiendas. Pasaron TypeScript de cliente y servidor, ESLint de los archivos modificados y las compilaciones web y Android. La APK conserva el certificado de firma de 1.17.0. El detalle reproducible, hash y límites de la comprobación se registran en [`validation/marketplace-1.18.json`](validation/marketplace-1.18.json).
+
+## Publicación aprobada
+
+El propietario autorizó publicar servidor, web y APK 1.18.0 el 26 de octubre de 2026. Se activó el servidor compartido y se verificaron sus ocho API nuevas. Vercel publicó el despliegue `dpl_9DVS5zTpqMAb1MV918Xh7zue8zZx`, estado `READY`, en https://viso-deck-android.vercel.app. Los 90 archivos públicos coinciden byte por byte con la compilación revisada; nueve rutas devuelven la aplicación actual.
+
+La [descarga permanente de la APK 1.18.0](https://raw.githubusercontent.com/elkauce/visoapparg/b59232f743befeb941788af1ed807a9cc6972668/downloads/VISO-Deck-1.18.0-debug.apk) responde correctamente y coincide con el artefacto firmado aprobado. El botón y el QR usan esa misma dirección; se decodificó el SVG del componente real para comprobarla. Los resultados completos están en [`validation/marketplace-1.18-production.json`](validation/marketplace-1.18-production.json).
+
+La comprobación HTTPS del sistema pasó. La comprobación adicional en Chromium contra el dominio público quedó pendiente porque el navegador del entorno no confía en la CA actual del proxy; la revisión automática rechazó agregar confianza persistente al almacén NSS. No se omitió la validación TLS. La revisión responsive de los componentes reales se mantiene acreditada por las pruebas locales anteriores. No se inició sesión en cuentas reales ni se ejecutaron cobros, llamadas o cambios de luces durante la publicación.
+
+Convex informó que el proyecto supera los límites del plan gratuito, aunque completó la actualización. El propietario debe revisar el uso o su plan para evitar una interrupción. Esta publicación no modifica facturación, credenciales ni la web separada de Te a Viso.
