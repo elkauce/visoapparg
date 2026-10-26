@@ -2,6 +2,7 @@ import { screenKind } from "./lib/screen_settings";
 import { defineSchema, defineTable } from "convex/server";
 import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
+import { storefrontConfiguration } from "./lib/marketplace_storefront";
 import { timbreTables } from "./timbre_tables";
 import { timbreCommerceTables } from "./timbre_commerce_tables";
 import { timbrePresenceTables } from "./timbre_presence_tables";
@@ -263,6 +264,21 @@ export default defineSchema({
   })
     .index("by_user", ["userId"])
     .index("by_user_product", ["userId", "productId"]),
+
+  marketplaceStorefront: defineTable({
+    key: v.string(),
+    configuration: storefrontConfiguration,
+    revision: v.number(),
+    updatedBy: v.id("users"),
+    updatedAt: v.number(),
+  }).index("by_key", ["key"]),
+  marketplaceShopping: defineTable({
+    userId: v.id("users"),
+    cart: v.array(v.string()),
+    saved: v.array(v.string()),
+    following: v.optional(v.array(v.string())),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
 
   marketplacePaymentSettings: defineTable({
     key: v.string(),

@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as teaviso from "../teaviso.js";
 import type * as auth from "../auth.js";
 import type * as background_presence from "../background_presence.js";
 import type * as deck_actions from "../deck_actions.js";
@@ -35,11 +34,13 @@ import type * as lib_marketplace_affiliate_urls from "../lib/marketplace_affilia
 import type * as lib_marketplace_catalog from "../lib/marketplace_catalog.js";
 import type * as lib_marketplace_page_templates from "../lib/marketplace_page_templates.js";
 import type * as lib_marketplace_payment_provider from "../lib/marketplace_payment_provider.js";
+import type * as lib_marketplace_storefront from "../lib/marketplace_storefront.js";
 import type * as lib_marketplace_validation from "../lib/marketplace_validation.js";
 import type * as lib_owned_status from "../lib/owned_status.js";
 import type * as lib_public_links from "../lib/public_links.js";
 import type * as lib_screen_settings from "../lib/screen_settings.js";
 import type * as lib_sports_leagues from "../lib/sports_leagues.js";
+import type * as lib_teaviso from "../lib/teaviso.js";
 import type * as lib_timbre_access from "../lib/timbre_access.js";
 import type * as lib_timbre_commerce from "../lib/timbre_commerce.js";
 import type * as lib_timbre_presence from "../lib/timbre_presence.js";
@@ -57,11 +58,15 @@ import type * as marketplace_import from "../marketplace_import.js";
 import type * as marketplace_pages from "../marketplace_pages.js";
 import type * as marketplace_payment_http from "../marketplace_payment_http.js";
 import type * as marketplace_payments from "../marketplace_payments.js";
+import type * as marketplace_shopping from "../marketplace_shopping.js";
+import type * as marketplace_storefront from "../marketplace_storefront.js";
 import type * as media from "../media.js";
 import type * as public_status from "../public_status.js";
 import type * as social_auth from "../social_auth.js";
 import type * as sports from "../sports.js";
 import type * as statuses from "../statuses.js";
+import type * as teaviso from "../teaviso.js";
+import type * as teaviso_tables from "../teaviso_tables.js";
 import type * as timbre from "../timbre.js";
 import type * as timbre_calls from "../timbre_calls.js";
 import type * as timbre_calls_tables from "../timbre_calls_tables.js";
@@ -87,7 +92,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  teaviso: typeof teaviso;
   auth: typeof auth;
   background_presence: typeof background_presence;
   deck_actions: typeof deck_actions;
@@ -114,11 +118,13 @@ declare const fullApi: ApiFromModules<{
   "lib/marketplace_catalog": typeof lib_marketplace_catalog;
   "lib/marketplace_page_templates": typeof lib_marketplace_page_templates;
   "lib/marketplace_payment_provider": typeof lib_marketplace_payment_provider;
+  "lib/marketplace_storefront": typeof lib_marketplace_storefront;
   "lib/marketplace_validation": typeof lib_marketplace_validation;
   "lib/owned_status": typeof lib_owned_status;
   "lib/public_links": typeof lib_public_links;
   "lib/screen_settings": typeof lib_screen_settings;
   "lib/sports_leagues": typeof lib_sports_leagues;
+  "lib/teaviso": typeof lib_teaviso;
   "lib/timbre_access": typeof lib_timbre_access;
   "lib/timbre_commerce": typeof lib_timbre_commerce;
   "lib/timbre_presence": typeof lib_timbre_presence;
@@ -136,11 +142,15 @@ declare const fullApi: ApiFromModules<{
   marketplace_pages: typeof marketplace_pages;
   marketplace_payment_http: typeof marketplace_payment_http;
   marketplace_payments: typeof marketplace_payments;
+  marketplace_shopping: typeof marketplace_shopping;
+  marketplace_storefront: typeof marketplace_storefront;
   media: typeof media;
   public_status: typeof public_status;
   social_auth: typeof social_auth;
   sports: typeof sports;
   statuses: typeof statuses;
+  teaviso: typeof teaviso;
+  teaviso_tables: typeof teaviso_tables;
   timbre: typeof timbre;
   timbre_calls: typeof timbre_calls;
   timbre_calls_tables: typeof timbre_calls_tables;

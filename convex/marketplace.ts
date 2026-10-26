@@ -191,6 +191,7 @@ async function publicProduct(
     category: content.category,
     condition: content.condition,
     creatorName: content.creatorName,
+    creatorRef: isMarketplaceAdmin(product.userId) ? "viso" : product.creatorId,
     coverUrl: content.coverStorageId
       ? await ctx.storage.getUrl(content.coverStorageId)
       : (content.coverPath ?? null),
@@ -244,6 +245,7 @@ async function publicBuiltin(
     category: content.category,
     condition: content.condition,
     creatorName: content.creatorName,
+    creatorRef: "viso",
     coverUrl: content.coverPath,
     priceMode: content.priceMode,
     priceAmount: content.priceAmount,
@@ -294,6 +296,22 @@ function matchesCategory(
       (product.category === "hardware" && product.condition === category)
     );
   return product.category === category;
+}
+
+export async function publishedProductFor(
+  ctx: ReadCtx,
+  userId: Id<"users">,
+  productId: string,
+) {
+  const product = await dbProduct(ctx, productId);
+  if (product)
+    return product.status === "published"
+      ? publicProduct(ctx, product, userId)
+      : null;
+  const first = builtin(productId);
+  return first && first.priceMode !== "info"
+    ? publicBuiltin(ctx, first, userId)
+    : null;
 }
 
 export const session = query({
@@ -396,6 +414,9 @@ export const library = query({
           title: entry.title,
           category: entry.category,
           creatorName: entry.creatorName,
+          coverUrl: latest?.content.coverStorageId
+            ? await ctx.storage.getUrl(latest.content.coverStorageId)
+            : latest?.content.coverPath,
           delivery: entry.delivery,
           acquiredAt: entry.acquiredAt,
           profileTemplate: entry.profileTemplate,

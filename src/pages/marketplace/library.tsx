@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import MarketplacePageInstall from "./page-install";
-import { CATEGORY_LABELS, type MarketLibraryEntry } from "./types";
+import { assetSource, CATEGORY_LABELS, type MarketLibraryEntry } from "./types";
 
 export { LibraryAsset } from "./library-asset";
 import { LibraryAsset } from "./library-asset";
@@ -36,6 +36,8 @@ export default function MarketLibrary({
   onExplore: () => void;
 }) {
   const entries = useQuery(api.marketplace.library, {});
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
   const remove = useMutation(api.marketplace.removeFromLibrary);
   const install = useMutation(api.marketplace.installProfile);
   const update = useMutation(api.marketplace.updateLibrary);
@@ -114,39 +116,74 @@ export default function MarketLibrary({
 
   return (
     <>
-      <div className="vm-library-help">
-        <Check aria-hidden="true" />
-        <p>
-          Tus recursos se guardan con tu cuenta. Tocá Usar en un producto para
-          elegir dónde aplicarlo; también estará disponible en tus otros
-          dispositivos.
-        </p>
-        <Button variant="outline" size="sm" asChild>
-          <Link to="/deck/edit">
-            Editar mis teclas <ArrowUpRight />
-          </Link>
-        </Button>
+      <div className="vm-library-search">
+        <input
+          aria-label="Buscar en mi biblioteca"
+          placeholder="Buscar en mi biblioteca"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select
+          aria-label="Categoría de mi biblioteca"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="all">Todos</option>
+          {Object.entries(CATEGORY_LABELS).map(([id, label]) => (
+            <option key={id} value={id}>
+              {label}
+            </option>
+          ))}
+        </select>
       </div>
+      <details className="vm-library-help">
+        <summary>Cómo usar tus recursos</summary>
+        <div className="vm-library-help-content">
+          <Check aria-hidden="true" />
+          <p>
+            Tus recursos se guardan con tu cuenta. Tocá Usar en un producto para
+            elegir dónde aplicarlo; también estará disponible en tus otros
+            dispositivos.
+          </p>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/deck/edit">
+              Editar mis teclas <ArrowUpRight />
+            </Link>
+          </Button>
+        </div>
+      </details>
       <div className="vm-library-list">
         {[...entries]
+          .filter(
+            (entry) =>
+              (category === "all" || entry.category === category) &&
+              `${entry.title} ${entry.creatorName}`
+                .toLocaleLowerCase("es")
+                .includes(search.trim().toLocaleLowerCase("es")),
+          )
           .sort((a, b) => b.acquiredAt - a.acquiredAt)
-          .map((entry, index) => (
-            <details
-              key={entry.productId}
-              className="vm-library-entry"
-              open={index === 0}
-            >
+          .map((entry) => (
+            <details key={entry.productId} className="vm-library-entry">
               <summary>
-                <span className="vm-library-entry-icon">
-                  <Library aria-hidden="true" />
-                </span>
+                <LibraryPreview entry={entry} />
                 <span className="vm-library-entry-heading">
                   <span>
                     {CATEGORY_LABELS[entry.category]} · {entry.creatorName}
                   </span>
                   <h2>{entry.title}</h2>
                 </span>
-                <MarketplaceUseButton productId={entry.productId} />
+                <MarketplaceUseButton
+                  productId={entry.productId}
+                  label={
+                    entry.category === "icons"
+                      ? "Aplicar a una tecla"
+                      : entry.category === "screensavers"
+                        ? "Usar en Display"
+                        : entry.category === "pages"
+                          ? "Agregar página"
+                          : "Usar recurso"
+                  }
+                />
                 <ChevronDown
                   className="vm-library-chevron"
                   aria-hidden="true"
@@ -290,5 +327,39 @@ export default function MarketLibrary({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function LibraryPreview({ entry }: { entry: MarketLibraryEntry }) {
+  if (entry.coverUrl)
+    return (
+      <img
+        className="vm-library-preview"
+        src={entry.coverUrl}
+        alt=""
+        loading="lazy"
+      />
+    );
+  const media =
+    entry.assets.find((a) => a.mediaType === "image" && assetSource(a)) ??
+    entry.assets.find((a) => a.mediaType === "video" && assetSource(a));
+  const src = media ? assetSource(media) : null;
+  return src && media ? (
+    media.mediaType === "video" ? (
+      <video
+        className="vm-library-preview"
+        src={src}
+        muted
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      />
+    ) : (
+      <img className="vm-library-preview" src={src} alt="" loading="lazy" />
+    )
+  ) : (
+    <span className="vm-library-entry-icon">
+      <Library aria-hidden="true" />
+    </span>
   );
 }

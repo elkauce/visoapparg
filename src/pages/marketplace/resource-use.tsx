@@ -36,7 +36,13 @@ export function ResourceUsage({
   );
 }
 
-export function MarketplaceUseButton({ productId }: { productId: string }) {
+export function MarketplaceUseButton({
+  productId,
+  label = "Usar",
+}: {
+  productId: string;
+  label?: string;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -48,7 +54,7 @@ export function MarketplaceUseButton({ productId }: { productId: string }) {
           setOpen(true);
         }}
       >
-        <WandSparkles /> Usar
+        <WandSparkles /> {label}
       </Button>
       <MarketplaceUseDialog
         productId={productId}

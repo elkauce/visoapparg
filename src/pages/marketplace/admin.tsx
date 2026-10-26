@@ -27,6 +27,7 @@ import {
 import { marketErrorMessage } from "@/lib/marketplace-upload";
 import ProductForm, { type EditableMarketProduct } from "./product-form";
 import MarketplacePaymentSettings from "./payment-settings";
+import StorefrontAdmin from "./storefront-admin";
 import "./studio.css";
 
 type Review =
@@ -244,6 +245,7 @@ function AdminWorkspace() {
           publicados por VISO.
         </p>
       </header>
+      <StorefrontAdmin />
       <MarketplacePaymentSettings />
       <div className="vm-admin-summary">
         <div>

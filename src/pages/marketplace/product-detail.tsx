@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery } from "convex/react";
 import {
@@ -11,6 +11,9 @@ import {
   Library,
   Loader2,
   Package,
+  Play,
+  Heart,
+  ShoppingCart,
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -36,6 +39,8 @@ import {
 } from "@/lib/marketplace-navigation";
 import { MarketplaceUseDialog, ResourceUsage } from "./resource-use";
 import ProductCheckout from "./checkout";
+import { useShopping } from "./use-shopping";
+import { creatorUrl } from "./storefront-model";
 
 function gallerySource(item: MarketGalleryItem): string | null {
   const local = item.builtinPath ?? item.url;
@@ -74,11 +79,33 @@ export default function MarketProductPage({
   onAcquired: () => void;
 }) {
   const product = useQuery(api.marketplace.get, { productId });
+  const shopping = useShopping();
+  const [activeMedia, setActiveMedia] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<MarketGalleryItem | null>(null);
+  const galleryRef = useRef<HTMLElement>(null);
+  const mainVideo = useRef<HTMLVideoElement>(null);
+  const expandedVideo = useRef<HTMLVideoElement>(null);
+  const expandedTime = useRef(0);
+  useEffect(() => {
+    const visibility = () => {
+      if (document.hidden) {
+        mainVideo.current?.pause();
+        expandedVideo.current?.pause();
+      }
+    };
+    document.addEventListener("visibilitychange", visibility);
+    return () => document.removeEventListener("visibilitychange", visibility);
+  }, []);
+  function openExpanded(item: MarketGalleryItem) {
+    expandedTime.current = mainVideo.current?.currentTime ?? 0;
+    mainVideo.current?.pause();
+    setExpanded(item);
+  }
+
   const acquire = useMutation(api.marketplace.acquire);
   const [pending, setPending] = useState(false);
   const [useOpen, setUseOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState<MarketGalleryItem | null>(null);
   const busy = useRef(false);
   const add = async () => {
     if (!product || product.priceMode !== "free" || busy.current) return;
@@ -123,6 +150,12 @@ export default function MarketProductPage({
       mediaType: "image",
       url: product.coverUrl,
     });
+  const selected =
+    gallery.find((item) => item.id === activeMedia) ?? gallery[0];
+  const demonstration = gallery.find((item) => item.mediaType === "video");
+  const creator = creatorUrl(product);
+  const saved = shopping?.saved.includes(product.id);
+  const inCart = shopping?.cart.some((item) => item.productId === product.id);
   const details = product.details;
   const facts: [string, string | undefined][] = [
     ["Tipo", details?.type ?? CATEGORY_LABELS[product.category]],
@@ -154,7 +187,14 @@ export default function MarketProductPage({
           </span>
           <h1>{product.title}</h1>
           <p className="vm-detail-creator">
-            Por {product.creatorName}
+            Por{" "}
+            {creator ? (
+              <Link className="vm-product-creator-link" to={creator}>
+                {product.creatorName}
+              </Link>
+            ) : (
+              product.creatorName
+            )}
             {product.builtin && (
               <span>
                 <ShieldCheck aria-hidden="true" /> Original de VISO
@@ -164,6 +204,29 @@ export default function MarketProductPage({
         </div>
         <div className="vm-product-purchase">
           <strong className="vm-detail-price">{productPrice(product)}</strong>
+          {shopping && (
+            <div className="vm-pdp-cart">
+              {!product.acquired && product.priceMode !== "info" && (
+                <Button
+                  variant="outline"
+                  onClick={() => void shopping.set(product.id, "cart", !inCart)}
+                >
+                  {inCart ? <Check /> : <ShoppingCart />}
+                  {inCart ? "En tu carrito" : "Agregar al carrito"}
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                aria-label={
+                  saved ? "Quitar de favoritos" : "Guardar en favoritos"
+                }
+                aria-pressed={saved}
+                onClick={() => void shopping.set(product.id, "saved", !saved)}
+              >
+                <Heart fill={saved ? "currentColor" : "none"} />
+              </Button>
+            </div>
+          )}
           <ProductAction
             product={product}
             pending={pending}
@@ -179,55 +242,107 @@ export default function MarketProductPage({
           {error}
         </p>
       )}
-      {!!gallery.length && (
+      {!!gallery.length && selected && (
         <section
+          ref={galleryRef}
           aria-label="Galería del producto"
           className="vm-product-gallery"
         >
-          {gallery.map((item, index) => (
-            <figure key={item.id} className="vm-gallery-item">
-              {item.mediaType === "video" ? (
-                <video
-                  src={gallerySource(item)!}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  aria-label={item.name || `Video ${index + 1}`}
+          <div className="vm-gallery-main">
+            {selected.mediaType === "video" ? (
+              <video
+                ref={mainVideo}
+                key={selected.id}
+                src={gallerySource(selected)!}
+                controls
+                playsInline
+                preload="metadata"
+                autoPlay={!!activeMedia}
+                poster={product.coverUrl ?? undefined}
+                aria-label={selected.name || "Video del producto"}
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => openExpanded(selected)}
+                aria-label={`Ampliar ${selected.name || "imagen del producto"}`}
+              >
+                <img
+                  src={gallerySource(selected)!}
+                  alt={selected.name || product.title}
                 />
-              ) : (
+              </button>
+            )}
+            <span className="vm-gallery-counter">
+              {gallery.indexOf(selected) + 1}/{gallery.length}
+            </span>
+            <button
+              className="vm-gallery-fullscreen"
+              type="button"
+              onClick={() => openExpanded(selected)}
+              aria-label="Ampliar contenido seleccionado"
+            >
+              <Expand />
+            </button>
+          </div>
+          {gallery.length > 1 && (
+            <div
+              className="vm-gallery-thumbnails"
+              aria-label="Elegir foto o video"
+            >
+              {gallery.map((item, index) => (
                 <button
                   type="button"
-                  className="vm-gallery-image"
-                  onClick={() => setExpanded(item)}
-                  aria-label={`Ampliar ${item.name || `imagen ${index + 1}`}`}
+                  key={item.id}
+                  aria-label={`${item.mediaType === "video" ? "Ver video" : "Ver imagen"} ${index + 1}: ${item.name}`}
+                  aria-pressed={selected.id === item.id}
+                  onClick={() => setActiveMedia(item.id)}
                 >
-                  <img
-                    src={gallerySource(item)!}
-                    alt={item.name || `Imagen ${index + 1} de ${product.title}`}
-                    loading={index ? "lazy" : "eager"}
-                  />
-                  <span>
-                    <Expand aria-hidden="true" />
-                  </span>
+                  {item.mediaType === "video" ? (
+                    <>
+                      <video
+                        src={gallerySource(item)!}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        aria-hidden="true"
+                      />
+                      <span>
+                        <Play />
+                      </span>
+                    </>
+                  ) : (
+                    <img src={gallerySource(item)!} alt="" loading="lazy" />
+                  )}
                 </button>
-              )}
-              {item.mediaType === "video" && (
-                <button
-                  type="button"
-                  className="vm-gallery-expand"
-                  onClick={() => setExpanded(item)}
-                  aria-label={`Ampliar ${item.name || `video ${index + 1}`}`}
-                >
-                  <Expand aria-hidden="true" />
-                </button>
-              )}
-            </figure>
-          ))}
+              ))}
+            </div>
+          )}
+          {demonstration && (
+            <button
+              className="vm-product-demo"
+              type="button"
+              onClick={() => {
+                setActiveMedia(demonstration.id);
+                galleryRef.current?.scrollIntoView?.({
+                  block: "center",
+                  behavior: "smooth",
+                });
+              }}
+            >
+              <Play /> Ver demostración
+            </button>
+          )}
         </section>
       )}
+      <nav className="vm-product-tabs" aria-label="Información del producto">
+        <a href="#vm-description">Descripción</a>
+        <a href="#vm-details">Detalles</a>
+        <a href="#vm-creator">Creador</a>
+      </nav>
       <div className="vm-product-information">
         <div className="vm-product-overview">
-          <section>
+          <section id="vm-description">
             <h2>Descripción</h2>
             <div className="vm-product-info-card">
               <p className="vm-detail-description">{product.description}</p>
@@ -280,9 +395,9 @@ export default function MarketProductPage({
           {product.priceMode === "free" &&
             ["icons", "screensavers"].includes(product.category) && (
               <p className="vm-detail-help">
-                Tocá Obtener y usar para elegir una imagen o animación y
-                aplicarla directamente a una tecla o al fondo del Display. La
-                acción de la tecla se conserva.
+                Agregá el recurso a tu biblioteca para elegir una imagen o
+                animación y aplicarla directamente a una tecla o al fondo del
+                Display. La acción de la tecla se conserva.
               </p>
             )}
           {product.priceMode === "info" && (
@@ -291,7 +406,7 @@ export default function MarketProductPage({
             </p>
           )}
         </div>
-        <aside className="vm-product-details">
+        <aside className="vm-product-details" id="vm-details">
           <h2>Detalles</h2>
           <dl className="vm-product-info-card">
             {facts
@@ -329,6 +444,15 @@ export default function MarketProductPage({
               </div>
             )}
           </dl>
+          <section id="vm-creator" className="vm-product-info-card">
+            <h2>Creador</h2>
+            <p>{product.creatorName}</p>
+            {creator && (
+              <Link to={creator}>
+                Ver tienda del creador <ArrowUpRight />
+              </Link>
+            )}
+          </section>
         </aside>
       </div>
       {expanded && (
@@ -342,7 +466,12 @@ export default function MarketProductPage({
             </DialogHeader>
             {expanded.mediaType === "video" ? (
               <video
+                ref={expandedVideo}
                 src={gallerySource(expanded)!}
+                onLoadedMetadata={(e) => {
+                  if (expandedTime.current > 0)
+                    e.currentTarget.currentTime = expandedTime.current;
+                }}
                 controls
                 playsInline
                 autoPlay
@@ -437,7 +566,7 @@ function ProductAction({
       ) : (
         <Button disabled={pending} onClick={onAdd}>
           {pending ? <Loader2 className="animate-spin" /> : <Library />}
-          {pending ? "Preparando…" : "Obtener y usar"}
+          {pending ? "Preparando…" : "Agregar a mi biblioteca"}
         </Button>
       )}
     </div>

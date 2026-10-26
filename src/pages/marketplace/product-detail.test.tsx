@@ -61,7 +61,9 @@ describe("Marketplace acquisition", () => {
   it("adds a free resource through the backend before reporting success", async () => {
     const user = userEvent.setup();
     const acquired = show();
-    await user.click(screen.getByRole("button", { name: "Obtener y usar" }));
+    await user.click(
+      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
+    );
     expect(fixture.acquire).toHaveBeenCalledExactlyOnceWith({
       productId: "free-pack",
     });
@@ -76,7 +78,9 @@ describe("Marketplace acquisition", () => {
     fixture.acquire.mockRejectedValueOnce(new Error("Private diagnostics"));
     const user = userEvent.setup();
     const acquired = show();
-    await user.click(screen.getByRole("button", { name: "Obtener y usar" }));
+    await user.click(
+      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
+    );
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "No pudimos agregar el recurso",
     );
@@ -86,7 +90,7 @@ describe("Marketplace acquisition", () => {
     expect(acquired).not.toHaveBeenCalled();
     expect(fixture.success).not.toHaveBeenCalled();
     expect(
-      screen.getByRole("button", { name: "Obtener y usar" }),
+      screen.getByRole("button", { name: "Agregar a mi biblioteca" }),
     ).toBeEnabled();
   });
 
@@ -108,7 +112,7 @@ describe("Marketplace acquisition", () => {
       screen.getByText(/VISO puede recibir una comisión/),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Obtener y usar" }),
+      screen.queryByRole("button", { name: "Agregar a mi biblioteca" }),
     ).not.toBeInTheDocument();
     expect(fixture.acquire).not.toHaveBeenCalled();
   });
@@ -151,7 +155,7 @@ describe("Marketplace acquisition", () => {
       ).toBeInTheDocument(),
     );
     expect(
-      screen.queryByRole("button", { name: "Obtener y usar" }),
+      screen.queryByRole("button", { name: "Agregar a mi biblioteca" }),
     ).not.toBeInTheDocument();
     expect(fixture.acquire).not.toHaveBeenCalled();
   });
@@ -205,6 +209,9 @@ describe("Marketplace acquisition", () => {
     expect(
       within(gallery).getByRole("img", { name: "Vista de frente" }),
     ).toHaveAttribute("src", "/marketplace/covers/original-icons.png");
+    await user.click(
+      screen.getByRole("button", { name: /Ver video.*Video vertical/ }),
+    );
     expect(
       container.querySelector('video[aria-label="Video vertical"]'),
     ).toHaveAttribute("controls");
@@ -219,6 +226,12 @@ describe("Marketplace acquisition", () => {
     expect(
       screen.getByRole("link", { name: /Contactar al creador/ }),
     ).toHaveAttribute("href", "https://creator.example.test/support");
+    await user.click(
+      screen.getByRole("button", { name: /Ver imagen.*Vista de frente/ }),
+    );
+    expect(
+      container.querySelector('video[aria-label="Video vertical"]'),
+    ).not.toBeInTheDocument();
     await user.click(
       screen.getByRole("button", { name: "Ampliar Vista de frente" }),
     );

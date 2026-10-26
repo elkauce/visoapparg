@@ -107,6 +107,26 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     category: "icons",
     creatorName: "VISO",
     coverPath: "/marketplace/covers/living-icons.png",
+    gallery: [
+      {
+        id: "pulso-cover",
+        name: "Los seis estados VISO",
+        mediaType: "image",
+        builtinPath: "/marketplace/covers/living-icons.png",
+      },
+      {
+        id: "pulso-video",
+        name: "VISO Pulso en movimiento",
+        mediaType: "video",
+        builtinPath: "/marketplace/animated/libre.mp4",
+      },
+      {
+        id: "pulso-ocupado",
+        name: "Ocupado animado",
+        mediaType: "video",
+        builtinPath: "/marketplace/animated/ocupado.mp4",
+      },
+    ],
     priceMode: "free",
     delivery: "assets",
     assets: stateNames.flatMap(([id, name]) => [
@@ -147,6 +167,20 @@ export const BUILTIN_MARKETPLACE_PRODUCTS: BuiltinProduct[] = [
     category: "screensavers",
     creatorName: "VISO",
     coverPath: "/marketplace/covers/ambient-screen.png",
+    gallery: [
+      {
+        id: "aurora-cover",
+        name: "Aurora VISO",
+        mediaType: "image",
+        builtinPath: "/marketplace/covers/ambient-screen.png",
+      },
+      {
+        id: "aurora-demo",
+        name: "Aurora en movimiento",
+        mediaType: "video",
+        builtinPath: "/marketplace/screensavers/aurora.mp4",
+      },
+    ],
     priceMode: "free",
     delivery: "assets",
     assets: [

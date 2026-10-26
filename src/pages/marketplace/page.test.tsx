@@ -125,9 +125,7 @@ describe("Marketplace access and navigation", () => {
     const categories = screen.getByRole("navigation", {
       name: "Categorías del marketplace",
     });
-    await user.click(
-      within(categories).getByRole("button", { name: "Iconos" }),
-    );
+    await user.click(within(categories).getByRole("link", { name: "Iconos" }));
     expect(screen.getByTestId("location")).toHaveTextContent("category=icons");
     await user.type(
       screen.getByRole("searchbox", { name: "Buscar en el marketplace" }),
@@ -163,7 +161,10 @@ describe("Marketplace access and navigation", () => {
     const user = userEvent.setup();
     show();
     await user.click(
-      screen.getByRole("button", { name: "Administrar marketplace" }),
+      screen.getByRole("button", { name: "Más opciones del marketplace" }),
+    );
+    await user.click(
+      screen.getByRole("menuitem", { name: "Administrar marketplace" }),
     );
     expect(
       await screen.findByRole("heading", { name: "Cola de aprobación" }),

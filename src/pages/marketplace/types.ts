@@ -19,6 +19,7 @@ export type MarketProduct = {
   description: string;
   category: MarketplaceCategory;
   creatorName: string;
+  creatorRef?: string;
   coverUrl?: string | null;
   priceMode: "free" | "external" | "info" | "paid";
   priceAmount?: number;
@@ -34,6 +35,7 @@ export type MarketProduct = {
   hasDraft?: boolean;
   draftStatus?: "draft" | "pending" | "rejected";
   revision?: number;
+  updatedAt?: number;
   delivery: "assets" | "profile" | "plugin" | "inquiry" | "page";
   externalUrl?: string;
   affiliate: boolean;
@@ -91,6 +93,7 @@ export type MarketLibraryEntry = {
   title: string;
   category: MarketplaceCategory;
   creatorName: string;
+  coverUrl?: string | null;
   delivery: "assets" | "profile" | "plugin" | "inquiry" | "page";
   acquiredAt: number;
   revision?: number;

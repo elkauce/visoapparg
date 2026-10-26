@@ -1,0 +1,48 @@
+{
+  "version": "1.18.0",
+  "versionCode": 30,
+  "package": "com.viso.deck",
+  "apk": {
+    "path": "artifacts/android/VISO-Deck-1.18.0-review.apk",
+    "bytes": 23242712,
+    "sha256": "03cfee5e4d0c35bad845549f1d3fbb9525a888d9ad500a7cffe46d4caec58d17",
+    "signatureSHA256": "9664805aed9f244425531734609e107ebfac5d0e038cb9260ccbef3879fb12da",
+    "sameSigningCertificateAs1170": true,
+    "minSdk": 24,
+    "targetSdk": 36,
+    "googleHomeSdk": true,
+    "fcmEnabled": true
+  },
+  "tests": {
+    "files": 103,
+    "passed": 955,
+    "backend": "Actual Convex functions exercised with convex-test, isolated data and storage",
+    "log": "artifacts/marketplace-redesign/tests-confirmed.log"
+  },
+  "browser": {
+    "checks": 123,
+    "widths": [390, 320, 844, 1440],
+    "landscape": { "width": 844, "height": 390 },
+    "creatorFollowChecks": 6,
+    "creatorWidths": [390, 1440],
+    "runtimeErrors": [],
+    "fixtures": "Actual React components and built-in catalog with synthetic accounts and isolated backend responses",
+    "reports": [
+      "artifacts/marketplace-redesign/browser-validation.json",
+      "artifacts/marketplace-redesign/creator-validation.json"
+    ]
+  },
+  "typeScriptFrontend": "passed",
+  "typeScriptBackend": "passed",
+  "eslintChangedFiles": "passed with zero warnings",
+  "webBuild": "passed",
+  "androidBuild": "passed",
+  "physicalDeviceTested": false,
+  "realPaymentsExecuted": false,
+  "realCallsOrLightsTriggered": false,
+  "productionChanged": false,
+  "stableDownloadChanged": false,
+  "backendActivationRequired": true,
+  "backendDeployment": "vivid-nightingale-785",
+  "publicationOrder": ["backend", "web", "APK download and QR"]
+}
