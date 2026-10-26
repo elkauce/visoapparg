@@ -42,4 +42,12 @@ VISO_GOOGLE_HOME_SDK_DIR=/workspace/status-mini-/app/libs \
 node scripts/build-android.mjs
 ```
 
-Esta entrega no publica en Vercel, no despliega Convex y no cambia la descarga/QR de producción. La promoción de esta versión requiere la autorización de publicación del propietario.
+La revisión se preparó sin publicar ni modificar el servidor. El 26 de octubre de 2026 el propietario autorizó la publicación con «Si publica».
+
+## Publicación autorizada
+
+La versión está publicada en [la web estable](https://viso-deck-android.vercel.app). El botón de descarga, el acceso rápido y el QR utilizan la misma [APK 1.17.0](https://raw.githubusercontent.com/elkauce/visoapparg/fed264a9d066b1db405f223efeb7fe7567b96619/downloads/VISO-Deck-1.17.0-debug.apk), alojada en un commit inmutable. Se descargó y comparó byte por byte con el archivo aprobado; conserva su firma anterior.
+
+Se comprobaron los 93 archivos de la web antes y después de promover el despliegue, ocho rutas públicas y la decodificación real del QR. Además pasaron 18 comprobaciones de navegador sobre el acceso publicado, a 390 y 320 px, conectado al servidor real: Google disponible, correo/contraseña, registro, paleta y latido. No se crearon cuentas ni se iniciaron llamadas o pagos.
+
+El [informe de publicación](validation/android-design-1.17-production.json) registra los despliegues actual y anterior y la suma de comprobación de la APK. No se desplegó Convex ni se modificó Te a Viso. Para ver el nuevo diseño en el teléfono hay que instalar la nueva APK; la prueba en un dispositivo físico sigue pendiente.

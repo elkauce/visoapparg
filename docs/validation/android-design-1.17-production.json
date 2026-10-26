@@ -1,0 +1,86 @@
+{
+  "verifiedAt": "2026-10-26T13:44:47.566Z",
+  "origin": "https://viso-deck-android.vercel.app",
+  "matchedFiles": 93,
+  "mismatchedFiles": [],
+  "apkUrlBundles": 1,
+  "routes": [
+    {
+      "path": "/",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/timbre",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/android",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/android/settings",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/marketplace",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/deck",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/deck/edit",
+      "status": 200,
+      "matchesIndex": true
+    },
+    {
+      "path": "/s/review",
+      "status": 200,
+      "matchesIndex": true
+    }
+  ],
+  "downloadUrl": "https://raw.githubusercontent.com/elkauce/visoapparg/fed264a9d066b1db405f223efeb7fe7567b96619/downloads/VISO-Deck-1.17.0-debug.apk",
+  "downloadStatus": 200,
+  "scope": "Static files match the reviewed build; download button and QR share the rendered component constant. No authenticated browser session or physical notification/call asserted.",
+  "status": "published",
+  "version": "1.17.0",
+  "authorization": "User: Si publica",
+  "sourceCommit": "6392dd821212f1b343d70ffff0372eb660df83ca",
+  "reviewSourceCommit": "34d42a4",
+  "deploymentId": "dpl_E4tCUxahffVi4tr5kdkFQDjynWod",
+  "previousDeploymentId": "dpl_QuEXKupSQMVxyY9mPSyUbHWgvyvy",
+  "stagingVerified": true,
+  "renderChecks": {
+    "downloadHrefCorrect": true,
+    "versionLabel": "1.17.0",
+    "qrDecodedCorrectly": true,
+    "sharedApkUrlForQrAndButtons": true
+  },
+  "browser": {
+    "checks": 18,
+    "widths": [390, 320],
+    "realBackend": true,
+    "loginAndRegistrationVisible": true,
+    "googleAvailable": true,
+    "heartbeat": true,
+    "physicalDeviceTested": false,
+    "accountCreated": false,
+    "signInPerformed": false,
+    "realLightsOrCalls": false,
+    "tls": "Verified CA and inherited proxy; no TLS bypass"
+  },
+  "apkSHA256": "d1bf7660c5c8994c5afbfe6651a2f6eab8d4f411de57bf211be5dfc4ae85920a",
+  "downloadedBytesMatchApprovedArtifact": true,
+  "apkPublicationCommit": "fed264a9d066b1db405f223efeb7fe7567b96619",
+  "apkCertificateMatchesPrevious": true,
+  "backendChanged": false,
+  "teavisoChanged": false,
+  "physicalDeviceTested": false
+}
