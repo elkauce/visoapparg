@@ -493,6 +493,7 @@ export default function DeckPage({
           ? "flex h-full min-h-0 flex-col gap-3 bg-black"
           : "flex h-dvh flex-col gap-3 bg-background p-3 [--deck-padding:0.75rem] sm:p-4 sm:[--deck-padding:1rem]"
       }
+      data-management-editing={editMode ? "true" : undefined}
       style={
         embeddedPageId
           ? undefined
@@ -844,7 +845,7 @@ export default function DeckPage({
         />
       )}
       <Dialog open={elgatoOpen} onOpenChange={setElgatoOpen}>
-        <DialogContent className="max-h-[85dvh] overflow-y-auto">
+        <DialogContent management className="max-h-[85dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Elgato Stream Deck</DialogTitle>
           </DialogHeader>

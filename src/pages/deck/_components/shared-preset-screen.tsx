@@ -128,7 +128,7 @@ export default function SharedPresetScreen({
             onSettingsOpenChange?.(open);
           }}
         >
-          <DialogContent>
+          <DialogContent management>
             <DialogHeader>
               <DialogTitle>Spotify</DialogTitle>
             </DialogHeader>

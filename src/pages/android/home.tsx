@@ -1,99 +1,140 @@
-import { useConvexAuth } from "convex/react";
+import { readableTextColor } from "@/lib/color";
+import type { CSSProperties } from "react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { Link } from "react-router-dom";
 import {
   LayoutGrid,
   Monitor,
-  Settings2,
   Plug,
   ShoppingBag,
   BellRing,
+  ChevronRight,
+  UserRound,
 } from "lucide-react";
-import { SignInButton } from "@/components/ui/signin.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { VisoBrand } from "@/components/viso-brand.tsx";
-import { ConnectionStatus } from "./shared.tsx";
+import { api } from "@/convex/_generated/api";
+import StatusIcon from "@/components/status-icon";
+import AccountAccess from "@/components/account-access";
+import NativeBrand from "@/components/native-brand";
+import NativeAppNav from "@/components/native-app-nav";
+import { ConnectionStatus } from "./shared";
+import "./management.css";
 
 export default function AndroidHome() {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  const data = useQuery(api.statuses.list, isAuthenticated ? {} : "skip");
+  const active = data?.statuses.find(
+    (status) => status._id === data.activeStatusId,
+  );
+  if (isLoading)
+    return (
+      <div className="viso-app-home viso-safe-screen">
+        <p role="status">Cargando tu cuenta…</p>
+      </div>
+    );
+  if (!isAuthenticated)
+    return (
+      <div className="viso-app-home viso-app-welcome viso-safe-screen">
+        <main>
+          <NativeBrand />
+          <h1>Tu espacio, conectado.</h1>
+          <p>Todo lo que necesitás, en un solo lugar.</p>
+          <div className="viso-app-auth-halo">
+            <AccountAccess />
+          </div>
+          <p className="viso-app-welcome-footer">
+            Deck · Display · Timbre · Marketplace
+          </p>
+        </main>
+      </div>
+    );
   return (
-    <div className="viso-safe-screen viso-safe-home flex min-h-dvh flex-col bg-background">
-      <header className="mx-auto flex w-full max-w-2xl flex-wrap items-center justify-between gap-3">
-        <VisoBrand />
-        <ConnectionStatus />
+    <div className="viso-app-home viso-safe-screen">
+      <header className="viso-app-home-header">
+        <NativeBrand />
+        <Link
+          to="/android/settings"
+          className="viso-app-avatar"
+          aria-label="Abrir mi cuenta"
+        >
+          <UserRound />
+        </Link>
       </header>
-      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-4 py-8">
-        <h1 className="text-2xl font-semibold">VISO Deck</h1>
-        {isLoading ? (
-          <p role="status">Cargando la sesión…</p>
-        ) : isAuthenticated ? (
-          <>
-            <Button
-              asChild
-              className="h-24 justify-start rounded-2xl px-6 text-xl"
+      <main className="viso-app-dashboard">
+        <h1>Tu panel</h1>
+        <Link
+          to="/deck"
+          className="viso-app-current-status"
+          style={
+            {
+              backgroundColor: active?.color ?? "#64748b",
+              color: active ? readableTextColor(active.color) : "#fff",
+            } as CSSProperties
+          }
+          aria-label={
+            active ? `Estado actual: ${active.name}. Abrir Deck` : "Abrir Deck"
+          }
+        >
+          <span>Estado actual</span>
+          <strong>
+            {active && <StatusIcon name={active.icon} className="size-7" />}
+            {active?.name ??
+              (data === undefined ? "Sincronizando…" : "Sin estado activo")}
+          </strong>
+          <ChevronRight className="viso-app-status-arrow" />
+        </Link>
+        <section className="viso-app-launchers" aria-label="Tu espacio VISO">
+          {[
+            {
+              title: "Deck",
+              description: "Tus teclas y páginas",
+              icon: LayoutGrid,
+              to: "/deck",
+              primary: true,
+            },
+            {
+              title: "Display",
+              description: "Tu estado, a la vista",
+              icon: Monitor,
+              to: "/android/display",
+            },
+            {
+              title: "Timbre",
+              description: "Recibí tus visitas",
+              icon: BellRing,
+              to: "/timbre",
+            },
+            {
+              title: "Marketplace",
+              description: "Descubrí contenidos",
+              icon: ShoppingBag,
+              to: "/marketplace",
+            },
+          ].map(({ title, description, icon: Icon, to, primary }) => (
+            <Link
+              key={title}
+              to={to}
+              className={`viso-app-launcher${primary ? " is-primary" : ""}`}
             >
-              <Link to="/deck">
-                <LayoutGrid className="mr-3 size-8" />
-                Deck
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="h-24 justify-start rounded-2xl px-6 text-xl"
-            >
-              <Link to="/android/display">
-                <Monitor className="mr-3 size-8" />
-                Display
-              </Link>
-            </Button>
-            <Button
-              asChild
-              variant="secondary"
-              className="h-16 justify-start rounded-2xl px-6"
-            >
-              <Link to="/marketplace">
-                <ShoppingBag className="mr-3 size-6" />
-                Marketplace
-              </Link>
-            </Button>
-            <div className="grid grid-cols-2 gap-3">
-              <Button
-                asChild
-                variant="secondary"
-                className="col-span-2 h-16 justify-start rounded-2xl px-6"
-              >
-                <Link to="/timbre">
-                  <BellRing className="mr-3 size-6" />
-                  Timbre
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="h-14">
-                <Link to="/android/settings">
-                  <Settings2 />
-                  Configuración
-                </Link>
-              </Button>
-              <Button asChild variant="outline" className="h-14">
-                <Link to="/android/integrations">
-                  <Plug />
-                  Integraciones
-                </Link>
-              </Button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="text-muted-foreground">
-              Tu Deck y tu Display, sincronizados con tu cuenta VISO.
-            </p>
-            <SignInButton size="lg" signInText="Entrar o crear cuenta" />
-          </>
-        )}
+              <span className="viso-app-launcher-icon">
+                <Icon />
+              </span>
+              <h2>{title}</h2>
+              <p>{description}</p>
+              <ChevronRight className="viso-app-launcher-arrow" />
+            </Link>
+          ))}
+        </section>
+        <Link to="/android/integrations" className="viso-app-connections">
+          <Plug />
+          <span>
+            <strong>Conexiones</strong>
+            <small>Tus servicios vinculados</small>
+          </span>
+          <ChevronRight />
+        </Link>
+        <ConnectionStatus />
       </main>
-      {isAuthenticated && (
-        <footer className="mx-auto flex w-full max-w-2xl justify-end">
-          <SignInButton variant="ghost" signOutText="Cerrar sesión" />
-        </footer>
-      )}
+      <NativeAppNav />
     </div>
   );
 }

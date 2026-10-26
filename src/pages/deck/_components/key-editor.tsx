@@ -115,6 +115,7 @@ export default function KeyEditor({
       onOpenChange={(open) => !open && !busy && onClose()}
     >
       <DialogContent
+        management
         className="max-h-[90dvh] max-w-md overflow-y-auto"
         showCloseButton={!busy}
       >

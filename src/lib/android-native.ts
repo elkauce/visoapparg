@@ -81,6 +81,7 @@ export interface InstalledAndroidApp {
 }
 
 interface VisoNativePlugin {
+  setManagementAppearance(options: { light: boolean }): Promise<void>;
   exportDeckConfiguration(options: { contents: string }): Promise<void>;
   setScreenOrientation(options: {
     mode: "portrait" | "automatic";
@@ -210,6 +211,10 @@ async function discoverLights(): Promise<HomeAssistantLight[]> {
 }
 
 export const nativeDeck = {
+  async setManagementAppearance(light: boolean) {
+    requireAndroid();
+    await plugin.setManagementAppearance({ light });
+  },
   async setScreenOrientation(mode: "portrait" | "automatic") {
     requireAndroid();
     await plugin.setScreenOrientation({ mode });

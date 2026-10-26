@@ -194,7 +194,7 @@ export default function AndroidDeck() {
     );
   if (editing)
     return (
-      <div className="relative h-dvh">
+      <div className="viso-management-theme relative h-dvh">
         <DeckPage startEditing fullEditor initialPageId={screen} />
         <Button
           className="fixed bottom-[max(var(--viso-safe-bottom),1rem)] left-1/2 z-40 -translate-x-1/2 shadow-lg"
@@ -366,7 +366,10 @@ export default function AndroidDeck() {
         )}
       </DeckSlide>
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+        <DialogContent
+          management
+          className="max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        >
           <DialogHeader>
             <DialogTitle>Ajustes</DialogTitle>
             <DialogDescription>
@@ -491,7 +494,10 @@ export default function AndroidDeck() {
         </DialogContent>
       </Dialog>
       <Dialog open={elgatoOpen} onOpenChange={setElgatoOpen}>
-        <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
+        <DialogContent
+          management
+          className="max-h-[calc(100dvh-2rem)] overflow-y-auto"
+        >
           <DialogHeader>
             <DialogTitle>Elgato Stream Deck</DialogTitle>
             <DialogDescription>

@@ -273,7 +273,7 @@ function GoogleHomeAccountDialog({ userId, open, onOpenChange }: DialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto">
+      <DialogContent management className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Luces Google Home</DialogTitle>
           <DialogDescription>

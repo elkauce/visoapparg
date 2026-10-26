@@ -707,8 +707,21 @@ class VisoNativePlugin : Plugin() {
         clearMediaArtwork()
     }
 
+    @PluginMethod
+    fun setManagementAppearance(call: PluginCall) {
+        val light = call.getBoolean("light", false) == true
+        activity.runOnUiThread {
+            lightManagement = light
+            val controller = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+            controller.isAppearanceLightStatusBars = light
+            controller.isAppearanceLightNavigationBars = light
+            call.resolve()
+        }
+    }
+
     companion object {
         private var immersive = false
+        private var lightManagement = false
 
         @JvmStatic
         fun applyImmersive(activity: android.app.Activity, webView: android.view.View?) {
@@ -720,6 +733,8 @@ class VisoNativePlugin : Plugin() {
                 window.attributes = attributes
             }
             val controller = WindowInsetsControllerCompat(window, window.decorView)
+            controller.isAppearanceLightStatusBars = lightManagement
+            controller.isAppearanceLightNavigationBars = lightManagement
             controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             if (immersive) controller.hide(WindowInsetsCompat.Type.systemBars()) else controller.show(WindowInsetsCompat.Type.systemBars())
             if (webView != null) {

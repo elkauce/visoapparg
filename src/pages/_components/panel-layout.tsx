@@ -1,3 +1,7 @@
+import NativeAppNav from "@/components/native-app-nav";
+import { useNativeAppSurface } from "@/lib/use-native-app-surface";
+import NativeBrand from "@/components/native-brand";
+import "@/pages/android/management.css";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -65,7 +69,22 @@ export default function PanelLayout({
   className?: string;
   children: ReactNode;
 }) {
+  const nativeSurface = useNativeAppSurface();
   const android = isAndroidNative();
+  if (nativeSurface)
+    return (
+      <div
+        className={`viso-control-panel viso-app-management viso-safe-screen ${className}`}
+      >
+        <header className="viso-app-home-header">
+          <Link to="/android" aria-label="Ir al inicio VISO">
+            <NativeBrand />
+          </Link>
+        </header>
+        <div className="viso-panel-shell">{children}</div>
+        <NativeAppNav />
+      </div>
+    );
   return (
     <div className={`viso-control-panel min-h-screen ${className}`}>
       <aside className="viso-panel-rail" aria-label="Panel VISO">

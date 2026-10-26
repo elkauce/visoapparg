@@ -1,7 +1,12 @@
 import { useAction } from "convex/react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog.tsx";
 import { Skeleton } from "@/components/ui/skeleton.tsx";
 import { api } from "@/convex/_generated/api.js";
 import { SPORTS_LEAGUES, isSportsLeague } from "@/convex/lib/sports_leagues.ts";
@@ -24,11 +29,15 @@ export default function SportsDialog({ league, onClose }: SportsDialogProps) {
     enabled: league !== null,
     refetchInterval: REFRESH_MS,
   });
-  const title = league && isSportsLeague(league) ? SPORTS_LEAGUES[league].name : "Deportes";
+  const title =
+    league && isSportsLeague(league) ? SPORTS_LEAGUES[league].name : "Deportes";
 
   return (
     <Dialog open={league !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
+      <DialogContent
+        management
+        className="max-h-[85vh] max-w-lg overflow-y-auto"
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -46,7 +55,9 @@ export default function SportsDialog({ league, onClose }: SportsDialogProps) {
           </p>
         )}
         {data && data.length === 0 && (
-          <p className="text-sm text-muted-foreground">No hay partidos para mostrar hoy.</p>
+          <p className="text-sm text-muted-foreground">
+            No hay partidos para mostrar hoy.
+          </p>
         )}
         {data && data.length > 0 && (
           <ul className="space-y-2">
@@ -58,17 +69,23 @@ export default function SportsDialog({ league, onClose }: SportsDialogProps) {
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="flex justify-between gap-2">
                     <span className="truncate">{match.home.name}</span>
-                    <span className="font-bold tabular-nums">{match.home.score}</span>
+                    <span className="font-bold tabular-nums">
+                      {match.home.score}
+                    </span>
                   </p>
                   <p className="flex justify-between gap-2">
                     <span className="truncate">{match.away.name}</span>
-                    <span className="font-bold tabular-nums">{match.away.score}</span>
+                    <span className="font-bold tabular-nums">
+                      {match.away.score}
+                    </span>
                   </p>
                 </div>
                 <span
                   className={cn(
                     "w-24 shrink-0 text-right text-xs",
-                    match.state === "in" ? "font-semibold text-primary" : "text-muted-foreground",
+                    match.state === "in"
+                      ? "font-semibold text-primary"
+                      : "text-muted-foreground",
                   )}
                 >
                   {match.state === "pre"

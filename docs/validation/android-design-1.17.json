@@ -1,0 +1,50 @@
+{
+  "version": "1.17.0",
+  "versionCode": 29,
+  "package": "com.viso.deck",
+  "apkSHA256": "d1bf7660c5c8994c5afbfe6651a2f6eab8d4f411de57bf211be5dfc4ae85920a",
+  "signatureSHA256": "9664805aed9f244425531734609e107ebfac5d0e038cb9260ccbef3879fb12da",
+  "sameSigningCertificateAs1161": true,
+  "tests": {
+    "passed": 941,
+    "files": 100
+  },
+  "browser": {
+    "checks": 52,
+    "pixelResults": [
+      {
+        "route": "deck",
+        "width": 390,
+        "differingPixels": 0
+      },
+      {
+        "route": "deck",
+        "width": 844,
+        "differingPixels": 0
+      },
+      {
+        "route": "s/demo",
+        "width": 390,
+        "differingPixels": 0
+      },
+      {
+        "route": "s/demo",
+        "width": 844,
+        "differingPixels": 0
+      }
+    ],
+    "fixtures": "synthetic account/native services; actual components",
+    "productionChanged": false
+  },
+  "typeScript": "passed",
+  "androidBuild": "passed",
+  "googleHomeSdk": true,
+  "fcmEnabled": true,
+  "eslint": {
+    "newIssues": 0,
+    "existingIssues": 6
+  },
+  "physicalDeviceTested": false,
+  "productionChanged": false,
+  "stableDownloadChanged": false
+}

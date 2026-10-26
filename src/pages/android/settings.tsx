@@ -13,7 +13,7 @@ export default function AndroidSettings() {
   const user = useQuery(api.users.getCurrentUser, {});
   const [googlePending, setGooglePending] = useState(false);
   return (
-    <AndroidScreen title="Configuración">
+    <AndroidScreen title="Cuenta">
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <h2 className="font-semibold">Cuenta</h2>
         <p className="break-all text-sm text-muted-foreground">
@@ -33,11 +33,11 @@ export default function AndroidSettings() {
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">
         <h2 className="font-semibold">Deck</h2>
         <p className="text-sm text-muted-foreground">
-          Abre el Deck y toca Editar para configurar teclas, páginas y
-          distribución. La orientación se ajusta automáticamente.
+          Editá tus teclas, páginas y distribución. La orientación se ajusta
+          automáticamente.
         </p>
         <Button asChild variant="outline">
-          <Link to="/deck">Configurar Deck</Link>
+          <Link to="/deck/edit">Editar Deck</Link>
         </Button>
       </section>
       <section className="space-y-3 rounded-2xl border border-border bg-card p-5">

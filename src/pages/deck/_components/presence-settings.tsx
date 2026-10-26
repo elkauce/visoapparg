@@ -63,7 +63,7 @@ export default function PresenceSettings({
   };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto">
+      <DialogContent management className="max-h-[85dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Estado automático</DialogTitle>
           <DialogDescription>

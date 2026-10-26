@@ -164,8 +164,8 @@ describe("Android integration navigation", () => {
     const links = screen.getAllByRole("link", { name: /^Configurar / });
     expect(links.map((link) => link.getAttribute("aria-label"))).toEqual([
       "Configurar Google Home",
-      "Configurar Amazon Alexa",
       "Configurar Dispositivos VISO",
+      "Configurar Amazon Alexa",
       "Configurar Home Assistant",
       "Configurar Spotify y multimedia",
       "Configurar Aplicaciones y automatizaciones",
@@ -174,15 +174,15 @@ describe("Android integration navigation", () => {
       within(
         screen.getByRole("region", { name: "Hogar inteligente" }),
       ).getAllByRole("link"),
-    ).toHaveLength(4);
+    ).toHaveLength(2);
     expect(
       within(
         screen.getByRole("region", { name: "Aplicaciones y multimedia" }),
       ).getAllByRole("link"),
     ).toHaveLength(2);
     expect(
-      screen.queryByText(/Elgato|Stream Deck Mobile|Luces y RGB/),
-    ).not.toBeInTheDocument();
+      screen.getByRole("link", { name: /Stream Deck de Elgato/ }),
+    ).toHaveAttribute("href", "/android/stream-deck");
     expect(
       screen.queryByRole("button", { name: "Play / pausa" }),
     ).not.toBeInTheDocument();
@@ -204,7 +204,7 @@ describe("Android integration navigation", () => {
       screen.getByRole("link", { name: "Volver a integraciones" }),
     );
     expect(
-      screen.getByRole("heading", { name: "Integraciones", level: 1 }),
+      screen.getByRole("heading", { name: "Conexiones", level: 1 }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Play / pausa" }),

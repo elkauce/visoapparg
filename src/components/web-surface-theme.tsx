@@ -1,18 +1,24 @@
-import { useLayoutEffect } from "react";
+import { isAndroidNative, nativeDeck } from "@/lib/android-native";
+import { useEffect, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { isAndroidNative } from "@/lib/android-native";
 import "./web-surface-theme.css";
+import "./management-theme.css";
 
 /** Portals inherit the same palette as the web home and account panel.
- * Full-screen Deck, Display and native Android routes retain their own theme. */
+ * Operational Deck and Display retain their own theme; management routes are light. */
 export default function WebSurfaceTheme() {
   const { pathname } = useLocation();
   const light =
     pathname.startsWith("/marketplace") ||
     pathname === "/timbre" ||
-    (pathname === "/" &&
-      !isAndroidNative() &&
-      import.meta.env.VITE_ANDROID_PREVIEW !== "true");
+    pathname.startsWith("/android") ||
+    pathname === "/deck/edit" ||
+    pathname === "/";
+
+  useEffect(() => {
+    if (isAndroidNative())
+      void nativeDeck.setManagementAppearance(light).catch(() => undefined);
+  }, [light]);
 
   useLayoutEffect(() => {
     if (!light) return;

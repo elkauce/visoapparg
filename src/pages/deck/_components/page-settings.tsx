@@ -118,6 +118,7 @@ export default function PageSettings(props: Props) {
   return (
     <Dialog open onOpenChange={(open) => !open && !busy && props.onClose()}>
       <DialogContent
+        management
         className="max-h-[90dvh] max-w-md overflow-y-auto"
         showCloseButton={!busy}
       >

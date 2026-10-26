@@ -54,7 +54,7 @@ export default function DeckIdleSettings({
   }, [open, configuration, pages]);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent management>
         <DialogHeader>
           <DialogTitle>Principal y protector de pantalla</DialogTitle>
           <DialogDescription>

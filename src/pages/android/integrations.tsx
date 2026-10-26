@@ -5,6 +5,7 @@ import {
   House,
   Lightbulb,
   ListMusic,
+  LayoutGrid,
   Mic,
   RefreshCw,
   Smartphone,
@@ -73,6 +74,9 @@ function IntegrationMenu() {
       ? "No se pudo comprobar"
       : "Comprobando…";
 
+  const legacyConfigured =
+    !!settings?.homeWebhookUrl ||
+    capabilities?.homeAssistant?.status === "connected";
   return (
     <>
       <div className="flex justify-end">
@@ -109,6 +113,42 @@ function IntegrationMenu() {
             route="google-home"
           />
           <IntegrationRow
+            icon={Lightbulb}
+            name="Dispositivos VISO"
+            description="Conectá, administrá y controlá tus dispositivos VISO."
+            status="Ver dispositivos"
+            route="devices"
+          />
+        </div>
+      </section>
+      <section className="space-y-2">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Teclas físicas
+        </h2>
+        <div className="rounded-2xl border border-border bg-card">
+          <Link
+            className="flex min-h-20 items-center gap-3 px-4 py-3"
+            to="/android/stream-deck"
+          >
+            <LayoutGrid className="size-6 text-primary" />
+            <span className="flex-1">
+              <strong className="block">Stream Deck de Elgato</strong>
+              <span className="text-sm text-muted-foreground">
+                Plugin y configuración de tus teclas
+              </span>
+            </span>
+            <ChevronRight className="size-4" />
+          </Link>
+        </div>
+      </section>
+      <details
+        className="viso-app-other-connections"
+        open={legacyConfigured || undefined}
+      >
+        <summary>Otras conexiones</summary>
+        <p>Conservá tus automatizaciones y servicios configurados.</p>
+        <div className="divide-y divide-border">
+          <IntegrationRow
             icon={Mic}
             name="Amazon Alexa"
             description="Activá rutinas al cambiar de estado."
@@ -122,13 +162,6 @@ function IntegrationMenu() {
             route="alexa"
           />
           <IntegrationRow
-            icon={Lightbulb}
-            name="Dispositivos VISO"
-            description="Conectá, administrá y controlá tus dispositivos VISO."
-            status="Ver dispositivos"
-            route="devices"
-          />
-          <IntegrationRow
             icon={Smartphone}
             name="Home Assistant"
             description="Conectá tu servidor y controlá tus luces."
@@ -136,7 +169,7 @@ function IntegrationMenu() {
             route="home-assistant"
           />
         </div>
-      </section>
+      </details>
       <section aria-labelledby="apps-media-heading" className="space-y-2">
         <h2
           id="apps-media-heading"
@@ -175,7 +208,7 @@ function IntegrationMenu() {
 
 export default function AndroidIntegrations() {
   return (
-    <AndroidScreen title="Integraciones">
+    <AndroidScreen title="Conexiones">
       <IntegrationMenu />
     </AndroidScreen>
   );

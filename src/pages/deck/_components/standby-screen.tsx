@@ -993,7 +993,10 @@ function AccountStandby(props: StandbyScreenProps) {
           </div>
         )}
       <Dialog open={customizing} onOpenChange={setCustomizing}>
-        <DialogContent className="max-h-[calc(100dvh-3rem)] overflow-y-auto">
+        <DialogContent
+          management
+          className="max-h-[calc(100dvh-3rem)] overflow-y-auto"
+        >
           <DialogHeader>
             <DialogTitle>Personalizar Reloj</DialogTitle>
             <DialogDescription>

@@ -145,7 +145,7 @@ export default function ExtendedScreen({
           if (!busy) setOpen(value);
         }}
       >
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
+        <DialogContent management className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Personalizar {title}</DialogTitle>
             <DialogDescription>

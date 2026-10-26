@@ -1,0 +1,505 @@
+.viso-app-home,
+.viso-app-management {
+  background: #f5f3ef;
+  color: #17191d;
+  min-height: 100dvh;
+}
+.viso-app-home {
+  padding-bottom: calc(95px + var(--viso-safe-bottom, 0px));
+}
+.viso-app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 29px;
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  color: #17191d;
+  flex-shrink: 0;
+}
+.viso-app-brand-symbol {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  overflow: hidden;
+  position: relative;
+  flex: 0 0 43px;
+}
+.viso-app-brand-symbol > img {
+  position: absolute;
+  max-width: none;
+  width: 121px;
+  height: auto;
+  left: -5px;
+  top: -5px;
+}
+.viso-app-home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 680px;
+  margin: 0 auto 30px;
+  gap: 18px;
+}
+.viso-app-avatar {
+  background: #e9e5df;
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.viso-app-dashboard {
+  max-width: 680px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.viso-app-dashboard > h1 {
+  font-size: 29px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin: 0;
+}
+.viso-app-current-status {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  border-radius: 20px;
+  padding: 20px 46px 20px 20px;
+  transition:
+    background-color 0.5s,
+    color 0.5s;
+  min-height: 100px;
+}
+.viso-app-current-status > span {
+  font-size: 12px;
+  opacity: 0.95;
+}
+.viso-app-current-status > strong {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 25px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.viso-app-status-arrow {
+  position: absolute;
+  right: 18px;
+  top: calc(50% - 10px);
+  width: 20px;
+  height: 20px;
+}
+.viso-app-launchers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.viso-app-launcher {
+  min-width: 0;
+  position: relative;
+  border: 1px solid #e5dfd6;
+  border-radius: 21px;
+  background: #fff;
+  padding: 19px 17px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+  min-height: 168px;
+}
+.viso-app-launcher.is-primary {
+  background: #e84300;
+  border-color: #e84300;
+  color: #fff;
+}
+.viso-app-launcher-icon {
+  width: 49px;
+  height: 49px;
+  display: grid;
+  place-items: center;
+  background: #fff0e7;
+  color: #d43e00;
+  border-radius: 17px;
+}
+.viso-app-launcher-icon > svg {
+  width: 26px;
+  height: 26px;
+}
+.is-primary .viso-app-launcher-icon {
+  background: #ffffff20;
+  color: #fff;
+}
+.viso-app-launcher h2 {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.viso-app-launcher p {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #60646c;
+  max-width: calc(100% - 8px);
+}
+.is-primary p {
+  color: #fff;
+}
+.viso-app-launcher-arrow {
+  position: absolute;
+  right: 11px;
+  bottom: 19px;
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+.viso-app-connections {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  background: white;
+  border: 1px solid #e5dfd6;
+  border-radius: 19px;
+  padding: 17px;
+}
+.viso-app-connections > svg:first-child {
+  width: 25px;
+  height: 25px;
+  color: #d43e00;
+}
+.viso-app-connections > span {
+  flex: 1;
+}
+.viso-app-connections strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 650;
+}
+.viso-app-connections small {
+  display: block;
+  font-size: 11px;
+  color: #60646c;
+  margin-top: 2px;
+}
+.viso-app-connections > svg:last-child {
+  width: 18px;
+  color: #60646c;
+}
+.viso-app-bottom-nav {
+  position: fixed;
+  z-index: 40;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 11px max(16px, var(--viso-safe-right, 0px))
+    max(12px, var(--viso-safe-bottom, 0px))
+    max(16px, var(--viso-safe-left, 0px));
+  background: #f9f7f3f5;
+  border-top: 1px solid #e5dfd6;
+  backdrop-filter: blur(14px);
+}
+.viso-app-bottom-nav > a {
+  display: flex;
+  flex: 1;
+  max-width: 225px;
+  align-items: center;
+  flex-direction: column;
+  gap: 5px;
+  padding: 3px 8px;
+  color: #60646c;
+  font-size: 11px;
+}
+.viso-app-bottom-nav svg {
+  width: 23px;
+  height: 23px;
+}
+.viso-app-bottom-nav > a[aria-current="page"] {
+  color: #d43e00;
+  font-weight: 650;
+}
+.viso-app-management {
+  padding-bottom: calc(100px + var(--viso-safe-bottom, 0px));
+}
+.viso-app-management .viso-app-page-content {
+  max-width: 680px;
+  margin: auto;
+  padding: 0;
+}
+.viso-app-page-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+  max-width: 680px;
+  margin: 0 auto 24px;
+}
+.viso-app-page-header h1 {
+  flex: 1;
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  min-width: 130px;
+}
+.viso-app-management details.viso-app-other-connections {
+  border: 1px solid #e5dfd6;
+  border-radius: 18px;
+  padding: 18px;
+  background: #fff;
+}
+.viso-app-other-connections > summary {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.viso-app-other-connections > p {
+  color: #60646c;
+  font-size: 12px;
+  line-height: 1.7;
+  margin: 8px 0 16px;
+}
+.viso-app-welcome {
+  display: flex;
+  justify-content: center;
+  padding-bottom: max(var(--viso-safe-bottom, 0px), 28px);
+}
+.viso-app-welcome > main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 430px;
+  justify-content: center;
+  padding: 28px 0;
+}
+.viso-app-welcome h1 {
+  font-size: 25px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  text-align: center;
+  margin: 25px 0 7px;
+}
+.viso-app-welcome > main > p {
+  font-size: 13px;
+  color: #60646c;
+  text-align: center;
+  line-height: 1.6;
+}
+.viso-app-auth-halo {
+  width: 100%;
+  position: relative;
+  isolation: isolate;
+  margin: 32px 0 26px;
+}
+.viso-app-auth-halo::before {
+  content: "";
+  position: absolute;
+  inset: -30px -8px;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+  background: var(--viso-auth-color);
+  filter: blur(40px);
+  animation:
+    viso-auth-cycle 36s linear infinite,
+    viso-auth-beat 3.2s ease-in-out infinite;
+  opacity: 0.38;
+}
+@property --viso-auth-color {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #22c55e;
+}
+@keyframes viso-auth-cycle {
+  0%,
+  10%,
+  100% {
+    --viso-auth-color: #22c55e;
+  }
+  16.667%,
+  26.667% {
+    --viso-auth-color: #ef4444;
+  }
+  33.333%,
+  43.333% {
+    --viso-auth-color: #f59e0b;
+  }
+  50%,
+  60% {
+    --viso-auth-color: #8b5cf6;
+  }
+  66.667%,
+  76.667% {
+    --viso-auth-color: #ec4899;
+  }
+  83.333%,
+  93.333% {
+    --viso-auth-color: #64748b;
+  }
+}
+@keyframes viso-auth-beat {
+  0%,
+  36%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.96);
+  }
+  12% {
+    opacity: 0.49;
+    transform: scale(1.04);
+  }
+  23% {
+    opacity: 0.3;
+    transform: scale(0.985);
+  }
+  29% {
+    opacity: 0.41;
+    transform: scale(1.02);
+  }
+}
+.viso-app-auth-card {
+  width: 100%;
+  border: 1px solid #e5dfd6;
+  border-radius: 25px;
+  padding: 26px 22px;
+  background: #fff;
+  box-shadow: 0 10px 32px #201a1512;
+}
+.viso-app-auth-card h2 {
+  font-size: 23px;
+  font-weight: 750;
+  text-align: center;
+  margin-bottom: 22px;
+  letter-spacing: -0.03em;
+}
+.viso-app-auth-card form {
+  margin-top: 17px;
+}
+.viso-app-auth-card fieldset {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+  min-width: 0;
+}
+.viso-app-auth-card label {
+  font-size: 12px;
+  font-weight: 500;
+  margin-top: 6px;
+}
+.viso-app-auth-card input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 13px;
+  border: 1px solid #d5d0c6;
+  border-radius: 10px;
+  background: #f9f8f6;
+  font-size: 14px;
+  color: #17191d;
+}
+.viso-app-auth-card input:focus-visible {
+  outline: 2px solid #d43e00;
+  outline-offset: 2px;
+}
+.viso-app-auth-card [type="submit"] {
+  margin-top: 12px;
+  min-height: 44px;
+}
+.viso-app-auth-switch {
+  display: block;
+  margin: 22px auto 0;
+  color: #d43e00;
+  font-size: 13px;
+  cursor: pointer;
+}
+.viso-app-auth-switch:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.viso-app-auth-card [role="alert"] {
+  font-size: 12px;
+  color: #b92323;
+  line-height: 1.7;
+}
+.viso-app-help {
+  font-size: 11px;
+  color: #60646c;
+}
+.viso-app-password {
+  display: flex;
+  position: relative;
+}
+.viso-app-password > input {
+  padding-right: 44px;
+}
+.viso-app-password > button {
+  position: absolute;
+  right: 9px;
+  top: 9px;
+  padding: 3px;
+  color: #60646c;
+}
+.viso-app-password svg {
+  width: 21px;
+  height: 21px;
+}
+.viso-app-welcome-footer {
+  font-size: 11px !important;
+}
+@media (max-width: 359px) {
+  .viso-app-launcher {
+    padding: 16px 13px;
+    min-height: 156px;
+  }
+  .viso-app-launcher h2 {
+    font-size: 16px;
+  }
+  .viso-app-launchers {
+    gap: 10px;
+  }
+  .viso-app-brand {
+    font-size: 26px;
+  }
+  .viso-app-auth-card {
+    padding: 23px 18px;
+  }
+  .viso-app-welcome h1 {
+    font-size: 23px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .viso-app-auth-halo::before {
+    animation: none;
+    opacity: 0.22;
+    transform: none;
+  }
+  .viso-app-current-status {
+    transition: none;
+  }
+}
+.viso-app-management.viso-control-panel > .viso-panel-shell {
+  margin-left: 0 !important;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 !important;
+  margin-right: auto;
+  margin-inline: auto !important;
+}
+.viso-app-management.viso-control-panel > .viso-app-home-header {
+  max-width: 1200px;
+  margin-bottom: 24px;
+}
+.viso-app-management .vm-header {
+  padding-top: 0;
+}
+.viso-app-management.viso-control-panel .vm-shell {
+  padding-bottom: 22px;
+}
