@@ -1,18 +1,24 @@
 {
+  "checkedAt": "2026-10-27T20:34:12.621319+00:00",
   "name": "Te Aviso",
   "package": "com.teaviso.app",
   "version": "1.0.0",
   "versionCode": 1,
-  "sha256": "380aaa97a6cf0ff63f1c2c2ae69d126db994c507d5aec23972d1ac410585c0ae",
-  "bytes": 13624509,
+  "filename": "Te-Aviso-1.0.0.apk",
+  "sha256": "e62984ec3e71fe919410c66953375d21a6124de94c7088f1e189f9ac6f8e5e27",
+  "bytes": 17170452,
   "signing": "Android Debug (testing)",
-  "pushEnabled": false,
+  "pushEnabled": true,
   "localTest": false,
   "httpsOnly": true,
   "webviewDebuggingEnabled": false,
   "packageAndCertificateVerified": true,
-  "firebaseClientIntegrated": false,
-  "reason": "Uploaded client project viso-ad874-afbab differs from configured server viso-ad874",
+  "firebaseClientIntegrated": true,
+  "firebaseProject": "viso-ad874",
+  "firebaseClientPackageMatches": true,
+  "firebaseServiceEnabledInManifest": true,
+  "deliveryTest": "pending",
+  "nativeGoogleBackendDeployed": false,
   "checkedDate": "2026-10-27",
   "sourceBranch": "feat/te-aviso-android",
   "productionPublished": false,
@@ -31,17 +37,21 @@
     },
     "nativeRuntime": {
       "verified": false,
-      "reason": "Isolated API36 emulator has not completed a usable boot; no successful app installation/runtime report"
+      "reason": "Isolated API36 emulator completed boot; streamed45s and nonstreamed90s installations timed out. No successful app runtime report."
     },
     "google": {
       "codeTestsPassed": true,
-      "backendDeployment": "pending authorization",
+      "webConfigured": true,
+      "androidBackendDeployed": false,
+      "backendDeployment": "pending owner authorization",
       "deviceConsent": "not verified"
     },
     "fcm": {
       "backendProjectConfirmed": "viso-ad874",
-      "uploadedClientProject": "viso-ad874-afbab",
-      "integrated": false,
+      "uploadedClientProject": "viso-ad874",
+      "package": "com.teaviso.app",
+      "integrated": true,
+      "serviceEnabled": true,
       "delivery": "not verified"
     }
   }

@@ -75,6 +75,8 @@ El cambio de backend que admite este regreso exacto está implementado en
 conservar el regreso existente de VISO (`com.viso.deck://oauth/google`). El inicio
 Google nativo y la vinculación de cuentas requieren verificar ese despliegue y
 probar el recorrido en Android; compilar la APK no acredita ese funcionamiento.
+La consulta pública de configuración confirma Google web disponible y el regreso
+Google Android de Te Aviso todavía sin desplegar.
 
 Una comprobación de solo lectura confirmó que el backend tiene FCM configurado
 para el proyecto Firebase **`viso-ad874`**. Te Aviso requiere su propio cliente
@@ -87,11 +89,11 @@ apps/teaviso/android/app/google-services.json
 Esa ruta está ignorada por Git. El script valida el proyecto y el paquete antes
 de habilitar FCM; el JSON de la APK VISO no sustituye el cliente de Te Aviso. No
 copiar credenciales de administración Firebase a la aplicación ni a variables
-`VITE_*`. El archivo cliente nuevo recibido declara `com.teaviso.app`, pero su
-proyecto es **`viso-ad874-afbab`**, distinto del proyecto existente `viso-ad874`.
-**Todavía no está integrado**: la comprobación del script debe mantenerse hasta
-obtener el cliente del proyecto original `viso-ad874`. Falta confirmar una
-configuración compatible y repetir la compilación y las pruebas.
+`VITE_*`. El cliente correcto recibido declara el proyecto **`viso-ad874`** y
+contiene los paquetes **`com.teaviso.app`** y `com.viso.deck`. Ya se validó y copió
+a la ruta anterior, ignorada por Git y con permisos locales `0600`. Las APK
+habitual y local ya se compilaron con FCM habilitado; la entrega real de avisos
+sigue pendiente de prueba en dispositivo.
 
 Los avisos con la app cerrada requieren APK compatible, servicio FCM del backend,
 Google Play Services, conexión y activación voluntaria por cuenta y dispositivo.
@@ -116,23 +118,25 @@ backend. No habilitan por sí mismos cámara, micrófono ni apertura de cerradur
 
 ## Verificación disponible
 
-Estado documentado el 27 de octubre de 2026. El archivo Firebase nuevo requiere
-resolver la diferencia de proyecto; todavía no hay compilación confirmada con él:
+Estado documentado el 27 de octubre de 2026. El cliente Firebase correcto está
+integrado y las compilaciones con FCM terminaron correctamente:
 
 | Comprobación | Resultado y evidencia local |
 | --- | --- |
 | Suite completa Vitest | 1014 tests, 112 archivos, aprobados tras el último ajuste; `artifacts/teaviso-android/all-tests-resume.log` |
 | Regreso Google nativo | 4 tests focalizados aprobados, incluidos en la suite completa, después de ajustar los destinos seguros de regreso |
 | Políticas Android JVM | 4 tests aprobados; `apps/teaviso/android/app/build/test-results/testDebugUnitTest/TEST-com.teaviso.app.TeAvisoPolicyTest.xml` |
-| APK previa y metadatos | Build correcto de `Te-Aviso-1.0.0-preview.apk`, FCM deshabilitado; `build-final.log`, `build.json`, `package.txt` y `signature.txt` en `artifacts/teaviso-android/` |
-| APK local actualizada | `Te-Aviso-local-test.apk` recompilada correctamente con los tests JVM; `artifacts/teaviso-android/local-build-resume.log` |
+| APK actual y metadatos | `Te-Aviso-1.0.0.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
+| APK local con FCM | `Te-Aviso-local-test.apk`, `pushEnabled: true`, build aprobado en 8 s; `artifacts/teaviso-android/local-build-fcm.log` y `local-build.json` |
 | Navegador con backend local aislado | Repetición aprobada de las cinco comprobaciones reales: registro, alta de timbre WhatsApp, descargas PNG/SVG, sesión tras recarga y misma cuenta en dos contextos; `artifacts/teaviso-android/browser-report.json` y `browser-qa-resume.log` |
-| Proyecto Firebase del backend | Lectura confirmada: `viso-ad874`, servicio configurado. El archivo recibido usa `viso-ad874-afbab` y sigue sin integrarse |
+| Firebase | Backend confirmado en `viso-ad874`, servicio configurado; cliente correcto de Te Aviso validado e integrado en la ruta ignorada |
+| Servicio FCM empaquetado | Servicio habilitado en el manifiesto de la APK. La entrega de avisos sigue pendiente |
 | Ejecución real de la APK | Pendiente: las comprobaciones web y JVM no prueban la app instalada |
 | Google nativo y avisos FCM | Pendientes de despliegue compatible y prueba completa en dispositivo |
 
-El emulador aislado nuevo ya aparece como dispositivo en ADB; todavía no está
-confirmada la instalación ni la ejecución de Te Aviso. Antes de una entrega final
-faltan instalación y coexistencia con VISO, sesión y cambio de cuenta, regreso
-Google, exportación nativa de QR y llamadas/avisos con la app abierta y en segundo
-plano. No se desplegaron cambios de producción ni se integró el JSON incompatible.
+El emulador aislado completó el arranque, pero las instalaciones ADB con y sin
+streaming agotaron sus tiempos de espera (45 s y 90 s). No se confirmó la
+instalación ni la ejecución nativa. Antes de una entrega final faltan instalación
+y coexistencia con VISO, sesión y cambio de cuenta, regreso Google, exportación
+nativa de QR y llamadas/avisos con la app abierta y en segundo plano. No se
+publicó en producción ni se desplegó el cambio de callback Google.
