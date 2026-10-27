@@ -14,3 +14,6 @@
 @media(max-width:760px){.space-copy>p{font-size:12px}.checks,.plan .checks{font-size:12px}.model-summary{font-size:14px}.model-detail{font-size:11px;line-height:1.85;margin-bottom:19px}.plan-description{font-size:12px}.hero-facts{font-size:9px}.model-end>p{font-size:10px}.model-note{font-size:10px}.model-end .button{font-size:12px}.plan>.button{font-size:12px}.centered>.eyebrow{justify-content:flex-start}.model-top .tag{font-size:7px}}
 @media(max-width:355px){.hero-facts{font-size:8px}.plan .checks{font-size:11px}.model-top .tag{font-size:6px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}
+
+.all-plans-link{margin:15px auto 0;color:var(--orange);font-size:12px}.centered>.all-plans-link{display:inline-flex}.plans-page .all-plans-link{margin:0}
+@media(max-width:760px){.all-plans-link{font-size:11px;margin-top:13px}}

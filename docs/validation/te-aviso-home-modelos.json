@@ -63,5 +63,7 @@
     "Familia": 80000
   },
   "commercialStatus": "Proposal only: no prices, quotas, plates, shipping or license duration approved or configured.",
-  "locationStatus": "Visual proposal only: no browser location collection or server-side proximity validation implemented by this work."
+  "locationStatus": "Visual proposal only: no browser location collection or server-side proximity validation implemented by this work.",
+  "detailedPlansPage": "planes.html",
+  "detailedPlansReport": "te-aviso-planes-funciones.json"
 }

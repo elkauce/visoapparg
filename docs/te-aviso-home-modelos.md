@@ -25,6 +25,11 @@ sin atribución visible «por VISO».
    Se mantienen explícitamente como ejemplos de diseño y presupuestos físicos.
 7. Preguntas frecuentes y acceso para elegir el modelo. Navegación inferior en móvil.
 
+La ampliación posterior incorpora una página de Planes con las funciones actuales
+auditadas y un enlace desde el home: [detalle del catálogo](te-aviso-planes-funciones.md).
+La portada aprobada mantiene su distribución; los paquetes y servicios se explican
+en la nueva página sin activar ninguna prestación comercial.
+
 ## Capturas
 
 - [Inicio en computadora](design/te-aviso-home-modelos/home-1440-inicio.png).
@@ -73,6 +78,9 @@ node docs/design/te-aviso-home-modelos/server.mjs
 Abrir `http://127.0.0.1:5211`. El prototipo sirve solo sobre loopback y no conecta
 con Convex, Vercel, Google, Mercado Pago ni servicios de geolocalización.
 Los botones de contratación/login muestran un diálogo de vista previa.
+La página completa de planes se revisa en `http://127.0.0.1:5211/planes.html`.
+Para regenerar ambos documentos se puede ejecutar
+`node docs/design/te-aviso-home-modelos/build.mjs` desde la raíz del repositorio.
 
 Se comprobaron 320, 390, 768 y 1440 px: sin desbordamiento horizontal, imágenes
 cargadas, pestañas con teclado, navegación móvil, preguntas desplegables y diálogo

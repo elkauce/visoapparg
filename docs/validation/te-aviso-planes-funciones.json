@@ -1,0 +1,58 @@
+{
+  "status": "local-design-only",
+  "productionChanged": false,
+  "backendConnected": false,
+  "realPayments": false,
+  "checks": [
+    {
+      "width": 1440,
+      "homeLinksToDetailedPlans": true,
+      "services": 5,
+      "tableRows": 13,
+      "tableScrollableWithoutDocumentOverflow": true,
+      "details": true,
+      "previewDialog": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "homeLinksToDetailedPlans": true,
+      "services": 5,
+      "tableRows": 13,
+      "tableScrollableWithoutDocumentOverflow": true,
+      "details": true,
+      "previewDialog": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 320,
+      "homeLinksToDetailedPlans": true,
+      "services": 5,
+      "tableRows": 13,
+      "tableScrollableWithoutDocumentOverflow": true,
+      "details": true,
+      "previewDialog": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 768,
+      "homeLinksToDetailedPlans": true,
+      "services": 5,
+      "tableRows": 13,
+      "tableScrollableWithoutDocumentOverflow": true,
+      "details": true,
+      "previewDialog": true,
+      "errors": [],
+      "externalRequests": []
+    }
+  ],
+  "sourceAudit": "docs/te-aviso-planes-funciones.md",
+  "pricesConfigured": false,
+  "licensesChanged": false,
+  "proximityImplemented": false,
+  "commercialPackages": "proposed, not configured",
+  "chatOnlySetupNeedsAdaptationBeforeLaunch": true
+}
