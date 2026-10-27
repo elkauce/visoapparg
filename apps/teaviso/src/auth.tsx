@@ -41,7 +41,7 @@ export default function Auth() {
     } catch {
       setError(
         flow === "signUp"
-          ? "No pudimos crear la cuenta. Si ya usás VISO, ingresá con tu cuenta existente."
+          ? "No pudimos crear la cuenta. Si este correo ya está registrado, probá ingresar."
           : "No pudimos ingresar. Revisá tu correo y contraseña.",
       );
     } finally {
@@ -79,8 +79,8 @@ export default function Auth() {
         <span className="eyebrow">TU PUERTA, CONECTADA</span>
         <h1>{flow === "signUp" ? "Creá tu cuenta" : "Qué bueno verte."}</h1>
         <p>
-          Tu cuenta es la misma que en VISO. No hace falta crear otra si ya sos
-          usuario.
+          Ingresá a Te Aviso para configurar tus timbres, recibir visitas y
+          gestionar tus reservas.
         </p>
         {config?.google && (
           <>

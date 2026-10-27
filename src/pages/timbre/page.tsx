@@ -100,7 +100,7 @@ export function TimbreWorkspace() {
   const now = useTimbreNow();
   const invite = params.get("invite");
   const site =
-    workspace?.sites.find((row) => row._id === selection) ??
+    workspace?.sites.find((row) => row._id === (selection || params.get("site"))) ??
     workspace?.sites[0];
   if (!workspace || !license) return <p role="status">Cargando tus timbres…</p>;
   return (
@@ -129,7 +129,7 @@ export function TimbreWorkspace() {
           </Button>
         </Card>
       )}
-      <div className="vt-toolbar">
+      {!brand.standalone && <div className="vt-toolbar">
         <div className="vt-segmented" aria-label="Secciones de Timbre">
           <button
             aria-pressed={view === "site"}
@@ -153,7 +153,7 @@ export function TimbreWorkspace() {
           )}
         </div>
         {!brand.standalone && <Link to="/marketplace">Marketplace VISO</Link>}
-      </div>
+      </div>}
       {view === "offers" ? (
         <TimbreCommercial />
       ) : view === "admin" && session?.isAdmin ? (

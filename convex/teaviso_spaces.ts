@@ -1,3 +1,4 @@
+import { enrollTeaviso } from "./lib/teaviso_accounts";
 import { locationUsage, linkedSite, linkedSpace } from "./lib/teaviso_quota";
 import { ConvexError, v } from "convex/values";
 import { makeFunctionReference } from "convex/server";
@@ -231,6 +232,7 @@ export const create = mutation({
         .query("teavisoSpaces")
         .withIndex("by_owner", (q) => q.eq("ownerId", user._id))
         .take(50);
+    await enrollTeaviso(ctx, user._id);
     if (rows.length >= 50)
       fail("Alcanzaste el límite de espacios de la cuenta.");
     const name = teavisoText(args.name, 100),

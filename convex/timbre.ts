@@ -1,3 +1,4 @@
+import { enrollTeaviso } from "./lib/teaviso_accounts";
 import { locationUsage, linkedSpace, linkedSite } from "./lib/teaviso_quota";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
@@ -74,6 +75,7 @@ export const createSite = mutation({
   args: { name: v.string(), kind: timbreSiteKind, licenseId: v.id("timbreLicenses"), timezone: v.string(), teavisoSpaceId: v.optional(v.id("teavisoSpaces")) },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
+    await enrollTeaviso(ctx, user._id);
     const license = await requireValidTimbreLicense(ctx, args.licenseId, user._id);
     if (args.kind === "building" && !license.features.buildings) timbreError("Tu licencia no incluye edificios.");
     if (args.kind === "office" && !license.features.offices) timbreError("Tu licencia no incluye oficinas.");
@@ -359,6 +361,7 @@ export const listInvites = query({ args: { siteId: v.id("timbreSites") }, handle
 } });
 export const acceptInvite = mutation({ args: { token: v.string() }, handler: async (ctx, { token }) => {
   const user = await requireCurrentUser(ctx);
+    await enrollTeaviso(ctx, user._id);
   if (!/^[a-f0-9]{64}$/.test(token)) timbreError("La invitación no es válida o venció.");
   const hash = await hashTimbreToken(token);
   const invite = await ctx.db.query("timbreInvitations").withIndex("by_hash", (q) => q.eq("tokenHash", hash)).unique();

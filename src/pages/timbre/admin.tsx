@@ -1,3 +1,4 @@
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { useState, type FormEvent, type ReactNode } from "react";
 import { useConvex, useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
@@ -41,23 +42,25 @@ function Picker({ label, rows, selected, onChange }: { label: string; rows: { _i
   return <div className="vt-toolbar"><Field title={label}><select value={selected} onChange={(e) => onChange(e.target.value)}><option value="">Crear nuevo</option>{rows.map((row) => <option key={row._id} value={row._id}>{row.name}</option>)}</select></Field><Button variant="outline" onClick={() => onChange("")}><Plus /> Nuevo</Button></div>;
 }
 function AdminForm({ children, save, button = "Guardar configuración" }: { children: ReactNode; save: (data: FormData) => Promise<unknown>; button?: string }) {
+  const brand=useTimbreBrand();
   const [busy, setBusy] = useState(false);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault(); if (busy) return;
     const data = new FormData(event.currentTarget); setBusy(true);
-    try { await save(data); toast.success("Guardado en VISO"); } catch (error) { toast.error(error instanceof Error ? error.message : "No se pudo guardar."); }
+    try { await save(data); toast.success(`Guardado en ${brand.standalone?"Te Aviso":"VISO"}`); } catch (error) { toast.error(error instanceof Error ? error.message : "No se pudo guardar."); }
     finally { setBusy(false); }
   };
   return <form className="vt-form" onSubmit={(e) => void submit(e)}><fieldset disabled={busy} className="vta-fieldset">{children}</fieldset><Button type="submit" disabled={busy}>{busy ? "Guardando…" : button}</Button></form>;
 }
 
 export default function TimbreAdmin() {
+  const brand=useTimbreBrand();
   const data = useQuery(api.timbre_commerce.adminOverview, {});
   const [tab, setTab] = useState("plans");
   if (!data) return <p role="status">Cargando administración…</p>;
   const sections = [{ id: "plans", label: "Planes" }, { id: "plates", label: "Placas" }, { id: "shipping", label: "Envíos" },
-    { id: "discounts", label: "Cupones" }, { id: "hardware", label: "Hardware" }, { id: "orders", label: "Pedidos" }, { id: "licenses", label: "Licencias" }, { id: "connection", label: "Conexión de llamadas" }];
-  return <div className="vt-stack vta-admin"><div className="vt-notice"><strong>Administración comercial de Timbre</strong><p>Los precios, materiales y condiciones se publican con lo que guardes acá. Una cuenta VISO o un recurso gratuito del marketplace nunca activa el servicio.</p></div>
+    { id: "discounts", label: "Cupones" }, { id: "hardware", label: "Hardware" }, { id: "orders", label: "Pedidos" }, { id: "licenses", label: "Licencias" }, { id: "connection", label: "Conexión de llamadas" }].filter(section=>!brand.standalone||section.id!=="hardware");
+  return <div className="vt-stack vta-admin"><div className="vt-notice"><strong>Administración comercial de Timbre</strong><p>Los precios, materiales y condiciones se publican con lo que guardes acá. Las funciones de pago se habilitan con una licencia válida; registrarse no activa un plan de pago.</p></div>
     <nav className="vt-segmented" aria-label="Administración comercial">{sections.map((section) => <button key={section.id} aria-pressed={tab === section.id} onClick={() => setTab(section.id)}>{section.label}</button>)}</nav>
     {tab === "plans" ? <Plans data={data} /> : tab === "plates" ? <Variants data={data} /> : tab === "shipping" ? <Shipping data={data} /> : tab === "discounts" ? <Discounts data={data} /> : tab === "hardware" ? <Hardware data={data} /> : tab === "orders" ? <Orders data={data} /> : tab === "connection" ? <TimbreServiceSetup /> : <Licenses data={data} />}
   </div>;

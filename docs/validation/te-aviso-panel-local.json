@@ -1,0 +1,41 @@
+{
+  "status": "review-not-published",
+  "request": "Te Aviso owns its customer panel and customer/doorbell administration; VISO Deck links are conditional.",
+  "designStatus": "Simplified mobile proposal shown to owner; awaiting direction. No public landing or plan redesign applied.",
+  "backendPublished": false,
+  "frontendPublished": false,
+  "apkBuilt": false,
+  "tests": {
+    "fullSuitePassed": 987,
+    "files": 108,
+    "focusedAfterVersionGuards": 12,
+    "focusedFiles": 2
+  },
+  "browser": {
+    "checks": 32,
+    "widths": [
+      390,
+      1440
+    ],
+    "errors": [],
+    "actualReactComponents": true,
+    "actualConvexFunctions": true,
+    "syntheticIdentities": true,
+    "productionChanged": false,
+    "realCallsOrPayments": false
+  },
+  "sourceChanges": [
+    "Te Aviso product profiles and enrollment distinct from shared authentication",
+    "Scoped customer directory and legacy membership migration",
+    "Local customer contact editing, audited doorbell rename/pause/resume with stale-version rejection",
+    "Local account and doorbell routes; shared VISO identity stays unchanged",
+    "Conditional Deck access based on actual Deck pages or eligible active hardware-bundle license",
+    "Standalone Timbre workspace hides duplicated commerce/admin tabs"
+  ],
+  "limits": [
+    "The email/password/Google identity remains shared infrastructure; email changes and global identity deletion are not added.",
+    "New design is a proposal; no plan price or billing activation was performed.",
+    "Legacy membership migration must run against vivid-nightingale-785 after publishing the compatible backend.",
+    "No separate Te Aviso APK, new call channel or physical device integration."
+  ]
+}

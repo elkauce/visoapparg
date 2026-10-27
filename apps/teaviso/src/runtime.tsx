@@ -7,7 +7,12 @@ import {
   type ReactNode,
 } from "react";
 import { ConvexAuthProvider, useAuthActions } from "@convex-dev/auth/react";
-import { ConvexReactClient, useConvexAuth, useQuery } from "convex/react";
+import {
+  ConvexReactClient,
+  useConvexAuth,
+  useMutation,
+  useQuery,
+} from "convex/react";
 import {
   BrowserRouter,
   Link,
@@ -24,13 +29,13 @@ import {
   LayoutDashboard,
   LogOut,
   MessageCircle,
-  Package,
   QrCode,
   Settings2,
   ShieldCheck,
   Menu,
   X,
   ArrowUpRight,
+  Users,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -38,10 +43,11 @@ import TimbreIncoming from "@/components/timbre-incoming";
 import { TimbreBrandContext } from "@/lib/timbre-brand";
 import { api } from "@/convex/_generated/api";
 import { convexUrl } from "./config";
+import AccountPanel from "./account-panel";
+import AdminCustomers from "./admin-customers";
 import Landing, { Equipment, Plans, Privacy, Solutions } from "./main";
 import {
   Agenda,
-  Devices,
   Entries,
   Onboarding,
   Overview,
@@ -104,13 +110,22 @@ function Protected({ children }: { children: ReactNode }) {
   return auth.isAuthenticated ? <>{children}</> : <Auth />;
 }
 function Shell({ children }: { children: ReactNode }) {
-  const account = useQuery(api.teaviso.account, {}),
+  const account = useQuery(api.teaviso_accounts.profile, {}),
+    register = useMutation(api.teaviso_accounts.register),
     { signOut } = useAuthActions(),
     location = useLocation(),
     navigate = useNavigate();
   const [open, setOpen] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (account?.id && !account.enrolled)
+      void register({}).catch(() =>
+        setError(
+          "No pudimos preparar tu perfil. Recargá e intentá nuevamente.",
+        ),
+      );
+  }, [account?.id, account?.enrolled, register]);
   useEffect(() => {
     const p = new URLSearchParams(location.search);
     if (p.has("google")) {
@@ -125,11 +140,10 @@ function Shell({ children }: { children: ReactNode }) {
       space ? `${path}?space=${encodeURIComponent(space)}` : path;
   const links = [
     { to: "/panel", label: "Inicio", icon: LayoutDashboard },
-    { to: "/panel/entradas", label: "Mis entradas", icon: QrCode },
+    { to: "/panel/timbres", label: "Mis timbres", icon: QrCode },
     { to: "/panel/agenda", label: "Agenda", icon: CalendarDays },
     { to: "/panel/portal", label: "Portal de visitas", icon: MessageCircle },
-    { to: "/timbre", label: "Llamadas e integrantes", icon: BellRing },
-    { to: "/panel/dispositivos", label: "Dispositivos", icon: Package },
+    { to: "/panel/llamadas", label: "Llamadas e integrantes", icon: BellRing },
     { to: "/panel/plan", label: "Mi plan", icon: ShieldCheck },
     { to: "/panel/cuenta", label: "Mi cuenta", icon: Settings2 },
   ];
@@ -160,22 +174,38 @@ function Shell({ children }: { children: ReactNode }) {
             </NavLink>
           ))}
           {account?.isAdmin && (
-            <NavLink to="/panel/admin" onClick={() => setOpen(false)}>
-              <Settings2 size={19} />
-              Administración
-            </NavLink>
+            <div className="av-admin-nav">
+              <small>Administración Te Aviso</small>
+              <NavLink to="/panel/admin" end onClick={() => setOpen(false)}>
+                <Users size={19} />
+                Usuarios y timbres
+              </NavLink>
+              <NavLink to="/panel/admin/planes" onClick={() => setOpen(false)}>
+                <ShieldCheck size={19} />
+                Planes y licencias
+              </NavLink>
+              <NavLink
+                to="/panel/admin/servicios"
+                onClick={() => setOpen(false)}
+              >
+                <MessageCircle size={19} />
+                Números dedicados
+              </NavLink>
+            </div>
           )}
-          <a
-            href="https://viso-deck-android.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ArrowUpRight size={19} />
-            Ir a VISO
-          </a>
+          {account?.deckLinked && (
+            <a
+              href="https://viso-deck-android.vercel.app/deck"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ArrowUpRight size={19} />
+              Mi Deck VISO
+            </a>
+          )}
         </nav>
         <div className="av-sidebar-account">
-          <small>{account?.email ?? "Tu cuenta VISO"}</small>
+          <small>{account?.email ?? "Tu cuenta Te Aviso"}</small>
           <button
             disabled={busy}
             onClick={() => {
@@ -200,7 +230,7 @@ function Shell({ children }: { children: ReactNode }) {
         {[
           { to: "/panel", name: "Inicio", icon: LayoutDashboard },
           { to: "/panel/agenda", name: "Agenda", icon: CalendarDays },
-          { to: "/panel/entradas", name: "Entradas", icon: QrCode },
+          { to: "/panel/timbres", name: "Timbres", icon: QrCode },
           { to: "/panel/cuenta", name: "Cuenta", icon: Settings2 },
         ].map(({ to, name, icon: Icon }) => (
           <NavLink key={to} to={withSpace(to)} end={to === "/panel"}>
@@ -214,46 +244,6 @@ function Shell({ children }: { children: ReactNode }) {
 }
 function Dashboard() {
   return <Overview />;
-}
-function AccountPanel() {
-  const account = useQuery(api.teaviso.account, {});
-  return (
-    <div className="av-stack">
-      <header className="av-panel-heading">
-        <div>
-          <span className="av-eyebrow">Tu cuenta, conectada</span>
-          <h1>Mi cuenta</h1>
-          <p>Usás la misma identidad en Te Aviso y VISO.</p>
-        </div>
-      </header>
-      <section className="av-card">
-        <h2>{account?.name ?? "Tu perfil"}</h2>
-        <p>{account?.email}</p>
-        <a
-          className="av-button av-outline"
-          href="https://viso-deck-android.vercel.app/?section=account"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Gestionar mi cuenta VISO ↗
-        </a>
-      </section>
-      <section className="av-card">
-        <h2>Recepción de avisos</h2>
-        <p>
-          Los avisos de visitas y agenda se consultan en este panel. Para
-          llamadas con la web abierta, permití cámara y micrófono cuando vayas a
-          atender.
-        </p>
-        <p>
-          La APK VISO compatible recibe llamadas con sus permisos y las
-          condiciones de Android. La APK independiente Te Aviso todavía no se
-          distribuye; no hay recepción nativa iOS.
-        </p>
-      </section>
-      <Link to="/privacidad">Privacidad y uso ↗</Link>
-    </div>
-  );
 }
 function PlanPanel() {
   return (
@@ -289,38 +279,47 @@ function DigitalPanel() {
         <span className="eyebrow">TE AVISO · AUDIO Y VIDEO</span>
         <h1>Mis timbres digitales</h1>
         <p>
-          Administrá tus lugares, integrantes, QR y llamadas con tu cuenta
-          vinculada a VISO.
+          Administrá integrantes, notificaciones y llamadas de tus timbres en Te
+          Aviso.
         </p>
       </header>
       <Digital />
     </section>
   );
 }
-function AdminPanel() {
-  const account = useQuery(api.teaviso.account, {});
-  return account === undefined ? (
-    <p role="status">Revisando permisos…</p>
-  ) : account?.isAdmin ? (
+function AdminPanel({
+  section = "customers",
+}: {
+  section?: "customers" | "commercial" | "business";
+}) {
+  const account = useQuery(api.teaviso_accounts.profile, {});
+  if (account === undefined) return <p role="status">Revisando permisos…</p>;
+  if (!account?.isAdmin)
+    return (
+      <section className="av-card">
+        <h1>Acceso restringido</h1>
+        <p>Esta sección es para administradores de Te Aviso.</p>
+      </section>
+    );
+  if (section === "customers") return <AdminCustomers />;
+  return (
     <div className="av-stack">
       <header className="av-panel-heading">
-        <h1>Administración Te Aviso</h1>
+        <div>
+          <span className="av-eyebrow">Administración Te Aviso</span>
+          <h1>
+            {section === "commercial"
+              ? "Planes y licencias"
+              : "Números dedicados"}
+          </h1>
+        </div>
       </header>
-      <details className="av-card" open>
-        <summary>Planes, licencias y asistencia</summary>
-        <TimbreAdmin />
-      </details>
-      <details className="av-card">
-        <summary>Número dedicado y configuración asistida</summary>
-        <BusinessAdmin />
-      </details>
+      {section === "commercial" ? <TimbreAdmin /> : <BusinessAdmin />}
     </div>
-  ) : (
-    <section className="tea-card">
-      <h1>Acceso restringido</h1>
-      <p>Esta sección es para administradores.</p>
-    </section>
   );
+}
+function LegacyDevices() {
+  return <Navigate to="/panel/cuenta" replace />;
 }
 function panel(content: ReactNode) {
   return (
@@ -358,6 +357,11 @@ export default function App() {
                   <Route path="/privacidad" element={<Privacy />} />
                   <Route path="/panel/nuevo" element={panel(<Onboarding />)} />
                   <Route path="/panel/entradas" element={panel(<Entries />)} />
+                  <Route path="/panel/timbres" element={panel(<Entries />)} />
+                  <Route
+                    path="/panel/llamadas"
+                    element={panel(<DigitalPanel />)}
+                  />
                   <Route
                     path="/panel/entradas/:spaceId"
                     element={panel(<SpaceEditorPage />)}
@@ -369,7 +373,7 @@ export default function App() {
                   />
                   <Route
                     path="/panel/dispositivos"
-                    element={panel(<Devices />)}
+                    element={panel(<LegacyDevices />)}
                   />
                   <Route path="/panel/plan" element={panel(<PlanPanel />)} />
                   <Route
@@ -392,6 +396,14 @@ export default function App() {
                     element={panel(<BusinessPanel />)}
                   />
                   <Route path="/panel/admin" element={panel(<AdminPanel />)} />
+                  <Route
+                    path="/panel/admin/planes"
+                    element={panel(<AdminPanel section="commercial" />)}
+                  />
+                  <Route
+                    path="/panel/admin/servicios"
+                    element={panel(<AdminPanel section="business" />)}
+                  />
                   <Route path="/timbre" element={panel(<DigitalPanel />)} />
                   <Route path="/t/:qr" element={<Visitor />} />
                   <Route path="/w/:token" element={<EntryPortal />} />

@@ -110,17 +110,18 @@ export function Overview() {
         </Empty>
       )}
       <LegacyEntries />
+      <DigitalDoorbellCards />
       <div className="av-callout">
         <BellRing />
         <div>
           <h2>Atendé desde donde estés.</h2>
           <p>
             Para recibir avisos y llamadas en la web, mantené el panel abierto.
-            La APK VISO compatible recibe las llamadas digitales según sus
-            permisos y las condiciones del teléfono.
+            En el celular, la recepción en segundo plano requiere la APK
+            compatible y sus permisos.
           </p>
         </div>
-        <Link to="/timbre">Mis llamadas y timbres ↗</Link>
+        <Link to="/panel/llamadas">Mis llamadas y timbres ↗</Link>
       </div>
     </div>
   );
@@ -238,10 +239,8 @@ function LegacyEntries() {
   if (!remaining?.length) return null;
   return (
     <section className="av-card">
-      <h2>Tus QR existentes</h2>
-      <p>
-        Incorporalos al nuevo panel conservando el enlace que ya imprimiste.
-      </p>
+      <h2>Tus timbres WhatsApp</h2>
+      <p>Configurá tus timbres conservando el QR que ya imprimiste.</p>
       {remaining.map((q) => (
         <div className="av-small-item" key={q._id}>
           <QrCode />
@@ -262,12 +261,43 @@ function LegacyEntries() {
               })
             }
           >
-            Usar en el panel
+            Configurar timbre
           </button>
         </div>
       ))}
       <Feedback task={task} />
-      <Link to="/panel/whatsapp">Administración anterior de QR ↗</Link>
+    </section>
+  );
+}
+function DigitalDoorbellCards() {
+  const data = useQuery(api.timbre.workspace, {}),
+    { rows } = useSpaces();
+  const sites = data?.sites.filter(
+    (site) => !rows?.some((space) => space.timbreSiteId === site._id),
+  );
+  if (!sites?.length) return null;
+  return (
+    <section className="av-stack">
+      <h2>Timbres con llamadas</h2>
+      <div className="av-entry-grid">
+        {sites.map((site) => (
+          <Link
+            className="av-card av-entry-card"
+            key={site._id}
+            to={`/panel/llamadas?site=${site._id}`}
+          >
+            <BellRing />
+            <span className="av-tag">
+              {site.enabled ? "Activo" : "Pausado"}
+            </span>
+            <h3>{site.name}</h3>
+            <p>Audio, video e integrantes</p>
+            <span>
+              Administrar timbre <ArrowRight size={16} />
+            </span>
+          </Link>
+        ))}
+      </div>
     </section>
   );
 }
@@ -279,8 +309,8 @@ export function Entries() {
       <header className="av-panel-heading">
         <div>
           <span className="av-eyebrow">Tus lugares</span>
-          <h1>Mis entradas</h1>
-          <p>Un QR estable. Tu forma de recibir.</p>
+          <h1>Mis timbres</h1>
+          <p>Tus QR, llamadas e integrantes se administran en Te Aviso.</p>
         </div>
         <Link className="av-button" to="/panel/nuevo">
           <Plus size={17} /> Crear entrada
@@ -311,6 +341,7 @@ export function Entries() {
         </Empty>
       )}
       <LegacyEntries />
+      <DigitalDoorbellCards />
     </div>
   );
 }
@@ -1582,6 +1613,7 @@ export function PortalSettings() {
   );
 }
 export function Devices() {
+  const account = useQuery(api.teaviso_accounts.profile, {});
   return (
     <div className="av-stack">
       <header className="av-panel-heading">
@@ -1591,21 +1623,23 @@ export function Devices() {
           <p>Conocé qué podés vincular y el estado de los kits.</p>
         </div>
       </header>
-      <section className="av-card">
-        <h2>Google Home y VISO</h2>
-        <p>
-          Conservás las luces que ya usás con VISO. Su selección y autorización
-          se administran desde la APK compatible.
-        </p>
-        <a
-          className="av-button av-outline"
-          href="https://viso-deck-android.vercel.app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Abrir VISO ↗
-        </a>
-      </section>
+      {account?.deckLinked && (
+        <section className="av-card">
+          <h2>Google Home y tu Deck VISO</h2>
+          <p>
+            Conservás las luces que ya usás con VISO. Su selección y
+            autorización se administran desde la APK compatible.
+          </p>
+          <a
+            className="av-button av-outline"
+            href="https://viso-deck-android.vercel.app"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Abrir VISO ↗
+          </a>
+        </section>
+      )}
       <div className="av-settings-grid">
         <section className="av-card">
           <span className="av-tag">En evaluación</span>

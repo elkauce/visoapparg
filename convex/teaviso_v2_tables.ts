@@ -25,6 +25,27 @@ export const bookingStatus = v.union(
   v.literal("expired"),
 );
 export const teavisoV2Tables = {
+  // Product membership and profile are separate from the shared login identity.
+  // Opening VISO alone never enrolls that user in the Te Aviso customer directory.
+  teavisoAccounts: defineTable({
+    userId: v.id("users"),
+    name: v.string(),
+    contactPhone: v.string(),
+    searchText: v.string(),
+    deckLinked: v.optional(v.boolean()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .searchIndex("search", { searchField: "searchText" }),
+  teavisoAdminEvents: defineTable({
+    actorId: v.id("users"),
+    ownerId: v.id("users"),
+    action: v.string(),
+    targetId: v.string(),
+    reason: v.string(),
+    createdAt: v.number(),
+  }).index("by_owner_created", ["ownerId", "createdAt"]),
   teavisoSpaces: defineTable({
     ownerId: v.id("users"),
     name: v.string(),

@@ -1,3 +1,4 @@
+import { enrollTeaviso } from "./lib/teaviso_accounts";
 import { teavisoQrTemplate } from "./teaviso_tables";
 import { v, ConvexError } from "convex/values";
 import { query, mutation, internalMutation, action } from "./_generated/server";
@@ -98,6 +99,7 @@ export const saveWhatsappQr = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
+    await enrollTeaviso(ctx, user._id);
     if (!args.consent)
       throw new ConvexError(
         "Confirmá que podés publicar este número de WhatsApp.",
@@ -205,6 +207,7 @@ export const requestBusiness = mutation({
   },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
+    await enrollTeaviso(ctx, user._id);
     const rows = await ctx.db
       .query("teavisoBusinessRequests")
       .withIndex("by_owner", (q) => q.eq("ownerId", user._id))

@@ -2339,3 +2339,17 @@
 .av-move input {
   min-width: 0;
 }
+
+/* Te Aviso customer management stays inside this product. */
+.av-admin-nav{border-top:1px solid var(--av-line,#e5e0da);margin-top:16px;padding-top:16px;display:grid;gap:4px}
+.av-admin-nav>small{padding:0 12px 8px;color:var(--av-muted,#6d6a66);font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.av-admin-search{display:flex;gap:12px;align-items:center;background:white;border:1px solid #e4dfd8;padding:14px 18px;border-radius:16px}
+.av-admin-search input{background:transparent;border:0;min-width:0;width:100%;outline-offset:4px}
+.av-customer-row{display:flex;text-align:left;align-items:center;gap:16px;width:100%;border:1px solid #e4dfd8;border-radius:14px;background:#fff;padding:18px;color:inherit}
+.av-customer-row>span:first-of-type{display:grid;gap:5px;flex:1;min-width:0}
+.av-customer-row small{overflow-wrap:anywhere;color:#6d6a66}
+.av-customer-row>span:last-child{font-size:13px;color:#c93c00}
+.av-admin-doorbell>summary{display:flex;align-items:center;gap:12px;cursor:pointer;list-style:none}
+.av-admin-doorbell>summary strong{flex:1;overflow-wrap:anywhere}
+.av-admin-doorbell[open]>summary{margin-bottom:20px}
+@media(max-width:520px){.av-customer-row{padding:14px;gap:10px}.av-customer-row>span:last-child{max-width:64px}.av-admin-doorbell>summary{flex-wrap:wrap}}
