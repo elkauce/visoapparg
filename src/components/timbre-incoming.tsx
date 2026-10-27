@@ -3,6 +3,7 @@ import { useConvexAuth, useMutation, useQuery } from "convex/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BellRing, Bell, Phone, PhoneOff } from "lucide-react";
 import { Capacitor } from "@capacitor/core";
+import { useTimbreBrand } from "@/lib/timbre-brand";
 import { api } from "@/convex/_generated/api";
 import "@/pages/timbre/calls.css";
 
@@ -101,6 +102,7 @@ export default function TimbreIncoming() {
 }
 
 function AuthenticatedIncoming() {
+  const brand = useTimbreBrand();
   const incoming = useQuery(api.timbre_calls.incoming, {});
   const reject = useMutation(api.timbre_calls.reject);
   const location = useLocation();
@@ -231,7 +233,7 @@ function AuthenticatedIncoming() {
         </p>
       )}
       <p className="vt-muted">
-        Avisos mientras VISO está abierto. La recepción con la app cerrada
+        Avisos mientras {brand.standalone ? brand.name : "VISO"} está abierto. La recepción con la app cerrada
         requiere un servicio de notificaciones configurado.
       </p>
       {(error || permissionError) && (

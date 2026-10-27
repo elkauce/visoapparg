@@ -3,9 +3,13 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Brand } from "./ui-v2";
+import { isTeavisoAndroid } from "./native-app";
+import { useNativeGoogleAuth } from "@/lib/native-google-auth-context";
 
 export default function Auth() {
   const { signIn } = useAuthActions();
+  const native = isTeavisoAndroid();
+  const nativeGoogle = useNativeGoogleAuth();
   const config = useQuery(api.teaviso.configuration, {
     origin: window.location.origin,
   });
@@ -13,6 +17,8 @@ export default function Auth() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const busy = useRef(false);
+  const googleAvailable = native ? !!config?.androidGoogle : !!config?.google;
+  const working = pending || (native && nativeGoogle.pending);
   useEffect(() => {
     const restore = (event: PageTransitionEvent) => {
       if (event.persisted) {
@@ -50,11 +56,17 @@ export default function Auth() {
     }
   }
   async function google() {
-    if (busy.current || !config?.google) return;
+    if (busy.current || !googleAvailable) return;
     busy.current = true;
     setPending(true);
     setError("");
     try {
+      if (native) {
+        await nativeGoogle.start("signin");
+        busy.current = false;
+        setPending(false);
+        return;
+      }
       const result = await signIn("google", {
         redirectTo: `${window.location.origin}/panel?google=return`,
       });
@@ -77,11 +89,11 @@ export default function Auth() {
           Ingresá a Te Aviso para configurar tus timbres, recibir visitas y
           gestionar tus reservas.
         </p>
-        {config?.google && (
+        {googleAvailable && (
           <>
             <button
               className="tea-secondary"
-              disabled={pending}
+              disabled={working || (native && !nativeGoogle.ready)}
               onClick={() => void google()}
             >
               Continuar con Google
@@ -90,7 +102,7 @@ export default function Auth() {
           </>
         )}
         <form onSubmit={submit}>
-          <fieldset disabled={pending}>
+          <fieldset disabled={working}>
             <label>
               Correo electrónico
               <input
@@ -115,7 +127,7 @@ export default function Auth() {
               />
             </label>
             <button className="button" type="submit">
-              {pending
+              {working
                 ? "Procesando…"
                 : flow === "signUp"
                   ? "Crear cuenta"
@@ -126,7 +138,7 @@ export default function Auth() {
         {error && <p role="alert">{error}</p>}
         <button
           className="tea-link-button"
-          disabled={pending}
+          disabled={working}
           onClick={() => {
             setFlow(flow === "signIn" ? "signUp" : "signIn");
             setError("");
@@ -134,6 +146,14 @@ export default function Auth() {
         >
           {flow === "signIn" ? "Crear una cuenta" : "Ya tengo una cuenta"}
         </button>
+        {native && nativeGoogle.pending && (
+          <button
+            className="tea-link-button"
+            onClick={() => void nativeGoogle.cancel()}
+          >
+            Cancelar acceso con Google
+          </button>
+        )}
         <small>
           El registro no contrata servicios pagos. Elegí cómo recibir desde tu
           panel.

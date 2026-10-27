@@ -27,6 +27,25 @@ const form = {
   consent: true,
 };
 afterEach(() => vi.unstubAllEnvs());
+it("advertises the native Te Aviso callback only when Google is configured", async () => {
+  const f = await fixture();
+  vi.stubEnv("AUTH_GOOGLE_ID", "");
+  vi.stubEnv("AUTH_GOOGLE_SECRET", "");
+  expect(
+    (
+      await f.t.query(api.teaviso.configuration, {
+        origin: "https://localhost",
+      })
+    ).androidGoogle,
+  ).toBe(false);
+  vi.stubEnv("AUTH_GOOGLE_ID", "local-test-id");
+  vi.stubEnv("AUTH_GOOGLE_SECRET", "local-test-secret");
+  const config = await f.t.query(api.teaviso.configuration, {
+    origin: "https://localhost",
+  });
+  expect(config.androidGoogle).toBe(true);
+  expect(config.google).toBe(false);
+});
 describe("Te a Viso WhatsApp QR", () => {
   it("requires an account, explicit consent and valid phone", async () => {
     const f = await fixture();

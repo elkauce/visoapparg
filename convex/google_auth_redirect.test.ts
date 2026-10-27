@@ -4,6 +4,19 @@ import schema from "./schema";
 import { modules } from "./test.setup";
 import { googleAuthRedirect } from "./lib/google_auth_redirect";
 
+it("allows the separate Te Aviso app callback without broadening native hosts or parameters", () => {
+  const nonce = "c".repeat(64),
+    target = `com.teaviso.app://oauth/google?attempt=${nonce}`;
+  expect(googleAuthRedirect(target, "https://viso.example")).toBe(target);
+  for (const url of [
+    `com.teaviso.app.evil://oauth/google?attempt=${nonce}`,
+    `${target}&extra=1`,
+    `com.teaviso.app://oauth/other?attempt=${nonce}`,
+    `${target}\n`,
+  ])
+    expect(() => googleAuthRedirect(url, "https://viso.example")).toThrow();
+});
+
 const SITE = "https://viso.example.test";
 const ATTEMPT = "a1".repeat(32);
 const NATIVE = `com.viso.deck://oauth/google?attempt=${ATTEMPT}`;
@@ -77,9 +90,7 @@ describe("Google sign-in return destinations", () => {
   });
 
   it("requires a web SITE_URL for web returns", () => {
-    expect(() => googleAuthRedirect("/?google=return", "")).toThrow(
-      /SITE_URL/,
-    );
+    expect(() => googleAuthRedirect("/?google=return", "")).toThrow(/SITE_URL/);
     expect(() =>
       googleAuthRedirect("/?google=return", "javascript:alert(1)"),
     ).toThrow(/SITE_URL/);
@@ -104,7 +115,8 @@ describe("configured Google callback", () => {
       const discovery = vi.fn(async () =>
         Response.json({
           issuer: "https://accounts.google.com",
-          authorization_endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
+          authorization_endpoint:
+            "https://accounts.google.com/o/oauth2/v2/auth",
           token_endpoint: "https://oauth2.googleapis.com/token",
           userinfo_endpoint: "https://openidconnect.googleapis.com/v1/userinfo",
           jwks_uri: "https://www.googleapis.com/oauth2/v3/certs",
@@ -124,9 +136,7 @@ describe("configured Google callback", () => {
       expect(response.status).toBe(302);
       expect(response.headers.get("Location")).toBe(destination);
       expect(discovery).toHaveBeenCalledOnce();
-      expect(await t.run((ctx) => ctx.db.query("users").collect())).toEqual(
-        [],
-      );
+      expect(await t.run((ctx) => ctx.db.query("users").collect())).toEqual([]);
       expect(
         await t.run((ctx) => ctx.db.query("authSessions").collect()),
       ).toEqual([]);

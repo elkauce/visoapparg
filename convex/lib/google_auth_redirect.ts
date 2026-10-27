@@ -6,7 +6,7 @@ import { teavisoOrigin } from "./teaviso";
  * an allowed destination or silently discard duplicate/extra parameters.
  */
 const NATIVE_GOOGLE_RETURN =
-  /^com\.viso\.deck:\/\/oauth\/google\?attempt=[a-f0-9]{64}$/;
+  /^com\.(?:viso\.deck|teaviso\.app):\/\/oauth\/google\?attempt=[a-f0-9]{64}$/;
 
 export function googleAuthRedirect(
   redirectTo: string,

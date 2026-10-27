@@ -14,7 +14,7 @@ export function VisoBrand({
 }) {
   const [failedUrls, setFailedUrls] = useState<string[]>([]);
   const product = useTimbreBrand();
-  if (product.standalone) return <span className={cn("tea-brand-mark", className)}><span className="tea-original-symbol" aria-hidden="true"><img src="/brand/viso-logo.png" alt=""/></span>Te a Viso</span>;
+  if (product.standalone) return <span className={cn("tea-brand-mark", className)}><span className="tea-original-symbol" aria-hidden="true"><img src="/brand/viso-logo.png" alt=""/></span>{product.name}</span>;
   const configuredSource = logoUrl?.trim() || OFFICIAL_LOGO_URL;
   const source = failedUrls.includes(configuredSource) ? OFFICIAL_LOGO_URL : configuredSource;
 

@@ -1,0 +1,48 @@
+{
+  "name": "Te Aviso",
+  "package": "com.teaviso.app",
+  "version": "1.0.0",
+  "versionCode": 1,
+  "sha256": "380aaa97a6cf0ff63f1c2c2ae69d126db994c507d5aec23972d1ac410585c0ae",
+  "bytes": 13624509,
+  "signing": "Android Debug (testing)",
+  "pushEnabled": false,
+  "localTest": false,
+  "httpsOnly": true,
+  "webviewDebuggingEnabled": false,
+  "packageAndCertificateVerified": true,
+  "firebaseClientIntegrated": false,
+  "reason": "Uploaded client project viso-ad874-afbab differs from configured server viso-ad874",
+  "checkedDate": "2026-10-27",
+  "sourceBranch": "feat/te-aviso-android",
+  "productionPublished": false,
+  "verification": {
+    "vitest": {
+      "passed": 1014,
+      "files": 112
+    },
+    "jvm": {
+      "passed": 4
+    },
+    "browser": {
+      "passed": true,
+      "checks": 5,
+      "backend": "isolated local only"
+    },
+    "nativeRuntime": {
+      "verified": false,
+      "reason": "Isolated API36 emulator has not completed a usable boot; no successful app installation/runtime report"
+    },
+    "google": {
+      "codeTestsPassed": true,
+      "backendDeployment": "pending authorization",
+      "deviceConsent": "not verified"
+    },
+    "fcm": {
+      "backendProjectConfirmed": "viso-ad874",
+      "uploadedClientProject": "viso-ad874-afbab",
+      "integrated": false,
+      "delivery": "not verified"
+    }
+  }
+}

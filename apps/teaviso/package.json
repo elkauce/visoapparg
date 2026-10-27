@@ -16,7 +16,10 @@
     "convex": "^1.43.0",
     "react-router-dom": "^7.18.2",
     "qrcode": "1.5.4",
-    "sonner": "^2.0.8"
+    "sonner": "^2.0.8",
+    "@capacitor/android": "8.5.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/app": "8.1.2"
   },
   "devDependencies": {
     "vite": "^8.2.1",

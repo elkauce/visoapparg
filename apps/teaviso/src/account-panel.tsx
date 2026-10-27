@@ -6,12 +6,16 @@ import { Link } from "react-router-dom";
 import { api } from "@/convex/_generated/api";
 import { Feedback, Loading } from "./ui-v2";
 import { useTask } from "./use-teaviso-task";
+import { isTeavisoAndroid } from "./native-app";
+import { NativeCallSetup } from "./native-surface";
+import GoogleAccountSettings from "@/components/google-account-settings";
 
 type Profile = NonNullable<
   FunctionReturnType<typeof api.teaviso_accounts.profile>
 >;
 
 export default function AccountPanel() {
+  const [googlePending, setGooglePending] = useState(false);
   const profile = useQuery(api.teaviso_accounts.profile, {});
   if (!profile?.enrolled) return <Loading />;
   return (
@@ -23,7 +27,19 @@ export default function AccountPanel() {
           <p>Administrá tus datos y tus timbres desde acá.</p>
         </div>
       </header>
-      <ProfileForm key={profile.updatedAt} profile={profile} />
+      <ProfileForm
+        key={profile.updatedAt}
+        profile={profile}
+        disabled={googlePending}
+      />
+      {isTeavisoAndroid() && (
+        <>
+          <section className="av-card">
+            <GoogleAccountSettings onPendingChange={setGooglePending} />
+          </section>
+          <NativeCallSetup />
+        </>
+      )}
       <section className="av-card av-stack">
         <h2>
           <BellRing size={22} /> Tus timbres
@@ -64,8 +80,9 @@ export default function AccountPanel() {
           recibís las llamadas de tus timbres acá.
         </p>
         <p>
-          La recepción en segundo plano del celular utiliza la APK compatible y
-          sus permisos. Una app propia Te Aviso todavía está pendiente.
+          {isTeavisoAndroid()
+            ? "Activá los avisos de Android para recibir llamadas con Te Aviso en segundo plano. La recepción depende de tus permisos y los ajustes de batería del celular."
+            : "La recepción en segundo plano del celular utiliza la APK compatible y sus permisos."}
         </p>
         <Link to="/panel/llamadas">Configurar recepción y notificaciones</Link>
       </section>
@@ -74,7 +91,13 @@ export default function AccountPanel() {
   );
 }
 
-function ProfileForm({ profile }: { profile: Profile }) {
+function ProfileForm({
+  profile,
+  disabled = false,
+}: {
+  profile: Profile;
+  disabled?: boolean;
+}) {
   const save = useMutation(api.teaviso_accounts.saveProfile),
     task = useTask();
   const [name, setName] = useState(profile.name),
@@ -96,7 +119,7 @@ function ProfileForm({ profile }: { profile: Profile }) {
   return (
     <form className="av-card av-form" onSubmit={submit}>
       <h2>Mis datos</h2>
-      <fieldset disabled={task.busy}>
+      <fieldset disabled={task.busy || disabled}>
         <label>
           Nombre
           <input

@@ -586,6 +586,7 @@ export function TimbreCallSession({
 }
 
 export default function TimbreCallPage() {
+  const brand = useTimbreBrand();
   const { callId } = useParams<{ callId: string }>();
   const auth = useConvexAuth();
   return (
@@ -598,7 +599,7 @@ export default function TimbreCallPage() {
       ) : !auth.isAuthenticated ? (
         <div className="vt-call-card">
           <h1>Entrá para atender tu timbre</h1>
-          <p>Usá la cuenta VISO que está vinculada a esta dirección.</p>
+          <p>Usá la cuenta {brand.standalone ? brand.name : "VISO"} que está vinculada a esta dirección.</p>
           <SignInButton signInText="Entrar para atender" />
         </div>
       ) : callId ? (

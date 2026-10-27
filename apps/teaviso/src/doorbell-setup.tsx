@@ -25,7 +25,7 @@ const kinds = {
   office: "Oficina",
   building: "Edificio",
 };
-export function DoorbellList() {
+export function DoorbellList({ showEmpty = true }: { showEmpty?: boolean }) {
   const rows = useQuery(api.teaviso_setup.list, {}),
     adopt = useMutation(api.teaviso_setup.adoptDigital),
     adoptWhatsapp = useMutation(api.teaviso_spaces.create),
@@ -85,7 +85,7 @@ export function DoorbellList() {
           </article>
         ))}
       </div>
-      {!rows.length && (
+      {!rows.length && showEmpty && (
         <Empty title="Todavía no tenés timbres">
           <p>Creá uno y elegí cómo querés recibir a tus visitas.</p>
           <Link className="av-button" to="/panel/nuevo">

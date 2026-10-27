@@ -17,6 +17,8 @@
     "android:sync": "cap sync android",
     "android:open": "cap open android",
     "teaviso:dev": "vite --config apps/teaviso/vite.config.ts",
+    "teaviso:android:build": "node scripts/build-teaviso-android.mjs",
+    "teaviso:android:open": "cd apps/teaviso && cap open android",
     "teaviso:build": "tsc --project apps/teaviso/tsconfig.json && vite build --config apps/teaviso/vite.config.ts"
   },
   "dependencies": {

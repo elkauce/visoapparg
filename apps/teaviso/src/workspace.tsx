@@ -109,7 +109,7 @@ export function Overview() {
           </Link>
         </Empty>
       )}
-      <DoorbellList />
+      <DoorbellList showEmpty={false} />
       <div className="av-callout">
         <BellRing />
         <div>

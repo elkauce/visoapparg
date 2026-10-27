@@ -40,6 +40,12 @@ import {
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import TimbreIncoming from "@/components/timbre-incoming";
+import TimbrePush from "@/components/timbre-push";
+import { TeavisoNativeGoogle } from "./native-google";
+import { NativeSurface, NativeCallSetup } from "./native-surface";
+import { isTeavisoAndroid } from "./native-app";
+import { secureTokenStorage } from "@/lib/android-native";
+import "./native.css";
 import { TimbreBrandContext } from "@/lib/timbre-brand";
 import { api } from "@/convex/_generated/api";
 import { convexUrl } from "./config";
@@ -261,7 +267,12 @@ function Shell({ children }: { children: ReactNode }) {
   );
 }
 function Dashboard() {
-  return <Overview />;
+  return (
+    <div className="av-stack">
+      <NativeCallSetup />
+      <Overview />
+    </div>
+  );
 }
 function DigitalPanel() {
   return (
@@ -324,7 +335,11 @@ function panel(content: ReactNode) {
 export default function App() {
   return (
     <Boundary>
-      <ConvexAuthProvider client={client}>
+      <ConvexAuthProvider
+        client={client}
+        storage={isTeavisoAndroid() ? secureTokenStorage : undefined}
+        shouldHandleCode={isTeavisoAndroid() ? () => false : undefined}
+      >
         <TimbreBrandContext.Provider
           value={{
             name: "Te Aviso",
@@ -333,112 +348,134 @@ export default function App() {
         >
           <TooltipProvider>
             <BrowserRouter>
-              <TimbreIncoming />
-              <Suspense
-                fallback={
-                  <p role="status" className="tea-loading">
-                    Cargando Te Aviso…
-                  </p>
-                }
-              >
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/planes" element={<Plans />} />
-                  <Route path="/funciones/:feature" element={<FeaturePage />} />
-                  <Route path="/carteles" element={<SignCatalog />} />
-                  <Route path="/carteles/:model" element={<SignPage />} />
-                  <Route path="/panel/carteles" element={panel(<MySigns />)} />
-                  <Route
-                    path="/panel/carteles/:model"
-                    element={panel(<SignPage owner />)}
-                  />
-                  <Route
-                    path="/panel/admin/carteles"
-                    element={panel(<AdminPanel section="signs" />)}
-                  />
-                  <Route path="/soluciones" element={<Solutions />} />
-                  <Route path="/soluciones/:solution" element={<Solutions />} />
-                  <Route path="/equipos" element={<Equipment />} />
-                  <Route path="/privacidad" element={<Privacy />} />
-                  <Route path="/panel/nuevo" element={panel(<Onboarding />)} />
-                  <Route path="/panel/entradas" element={panel(<Entries />)} />
-                  <Route path="/panel/timbres" element={panel(<Entries />)} />
-                  <Route
-                    path="/panel/llamadas"
-                    element={panel(<DigitalPanel />)}
-                  />
-                  <Route
-                    path="/panel/entradas/:spaceId"
-                    element={panel(<SpaceEditorPage />)}
-                  />
-                  <Route path="/panel/agenda" element={panel(<Agenda />)} />
-                  <Route
-                    path="/panel/portal"
-                    element={panel(<PortalSettings />)}
-                  />
-                  <Route
-                    path="/panel/dispositivos"
-                    element={panel(<LegacyDevices />)}
-                  />
-                  <Route path="/panel/plan" element={panel(<PlanPanel />)} />
-                  <Route
-                    path="/panel/cuenta"
-                    element={panel(<AccountPanel />)}
-                  />
-                  <Route path="/e/:token" element={<EntryPortal />} />
-                  <Route path="/reserva/:id" element={<BookingReceipt />} />
-                  <Route
-                    path="/login"
-                    element={<Navigate to="/panel" replace />}
-                  />
-                  <Route path="/panel" element={panel(<Dashboard />)} />
-                  <Route
-                    path="/panel/whatsapp"
-                    element={panel(<WhatsappPanel />)}
-                  />
-                  <Route
-                    path="/panel/business"
-                    element={panel(<BusinessPanel />)}
-                  />
-                  <Route path="/panel/admin" element={panel(<AdminPanel />)} />
-                  <Route
-                    path="/panel/admin/consultas"
-                    element={panel(<AdminPanel section="requests" />)}
-                  />
-                  <Route
-                    path="/panel/admin/planes"
-                    element={panel(<AdminPanel section="commercial" />)}
-                  />
-                  <Route
-                    path="/panel/admin/servicios"
-                    element={panel(<AdminPanel section="business" />)}
-                  />
-                  <Route path="/timbre" element={panel(<DigitalPanel />)} />
-                  <Route path="/t/:qr" element={<Visitor />} />
-                  <Route path="/w/:token" element={<EntryPortal />} />
-                  <Route
-                    path="/timbre/call/:callId"
-                    element={
-                      <Protected>
-                        <Call />
-                      </Protected>
-                    }
-                  />
-                  <Route
-                    path="*"
-                    element={
-                      <main className="tea-visitor">
-                        <section className="tea-card">
-                          <h1>No encontramos esta página</h1>
-                          <Link className="button" to="/">
-                            Volver al inicio
-                          </Link>
-                        </section>
-                      </main>
-                    }
-                  />
-                </Routes>
-              </Suspense>
+              <TeavisoNativeGoogle>
+                <NativeSurface />
+                <TimbreIncoming />
+                <TimbrePush />
+                <Suspense
+                  fallback={
+                    <p role="status" className="tea-loading">
+                      Cargando Te Aviso…
+                    </p>
+                  }
+                >
+                  <Routes>
+                    <Route path="/" element={isTeavisoAndroid() ? <Navigate to="/panel" replace /> : <Landing />} />
+                    <Route path="/planes" element={<Plans />} />
+                    <Route
+                      path="/funciones/:feature"
+                      element={<FeaturePage />}
+                    />
+                    <Route path="/carteles" element={<SignCatalog />} />
+                    <Route path="/carteles/:model" element={<SignPage />} />
+                    <Route
+                      path="/panel/carteles"
+                      element={panel(<MySigns />)}
+                    />
+                    <Route
+                      path="/panel/carteles/:model"
+                      element={panel(<SignPage owner />)}
+                    />
+                    <Route
+                      path="/panel/admin/carteles"
+                      element={panel(<AdminPanel section="signs" />)}
+                    />
+                    <Route path="/soluciones" element={<Solutions />} />
+                    <Route
+                      path="/soluciones/:solution"
+                      element={<Solutions />}
+                    />
+                    <Route path="/equipos" element={<Equipment />} />
+                    <Route path="/privacidad" element={<Privacy />} />
+                    <Route
+                      path="/panel/nuevo"
+                      element={panel(<Onboarding />)}
+                    />
+                    <Route
+                      path="/panel/entradas"
+                      element={panel(<Entries />)}
+                    />
+                    <Route path="/panel/timbres" element={panel(<Entries />)} />
+                    <Route
+                      path="/panel/llamadas"
+                      element={panel(<DigitalPanel />)}
+                    />
+                    <Route
+                      path="/panel/entradas/:spaceId"
+                      element={panel(<SpaceEditorPage />)}
+                    />
+                    <Route path="/panel/agenda" element={panel(<Agenda />)} />
+                    <Route
+                      path="/panel/portal"
+                      element={panel(<PortalSettings />)}
+                    />
+                    <Route
+                      path="/panel/dispositivos"
+                      element={panel(<LegacyDevices />)}
+                    />
+                    <Route path="/panel/plan" element={panel(<PlanPanel />)} />
+                    <Route
+                      path="/panel/cuenta"
+                      element={panel(<AccountPanel />)}
+                    />
+                    <Route path="/e/:token" element={<EntryPortal />} />
+                    <Route path="/reserva/:id" element={<BookingReceipt />} />
+                    <Route
+                      path="/login"
+                      element={<Navigate to="/panel" replace />}
+                    />
+                    <Route path="/panel" element={panel(<Dashboard />)} />
+                    <Route
+                      path="/panel/whatsapp"
+                      element={panel(<WhatsappPanel />)}
+                    />
+                    <Route
+                      path="/panel/business"
+                      element={panel(<BusinessPanel />)}
+                    />
+                    <Route
+                      path="/panel/admin"
+                      element={panel(<AdminPanel />)}
+                    />
+                    <Route
+                      path="/panel/admin/consultas"
+                      element={panel(<AdminPanel section="requests" />)}
+                    />
+                    <Route
+                      path="/panel/admin/planes"
+                      element={panel(<AdminPanel section="commercial" />)}
+                    />
+                    <Route
+                      path="/panel/admin/servicios"
+                      element={panel(<AdminPanel section="business" />)}
+                    />
+                    <Route path="/timbre" element={panel(<DigitalPanel />)} />
+                    <Route path="/t/:qr" element={<Visitor />} />
+                    <Route path="/w/:token" element={<EntryPortal />} />
+                    <Route
+                      path="/timbre/call/:callId"
+                      element={
+                        <Protected>
+                          <Call />
+                        </Protected>
+                      }
+                    />
+                    <Route
+                      path="*"
+                      element={
+                        <main className="tea-visitor">
+                          <section className="tea-card">
+                            <h1>No encontramos esta página</h1>
+                            <Link className="button" to="/">
+                              Volver al inicio
+                            </Link>
+                          </section>
+                        </main>
+                      }
+                    />
+                  </Routes>
+                </Suspense>
+              </TeavisoNativeGoogle>
             </BrowserRouter>
             <Toaster theme="light" />
           </TooltipProvider>

@@ -56,3 +56,12 @@ tsconfig.tsbuildinfo
 
 # Separate Te a Viso website build
 /apps/teaviso/dist/
+/apps/teaviso/dist-android/
+
+# Standalone Te Aviso Android outputs and client configuration.
+/apps/teaviso/android/local.properties
+/apps/teaviso/android/app/google-services.json
+/apps/teaviso/android/app/src/main/assets/public/
+/apps/teaviso/android/app/src/main/assets/capacitor.config.json
+/apps/teaviso/android/app/src/main/assets/capacitor.plugins.json
+/apps/teaviso/android/app/src/localTest/

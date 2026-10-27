@@ -1,0 +1,55 @@
+html[data-teaviso-native="true"] {
+  background: #f5f3ef;
+  color-scheme: light;
+}
+html[data-teaviso-native="true"] .tea-auth {
+  min-height: 100dvh;
+  padding: 32px 22px;
+  background:
+    radial-gradient(ellipse at 50% 13%, #ffc52d12, transparent 44%), #f5f3ef;
+}
+html[data-teaviso-native="true"] .tea-auth > .av-brand {
+  margin-bottom: 28px;
+}
+html[data-teaviso-native="true"] .tea-auth > .tea-card {
+  width: 100%;
+  max-width: 430px;
+  margin: auto;
+  border-radius: 13px;
+}
+html[data-teaviso-native="true"] .tea-auth input {
+  font-size: 16px;
+}
+html[data-teaviso-native="true"] .tea-auth .button {
+  background: #e84300;
+  color: #fff;
+}
+html[data-teaviso-native="true"] .teaviso-native-notifications h3 {
+  font-size: 18px;
+  color: #202321;
+  letter-spacing: -0.4px;
+}
+html[data-teaviso-native="true"] .teaviso-native-notifications p {
+  font-size: 12px;
+  line-height: 1.8;
+  margin-top: 12px;
+}
+html[data-teaviso-native="true"] .teaviso-native-notifications button {
+  margin-top: 15px;
+  background: #e84300;
+  color: #fff;
+  padding: 12px 15px;
+  border: 0;
+  border-radius: 6px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+html[data-teaviso-native="true"] .teaviso-native-notifications button:disabled {
+  opacity: 0.55;
+}
+html[data-teaviso-native="true"] .av-sidebar a {
+  min-height: 46px;
+}

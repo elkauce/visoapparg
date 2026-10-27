@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { isAndroidNative } from "@/lib/android-native";
 import { timbreNative, type TimbreNativeCapabilities } from "@/lib/timbre-native";
+import {useTimbreBrand} from "@/lib/timbre-brand";
 
 const CHANGE = "viso:timbre-push-preference";
 const preferenceKey = (userId: string) => `viso:timbre-push:${userId}`;
@@ -96,6 +97,7 @@ export function TimbrePushSettings() {
   return native && user ? <PushControls key={user._id} ownerId={user._id} /> : null;
 }
 function PushControls({ ownerId }: { ownerId: Id<"users"> }) {
+  const brand=useTimbreBrand();const product=brand.standalone?"Te Aviso":"VISO";
   const configuration = useQuery(api.timbre_push.configuration, {});
   const register = useMutation(api.timbre_push.registerDevice), unregister = useMutation(api.timbre_push.unregisterDevice);
   const [capabilities, setCapabilities] = useState<TimbreNativeCapabilities | null>(null);
@@ -113,7 +115,7 @@ function PushControls({ ownerId }: { ownerId: Id<"users"> }) {
       } else {
         if (!configuration?.configured || !capabilities?.available) throw new Error("Los avisos con la app cerrada todavía no están configurados.");
         const permission = await timbreNative.requestNotifications();
-        if (!permission.granted) throw new Error("Permití las notificaciones de VISO en los ajustes de Android para recibir llamadas.");
+        if (!permission.granted) throw new Error(`Permití las notificaciones de ${product} en los ajustes de Android para recibir llamadas.`);
         const { token } = await timbreNative.getPushToken();
         const result = await register({ deviceId: timbrePushDeviceId(), token });
         if (!result.configured) throw new Error("El servicio de avisos todavía no está configurado.");
@@ -129,8 +131,8 @@ function PushControls({ ownerId }: { ownerId: Id<"users"> }) {
   const available = configuration?.configured && capabilities?.available;
   return <div className="vt-notification-settings">
     <h3>Avisos de Timbre en Android</h3>
-    <p>Recibí el aviso aunque VISO esté en segundo plano o cerrado. Al atender se abre la llamada; la cámara y el micrófono se activan con tu permiso.</p>
-    {!available && <p className="vt-muted">La entrega con la app cerrada requiere configurar el servicio de notificaciones y una APK compatible. Las llamadas siguen apareciendo con VISO abierto.</p>}
+    <p>Recibí el aviso aunque {product} esté en segundo plano o cerrado. Al atender se abre la llamada; la cámara y el micrófono se activan con tu permiso.</p>
+    {!available && <p className="vt-muted">La entrega con la app cerrada requiere configurar el servicio de notificaciones y una APK compatible. Las llamadas siguen apareciendo con {product} abierto.</p>}
     <button type="button" className="vt-secondary" disabled={busy || (!enabled && !available)} onClick={() => void toggle()}>{enabled ? <BellOff size={17} /> : <Bell size={17} />}{busy ? "Actualizando…" : enabled ? "Desactivar avisos de Android" : "Activar avisos de Android"}</button>
     {enabled && available && <p className="vt-success">Avisos habilitados para esta cuenta y este dispositivo. Android puede limitar su entrega si forzás el cierre o restringís la batería.</p>}
     {error && <p className="vt-error" role="alert">{error}</p>}

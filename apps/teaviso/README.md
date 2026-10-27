@@ -12,6 +12,8 @@ Desde la raíz del repositorio, instalar las dependencias y ejecutar:
 - `npm run teaviso:dev`: desarrollo en puerto 5174.
 - `npm run teaviso:build`: TypeScript y salida `apps/teaviso/dist`.
 - `npm test`: pruebas de ambos productos y backend.
+- `npm run teaviso:android:build`: APK propia, sin modificar la APK VISO.
+- `npm run teaviso:android:open`: abrir su proyecto en Android Studio.
 
 No copiar esta carpeta sola sin extraer también los componentes y backend que
 comparte. El informe actual está en [la entrega actual](../../docs/te-aviso-sober-release.md).
@@ -43,8 +45,10 @@ Un visitante no necesita instalar ni registrarse. Los propietarios usan la misma
 cuenta VISO; las sesiones son propias de cada origen y no se transfieren por URL.
 Un QR pausado o eliminado no resuelve. WhatsApp requiere confirmar el envío y deja
 visible el número; no se promete central ni transferencia de llamadas WhatsApp.
-La web debe estar abierta para recibir llamadas. La APK VISO sigue compatible;
-una APK propia Te Aviso permanece pendiente.
+La web debe estar abierta para recibir llamadas. La APK VISO sigue compatible.
+La APK independiente **Te Aviso** usa `com.teaviso.app`; su configuración Firebase,
+compilación y estado de verificación están documentados en
+[Te Aviso Android](../../docs/te-aviso-android.md).
 
 ## Variables y despliegue
 

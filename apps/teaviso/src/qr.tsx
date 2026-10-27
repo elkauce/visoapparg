@@ -12,6 +12,7 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useParams, Link } from "react-router-dom";
 import { errorText, qrUrl } from "./config";
+import { isTeavisoAndroid, saveNativeQr } from "./native-app";
 
 export function QrDownload({
   url,
@@ -47,6 +48,14 @@ export function QrDownload({
     setError("");
     let objectUrl: string | undefined;
     try {
+      if (isTeavisoAndroid()) {
+        const contents =
+          kind === "png"
+            ? await qrPlatePng(plate.svg, plate.width, plate.height)
+            : plate.svg;
+        await saveNativeQr(`${name}-${selected}.${kind}`, kind, contents);
+        return;
+      }
       let href: string;
       if (kind === "png")
         href = await qrPlatePng(plate.svg, plate.width, plate.height);

@@ -43,6 +43,8 @@ export const configuration = query({
   handler: async (ctx, args) => {
     const config = await settings(ctx);
     return {
+      // Native clients must wait for a server that accepts their own callback.
+      androidGoogle: googleAvailable(),
       google:
         googleAvailable() &&
         !!teavisoOrigin(process.env.TEAVISO_WEB_ORIGIN) &&

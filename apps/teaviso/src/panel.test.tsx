@@ -9,6 +9,10 @@ import BusinessPanel from "./business";
 
 const f = vi.hoisted(() => ({
   google: false,
+  androidGoogle: false,
+  native: false,
+  nativePending: false,
+  nativeStart: vi.fn(),
   offer: null as null | {
     enabled: boolean;
     buyable: boolean;
@@ -29,11 +33,27 @@ const f = vi.hoisted(() => ({
 vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: f.signIn }),
 }));
+vi.mock("./native-app", () => ({
+  isTeavisoAndroid: () => f.native,
+  saveNativeQr: vi.fn(),
+}));
+vi.mock("@/lib/native-google-auth-context", () => ({
+  useNativeGoogleAuth: () => ({
+    ready: true,
+    pending: f.nativePending,
+    start: f.nativeStart,
+    cancel: vi.fn(),
+  }),
+}));
 vi.mock("convex/react", () => ({
   useQuery: (ref: Parameters<typeof getFunctionName>[0]) => {
     const name = getFunctionName(ref);
     return {
-      "teaviso:configuration": { google: f.google, business: f.offer },
+      "teaviso:configuration": {
+        google: f.google,
+        androidGoogle: f.androidGoogle,
+        business: f.offer,
+      },
       "teaviso:myWhatsappQrs": f.qrs,
       "teaviso:myBusinessRequests": f.requests,
       "teaviso:publicWhatsapp": f.contact,
@@ -54,6 +74,10 @@ function mount(node: React.ReactNode) {
 beforeEach(() => {
   vi.spyOn(window, "scrollTo").mockImplementation(() => {});
   f.google = false;
+  f.androidGoogle = false;
+  f.native = false;
+  f.nativePending = false;
+  f.nativeStart.mockReset().mockResolvedValue(undefined);
   f.offer = null;
   f.qrs = [];
   f.requests = [];
@@ -73,6 +97,38 @@ beforeEach(() => {
   f.template.mockResolvedValue(null);
 });
 describe("Te Aviso own account", () => {
+  it("uses the native browser flow only when this server supports Te Aviso's callback", async () => {
+    f.native = true;
+    f.google = true;
+    const view = mount(<Auth />);
+    expect(
+      screen.queryByRole("button", { name: "Continuar con Google" }),
+    ).not.toBeInTheDocument();
+    f.androidGoogle = true;
+    view.rerender(
+      <MemoryRouter>
+        <Auth />
+      </MemoryRouter>,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Continuar con Google" }),
+    );
+    expect(f.nativeStart).toHaveBeenCalledWith("signin");
+    expect(f.signIn).not.toHaveBeenCalled();
+  });
+  it("keeps password actions disabled while native Google is completing", () => {
+    f.native = true;
+    f.androidGoogle = true;
+    f.nativePending = true;
+    mount(<Auth />);
+    expect(screen.getByLabelText("Correo electrónico")).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Crear una cuenta" }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Cancelar acceso con Google" }),
+    ).toBeEnabled();
+  });
   it("signs in with existing VISO credentials and normalizes email", async () => {
     mount(<Auth />);
     await userEvent.type(
