@@ -1,6 +1,9 @@
 # Te Aviso · configuración guiada de timbres
 
-Estado: corrección implementada y probada para revisión. **Sin publicar**.
+Estado: **publicado** el 27 de octubre de 2026, con autorización expresa del
+propietario («si») después de revisar las capturas.
+
+Web: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/ .
 El propietario indicó que el producto funciona pero configurar un timbre resulta
 confuso. El recorrido anterior mostraba al mismo tiempo licencia, QR interno,
 contacto, horarios, reservas y mensajes; permitía terminar con una entrada sin
@@ -47,7 +50,7 @@ El enlace para pedir un cartel transporta el timbre elegido a la personalizació
 no cambia silenciosamente al primer timbre de la cuenta. Los clientes invitados
 pueden ver timbres compartidos sin adquirir permisos de propietario.
 
-## Verificación y entrega pendiente
+## Verificación y publicación
 
 1.001 pruebas correctas en 110 archivos. TypeScript de raíz y backend, compilación
 Te Aviso y ESLint de archivos cambiados correctos, sin advertencias de lint.
@@ -57,10 +60,21 @@ creación WhatsApp, descarga PNG, edición, activar llamadas sin selección manu
 QR, guardar mensajes en su sección, creación Digital y bloqueo de planes no válidos.
 Se comprobó también que el cartel usa el mismo timbre recién configurado.
 
-No se llamó ni envió WhatsApp a ninguna persona, no se realizaron cobros y no se
-publicaron funciones, web ni APK. No se cambiaron credenciales ni facturación.
-Para publicar la corrección se requiere la autorización del propietario, actualizar
-el backend compatible `vivid-nightingale-785` y únicamente el frontend Vercel
-`teaviso`. No necesita migración de registros ni reconstruir la APK VISO.
+No se llamó ni envió WhatsApp a ninguna persona ni se realizaron cobros. Se
+publicaron el backend compatible `vivid-nightingale-785` y únicamente el frontend
+Vercel `teaviso`: despliegue READY `dpl_3kjZVU1Wdj9z5svbWXK1ZQNmFAoC`,
+fuente `28d4520`. No se migraron registros, cambiaron credenciales ni facturación.
+VISO conserva su frontend `dpl_9DVS5zTpqMAb1MV918Xh7zue8zZx`; no se reconstruyó
+la APK.
+
+La entrega pública se verificó mediante HTTPS con TLS válido: 26 archivos
+comparados por SHA-256 y 23 rutas correctas. Los dos nuevos endpoints privados
+rechazan solicitudes sin sesión. Google continúa configurado. El recorrido
+interactivo se verificó localmente con identidades sintéticas; no se crearon
+usuarios de prueba ni timbres en producción para verificar la entrega.
+
+Convex mantiene el aviso de que los proyectos superan los límites del plan
+gratuito. La actualización y las consultas finalizaron correctamente; no se
+modificó la facturación.
 
 [Informe de revisión](validation/te-aviso-configuracion-guiada.json).
