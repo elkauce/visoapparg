@@ -14,8 +14,13 @@ type Variant = FunctionReturnType<
   typeof api.timbre_commerce.catalog
 >[number]["variants"][number];
 
-export default function TimbreCommercial() {
-  const catalog = useQuery(api.timbre_commerce.catalog, {});
+export default function TimbreCommercial({
+  accountOnly = false,
+}: { accountOnly?: boolean } = {}) {
+  const catalog = useQuery(
+    api.timbre_commerce.catalog,
+    accountOnly ? "skip" : {},
+  );
   const orders = useQuery(api.timbre_commerce.myPlateOrders, {});
   const licenses = useQuery(api.timbre_commerce.myLicenses, {});
   const checkout = useAction(api.timbre_commerce.createCheckout);
@@ -26,179 +31,196 @@ export default function TimbreCommercial() {
   const [variant, setVariant] = useState<Variant | null>(null);
   const [busy, setBusy] = useState(false);
   const [coupon, setCoupon] = useState("");
-  if (!catalog) return <p role="status">Cargando opciones de Timbre…</p>;
+  if (!catalog && !accountOnly)
+    return <p role="status">Cargando opciones de Timbre…</p>;
   return (
     <div className="vt-stack">
-      <div className="vt-notice">
-        <strong>Un servicio dentro de tu cuenta VISO.</strong>
-        <p>
-          Timbre requiere pago o una licencia incluida expresamente con hardware
-          elegible. La cuenta y los recursos gratuitos de la biblioteca no lo
-          activan. Antes de pagar verás el importe y las condiciones
-          configuradas por VISO.
-        </p>
-      </div>
-      <section className="vt-grid" aria-label="Ofertas de Timbre">
-        {catalog.map((offer) => (
-          <article className="vt-card" key={offer.code}>
-            <span className="vt-eyebrow">VISO TIMBRE</span>
-            <h2>{offer.title}</h2>
-            <p>{offer.description}</p>
-            {!offer.configured && (
-              <p>Las condiciones comerciales todavía no están configuradas.</p>
-            )}
-            {offer.plans.map((plan) => (
-              <div className="vt-details" key={plan.id}>
-                <h3 className="font-semibold">{plan.name}</h3>
-                <p>{plan.description}</p>
-                <strong>
-                  {timbrePrice(plan.priceAmount, plan.currency)}
-                  {plan.period === "monthly"
-                    ? " / mes"
-                    : plan.period === "yearly"
-                      ? " / año"
-                      : " · pago único"}
-                </strong>
-                <p>
-                  {plan.durationDays
-                    ? `Vigencia: ${plan.durationDays} días.`
-                    : "Vigencia según condiciones de la licencia."}{" "}
-                  Hasta {plan.limits.maxSites} timbres. Cada Timbre admite hasta{" "}
-                  {plan.limits.maxQrs} QR y {plan.limits.maxMembers}{" "}
-                  integrantes.
-                </p>
-                <p>
-                  {[
-                    plan.features.audio && "Audio",
-                    plan.features.video && "Video",
-                    plan.features.chat && "Chat",
-                    plan.features.messages && "Mensajes",
-                    plan.features.buildings && "Edificios",
-                  ]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-                {plan.period === "one_time" ? (
-                  <Button
-                    disabled={
-                      !plan.buyable ||
-                      busy ||
-                      offer.code === "hardware" ||
-                      offer.code === "personalizado"
-                    }
-                    onClick={() => {
-                      setBusy(true);
-                      void timbreTask(async () => {
-                        const result = await checkout({
-                          planId: plan.id,
-                          ...(coupon.trim() ? { coupon: coupon.trim() } : {}),
-                        });
-                        window.location.assign(result.checkoutUrl);
-                      }).finally(() => setBusy(false));
-                    }}
-                  >
-                    Contratar en Mercado Pago
-                  </Button>
-                ) : recurring?.enabled &&
-                  plan.priceAmount &&
-                  plan.currency === "ARS" &&
-                  ["digital", "edificios"].includes(offer.code) ? (
-                  <>
-                    <p className="vt-caption">
-                      La suscripción se autoriza en Mercado Pago. Timbre se
-                      activa al confirmar el primer pago y se renueva por cada
-                      período pagado.
-                    </p>
-                    <Button
-                      disabled={busy}
-                      onClick={() => {
-                        setBusy(true);
-                        void timbreTask(async () => {
-                          const result = await subscribe({ planId: plan.id });
-                          window.location.assign(result.checkoutUrl);
-                        }).finally(() => setBusy(false));
-                      }}
-                    >
-                      Suscribirme con Mercado Pago
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <p className="vt-caption">
-                      La contratación recurrente está pendiente de habilitación.
-                      Esta solicitud no realiza cobros ni activa una licencia.
-                    </p>
-                    <Button
-                      variant="outline"
-                      disabled={!plan.priceAmount || busy}
-                      onClick={() =>
-                        void timbreTask(async () => {
-                          const result = await request({ planId: plan.id });
-                          if (result.activated === false)
-                            toast.info(result.message);
-                        })
-                      }
-                    >
-                      Registrar interés en este plan
-                    </Button>
-                  </>
+      {!accountOnly && (
+        <>
+          <div className="vt-notice">
+            <strong>Un servicio dentro de tu cuenta VISO.</strong>
+            <p>
+              Timbre requiere pago o una licencia incluida expresamente con
+              hardware elegible. La cuenta y los recursos gratuitos de la
+              biblioteca no lo activan. Antes de pagar verás el importe y las
+              condiciones configuradas por VISO.
+            </p>
+          </div>
+          <section className="vt-grid" aria-label="Ofertas de Timbre">
+            {catalog?.map((offer) => (
+              <article className="vt-card" key={offer.code}>
+                <span className="vt-eyebrow">VISO TIMBRE</span>
+                <h2>{offer.title}</h2>
+                <p>{offer.description}</p>
+                {!offer.configured && (
+                  <p>
+                    Las condiciones comerciales todavía no están configuradas.
+                  </p>
                 )}
-              </div>
-            ))}
-            {offer.variants.map((row) => (
-              <div key={row.id} className="vt-details">
-                <h3 className="font-semibold">{row.name}</h3>
-                <p>
-                  {row.material} · {row.widthMm} × {row.heightMm} mm
-                </p>
-                <strong>{timbrePrice(row.priceAmount, row.currency)}</strong>
-                <p>
-                  {row.includedPlanId
-                    ? "Incluye una licencia Timbre, activada después de verificar el pago."
-                    : "Requiere un QR de tu licencia Timbre activa. No incluye licencia."}
-                </p>
-                {row.warranty && (
-                  <details>
-                    <summary>Garantía</summary>
-                    <p>{row.warranty}</p>
-                  </details>
+                {offer.plans.map((plan) => (
+                  <div className="vt-details" key={plan.id}>
+                    <h3 className="font-semibold">{plan.name}</h3>
+                    <p>{plan.description}</p>
+                    <strong>
+                      {timbrePrice(plan.priceAmount, plan.currency)}
+                      {plan.period === "monthly"
+                        ? " / mes"
+                        : plan.period === "yearly"
+                          ? " / año"
+                          : " · pago único"}
+                    </strong>
+                    <p>
+                      {plan.durationDays
+                        ? `Vigencia: ${plan.durationDays} días.`
+                        : "Vigencia según condiciones de la licencia."}{" "}
+                      Hasta {plan.limits.maxSites} timbres. Cada Timbre admite
+                      hasta {plan.limits.maxQrs} QR y {plan.limits.maxMembers}{" "}
+                      integrantes.
+                    </p>
+                    <p>
+                      {[
+                        plan.features.audio && "Audio",
+                        plan.features.video && "Video",
+                        plan.features.chat && "Chat",
+                        plan.features.messages && "Mensajes",
+                        plan.features.buildings && "Edificios",
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                    {plan.period === "one_time" ? (
+                      <Button
+                        disabled={
+                          !plan.buyable ||
+                          busy ||
+                          offer.code === "hardware" ||
+                          offer.code === "personalizado"
+                        }
+                        onClick={() => {
+                          setBusy(true);
+                          void timbreTask(async () => {
+                            const result = await checkout({
+                              planId: plan.id,
+                              ...(coupon.trim()
+                                ? { coupon: coupon.trim() }
+                                : {}),
+                            });
+                            window.location.assign(result.checkoutUrl);
+                          }).finally(() => setBusy(false));
+                        }}
+                      >
+                        Contratar en Mercado Pago
+                      </Button>
+                    ) : recurring?.enabled &&
+                      plan.priceAmount &&
+                      plan.currency === "ARS" &&
+                      ["digital", "edificios"].includes(offer.code) ? (
+                      <>
+                        <p className="vt-caption">
+                          La suscripción se autoriza en Mercado Pago. Timbre se
+                          activa al confirmar el primer pago y se renueva por
+                          cada período pagado.
+                        </p>
+                        <Button
+                          disabled={busy}
+                          onClick={() => {
+                            setBusy(true);
+                            void timbreTask(async () => {
+                              const result = await subscribe({
+                                planId: plan.id,
+                              });
+                              window.location.assign(result.checkoutUrl);
+                            }).finally(() => setBusy(false));
+                          }}
+                        >
+                          Suscribirme con Mercado Pago
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="vt-caption">
+                          La contratación recurrente está pendiente de
+                          habilitación. Esta solicitud no realiza cobros ni
+                          activa una licencia.
+                        </p>
+                        <Button
+                          variant="outline"
+                          disabled={!plan.priceAmount || busy}
+                          onClick={() =>
+                            void timbreTask(async () => {
+                              const result = await request({ planId: plan.id });
+                              if (result.activated === false)
+                                toast.info(result.message);
+                            })
+                          }
+                        >
+                          Registrar interés en este plan
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                ))}
+                {offer.variants.map((row) => (
+                  <div key={row.id} className="vt-details">
+                    <h3 className="font-semibold">{row.name}</h3>
+                    <p>
+                      {row.material} · {row.widthMm} × {row.heightMm} mm
+                    </p>
+                    <strong>
+                      {timbrePrice(row.priceAmount, row.currency)}
+                    </strong>
+                    <p>
+                      {row.includedPlanId
+                        ? "Incluye una licencia Timbre, activada después de verificar el pago."
+                        : "Requiere un QR de tu licencia Timbre activa. No incluye licencia."}
+                    </p>
+                    {row.warranty && (
+                      <details>
+                        <summary>Garantía</summary>
+                        <p>{row.warranty}</p>
+                      </details>
+                    )}
+                    <Button
+                      disabled={!row.buyable}
+                      onClick={() => setVariant(row)}
+                    >
+                      Personalizar placa
+                    </Button>
+                  </div>
+                ))}
+                {offer.eligibleProducts.map((product) => (
+                  <p key={product.productId}>
+                    Producto elegible:{" "}
+                    <a
+                      href={`/marketplace/products/${encodeURIComponent(product.productId)}`}
+                    >
+                      Ver equipo y condiciones
+                    </a>
+                  </p>
+                ))}
+                {offer.blockReason && (
+                  <p className="vt-caption">{offer.blockReason}</p>
                 )}
-                <Button disabled={!row.buyable} onClick={() => setVariant(row)}>
-                  Personalizar placa
-                </Button>
-              </div>
+              </article>
             ))}
-            {offer.eligibleProducts.map((product) => (
-              <p key={product.productId}>
-                Producto elegible:{" "}
-                <a
-                  href={`/marketplace/products/${encodeURIComponent(product.productId)}`}
-                >
-                  Ver equipo y condiciones
-                </a>
-              </p>
-            ))}
-            {offer.blockReason && (
-              <p className="vt-caption">{offer.blockReason}</p>
-            )}
-          </article>
-        ))}
-      </section>
-      <label className="vt-form">
-        Cupón para planes de pago único
-        <input
-          value={coupon}
-          maxLength={40}
-          placeholder="Código promocional"
-          onChange={(e) => setCoupon(e.target.value)}
-        />
-      </label>
-      {variant && (
-        <PlatePurchase
-          key={variant.id}
-          variant={variant}
-          onClose={() => setVariant(null)}
-        />
+          </section>
+          <label className="vt-form">
+            Cupón para planes de pago único
+            <input
+              value={coupon}
+              maxLength={40}
+              placeholder="Código promocional"
+              onChange={(e) => setCoupon(e.target.value)}
+            />
+          </label>
+          {variant && (
+            <PlatePurchase
+              key={variant.id}
+              variant={variant}
+              onClose={() => setVariant(null)}
+            />
+          )}
+        </>
       )}
       <section className="vt-card">
         <h2>Tus licencias</h2>

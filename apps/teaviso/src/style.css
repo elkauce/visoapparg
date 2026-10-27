@@ -1,6 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
 :root {
-  font-family: "DM Sans", sans-serif;
+  font-family: Arial, sans-serif;
   color: #17191d;
   background: #f5f3ef;
   font-synthesis: none;
@@ -54,7 +53,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-family: Manrope, sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 27px;
   letter-spacing: -1.6px;
   font-weight: 800;
@@ -65,7 +64,7 @@ footer {
 }
 .brand span {
   font:
-    600 9px "DM Sans",
+    600 9px Arial,
     sans-serif;
   letter-spacing: 1.2px;
   margin: 12px 0 0 4px;
@@ -120,7 +119,7 @@ footer {
 h1,
 h2,
 h3 {
-  font-family: Manrope, sans-serif;
+  font-family: Arial, sans-serif;
 }
 h1 {
   font-size: clamp(55px, 6.3vw, 82px);

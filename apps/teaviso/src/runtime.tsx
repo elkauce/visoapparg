@@ -58,7 +58,7 @@ import {
 } from "./workspace";
 import { BookingReceipt, EntryPortal } from "./visitor-v2";
 import { Brand } from "./ui-v2";
-import TimbreCommercial from "@/pages/timbre/commercial";
+import { PlanPanel, AdminPlanRequests } from "./commercial-panel";
 import TimbreAdmin from "@/pages/timbre/admin";
 import Auth from "./auth";
 import WhatsappPanel from "./qr";
@@ -180,6 +180,13 @@ function Shell({ children }: { children: ReactNode }) {
           {account?.isAdmin && (
             <div className="av-admin-nav">
               <small>Administración Te Aviso</small>
+              <NavLink
+                to="/panel/admin/consultas"
+                onClick={() => setOpen(false)}
+              >
+                <MessageCircle size={19} />
+                Consultas de planes
+              </NavLink>
               <NavLink to="/panel/admin" end onClick={() => setOpen(false)}>
                 <Users size={19} />
                 Usuarios y timbres
@@ -256,33 +263,6 @@ function Shell({ children }: { children: ReactNode }) {
 function Dashboard() {
   return <Overview />;
 }
-function PlanPanel() {
-  return (
-    <div className="av-stack">
-      <header className="av-panel-heading">
-        <div>
-          <span className="av-eyebrow">Elegí cómo recibir</span>
-          <h1>Mi plan y beneficios</h1>
-          <p>
-            Tu WhatsApp básico es gratuito. Las reservas, el portal de mensajes
-            y los servicios adicionales se habilitan según tu contratación.
-          </p>
-        </div>
-      </header>
-      <section className="av-card">
-        <h2>WhatsApp y número dedicado</h2>
-        <p>
-          Conservá tu número o solicitá la preparación de un número para tu
-          espacio. Los mensajes preguardados son una mejora de la licencia.
-        </p>
-        <Link className="av-button av-outline" to="/panel/business">
-          Consultar número dedicado ↗
-        </Link>
-      </section>
-      <TimbreCommercial />
-    </div>
-  );
-}
 function DigitalPanel() {
   return (
     <section className="tea-stack vt-management">
@@ -301,7 +281,7 @@ function DigitalPanel() {
 function AdminPanel({
   section = "customers",
 }: {
-  section?: "customers" | "commercial" | "business" | "signs";
+  section?: "customers" | "commercial" | "business" | "signs" | "requests";
 }) {
   const account = useQuery(api.teaviso_accounts.profile, {});
   if (account === undefined) return <p role="status">Revisando permisos…</p>;
@@ -313,6 +293,7 @@ function AdminPanel({
       </section>
     );
   if (section === "customers") return <AdminCustomers />;
+  if (section === "requests") return <AdminPlanRequests />;
   if (section === "signs") return <AdminSigns />;
   return (
     <div className="av-stack">
@@ -420,6 +401,10 @@ export default function App() {
                     element={panel(<BusinessPanel />)}
                   />
                   <Route path="/panel/admin" element={panel(<AdminPanel />)} />
+                  <Route
+                    path="/panel/admin/consultas"
+                    element={panel(<AdminPanel section="requests" />)}
+                  />
                   <Route
                     path="/panel/admin/planes"
                     element={panel(<AdminPanel section="commercial" />)}

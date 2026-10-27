@@ -6,6 +6,24 @@ import TimbreCommercial from "./commercial";
 import { defaultTimbreQrDesign } from "@/lib/timbre-qr";
 import type { TimbreQrEditorProps } from "./qr-editor";
 
+it("keeps owned licenses and subscriptions without displaying an acquisition catalogue in account-only mode", () => {
+  render(<TimbreCommercial accountOnly />);
+  expect(screen.getByRole("heading", { name: "Tus licencias" })).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Tus suscripciones" }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("heading", { name: "Tus pedidos de placas" }),
+  ).toBeVisible();
+  expect(
+    screen.queryByText("Un servicio dentro de tu cuenta VISO."),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("region", { name: "Ofertas de Timbre" }),
+  ).not.toBeInTheDocument();
+  expect(fixture.query).toHaveBeenCalledWith("timbre_commerce:catalog", "skip");
+});
+
 const fixture = vi.hoisted(() => ({
   catalog: [] as Array<Record<string, unknown>>,
   sites: [] as Array<Record<string, unknown>>,

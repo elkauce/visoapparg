@@ -31,6 +31,24 @@ export const bookingStatus = v.union(
   v.literal("expired"),
 );
 export const teavisoV2Tables = {
+  teavisoPlanRequests: defineTable({
+    ownerId: v.id("users"),
+    interest: v.string(),
+    message: v.string(),
+    requestKey: v.string(),
+    status: v.union(
+      v.literal("new"),
+      v.literal("reviewing"),
+      v.literal("answered"),
+      v.literal("closed"),
+    ),
+    response: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_key", ["ownerId", "requestKey"])
+    .index("by_owner_interest", ["ownerId", "interest"]),
   teavisoSignRequests: defineTable({
     ownerId: v.id("users"),
     spaceId: v.id("teavisoSpaces"),

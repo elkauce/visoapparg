@@ -1,0 +1,218 @@
+.ta-plan-account h2 {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.ta-plan-account .av-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.ta-wa-account {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+}
+.ta-wa-account > svg {
+  color: #4b8354;
+  flex-shrink: 0;
+}
+.ta-wa-account > div {
+  flex: 1;
+}
+.ta-wa-account p {
+  margin-top: 9px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+.ta-plan-inquiry header > p {
+  margin-top: 10px;
+}
+.ta-plan-inquiry header > h2 {
+  margin-top: 12px;
+}
+.ta-plan-inquiry form,
+.ta-admin-inquiry form {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  max-width: 720px;
+}
+.ta-plan-inquiry label,
+.ta-admin-inquiry label {
+  display: grid;
+  gap: 9px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.ta-plan-inquiry label > span {
+  display: contents;
+  font-weight: 400;
+  color: #83887c;
+}
+.ta-plan-inquiry input,
+.ta-plan-inquiry select,
+.ta-plan-inquiry textarea,
+.ta-admin-inquiry select,
+.ta-admin-inquiry textarea {
+  width: 100%;
+  padding: 12px 13px;
+  background: #fff;
+  border: 1px solid #dedfd7;
+  border-radius: 6px;
+  color: #30362c;
+  font: inherit;
+  font-weight: 400;
+  line-height: 1.7;
+}
+.ta-plan-inquiry textarea,
+.ta-admin-inquiry textarea {
+  resize: vertical;
+  min-height: 95px;
+}
+.ta-plan-inquiry form > .av-button,
+.ta-admin-inquiry form > .av-button {
+  justify-self: start;
+}
+.ta-offer-summary {
+  padding: 18px;
+  background: #f7f3eb;
+  border: 1px solid #e5ddcf;
+  border-radius: 7px;
+  display: grid;
+  gap: 9px;
+  font-size: 13px;
+}
+.ta-offer-summary > small {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #8b806d;
+}
+.ta-inquiry-note {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #858d79;
+  margin-top: 21px;
+}
+.ta-inquiry-note a,
+.ta-consultations-link {
+  color: #bc430f;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ta-consultations-link {
+  font-size: 12px;
+  justify-self: start;
+}
+.ta-request {
+  border-top: 1px solid #e5e7df;
+  padding-block: 20px;
+}
+.ta-request-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.ta-request-top > span {
+  font-size: 10px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #f3f5ee;
+  color: #778467;
+  white-space: nowrap;
+}
+.ta-request > p,
+.ta-admin-inquiry > p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.9;
+  margin-top: 12px;
+}
+.ta-request > small,
+.ta-admin-inquiry > small {
+  display: block;
+  font-size: 10px;
+  color: #8c967f;
+  margin-top: 10px;
+}
+.ta-request-response {
+  background: #f5f8f0;
+  border: 1px solid #dfe7d5;
+  padding: 16px 18px;
+  border-radius: 6px;
+  margin-top: 16px;
+  font-size: 12px;
+}
+.ta-request-response > p {
+  margin-top: 9px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+}
+.ta-admin-inquiry label {
+  max-width: 720px;
+}
+.ta-admin-inquiry .ta-request-top > h2 {
+  margin: 0;
+}
+.ta-plan-account > .vt-stack > .vt-card {
+  background: #fff;
+  border: 1px solid #e2e2dc;
+  border-radius: 10px;
+  box-shadow: none;
+}
+@media (max-width: 760px) {
+  .ta-plan-account .av-panel-heading {
+    display: block;
+  }
+  .ta-plan-account .av-panel-heading > .av-button {
+    margin-top: 17px;
+  }
+  .ta-wa-account {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .ta-wa-account > div {
+    flex-basis: calc(100% - 45px);
+  }
+  .ta-wa-account > .av-button {
+    margin-left: 37px;
+  }
+  .ta-plan-account h2 {
+    font-size: 19px;
+  }
+  .ta-plan-inquiry form,
+  .ta-admin-inquiry form {
+    gap: 17px;
+  }
+  .ta-plan-inquiry label,
+  .ta-admin-inquiry label {
+    font-size: 12px;
+  }
+  .ta-plan-inquiry select,
+  .ta-plan-inquiry textarea,
+  .ta-admin-inquiry select,
+  .ta-admin-inquiry textarea {
+    font-size: 14px;
+    min-height: 44px;
+  }
+  .ta-plan-inquiry textarea,
+  .ta-admin-inquiry textarea {
+    min-height: 105px;
+  }
+  .ta-request-top {
+    align-items: start;
+  }
+  .ta-request-top > strong {
+    font-size: 13px;
+  }
+  .ta-offer-summary {
+    font-size: 12px;
+    padding: 15px;
+  }
+  .ta-inquiry-note {
+    font-size: 10px;
+  }
+}
