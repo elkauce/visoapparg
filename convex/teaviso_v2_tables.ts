@@ -1,5 +1,11 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+import {
+  signModel,
+  signMaterial,
+  signState,
+  signFields,
+} from "./lib/teaviso_signs";
 
 export const spaceKind = v.union(
   v.literal("home"),
@@ -25,6 +31,23 @@ export const bookingStatus = v.union(
   v.literal("expired"),
 );
 export const teavisoV2Tables = {
+  teavisoSignRequests: defineTable({
+    ownerId: v.id("users"),
+    spaceId: v.id("teavisoSpaces"),
+    spaceName: v.string(),
+    qrToken: v.string(),
+    model: signModel,
+    material: signMaterial,
+    fields: signFields,
+    requestKey: v.string(),
+    status: signState,
+    adminNotes: v.string(),
+    reviewedAt: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_owner", ["ownerId"])
+    .index("by_owner_key", ["ownerId", "requestKey"]),
   // Product membership and profile are separate from the shared login identity.
   // Opening VISO alone never enrolls that user in the Te Aviso customer directory.
   teavisoAccounts: defineTable({

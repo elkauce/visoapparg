@@ -1,180 +1,119 @@
-import {
-  ArrowRight,
-  BellRing,
-  Check,
-  ChevronDown,
-  Download,
-  QrCode,
-  Smartphone,
-  Sparkles,
-} from "lucide-react";
-import { Link, useParams } from "react-router-dom";
-import { makeQrPlate, qrTemplates } from "./qr-templates";
+import { ArrowRight, BellRing, Check, QrCode } from "lucide-react";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { PublicLayout, SolutionCards } from "./ui-v2";
 import { solutions } from "./v2-model";
+import { FeatureCards } from "./feature-previews";
+import { SignCards } from "./sign-pages";
 import "./v2.css";
-const sampleUrl = "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app";
+const groups = [
+  {
+    title: "Personal",
+    text: "QR WhatsApp básico. Adicionales de pago.",
+    to: "/soluciones/whatsapp",
+    detail:
+      "Tu número, un mensaje general y QR descargable sin cargo. Podés sumar mensajes por motivo, llamadas o solicitar un número dedicado según contratación.",
+    action: "Empezar",
+    create: "/panel/nuevo?mode=whatsapp",
+  },
+  {
+    title: "Negocio",
+    text: "Horarios, reservas y atención.",
+    to: "/soluciones/negocios",
+    detail:
+      "Servicios, profesionales y agenda para que tus clientes reserven. Configurá cómo recibir visitas en tu negocio o consultorio.",
+    action: "Ver funciones",
+    create: "/panel/nuevo?mode=negocios",
+  },
+  {
+    title: "Edificio",
+    text: "Unidades y asistencia.",
+    to: "/soluciones/edificios",
+    detail:
+      "Timbres por unidad, residentes y responsables. Abono mensual con configuración asistida; condiciones e importe antes de contratar.",
+    action: "Conocer la opción",
+    create: "/panel/nuevo?mode=edificios",
+  },
+];
 export default function Landing() {
   return (
     <PublicLayout>
-      <main className="av-home">
-        <section className="av-hero">
-          <div className="av-hero-copy">
-            <span className="av-eyebrow">Para tu casa, negocio o edificio</span>
+      <main className="sb-home">
+        <section className="sb-hero">
+          <div>
+            <span className="sb-eyebrow">Timbre digital</span>
             <h1>
-              Tu timbre digital.
+              Tu timbre,
               <br />
-              Fácil de <em>instalar.</em>
+              en un QR.
             </h1>
-            <p>
-              Poné un QR en tu puerta y recibí a tus visitas desde el celular.
-              Ellas escanean. Vos elegís cómo atender.
-            </p>
-            <div className="av-actions">
+            <p>Escanean en tu puerta y te avisan al celular.</p>
+            <div className="sb-actions">
               <Link className="av-button" to="/panel/nuevo">
-                Crear mi timbre <ArrowRight size={18} />
+                Crear mi timbre
               </Link>
-              <a className="av-button av-outline" href="#como-funciona">
-                Ver cómo se instala <ArrowRight size={18} />
-              </a>
+              <Link className="sb-text-link" to="/carteles">
+                Elegir un cartel
+              </Link>
             </div>
-            <small className="av-hero-note">
-              <Check size={16} /> La opción con QR no requiere cableado.
-            </small>
           </div>
-          <div className="av-hero-image">
+          <figure>
             <img
-              src="/images/timbre-qr.png"
-              alt="Ejemplo de placa QR junto a una puerta y aviso de timbre en un celular"
-              width="1122"
-              height="1402"
+              src="/images/cartel-instalado.png"
+              width="1448"
+              height="1086"
               fetchPriority="high"
+              alt="Visualización de una placa vertical Te Aviso instalada junto a una puerta"
             />
-            <span>Imagen ilustrativa · personalizá tu QR</span>
-          </div>
+            <figcaption>
+              Dirección + timbre · Formato vertical compacto · Imagen
+              ilustrativa
+            </figcaption>
+          </figure>
         </section>
-        <section className="av-home-solutions" aria-label="Elegí tu timbre">
-          <SolutionCards />
+        <div className="sb-steps">
+          {["Creá tu timbre", "Colocá el QR", "Recibí visitas"].map(
+            (label, i) => (
+              <div key={label}>
+                <span>0{i + 1}</span>
+                {label}
+              </div>
+            ),
+          )}
+        </div>
+        <section className="sb-section" id="como-funciona">
+          <header>
+            <h2>Así funciona Te Aviso</h2>
+            <p>Agenda, llamadas y mensajes, desde tu panel.</p>
+          </header>
+          <FeatureCards />
+          <p className="sb-note">Funciones disponibles según el plan.</p>
         </section>
-        <section id="como-funciona" className="av-section">
-          <span className="av-eyebrow">Así de simple</span>
-          <h2>Tu timbre, listo en tres pasos.</h2>
-          <div className="av-steps">
-            {[
-              {
-                title: "Creá tu entrada",
-                text: "Elegí cómo querés recibir visitas.",
-                icon: Smartphone,
-              },
-              {
-                title: "Pegá tu QR",
-                text: "Descargalo y colocalo en la puerta.",
-                icon: QrCode,
-              },
-              {
-                title: "Recibí el aviso",
-                text: "Tu visita escanea y vos atendés.",
-                icon: BellRing,
-              },
-            ].map((s, i) => (
-              <article key={s.title}>
-                <span className={`av-step-number step-${i}`}>{i + 1}</span>
-                <div>
-                  <h3>{s.title}</h3>
-                  <p>{s.text}</p>
-                </div>
-                <s.icon />
-              </article>
-            ))}
-          </div>
-          <p className="av-muted">
-            WhatsApp requiere que la visita confirme el envío. Para recibir
-            llamadas en la web, mantené el panel abierto; en Android usá la APK
-            VISO compatible y sus permisos.
+        <section className="sb-section">
+          <header>
+            <h2>Un cartel para tu entrada</h2>
+            <p>Acrílico o aluminio, con tus datos y tu QR.</p>
+          </header>
+          <SignCards />
+          <p className="sb-note">
+            El cartel se compra por separado del plan digital. También podés
+            imprimir tu QR.
           </p>
         </section>
-        <section className="av-section av-qr-section">
-          <div>
-            <span className="av-eyebrow">Una entrada con tu estilo</span>
-            <h2>
-              Elegí el diseño.
-              <br />
-              El QR sigue siendo tuyo.
-            </h2>
-            <p>
-              Actualizá el contacto sin volver a imprimir. Elegí entre cuatro
-              diseños y descargá tu placa para colocarla donde quieras.
-            </p>
-            <Link className="av-button" to="/panel/nuevo">
-              Crear mi entrada <Download size={17} />
+        <section className="sb-section">
+          <header className="sb-heading-row">
+            <h2>Elegí según tu espacio</h2>
+            <Link className="sb-text-link" to="/planes">
+              Consultar planes →
             </Link>
-          </div>
-          <div className="av-plate-grid">
-            {qrTemplates.map((q) => (
-              <article key={q.id}>
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: makeQrPlate(sampleUrl, "Tu entrada", q.id).svg,
-                  }}
-                />
-                <strong>{q.name}</strong>
-              </article>
+          </header>
+          <div className="sb-plan-cards">
+            {groups.map((g) => (
+              <Link key={g.title} to={g.to}>
+                <h3>{g.title}</h3>
+                <p>{g.text}</p>
+              </Link>
             ))}
           </div>
-        </section>
-        <section className="av-section av-ecosystem">
-          <Sparkles />
-          <div>
-            <span className="av-eyebrow">Tu espacio, conectado</span>
-            <h2>Sumá luz y equipos VISO.</h2>
-            <p>
-              Conocé el beneficio Timbre de los equipos participantes y las
-              opciones de luz y acceso en validación.
-            </p>
-          </div>
-          <Link className="av-button av-outline" to="/equipos">
-            Conocer los equipos <ArrowRight size={18} />
-          </Link>
-        </section>
-        <section className="av-section av-faq">
-          <span className="av-eyebrow">Antes de empezar</span>
-          <h2>Todo un poco más simple.</h2>
-          {[
-            [
-              "¿La visita tiene que instalar una app?",
-              "No. Escanea el QR y abre tu entrada desde el navegador. Si elegís WhatsApp, continúa allí para enviarte el mensaje.",
-            ],
-            [
-              "¿Necesito comprar un timbre físico?",
-              "La opción con QR funciona con una placa o impresión. Las luces, controladores y cerraduras son adicionales y requieren compatibilidad e instalación propias.",
-            ],
-            [
-              "¿Puedo usarlo en una casa o departamento?",
-              "Sí. Podés crear una entrada individual. Los edificios también tienen una opción con departamentos, residentes y asistencia.",
-            ],
-            [
-              "¿Qué es gratuito?",
-              "El QR a tu propio WhatsApp, su mensaje general y los diseños descargables. Mensajes preguardados y número dedicado son mejoras de pago. Reservas y edificios requieren el plan correspondiente.",
-            ],
-            [
-              "¿Qué pasa con mi cuenta VISO?",
-              "Es la misma cuenta. Conservás tus timbres y las licencias vigentes; no hace falta registrarte otra vez.",
-            ],
-          ].map(([q, a]) => (
-            <details key={q}>
-              <summary>
-                {q}
-                <ChevronDown size={18} />
-              </summary>
-              <p>{a}</p>
-            </details>
-          ))}
-        </section>
-        <section className="av-final">
-          <h2>La próxima visita empieza acá.</h2>
-          <Link className="av-button" to="/panel/nuevo">
-            Crear mi timbre <ArrowRight size={18} />
-          </Link>
         </section>
       </main>
     </PublicLayout>
@@ -183,29 +122,36 @@ export default function Landing() {
 export function Plans() {
   return (
     <PublicLayout>
-      <main className="av-page">
-        <header className="av-page-heading">
-          <span className="av-eyebrow">Elegí cómo recibir</span>
-          <h1>
-            Un timbre digital para
-            <br />
-            tu forma de <em>recibir.</em>
-          </h1>
-          <p>Empezá con tu QR y elegí las funciones que necesitás.</p>
+      <main className="sb-page">
+        <header>
+          <span className="sb-eyebrow">Planes del servicio</span>
+          <h1>Elegí tu timbre</h1>
+          <p>Una opción para cada lugar.</p>
         </header>
-        <SolutionCards expanded />
-        <section className="av-callout">
-          <BellRing />
-          <div>
-            <h2>Una cuenta, tus espacios conectados.</h2>
-            <p>
-              Los importes, límites y condiciones de cada oferta se muestran
-              antes de contratar. El número dedicado tiene configuración y
-              mantenimiento según las condiciones del servicio.
-            </p>
-          </div>
+        <div className="sb-plan-details">
+          {groups.map((g) => (
+            <article key={g.title} className="av-card">
+              <h2>{g.title}</h2>
+              <p>{g.detail}</p>
+              <Link className="av-button av-outline" to={g.create}>
+                {g.action}
+              </Link>
+              <Link className="sb-text-link" to={g.to}>
+                Qué incluye →
+              </Link>
+            </article>
+          ))}
+        </div>
+        <section className="av-card sb-contract-info">
+          <h2>Antes de contratar</h2>
+          <p>
+            El QR WhatsApp básico es gratuito. Las funciones adicionales
+            requieren una licencia compatible; las tarifas, límites y
+            condiciones se muestran antes de confirmar la contratación.
+          </p>
+          <p>El cartel físico y el envío se presupuestan por separado.</p>
           <Link className="av-button" to="/panel/plan">
-            Ver ofertas disponibles <ArrowRight size={17} />
+            Ver ofertas de mi cuenta
           </Link>
         </section>
       </main>
@@ -285,74 +231,7 @@ export function Solutions() {
   );
 }
 export function Equipment() {
-  return (
-    <PublicLayout>
-      <main className="av-page">
-        <header className="av-page-heading">
-          <span className="av-eyebrow">Tu entrada, conectada</span>
-          <h1>
-            Equipos elegidos.
-            <br />
-            Tu espacio, <em>conectado.</em>
-          </h1>
-          <p>
-            El catálogo de equipos oficiales se habilita cuando cada combinación
-            está validada. Consultá el estado antes de comprar.
-          </p>
-        </header>
-        <div className="av-equipment-grid">
-          <article className="av-card">
-            <QrCode size={38} />
-            <span className="av-tag">Disponible</span>
-            <h2>Tu placa QR</h2>
-            <p>
-              Creala y descargala desde tu cuenta. La instalación de la placa no
-              requiere cableado.
-            </p>
-            <Link className="av-button" to="/panel/nuevo">
-              Crear mi placa
-            </Link>
-          </article>
-          <article className="av-card">
-            <Sparkles size={38} />
-            <span className="av-tag">En evaluación</span>
-            <h2>Indicador de luz RGB</h2>
-            <p>
-              Tapo L535E con Matter es una candidata para pruebas. Su
-              compatibilidad con VISO y la variante regional todavía deben
-              validarse.
-            </p>
-            <Link to="/panel/dispositivos">Ver estado de dispositivos ↗</Link>
-          </article>
-          <article className="av-card">
-            <BellRing size={38} />
-            <span className="av-tag">Selección pendiente</span>
-            <h2>Kit de apertura</h2>
-            <p>
-              Controlador, cerradura y sensor elegidos según la puerta. Requiere
-              validación e instalación; escanear el QR no autoriza la apertura.
-            </p>
-            <Link to="/panel/dispositivos">Consultar el kit ↗</Link>
-          </article>
-        </div>
-        <div className="av-callout">
-          <p>
-            El beneficio Timbre de un equipo VISO depende de una compra elegible
-            y de las condiciones publicadas. Comprar cualquier luz o producto
-            afiliado no lo activa.
-          </p>
-          <a
-            className="av-button av-outline"
-            href="https://viso-deck-android.vercel.app/marketplace?category=hardware"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Explorar hardware VISO ↗
-          </a>
-        </div>
-      </main>
-    </PublicLayout>
-  );
+  return <Navigate to="/carteles" replace />;
 }
 export function Privacy() {
   return (

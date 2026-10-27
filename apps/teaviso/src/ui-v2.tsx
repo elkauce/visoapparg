@@ -5,10 +5,13 @@ import { solutions } from "./v2-model";
 export function Brand() {
   return (
     <Link className="av-brand" to="/" aria-label="Te Aviso, inicio">
-      <img src="/brand/viso-icon.png" alt="" width="44" height="44" />
-      <span>
-        Te Aviso<small>por VISO</small>
+      <span className="av-mark" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+        <i />
       </span>
+      <span>Te Aviso</span>
     </Link>
   );
 }
@@ -23,11 +26,10 @@ export function PublicLayout({ children }: { children: ReactNode }) {
           aria-label="Principal"
           onClick={() => setOpen(false)}
         >
-          <NavLink to="/soluciones">Soluciones</NavLink>
           <a href="/#como-funciona">Cómo funciona</a>
-          <NavLink to="/equipos">Equipos</NavLink>
+          <NavLink to="/carteles">Carteles</NavLink>
           <NavLink to="/planes">Planes</NavLink>
-          <Link className="av-button" to="/panel">
+          <Link className="av-button av-outline" to="/panel">
             Ingresar <ArrowRight size={16} />
           </Link>
         </nav>
@@ -43,18 +45,12 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       {children}
       <footer className="av-footer">
         <Brand />
-        <p>Tu timbre digital. Fácil de instalar.</p>
+        <p>Tu timbre, en un QR.</p>
         <nav aria-label="Más información">
+          <Link to="/carteles">Carteles</Link>
           <Link to="/planes">Planes</Link>
           <Link to="/privacidad">Privacidad y uso</Link>
           <Link to="/panel">Mi cuenta</Link>
-          <a
-            href="https://viso-deck-android.vercel.app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Conocé VISO ↗
-          </a>
         </nav>
       </footer>
     </div>

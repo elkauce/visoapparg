@@ -169,7 +169,7 @@ export function EntryPortal() {
           </>
         )}
       </main>
-      <footer>Te Aviso · por VISO</footer>
+      <footer>Te Aviso</footer>
     </div>
   );
 }
@@ -670,7 +670,7 @@ export function BookingReceipt() {
           </>
         )}
       </main>
-      <footer>Te Aviso · por VISO</footer>
+      <footer>Te Aviso</footer>
     </div>
   );
 }

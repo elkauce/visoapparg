@@ -14,13 +14,13 @@ Desde la raíz del repositorio, instalar las dependencias y ejecutar:
 - `npm test`: pruebas de ambos productos y backend.
 
 No copiar esta carpeta sola sin extraer también los componentes y backend que
-comparte. El informe actual está en [Te Aviso 2](../../docs/te-aviso-v2.md).
+comparte. El informe actual está en [la entrega actual](../../docs/te-aviso-sober-release.md).
 
 ## Identidad
 
-**Te Aviso**, firma **por VISO**, mensaje **Tu timbre digital. Fácil de instalar.**
+**Te Aviso**, sin firma «por VISO». Mensaje **Tu timbre, en un QR.**
 Símbolo original de cuatro colores `public/brand/viso-icon.png`. Fondo `#F5F3EF`,
-blanco, grafito y naranja `#E84300`. El latido respeta movimiento reducido.
+blanco, grafito y naranja `#E84300`, tipografía Arial y controles sobrios.
 
 ## Rutas principales
 
@@ -79,5 +79,7 @@ conserva su mensaje gratuito. Business con número dedicado requiere preparació
 manual y pago verificado antes de asignación; guardar una oferta no activa cobros.
 Los equipos y cerraduras siguen pendientes de validación; no hay control físico.
 
-Ver [entrega y comprobaciones](../../docs/te-aviso-v2.md) y
-[validación de producción](../../docs/validation/te-aviso-v2-production.json).
+Ver [entrega y comprobaciones](../../docs/te-aviso-sober-release.md) y
+[validación de producción](../../docs/validation/te-aviso-sober-production.json).
+
+Carteles: `/carteles`, `/panel/carteles` y `/panel/admin/carteles`. Se reciben solicitudes de presupuesto; no se activaron cobros o fabricación. [Detalle de la entrega](../../docs/te-aviso-sober-release.md).

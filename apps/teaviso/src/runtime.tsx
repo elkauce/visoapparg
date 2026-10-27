@@ -45,6 +45,8 @@ import { api } from "@/convex/_generated/api";
 import { convexUrl } from "./config";
 import AccountPanel from "./account-panel";
 import AdminCustomers from "./admin-customers";
+import { AdminSigns, MySigns, SignCatalog, SignPage } from "./sign-pages";
+import { FeaturePage } from "./feature-previews";
 import Landing, { Equipment, Plans, Privacy, Solutions } from "./main";
 import {
   Agenda,
@@ -64,6 +66,7 @@ import BusinessPanel, { BusinessAdmin } from "./business";
 import "../../../src/index.css";
 import "./style.css";
 import "./panel.css";
+import "./sober.css";
 
 const Digital = lazy(() =>
   import("@/pages/timbre/page").then((module) => ({
@@ -144,6 +147,7 @@ function Shell({ children }: { children: ReactNode }) {
     { to: "/panel/agenda", label: "Agenda", icon: CalendarDays },
     { to: "/panel/portal", label: "Portal de visitas", icon: MessageCircle },
     { to: "/panel/llamadas", label: "Llamadas e integrantes", icon: BellRing },
+    { to: "/panel/carteles", label: "Mis carteles", icon: QrCode },
     { to: "/panel/plan", label: "Mi plan", icon: ShieldCheck },
     { to: "/panel/cuenta", label: "Mi cuenta", icon: Settings2 },
   ];
@@ -179,6 +183,13 @@ function Shell({ children }: { children: ReactNode }) {
               <NavLink to="/panel/admin" end onClick={() => setOpen(false)}>
                 <Users size={19} />
                 Usuarios y timbres
+              </NavLink>
+              <NavLink
+                to="/panel/admin/carteles"
+                onClick={() => setOpen(false)}
+              >
+                <QrCode size={19} />
+                Carteles y presupuestos
               </NavLink>
               <NavLink to="/panel/admin/planes" onClick={() => setOpen(false)}>
                 <ShieldCheck size={19} />
@@ -290,7 +301,7 @@ function DigitalPanel() {
 function AdminPanel({
   section = "customers",
 }: {
-  section?: "customers" | "commercial" | "business";
+  section?: "customers" | "commercial" | "business" | "signs";
 }) {
   const account = useQuery(api.teaviso_accounts.profile, {});
   if (account === undefined) return <p role="status">Revisando permisos…</p>;
@@ -302,6 +313,7 @@ function AdminPanel({
       </section>
     );
   if (section === "customers") return <AdminCustomers />;
+  if (section === "signs") return <AdminSigns />;
   return (
     <div className="av-stack">
       <header className="av-panel-heading">
@@ -351,6 +363,18 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Landing />} />
                   <Route path="/planes" element={<Plans />} />
+                  <Route path="/funciones/:feature" element={<FeaturePage />} />
+                  <Route path="/carteles" element={<SignCatalog />} />
+                  <Route path="/carteles/:model" element={<SignPage />} />
+                  <Route path="/panel/carteles" element={panel(<MySigns />)} />
+                  <Route
+                    path="/panel/carteles/:model"
+                    element={panel(<SignPage owner />)}
+                  />
+                  <Route
+                    path="/panel/admin/carteles"
+                    element={panel(<AdminPanel section="signs" />)}
+                  />
                   <Route path="/soluciones" element={<Solutions />} />
                   <Route path="/soluciones/:solution" element={<Solutions />} />
                   <Route path="/equipos" element={<Equipment />} />

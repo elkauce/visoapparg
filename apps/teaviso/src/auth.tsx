@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Link } from "react-router-dom";
+import { Brand } from "./ui-v2";
 
 export default function Auth() {
   const { signIn } = useAuthActions();
@@ -69,12 +69,7 @@ export default function Auth() {
   }
   return (
     <main className="tea-auth">
-      <Link className="brand" to="/">
-        <span className="tea-original-symbol" aria-hidden="true">
-          <img src="/brand/viso-logo.png" alt="" />
-        </span>
-        Te Aviso
-      </Link>
+      <Brand />
       <section className="tea-card">
         <span className="eyebrow">TU PUERTA, CONECTADA</span>
         <h1>{flow === "signUp" ? "Creá tu cuenta" : "Qué bueno verte."}</h1>

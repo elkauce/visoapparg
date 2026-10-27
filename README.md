@@ -2,7 +2,7 @@
 
 ## Te Aviso · web independiente
 
-[Abrir Te Aviso](https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/) · [Entrega y límites](docs/te-aviso-v2.md). Timbre digital con QR, WhatsApp, portal de visitas y agenda de reservas; comparte cuentas y servicios con VISO. El frontend y la APK VISO se publican por separado.
+[Abrir Te Aviso](https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/) · [Entrega y límites](docs/te-aviso-sober-release.md). Timbre digital con QR, WhatsApp, portal de visitas y agenda de reservas; comparte cuentas y servicios con VISO. El frontend y la APK VISO se publican por separado.
 
 ## Historial: versión 1.16
 
