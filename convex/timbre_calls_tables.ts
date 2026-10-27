@@ -30,6 +30,8 @@ export const timbreCallTables = {
     status: timbreCallStatus,
     visitorTokenHash: v.string(),
     visitorNonceHash: v.string(),
+    visitorLabel: v.optional(v.string()),
+    visitorMessage: v.optional(v.string()),
     createdAt: v.number(),
     expiresAt: v.number(),
     visitorSeenAt: v.number(),

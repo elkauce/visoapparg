@@ -205,8 +205,8 @@ export function TimbreWorkspace() {
                       licenseId: String(
                         form.get("license"),
                       ) as Id<"timbreLicenses">,
-                      timezone:
-                        Intl.DateTimeFormat().resolvedOptions().timeZone,
+                      timezone: new URLSearchParams(window.location.search).get("zona") || Intl.DateTimeFormat().resolvedOptions().timeZone,
+                      teavisoSpaceId: (new URLSearchParams(window.location.search).get("teavisoSpace") || undefined) as Id<"teavisoSpaces"> | undefined,
                     });
                     setSelection(id);
                   }, "Timbre creado");

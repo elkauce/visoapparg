@@ -98,7 +98,7 @@ export const savePlan = mutation({
     const existing = args.id ? await ctx.db.get("timbrePlans", args.id) : null;
     if (args.id && !existing) marketplaceError("No se encontró el plan.");
     const { id: _id, ...fields } = args; void _id;
-    const values = { ...fields, name: cleanMarketText(args.name, 120, "Nombre"), description: cleanMarketText(args.description, 3000, "Descripción"),
+    const values = { ...fields, features: {...args.features, bookings:args.features.bookings ?? existing?.features.bookings, templates:args.features.templates ?? existing?.features.templates}, name: cleanMarketText(args.name, 120, "Nombre"), description: cleanMarketText(args.description, 3000, "Descripción"),
       sellerId: existing?.sellerId ?? admin._id, updatedAt: Date.now() };
     if (existing) { await ctx.db.replace("timbrePlans", existing._id, { ...values, createdAt: existing.createdAt }); return existing._id; }
     return ctx.db.insert("timbrePlans", { ...values, createdAt: Date.now() });

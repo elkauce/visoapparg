@@ -1,3 +1,4 @@
+import { locationUsage, linkedSpace, linkedSite } from "./lib/teaviso_quota";
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
@@ -70,14 +71,17 @@ export const workspace = query({ args: {}, handler: async (ctx) => {
 } });
 
 export const createSite = mutation({
-  args: { name: v.string(), kind: timbreSiteKind, licenseId: v.id("timbreLicenses"), timezone: v.string() },
+  args: { name: v.string(), kind: timbreSiteKind, licenseId: v.id("timbreLicenses"), timezone: v.string(), teavisoSpaceId: v.optional(v.id("teavisoSpaces")) },
   handler: async (ctx, args) => {
     const user = await requireCurrentUser(ctx);
     const license = await requireValidTimbreLicense(ctx, args.licenseId, user._id);
     if (args.kind === "building" && !license.features.buildings) timbreError("Tu licencia no incluye edificios.");
     if (args.kind === "office" && !license.features.offices) timbreError("Tu licencia no incluye oficinas.");
-    const existing = await ctx.db.query("timbreSites").withIndex("by_license", (q) => q.eq("licenseId", license._id)).take(101);
-    if (existing.length >= Math.min(license.limits.maxSites, 100)) timbreError("Alcanzaste el límite de Timbres de esta licencia.");
+    const space=args.teavisoSpaceId?await ctx.db.get("teavisoSpaces",args.teavisoSpaceId):null;
+    if(args.teavisoSpaceId&&(!space||space.ownerId!==user._id))timbreError("No tenés acceso a esta entrada.");
+    if(space&&await linkedSite(ctx,space))timbreError("Esta entrada ya tiene un timbre digital vinculado.");
+    if(space?.kind==="building"&&args.kind!=="building")timbreError("Elegí el tipo edificio para esta entrada.");
+    if (await locationUsage(ctx,user._id,license._id,space?._id) >= Math.min(license.limits.maxSites, 100)) timbreError("Alcanzaste el límite de Timbres de esta licencia.");
     const now = Date.now();
     const siteId = await ctx.db.insert("timbreSites", {
       ownerId: user._id, licenseId: license._id, name: text(args.name), kind: args.kind,
@@ -88,6 +92,7 @@ export const createSite = mutation({
       fallbackAfterSeconds: 20, createdAt: now, updatedAt: now,
     });
     await ctx.db.insert("timbreMembers", { siteId, userId: user._id, role: "owner", unitIds: [], canReceive: true, createdAt: now, updatedAt: now });
+    if(space)await ctx.db.patch("teavisoSpaces",space._id,{timbreSiteId:siteId,licenseId:license._id,revision:space.revision+1,updatedAt:now});
     await recordTimbreAudit(ctx, siteId, user._id, "site.created", siteId);
     return siteId;
   },
@@ -143,18 +148,19 @@ export const changeSiteLicense = mutation({ args: { siteId: v.id("timbreSites"),
   const license = await requireValidTimbreLicense(ctx, args.licenseId, user._id);
   if (site.kind === "building" && !license.features.buildings) timbreError("La licencia nueva no incluye edificios.");
   if (site.kind === "office" && !license.features.offices) timbreError("La licencia nueva no incluye oficinas.");
-  const [sites, qrs, members, units] = await Promise.all([
-    ctx.db.query("timbreSites").withIndex("by_license", (q) => q.eq("licenseId", license._id)).take(101),
+  const [qrs, members, units] = await Promise.all([
     ctx.db.query("timbreQrs").withIndex("by_site_revoked", (q) => q.eq("siteId", site._id).eq("revokedAt", undefined)).take(1001),
     siteMembers(ctx, site._id),
     ctx.db.query("timbreUnits").withIndex("by_site_enabled", (q) => q.eq("siteId", site._id).eq("enabled", true)).take(1001),
   ]);
-  if (sites.filter((row) => row._id !== site._id).length >= Math.min(license.limits.maxSites, 100) ||
+  const associated=await linkedSpace(ctx,user._id,site._id);
+  if (await locationUsage(ctx,user._id,license._id,associated?._id,site._id) >= Math.min(license.limits.maxSites, 100) ||
       qrs.length > Math.min(license.limits.maxQrs, 1000) || members.length > Math.min(license.limits.maxMembers, 1000) ||
       units.length > Math.min(license.limits.maxUnits, 1000) || (site.kind === "home" && members.length > 1 && !license.features.families)) {
     timbreError("La licencia nueva no alcanza para los QR, integrantes o unidades de este Timbre. Elegí un plan compatible o reducí la configuración.");
   }
   await ctx.db.patch("timbreSites", site._id, { licenseId: license._id, updatedAt: Date.now() });
+  if(associated)await ctx.db.patch("teavisoSpaces",associated._id,{licenseId:license._id,revision:associated.revision+1,updatedAt:Date.now()});
   await recordTimbreAudit(ctx, site._id, user._id, "site.license_changed", license._id);
 } });
 
@@ -174,6 +180,8 @@ export const createQr = mutation({
     const now = Date.now();
     const qrId = await ctx.db.insert("timbreQrs", { siteId: site._id, ...(args.unitId ? { unitId: args.unitId } : {}),
       label: text(args.label), token: newTimbreToken(), enabled: true, createdAt: now, updatedAt: now });
+    const associated=await linkedSpace(ctx,site.ownerId,site._id);
+    if(associated&&!associated.timbreQrId&&!args.unitId)await ctx.db.patch("teavisoSpaces",associated._id,{timbreQrId:qrId,revision:associated.revision+1,updatedAt:now});
     await recordTimbreAudit(ctx, site._id, user._id, "qr.created", qrId);
     return qrId;
   },

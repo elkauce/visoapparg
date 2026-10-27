@@ -198,6 +198,7 @@ function AuthenticatedIncoming() {
             {visible.siteName}
             {pending.length > 1 ? ` · ${pending.length} llamadas` : ""}
           </p>
+          {visible.visitorMessage && <p>{visible.visitorMessage}<small> · Motivo indicado por la visita</small></p>}
         </div>
       </div>
       <div className="vt-call-actions">

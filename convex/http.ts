@@ -313,4 +313,20 @@ http.route({
   }),
 });
 
+// Account-owned logos for Te Aviso, separate from creator Marketplace uploads.
+http.route({path:"/teaviso/image",method:"OPTIONS",handler:httpAction(async()=>new Response(null,{status:204,headers:{...JSON_HEADERS,"Access-Control-Allow-Methods":"POST, OPTIONS","Access-Control-Allow-Headers":"Authorization, Content-Type"}}))});
+http.route({path:"/teaviso/image",method:"POST",handler:httpAction(async(ctx,request)=>{
+  let access;
+  try{access=await ctx.runQuery(internal.teaviso_spaces.imageAccess,{});}catch{return new Response(JSON.stringify({error:"Debes iniciar sesión"}),{status:401,headers:JSON_HEADERS});}
+  if(!access.allowed)return new Response(JSON.stringify({error:"Alcanzaste el límite de imágenes."}),{status:413,headers:JSON_HEADERS});
+  const type=request.headers.get("Content-Type")?.split(";")[0].toLowerCase()??"";
+  if(!["image/png","image/jpeg","image/webp","image/gif"].includes(type))return new Response(JSON.stringify({error:"Usá PNG, JPG, WebP o GIF."}),{status:400,headers:JSON_HEADERS});
+  const reader=request.body?.getReader();if(!reader)return new Response(null,{status:400,headers:JSON_HEADERS});
+  const chunks:ArrayBuffer[]=[];let size=0;
+  while(true){const part=await reader.read();if(part.done)break;size+=part.value.byteLength;if(size>2_000_000){await reader.cancel();return new Response(JSON.stringify({error:"Usá una imagen de hasta 2 MB."}),{status:413,headers:JSON_HEADERS});}chunks.push(part.value.slice().buffer);}
+  const blob=new Blob(chunks,{type});if(!matchesMarketplaceBytes(new Uint8Array(await blob.slice(0,64).arrayBuffer()),type))return new Response(JSON.stringify({error:"El contenido no corresponde a una imagen admitida."}),{status:400,headers:JSON_HEADERS});
+  const storageId=await ctx.storage.store(blob);
+  try{const imageId=await ctx.runMutation(internal.teaviso_spaces.recordUploadedImage,{storageId,contentType:type});return new Response(JSON.stringify({imageId}),{status:200,headers:JSON_HEADERS});}catch(error){await ctx.storage.delete(storageId);throw error;}
+})});
+
 export default http;

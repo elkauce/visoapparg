@@ -73,7 +73,7 @@ function mark(x: number, y: number) {
   return `<svg x="${x}" y="${y}" width="45" height="45" viewBox="0 0 64 64"><rect x="1" y="1" width="62" height="62" rx="19" fill="#17191d"/><rect x="8" y="8" width="22" height="22" rx="7" fill="#00d562"/><rect x="34" y="8" width="22" height="22" rx="7" fill="#ff303b"/><rect x="8" y="34" width="22" height="22" rx="7" fill="#ffd51b"/><rect x="34" y="34" width="22" height="22" rx="7" fill="#ff7300"/></svg>`;
 }
 function brand(x: number, y: number, color: string) {
-  return `${mark(x, y - 35)}<text x="${x + 60}" y="${y}" font-size="35" font-weight="750" letter-spacing="-1.5" fill="${color}">Te a Viso</text>`;
+  return `${mark(x, y - 35)}<text x="${x + 60}" y="${y}" font-size="35" font-weight="750" letter-spacing="-1.5" fill="${color}">Te Aviso</text>`;
 }
 function qrGraphic(url: string, x: number, y: number, size: number) {
   const qr = QRCode.create(url, { errorCorrectionLevel: "H" });
@@ -104,7 +104,7 @@ export function makeQrPlate(
   if (style.id === "urban")
     content = `<rect width="1200" height="800" rx="36" fill="#f5f3ef"/><path d="M0 0h560v800H0z" fill="#17191d"/>${brand(60, 105, "#fff")}<text x="60" y="285" font-size="76" font-weight="700" letter-spacing="-4" fill="#fff">Tu visita.</text><text x="60" y="375" font-size="76" font-weight="700" letter-spacing="-4" fill="#ffbf8f">Un aviso.</text><text x="60" y="466" font-size="24" fill="#dbc9bd">Escaneá para comunicarte.</text>${labelLines(label, 60, 650, "#fff", 25)}${qrGraphic(url, 625, 152, 510)}<text x="880" y="725" text-anchor="middle" font-size="18" letter-spacing="3" fill="#e84300">ESCANEÁ PARA AVISAR</text>`;
   return {
-    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${style.width / 10}mm" height="${style.height / 10}mm" viewBox="0 0 ${style.width} ${style.height}" role="img" aria-label="${escape(`Placa ${style.name}: ${label}`)}"><title>${escape(`Te a Viso · ${label}`)}</title><g font-family="Arial, Helvetica, sans-serif" fill="#17191d">${content}</g></svg>`,
+    svg: `<svg xmlns="http://www.w3.org/2000/svg" width="${style.width / 10}mm" height="${style.height / 10}mm" viewBox="0 0 ${style.width} ${style.height}" role="img" aria-label="${escape(`Placa ${style.name}: ${label}`)}"><title>${escape(`Te Aviso · ${label}`)}</title><g font-family="Arial, Helvetica, sans-serif" fill="#17191d">${content}</g></svg>`,
     width: style.width,
     height: style.height,
   };

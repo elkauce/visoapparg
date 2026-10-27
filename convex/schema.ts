@@ -24,9 +24,11 @@ import {
 } from "./lib/marketplace_validation";
 
 import { teavisoTables } from "./teaviso_tables";
+import { teavisoV2Tables } from "./teaviso_v2_tables";
 
 export default defineSchema({
   ...teavisoTables,
+  ...teavisoV2Tables,
   ...authTables,
   ...timbreTables,
   ...timbreCommerceTables,

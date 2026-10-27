@@ -395,6 +395,7 @@ export function TimbreCallSession({
         <div>
           <span className="vt-eyebrow">{brand.name}</span>
           <h1>{session.siteName}</h1>
+          {session.visitorMessage && <p>{session.visitorMessage}<small> · Motivo indicado por la visita</small></p>}
         </div>
         <span className="vt-status" role="status">
           {statusText}

@@ -5,6 +5,7 @@ import { timbreQrDesign } from "./timbre_tables";
 export const timbreOfferCode = v.union(v.literal("digital"), v.literal("personalizado"), v.literal("hardware"), v.literal("edificios"));
 export const timbrePeriod = v.union(v.literal("monthly"), v.literal("yearly"), v.literal("one_time"));
 export const timbreFeatures = v.object({
+  bookings: v.optional(v.boolean()), templates: v.optional(v.boolean()),
   audio: v.boolean(), video: v.boolean(), chat: v.boolean(), messages: v.boolean(),
   families: v.boolean(), buildings: v.boolean(), offices: v.boolean(), access: v.boolean(),
 });

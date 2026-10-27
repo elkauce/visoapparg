@@ -377,7 +377,7 @@ export function WhatsappVisitor() {
         <span className="tea-original-symbol" aria-hidden="true">
           <img src="/brand/viso-logo.png" alt="" />
         </span>
-        Te a Viso
+        Te Aviso
       </Link>
       <section className="tea-card">
         {contact === undefined ? (
@@ -391,7 +391,7 @@ export function WhatsappVisitor() {
               Abrir WhatsApp
             </a>
             <small>
-              Se abrirá el chat del lugar. No necesitás una cuenta en Te a Viso.
+              Se abrirá el chat del lugar. No necesitás una cuenta en Te Aviso.
             </small>
           </>
         ) : (

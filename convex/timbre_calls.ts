@@ -34,6 +34,7 @@ import {
   validateSignal,
 } from "./lib/timbre_rtc";
 import { timbreCallMode, timbreSignalKind } from "./timbre_calls_tables";
+import { teavisoPortalReason } from "./teaviso_spaces";
 
 type ReadCtx = QueryCtx | MutationCtx;
 type Call = Doc<"timbreCalls">;
@@ -317,10 +318,16 @@ export const startCall = mutation({
     mode: timbreCallMode,
     unitId: v.optional(v.id("timbreUnits")),
     visitorNonce: v.string(),
+    portalToken: v.optional(v.string()),
+    templateId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { qr, site, unit, effectiveFeatures, availability } =
       await resolvePublicQr(ctx, args.qrToken, args.unitId);
+    if (Boolean(args.portalToken) !== Boolean(args.templateId)) unavailable("Revisá el motivo de la visita.");
+    const visitorReason = args.portalToken && args.templateId
+      ? await teavisoPortalReason(ctx, args.portalToken, args.templateId, qr._id)
+      : {};
     if (!availability.available)
       unavailable(
         site.absenceMessage || "El Timbre no está atendiendo en este momento.",
@@ -367,6 +374,7 @@ export const startCall = mutation({
       status: "ringing",
       visitorTokenHash: await hashCapability(visitorToken),
       visitorNonceHash: nonceHash,
+      ...visitorReason,
       createdAt: now,
       expiresAt,
       visitorSeenAt: now,
@@ -414,7 +422,8 @@ export const session = query({
     const { call, role, userId, site, features } = await participant(ctx, args);
     return {
       callId: call._id,
-      siteName: site!.name,
+      siteName: site!.name + (call.visitorLabel ? ` · ${call.visitorLabel}` : ""),
+      visitorLabel:call.visitorLabel, visitorMessage:call.visitorMessage,
       mode: call.mode,
       status: alive(call) && expired(call) ? ("ended" as const) : call.status,
       role,
@@ -592,7 +601,8 @@ export const incoming = query({
         result.push({
           callId: call._id,
           siteId: site._id,
-          siteName: site.name,
+          siteName: site.name + (call.visitorLabel ? ` · ${call.visitorLabel}` : ""),
+          visitorLabel:call.visitorLabel, visitorMessage:call.visitorMessage,
           mode: call.mode,
           status: call.status,
           createdAt: call.createdAt,

@@ -73,7 +73,7 @@ export default function Auth() {
         <span className="tea-original-symbol" aria-hidden="true">
           <img src="/brand/viso-logo.png" alt="" />
         </span>
-        Te a Viso
+        Te Aviso
       </Link>
       <section className="tea-card">
         <span className="eyebrow">TU PUERTA, CONECTADA</span>

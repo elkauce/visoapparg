@@ -72,7 +72,7 @@ beforeEach(() => {
   f.request.mockResolvedValue("request");
   f.template.mockResolvedValue(null);
 });
-describe("Te a Viso own account", () => {
+describe("Te Aviso own account", () => {
   it("signs in with existing VISO credentials and normalizes email", async () => {
     mount(<Auth />);
     await userEvent.type(

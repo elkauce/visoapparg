@@ -17,7 +17,7 @@ export const publicOrigin = () => {
         ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)
       ))
   )
-    throw new Error("Configurá la dirección pública de Te a Viso.");
+    throw new Error("Configurá la dirección pública de Te Aviso.");
   return url.origin;
 };
 export const qrUrl = (token: string) => `${publicOrigin()}/w/${token}`;

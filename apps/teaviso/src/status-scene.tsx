@@ -14,7 +14,7 @@ export default function StatusScene({ children }: { children: ReactNode }) {
     <div
       className="scene tea-status-scene"
       role="img"
-      aria-label="Demostración de Te a Viso con latidos y los colores de los estados VISO"
+      aria-label="Demostración de Te Aviso con latidos y los colores de los estados VISO"
     >
       <style>{cycle}</style>
       {children}

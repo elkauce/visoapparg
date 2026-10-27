@@ -1,6 +1,10 @@
 # VISO
 
-## Versión publicada 1.16
+## Te Aviso · web independiente
+
+[Abrir Te Aviso](https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/) · [Entrega y límites](docs/te-aviso-v2.md). Timbre digital con QR, WhatsApp, portal de visitas y agenda de reservas; comparte cuentas y servicios con VISO. El frontend y la APK VISO se publican por separado.
+
+## Historial: versión 1.16
 
 [Abrir VISO](https://viso-deck-android.vercel.app/) · [Descargar APK 1.16.0](https://raw.githubusercontent.com/elkauce/visoapparg/28a928e8c9d1928ba3eb2e8df0f52e0673138272/downloads/VISO-Deck-1.16.0-debug.apk) · [Entrega y verificaciones](docs/timbre-release-1.16.md).
 

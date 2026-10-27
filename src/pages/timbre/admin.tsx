@@ -13,7 +13,7 @@ import "./admin.css";
 
 type Overview = FunctionReturnType<typeof api.timbre_commerce.adminOverview>;
 type Plan = Doc<"timbrePlans">;
-const featureNames = { audio: "Audio", video: "Video", chat: "Chat", messages: "Mensajes de ausencia", families: "Familiares", buildings: "Edificios", offices: "Oficinas", access: "Control de acceso compatible" } as const;
+const featureNames = { bookings: "Agenda y reservas Te Aviso", templates: "Portal de mensajes Te Aviso", audio: "Audio", video: "Video", chat: "Chat", messages: "Mensajes de ausencia", families: "Familiares", buildings: "Edificios", offices: "Oficinas", access: "Control de acceso compatible" } as const;
 const limitNames = { maxSites: "Timbres por licencia", maxQrs: "QR por Timbre", maxMembers: "Integrantes por Timbre", maxUnits: "Unidades por Timbre" } as const;
 const statusNames: Record<Doc<"timbrePlateOrders">["status"], string> = { draft: "Borrador", pending_payment: "Pago pendiente", paid: "Pagado", production: "En producción", ready: "Listo para despacho", shipped: "Despachado", delivered: "Entregado", cancelled: "Cancelado", refunded: "Reintegrado" };
 const licenseNames: Record<Doc<"timbreLicenses">["status"], string> = { pending_payment: "Pago pendiente", active: "Activa", past_due: "Pago vencido", suspended: "Suspendida", expired: "Vencida", revoked: "Revocada" };

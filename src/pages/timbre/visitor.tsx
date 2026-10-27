@@ -1,7 +1,7 @@
 import { useTimbreBrand } from "@/lib/timbre-brand";
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import {
   BellRing,
   CheckCircle2,
@@ -29,6 +29,7 @@ type VisitorCall = {
 };
 
 function VisitorContent({ qrToken }: { qrToken: string }) {
+  const [portalParams] = useSearchParams();
   const qr = useQuery(api.timbre.publicQr, { qrToken });
   const rtc = useQuery(
     api.timbre_calls.rtcAvailability,
@@ -135,6 +136,7 @@ function VisitorContent({ qrToken }: { qrToken: string }) {
         mode,
         unitId: target,
         visitorNonce: visitorNonce(),
+        ...(portalParams.get("portal") && portalParams.get("motivo") ? {portalToken:portalParams.get("portal")!, templateId:portalParams.get("motivo")!} : {}),
       });
       if (!alive.current) {
         stopTimbreMedia(captured);
