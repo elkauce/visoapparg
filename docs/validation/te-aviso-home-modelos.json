@@ -1,0 +1,67 @@
+{
+  "status": "local-design-only",
+  "productionChanged": false,
+  "backendConnected": false,
+  "realPayments": false,
+  "checks": [
+    {
+      "width": 1440,
+      "overflow": false,
+      "imagesDecoded": true,
+      "modelsSeparated": true,
+      "proximityShown": true,
+      "tabs": true,
+      "keyboardTabs": true,
+      "previewDialog": true,
+      "faq": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "imagesDecoded": true,
+      "modelsSeparated": true,
+      "proximityShown": true,
+      "tabs": true,
+      "keyboardTabs": true,
+      "previewDialog": true,
+      "faq": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 320,
+      "overflow": false,
+      "imagesDecoded": true,
+      "modelsSeparated": true,
+      "proximityShown": true,
+      "tabs": true,
+      "keyboardTabs": true,
+      "previewDialog": true,
+      "faq": true,
+      "errors": [],
+      "externalRequests": []
+    },
+    {
+      "width": 768,
+      "overflow": false,
+      "imagesDecoded": true,
+      "modelsSeparated": true,
+      "proximityShown": true,
+      "tabs": true,
+      "keyboardTabs": true,
+      "previewDialog": true,
+      "faq": true,
+      "errors": [],
+      "externalRequests": []
+    }
+  ],
+  "priceAmountsArs": {
+    "Avisos": 36000,
+    "Videollamada": 48000,
+    "Familia": 80000
+  },
+  "commercialStatus": "Proposal only: no prices, quotas, plates, shipping or license duration approved or configured.",
+  "locationStatus": "Visual proposal only: no browser location collection or server-side proximity validation implemented by this work."
+}
