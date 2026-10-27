@@ -1,0 +1,115 @@
+{
+  "authorization": "Owner approved server Google update in chat",
+  "deployment": "vivid-nightingale-785",
+  "sourceCommit": "705d7c0",
+  "serverFlow": {
+    "checkedAt": "2026-10-27T20:42:39.490Z",
+    "backend": "vivid-nightingale-785",
+    "sourceCommit": "705d7c0",
+    "authorizedByOwner": true,
+    "checks": [
+      "Te Aviso native Google capability enabled and web Google remains enabled",
+      "Existing VISO native and web Google availability preserved",
+      "Anonymous connection query does not expose an account",
+      "com.teaviso.app: real server starts Google with HTTPS callback, PKCE S256, identity scopes and bound app return cookie",
+      "com.viso.deck: real server starts Google with HTTPS callback, PKCE S256, identity scopes and bound app return cookie"
+    ],
+    "realGoogleConsent": "not attempted",
+    "physicalDevice": "not verified",
+    "fcmDelivery": "not verified",
+    "passed": true
+  },
+  "callbacks": {
+    "checkedAt": "2026-10-27T20:42:56.481187+00:00",
+    "deployment": "vivid-nightingale-785",
+    "deployedSourceReportedByMain": "705d7c0",
+    "endpoint": "https://vivid-nightingale-785.convex.site/api/auth/callback/google",
+    "method": "GET error=access_denied; synthetic own redirect cookie; redirects not followed",
+    "scope": "Cancellation redirect policy only; no sign-in action, Google consent, user/session/token creation or customer operations invoked",
+    "limitations": [
+      "Does not verify real Google consent or token redemption",
+      "Does not verify APK callback intent delivery, account linking or Firebase push"
+    ],
+    "checks": [
+      {
+        "check": "teaviso_native_exact",
+        "expected": "exact cancellation redirect",
+        "status": 302,
+        "hasLocation": true,
+        "returnedCode": false,
+        "exactExpectedRedirect": true,
+        "passed": true
+      },
+      {
+        "check": "viso_native_existing",
+        "expected": "exact cancellation redirect",
+        "status": 302,
+        "hasLocation": true,
+        "returnedCode": false,
+        "exactExpectedRedirect": true,
+        "passed": true
+      },
+      {
+        "check": "teaviso_scheme_suffix_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      },
+      {
+        "check": "teaviso_wrong_host_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      },
+      {
+        "check": "teaviso_encoded_path_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      },
+      {
+        "check": "teaviso_extra_parameter_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      },
+      {
+        "check": "teaviso_duplicate_attempt_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      },
+      {
+        "check": "teaviso_uppercase_scheme_rejected",
+        "expected": "rejected without redirect",
+        "status": 500,
+        "hasLocation": false,
+        "returnedCode": false,
+        "exactExpectedRedirect": null,
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "unchangedApk": {
+    "filename": "Te-Aviso-1.0.0.apk",
+    "sha256": "e62984ec3e71fe919410c66953375d21a6124de94c7088f1e189f9ac6f8e5e27",
+    "bytes": 17170452
+  },
+  "scope": "Backend published; physical Google login/intent delivery and FCM delivery remain unverified"
+}

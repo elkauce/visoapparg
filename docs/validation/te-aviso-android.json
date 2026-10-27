@@ -18,10 +18,9 @@
   "firebaseClientPackageMatches": true,
   "firebaseServiceEnabledInManifest": true,
   "deliveryTest": "pending",
-  "nativeGoogleBackendDeployed": false,
+  "nativeGoogleBackendDeployed": true,
   "checkedDate": "2026-10-27",
   "sourceBranch": "feat/te-aviso-android",
-  "productionPublished": false,
   "verification": {
     "vitest": {
       "passed": 1014,
@@ -42,8 +41,8 @@
     "google": {
       "codeTestsPassed": true,
       "webConfigured": true,
-      "androidBackendDeployed": false,
-      "backendDeployment": "pending owner authorization",
+      "androidBackendDeployed": true,
+      "backendDeployment": "published and server flow/callback checks passed",
       "deviceConsent": "not verified"
     },
     "fcm": {
@@ -54,5 +53,19 @@
       "serviceEnabled": true,
       "delivery": "not verified"
     }
-  }
+  },
+  "backendPublication": {
+    "authorizedByOwner": true,
+    "deployment": "vivid-nightingale-785",
+    "sourceCommit": "705d7c0",
+    "checkedAt": "2026-10-27T20:42:39.490Z",
+    "scope": "Google callback and Te Aviso native capability; no frontend or APK-hosting publication",
+    "liveFlowChecksPassed": 5,
+    "liveCallbackChecksPassed": 8,
+    "realGoogleConsent": "not attempted",
+    "physicalDevice": "not verified",
+    "fcmDelivery": "not verified"
+  },
+  "apkPublished": false,
+  "backendGooglePublished": true
 }

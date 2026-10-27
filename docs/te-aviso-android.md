@@ -31,10 +31,12 @@ npm run teaviso:android:build
 npm run teaviso:android:open
 ```
 
-El primer comando comprueba TypeScript, genera `apps/teaviso/dist-android`,
-sincroniza Capacitor y ejecuta `assembleDebug` y los tests JVM. El segundo abre
-`apps/teaviso/android` en Android Studio. La ubicación local del SDK se configura
-en `apps/teaviso/android/local.properties`, ignorado por Git.
+`pnpm install --frozen-lockfile` instala las dependencias de la raíz. El comando
+`teaviso:android:build` comprueba TypeScript, genera `apps/teaviso/dist-android`,
+sincroniza Capacitor y ejecuta `assembleDebug` y los tests JVM.
+`teaviso:android:open` abre `apps/teaviso/android` en Android Studio. La ubicación
+local del SDK se configura en `apps/teaviso/android/local.properties`, ignorado
+por Git.
 
 El script `scripts/build-teaviso-android.mjs` fija los orígenes HTTPS anteriores y
 deja la APK y su descripción en `artifacts/teaviso-android/`:
@@ -70,13 +72,23 @@ propio de Te Aviso. El intento queda ligado a un nonce de 64 caracteres, un
 verificador y un vencimiento. La validación rechaza parámetros adicionales,
 duplicados y destinos ajenos.
 
-El cambio de backend que admite este regreso exacto está implementado en
-`convex/lib/google_auth_redirect.ts` y **todavía no está desplegado**. Debe
-conservar el regreso existente de VISO (`com.viso.deck://oauth/google`). El inicio
-Google nativo y la vinculación de cuentas requieren verificar ese despliegue y
-probar el recorrido en Android; compilar la APK no acredita ese funcionamiento.
-La consulta pública de configuración confirma Google web disponible y el regreso
-Google Android de Te Aviso todavía sin desplegar.
+El cambio de `convex/lib/google_auth_redirect.ts` se publicó en el backend
+**`vivid-nightingale-785` el 27 de octubre de 2026 a las 20:41:49 UTC**, con
+aprobación explícita del propietario, desde el commit `705d7c0`. Admite el regreso
+exacto de Te Aviso y conserva el existente de VISO
+(`com.viso.deck://oauth/google`). La configuración pública confirma Google web y
+Android disponibles para ambos productos.
+
+Las comprobaciones en vivo verificaron el inicio OAuth real del servidor con
+callback HTTPS, PKCE S256, permisos de identidad y una cookie ligada al regreso
+de cada app. Las pruebas de cancelación simulada regresan al destino exacto y
+rechazan destinos inválidos. Todavía falta completar el consentimiento Google,
+el ingreso, la vinculación de cuentas y la entrega del callback a la APK en un
+dispositivo.
+
+La misma APK **`Te-Aviso-1.0.0.apk`** sigue siendo válida: ya incluye el regreso
+nativo y no necesita recompilarse por esta actualización del backend. La web y
+el alojamiento de APK no se publicaron en esta actualización.
 
 Una comprobación de solo lectura confirmó que el backend tiene FCM configurado
 para el proyecto Firebase **`viso-ad874`**. Te Aviso requiere su propio cliente
@@ -118,13 +130,16 @@ backend. No habilitan por sí mismos cámara, micrófono ni apertura de cerradur
 
 ## Verificación disponible
 
-Estado documentado el 27 de octubre de 2026. El cliente Firebase correcto está
-integrado y las compilaciones con FCM terminaron correctamente:
+Estado documentado el 27 de octubre de 2026, después del despliegue autorizado
+del backend Google. El cliente Firebase está integrado y ambas APK compilaron
+con FCM:
 
 | Comprobación | Resultado y evidencia local |
 | --- | --- |
 | Suite completa Vitest | 1014 tests, 112 archivos, aprobados tras el último ajuste; `artifacts/teaviso-android/all-tests-resume.log` |
 | Regreso Google nativo | 4 tests focalizados aprobados, incluidos en la suite completa, después de ajustar los destinos seguros de regreso |
+| Google en el backend publicado | 5 comprobaciones en vivo aprobadas: disponibilidad de ambos productos, privacidad anónima e inicio OAuth para Te Aviso y VISO; `artifacts/teaviso-android/google-production-report.json` |
+| Política del callback publicado | 8 comprobaciones aprobadas: cancelación simulada con regreso exacto para ambas apps y 6 destinos inválidos rechazados sin `Location`; `artifacts/teaviso-android/google-callback-production-report.json` |
 | Políticas Android JVM | 4 tests aprobados; `apps/teaviso/android/app/build/test-results/testDebugUnitTest/TEST-com.teaviso.app.TeAvisoPolicyTest.xml` |
 | APK actual y metadatos | `Te-Aviso-1.0.0.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
 | APK local con FCM | `Te-Aviso-local-test.apk`, `pushEnabled: true`, build aprobado en 8 s; `artifacts/teaviso-android/local-build-fcm.log` y `local-build.json` |
@@ -132,11 +147,11 @@ integrado y las compilaciones con FCM terminaron correctamente:
 | Firebase | Backend confirmado en `viso-ad874`, servicio configurado; cliente correcto de Te Aviso validado e integrado en la ruta ignorada |
 | Servicio FCM empaquetado | Servicio habilitado en el manifiesto de la APK. La entrega de avisos sigue pendiente |
 | Ejecución real de la APK | Pendiente: las comprobaciones web y JVM no prueban la app instalada |
-| Google nativo y avisos FCM | Pendientes de despliegue compatible y prueba completa en dispositivo |
+| Google en la APK y avisos FCM | Pendientes de consentimiento e ingreso Google reales, entrega del callback a la APK y prueba de recepción FCM en dispositivo |
 
 El emulador aislado completó el arranque, pero las instalaciones ADB con y sin
 streaming agotaron sus tiempos de espera (45 s y 90 s). No se confirmó la
 instalación ni la ejecución nativa. Antes de una entrega final faltan instalación
 y coexistencia con VISO, sesión y cambio de cuenta, regreso Google, exportación
-nativa de QR y llamadas/avisos con la app abierta y en segundo plano. No se
-publicó en producción ni se desplegó el cambio de callback Google.
+nativa de QR y llamadas/avisos con la app abierta y en segundo plano. El
+consentimiento Google real y la entrega FCM siguen pendientes.
