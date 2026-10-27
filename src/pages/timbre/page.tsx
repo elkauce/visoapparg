@@ -169,7 +169,7 @@ export function TimbreWorkspace() {
                 Se obtiene con un plan pago o con una compra elegible que lo
                 incluya expresamente.
               </p>
-              <Button onClick={() => setView("offers")}>Ver opciones</Button>
+              {brand.standalone?<Link className="vt-secondary" to="/panel/plan">Ver mis planes</Link>:<Button onClick={() => setView("offers")}>Ver opciones</Button>}
             </div>
           )}
           <div className="vt-toolbar">
@@ -191,7 +191,8 @@ export function TimbreWorkspace() {
             </label>
           </div>
           {site && <SiteWorkspace key={site._id} site={site} />}
-          {license.active && (
+          {brand.standalone && <Link className="vt-secondary" to="/panel/nuevo?modo=llamadas"><Plus size={16}/>Agregar un timbre</Link>}
+          {license.active && !brand.standalone && (
             <Card title="Crear un Timbre">
               <form
                 className="vt-form vt-form-inline"

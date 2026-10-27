@@ -1,5 +1,5 @@
 import { useMemo, useState, type FormEvent } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useAuthToken } from "@convex-dev/auth/react";
 import { useMutation, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
@@ -9,29 +9,28 @@ import {
   ArrowLeft,
   ArrowRight,
   BellRing,
-  Building2,
   CalendarDays,
   Check,
   ChevronLeft,
   ChevronRight,
   Clock,
-  Home,
   MessageCircle,
   Plus,
   QrCode,
   Settings2,
-  Users,
   X,
 } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
-import { publicOrigin } from "./config";
-import { QrDownload } from "./qr";
 import { Empty, Feedback, Loading } from "./ui-v2";
+import {
+  BasicDoorbellEditor,
+  DoorbellList,
+  SetupWizard,
+} from "./doorbell-setup";
 
 import { useSpaces } from "./use-spaces";
 import { useTask, useTeavisoNow } from "./use-teaviso-task";
 type Space = FunctionReturnType<typeof api.teaviso_spaces.get>;
-type Kind = "home" | "business" | "office" | "building";
 const dayNames = [
   "Domingo",
   "Lunes",
@@ -85,7 +84,8 @@ export function SpacePicker() {
 }
 export function Overview() {
   const { rows, selected } = useSpaces();
-  if (rows === undefined) return <Loading />;
+  const doorbells = useQuery(api.teaviso_setup.list, {});
+  if (rows === undefined || doorbells === undefined) return <Loading />;
   return (
     <div className="av-stack">
       <header className="av-panel-heading">
@@ -95,22 +95,21 @@ export function Overview() {
           <p>Recibí visitas y organizá tu día desde un solo lugar.</p>
         </div>
         <Link className="av-button" to="/panel/nuevo">
-          <Plus size={17} /> Crear entrada
+          <Plus size={17} /> Agregar timbre
         </Link>
       </header>
       <SpacePicker />
       {selected ? (
         <OverviewSpace id={selected._id} />
-      ) : (
-        <Empty title="Creá tu primera entrada">
+      ) : doorbells.length ? null : (
+        <Empty title="Creá tu primer timbre">
           <p>Elegí tu espacio, configurá cómo atender y descargá el QR.</p>
           <Link className="av-button" to="/panel/nuevo">
             Crear mi timbre <ArrowRight size={17} />
           </Link>
         </Empty>
       )}
-      <LegacyEntries />
-      <DigitalDoorbellCards />
+      <DoorbellList />
       <div className="av-callout">
         <BellRing />
         <div>
@@ -227,288 +226,30 @@ function OverviewSpace({ id }: { id: Id<"teavisoSpaces"> }) {
     </>
   );
 }
-function LegacyEntries() {
-  const old = useQuery(api.teaviso.myWhatsappQrs, {}),
-    { rows } = useSpaces(),
-    adopt = useMutation(api.teaviso_spaces.create),
-    task = useTask(),
-    navigate = useNavigate();
-  const remaining = old?.filter(
-    (q) => !rows?.some((s) => s.whatsappQrId === q._id),
-  );
-  if (!remaining?.length) return null;
-  return (
-    <section className="av-card">
-      <h2>Tus timbres WhatsApp</h2>
-      <p>Configurá tus timbres conservando el QR que ya imprimiste.</p>
-      {remaining.map((q) => (
-        <div className="av-small-item" key={q._id}>
-          <QrCode />
-          <strong>{q.label}</strong>
-          <button
-            className="av-button av-outline"
-            disabled={task.busy}
-            onClick={() =>
-              void task.run(async () => {
-                const id = await adopt({
-                  name: q.label,
-                  kind: "home",
-                  timezone: "America/Argentina/Buenos_Aires",
-                  consent: false,
-                  existingQrId: q._id,
-                });
-                navigate(`/panel/entradas/${id}`);
-              })
-            }
-          >
-            Configurar timbre
-          </button>
-        </div>
-      ))}
-      <Feedback task={task} />
-    </section>
-  );
-}
-function DigitalDoorbellCards() {
-  const data = useQuery(api.timbre.workspace, {}),
-    { rows } = useSpaces();
-  const sites = data?.sites.filter(
-    (site) => !rows?.some((space) => space.timbreSiteId === site._id),
-  );
-  if (!sites?.length) return null;
-  return (
-    <section className="av-stack">
-      <h2>Timbres con llamadas</h2>
-      <div className="av-entry-grid">
-        {sites.map((site) => (
-          <Link
-            className="av-card av-entry-card"
-            key={site._id}
-            to={`/panel/llamadas?site=${site._id}`}
-          >
-            <BellRing />
-            <span className="av-tag">
-              {site.enabled ? "Activo" : "Pausado"}
-            </span>
-            <h3>{site.name}</h3>
-            <p>Audio, video e integrantes</p>
-            <span>
-              Administrar timbre <ArrowRight size={16} />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
 export function Entries() {
-  const { rows } = useSpaces();
-  if (rows === undefined) return <Loading />;
   return (
     <div className="av-stack">
       <header className="av-panel-heading">
         <div>
           <span className="av-eyebrow">Tus lugares</span>
           <h1>Mis timbres</h1>
-          <p>Tus QR, llamadas e integrantes se administran en Te Aviso.</p>
+          <p>Elegí el timbre que querés configurar.</p>
         </div>
         <Link className="av-button" to="/panel/nuevo">
-          <Plus size={17} /> Crear entrada
+          <Plus size={17} />
+          Agregar timbre
         </Link>
       </header>
-      <div className="av-entry-grid">
-        {rows.map((s) => (
-          <Link
-            className="av-card av-entry-card"
-            to={`/panel/entradas/${s._id}`}
-            key={s._id}
-          >
-            <QrCode />
-            <span className="av-tag">
-              {s.enabled ? "Habilitada" : "Pausada"}
-            </span>
-            <h2>{s.name}</h2>
-            <p>{kindNames[s.kind]}</p>
-            <span>
-              Configurar y descargar QR <ArrowRight size={16} />
-            </span>
-          </Link>
-        ))}
-      </div>
-      {!rows.length && (
-        <Empty title="Tu próximo timbre empieza acá">
-          <p>Creá tu entrada para recibir a tus visitas.</p>
-        </Empty>
-      )}
-      <LegacyEntries />
-      <DigitalDoorbellCards />
+      <DoorbellList />
     </div>
   );
 }
 export function Onboarding() {
-  const [params] = useSearchParams(),
-    mode = params.get("mode"),
-    [kind, setKind] = useState<Kind>(
-      mode === "edificios"
-        ? "building"
-        : mode === "negocios"
-          ? "business"
-          : "home",
-    ),
-    [step, setStep] = useState(1),
-    [name, setName] = useState(""),
-    [phone, setPhone] = useState(""),
-    [consent, setConsent] = useState(false);
-  const create = useMutation(api.teaviso_spaces.create),
-    task = useTask(),
-    navigate = useNavigate();
-  return (
-    <div className="av-onboarding av-card">
-      <Link className="av-back" to="/panel">
-        <ArrowLeft size={16} /> Volver
-      </Link>
-      <span className="av-eyebrow">Paso {step} de 3</span>
-      <div className="av-progress">
-        {[1, 2, 3].map((n) => (
-          <span key={n} className={n <= step ? "active" : ""} />
-        ))}
-      </div>
-      <h1>Creá tu entrada</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (step < 3) {
-            setStep(step + 1);
-            return;
-          }
-          void task.run(async () => {
-            const id = await create({
-              name,
-              kind,
-              timezone:
-                Intl.DateTimeFormat().resolvedOptions().timeZone ||
-                "America/Argentina/Buenos_Aires",
-              phone: phone || undefined,
-              consent,
-            });
-            navigate(`/panel/entradas/${id}`);
-          }, "Tu entrada está creada.");
-        }}
-      >
-        <fieldset disabled={task.busy}>
-          {step === 1 ? (
-            <>
-              <h2>¿Dónde vas a usar tu timbre?</h2>
-              <div className="av-kind-grid">
-                {(
-                  [
-                    { id: "home", icon: Home },
-                    { id: "business", icon: CalendarDays },
-                    { id: "office", icon: Users },
-                    { id: "building", icon: Building2 },
-                  ] as const
-                ).map((k) => (
-                  <button
-                    type="button"
-                    key={k.id}
-                    className={kind === k.id ? "selected" : ""}
-                    aria-pressed={kind === k.id}
-                    onClick={() => setKind(k.id)}
-                  >
-                    <k.icon />
-                    {kindNames[k.id]}
-                  </button>
-                ))}
-              </div>
-              <label>
-                Nombre de tu espacio
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ej. Mi casa o mi peluquería"
-                  required
-                  maxLength={100}
-                />
-              </label>
-            </>
-          ) : step === 2 ? (
-            <>
-              <h2>¿Cómo querés recibir?</h2>
-              <p>
-                Podés empezar con tu propio WhatsApp o preparar una entrada
-                Digital para vincular una licencia. Reservas y mensajes por
-                motivo requieren una mejora activa.
-              </p>
-              <label>
-                Tu WhatsApp, si querés habilitarlo
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  type="tel"
-                  placeholder="5491112345678"
-                  maxLength={30}
-                />
-              </label>
-              {phone && (
-                <label className="av-check">
-                  <input
-                    type="checkbox"
-                    checked={consent}
-                    onChange={(e) => setConsent(e.target.checked)}
-                    required
-                  />{" "}
-                  Puedo usar este número y acepto que sea visible en WhatsApp.
-                </label>
-              )}
-              <Link to="/planes" target="_blank">
-                Conocer las opciones ↗
-              </Link>
-            </>
-          ) : (
-            <>
-              <h2>Ya casi está.</h2>
-              <div className="av-summary">
-                <strong>{name}</strong>
-                <p>{kindNames[kind]}</p>
-                <p>
-                  {phone
-                    ? "Contacto por WhatsApp"
-                    : "Entrada Digital por configurar"}
-                </p>
-              </div>
-              <p>
-                Al crearla vas a poder revisar el enlace, elegir el diseño y
-                descargar el QR. La placa QR no necesita cableado.
-              </p>
-            </>
-          )}
-          <div className="av-form-actions">
-            {step > 1 && (
-              <button
-                type="button"
-                className="av-button av-outline"
-                onClick={() => setStep(step - 1)}
-              >
-                Atrás
-              </button>
-            )}
-            <button className="av-button" type="submit">
-              {task.busy
-                ? "Creando…"
-                : step === 3
-                  ? "Crear mi entrada"
-                  : "Continuar"}
-              <ArrowRight size={17} />
-            </button>
-          </div>
-        </fieldset>
-        <Feedback task={task} />
-      </form>
-    </div>
-  );
+  return <SetupWizard />;
 }
 export function SpaceEditorPage() {
   const { rows, selected } = useSpaces();
+  const [params] = useSearchParams();
   const space = useQuery(
     api.teaviso_spaces.get,
     selected ? { spaceId: selected._id } : "skip",
@@ -521,12 +262,19 @@ export function SpaceEditorPage() {
       </Empty>
     );
   if (!space) return <Loading />;
-  return <SpaceEditor key={space._id} space={space} />;
+  return params.get("advanced") === "1" ? (
+    <SpaceEditor key={space._id} space={space} />
+  ) : (
+    <BasicDoorbellEditor key={space._id} space={space} />
+  );
 }
 function SpaceEditor({ space }: { space: Space }) {
+  const [params] = useSearchParams();
+  const [section, setSection] = useState(
+    params.get("section") === "messages" ? "messages" : "general",
+  );
   const configure = useMutation(api.teaviso_spaces.configure),
     connections = useQuery(api.teaviso_spaces.connections, {}),
-    saveTemplate = useMutation(api.teaviso.saveQrTemplate),
     authToken = useAuthToken(),
     task = useTask();
   const [hours, setHours] = useState(space.schedule),
@@ -611,7 +359,7 @@ function SpaceEditor({ space }: { space: Space }) {
     <div className="av-stack">
       <header className="av-panel-heading">
         <div>
-          <span className="av-eyebrow">Configuración de tu entrada</span>
+          <span className="av-eyebrow">Ajustes avanzados</span>
           <h1>{space.name}</h1>
           <p>El enlace se conserva al editar tus preferencias.</p>
         </div>
@@ -629,10 +377,34 @@ function SpaceEditor({ space }: { space: Space }) {
           <button onClick={reload}>Cargar la versión guardada</button>
         </div>
       )}
-      <div className="av-editor-layout">
+      <Link className="sb-text-link" to={`/panel/entradas/${space._id}`}>
+        ← Volver a la configuración simple
+      </Link>
+      <nav className="gd-advanced-tabs" aria-label="Ajustes avanzados">
+        {[
+          ["general", "Datos"],
+          ["calls", "Plan y llamadas"],
+          ["hours", "Horarios"],
+          ["bookings", "Reservas"],
+          ["messages", "Mensajes"],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={section === id}
+            onClick={() => setSection(id)}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      <div className="av-editor-layout gd-focused-editor">
         <form key={reset} className="av-stack" onSubmit={submit}>
           <fieldset disabled={task.busy || uploading}>
-            <section className="av-card av-stack">
+            <section
+              className="av-card av-stack"
+              hidden={section !== "general"}
+            >
               <h2>Tu entrada</h2>
               <div className="av-form-grid">
                 <label>
@@ -688,7 +460,7 @@ function SpaceEditor({ space }: { space: Space }) {
                 es visible allí.
               </p>
             </section>
-            <section className="av-card av-stack">
+            <section className="av-card av-stack" hidden={section !== "calls"}>
               <h2>Tu plan y tus llamadas</h2>
               <label>
                 Licencia activa
@@ -741,7 +513,7 @@ function SpaceEditor({ space }: { space: Space }) {
                 </Link>
               </div>
             </section>
-            <section className="av-card av-stack">
+            <section className="av-card av-stack" hidden={section !== "hours"}>
               <h2>Horarios de atención</h2>
               <p className="av-muted">
                 Podés agregar más de una franja por día. Fin 00:00 indica el
@@ -814,7 +586,10 @@ function SpaceEditor({ space }: { space: Space }) {
                 <Plus size={16} /> Agregar franja
               </button>
             </section>
-            <section className="av-card av-stack">
+            <section
+              className="av-card av-stack"
+              hidden={section !== "bookings"}
+            >
               <h2>Reservas</h2>
               <label className="av-check">
                 <input
@@ -879,7 +654,10 @@ function SpaceEditor({ space }: { space: Space }) {
                 Configurar servicios y profesionales ↗
               </Link>
             </section>
-            <section className="av-card av-stack">
+            <section
+              className="av-card av-stack"
+              hidden={section !== "messages"}
+            >
               <h2>Portal de mensajes</h2>
               <label className="av-check">
                 <input
@@ -1031,26 +809,6 @@ function SpaceEditor({ space }: { space: Space }) {
             </div>
           </fieldset>
         </form>
-        <aside className="av-editor-preview">
-          <QrDownload
-            url={`${publicOrigin()}/w/${space.token}`}
-            label={space.name}
-            onSaveTemplate={
-              space.whatsappQrId
-                ? (template) =>
-                    saveTemplate({
-                      kind: "personal",
-                      id: space.whatsappQrId!,
-                      template,
-                    })
-                : undefined
-            }
-          />
-          <p className="av-muted">
-            Probá tu entrada antes de imprimir. Los QR anteriores conservan su
-            enlace.
-          </p>
-        </aside>
       </div>
     </div>
   );

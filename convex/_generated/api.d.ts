@@ -71,6 +71,7 @@ import type * as sports from "../sports.js";
 import type * as statuses from "../statuses.js";
 import type * as teaviso from "../teaviso.js";
 import type * as teaviso_accounts from "../teaviso_accounts.js";
+import type * as teaviso_setup from "../teaviso_setup.js";
 import type * as teaviso_signs from "../teaviso_signs.js";
 import type * as teaviso_spaces from "../teaviso_spaces.js";
 import type * as teaviso_tables from "../teaviso_tables.js";
@@ -163,6 +164,7 @@ declare const fullApi: ApiFromModules<{
   statuses: typeof statuses;
   teaviso: typeof teaviso;
   teaviso_accounts: typeof teaviso_accounts;
+  teaviso_setup: typeof teaviso_setup;
   teaviso_signs: typeof teaviso_signs;
   teaviso_spaces: typeof teaviso_spaces;
   teaviso_tables: typeof teaviso_tables;

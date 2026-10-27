@@ -71,6 +71,7 @@ export const teavisoV2Tables = {
   }).index("by_owner_created", ["ownerId", "createdAt"]),
   teavisoSpaces: defineTable({
     ownerId: v.id("users"),
+    setupKey: v.optional(v.string()),
     name: v.string(),
     kind: spaceKind,
     token: v.string(),
@@ -96,7 +97,8 @@ export const teavisoV2Tables = {
   })
     .index("by_owner", ["ownerId"])
     .index("by_token", ["token"])
-    .index("by_whatsapp", ["whatsappQrId"]),
+    .index("by_whatsapp", ["whatsappQrId"])
+    .index("by_owner_setup", ["ownerId", "setupKey"]),
   teavisoServices: defineTable({
     spaceId: v.id("teavisoSpaces"),
     name: v.string(),

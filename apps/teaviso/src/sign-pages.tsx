@@ -5,7 +5,7 @@ import {
   usePaginatedQuery,
   useQuery,
 } from "convex/react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { QRCodeSVG } from "qrcode.react";
 import type { FunctionReturnType } from "convex/server";
 import type { Id } from "@/convex/_generated/dataModel";
@@ -247,9 +247,10 @@ export function SignPreview({
   );
 }
 function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
+  const [params] = useSearchParams();
   const [fields, setFields] = useState<Fields>(() => stored(model)),
     [material, setMaterial] = useState<"acrylic" | "aluminum">("aluminum"),
-    [spaceId, setSpaceId] = useState(""),
+    [spaceId, setSpaceId] = useState(params.get("space") ?? ""),
     [reviewed, setReviewed] = useState(false),
     [key] = useState(randomToken),
     [sent, setSent] = useState(false);

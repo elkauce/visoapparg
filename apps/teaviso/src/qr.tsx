@@ -1,4 +1,5 @@
 import { useId, useMemo, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import {
   makeQrPlate,
   normalizeTemplate,
@@ -17,9 +18,11 @@ export function QrDownload({
   label,
   initialTemplate,
   onSaveTemplate,
+  compact = false,
 }: {
   url: string;
   label: string;
+  compact?: boolean;
   initialTemplate?: QrTemplate;
   onSaveTemplate?: (template: QrTemplate) => Promise<unknown>;
 }) {
@@ -83,38 +86,52 @@ export function QrDownload({
   }
   return (
     <div className="tea-qr-preview">
-      <fieldset className="tea-template-picker" disabled={busy}>
-        <legend>Elegí el diseño de tu placa</legend>
-        <div>
-          {qrTemplates.map((template) => (
-            <label
-              key={template.id}
-              className={`tea-template-choice ${selected === template.id ? "selected" : ""}`}
-            >
-              <input
-                type="radio"
-                name={groupId}
-                value={template.id}
-                checked={selected === template.id}
-                onChange={() => {
-                  setSelected(template.id);
-                  setSaved(false);
-                }}
-              />
-              <span
-                className={`tea-template-swatch ${template.id}`}
-                aria-hidden="true"
-              />
-              <strong>{template.name}</strong>
-              <small>{template.description}</small>
-            </label>
-          ))}
+      {!compact && (
+        <fieldset className="tea-template-picker" disabled={busy}>
+          <legend>Elegí el diseño de tu placa</legend>
+          <div>
+            {qrTemplates.map((template) => (
+              <label
+                key={template.id}
+                className={`tea-template-choice ${selected === template.id ? "selected" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name={groupId}
+                  value={template.id}
+                  checked={selected === template.id}
+                  onChange={() => {
+                    setSelected(template.id);
+                    setSaved(false);
+                  }}
+                />
+                <span
+                  className={`tea-template-swatch ${template.id}`}
+                  aria-hidden="true"
+                />
+                <strong>{template.name}</strong>
+                <small>{template.description}</small>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {compact ? (
+        <div className="tea-plate-preview gd-compact-code">
+          <QRCodeSVG
+            value={url}
+            size={208}
+            marginSize={4}
+            level="M"
+            aria-label="QR de tu timbre"
+          />
         </div>
-      </fieldset>
-      <div
-        className="tea-plate-preview"
-        dangerouslySetInnerHTML={{ __html: plate.svg }}
-      />
+      ) : (
+        <div
+          className="tea-plate-preview"
+          dangerouslySetInnerHTML={{ __html: plate.svg }}
+        />
+      )}
       <p className="tea-print-size">
         {plate.width / 10} × {plate.height / 10} mm · listo para imprimir
       </p>
@@ -126,13 +143,15 @@ export function QrDownload({
         >
           Descargar PNG
         </button>
-        <button
-          disabled={busy}
-          className="tea-secondary"
-          onClick={() => void download("svg")}
-        >
-          Descargar SVG
-        </button>
+        {!compact && (
+          <button
+            disabled={busy}
+            className="tea-secondary"
+            onClick={() => void download("svg")}
+          >
+            Descargar SVG
+          </button>
+        )}
         {onSaveTemplate && (
           <button
             disabled={busy}

@@ -1,0 +1,43 @@
+{
+  "status": "review-not-published",
+  "request": "Simplify doorbell configuration",
+  "tests": {
+    "passed": 1001,
+    "files": 110,
+    "focusedAfterIndexedQueryChange": 10
+  },
+  "checks": {
+    "frontendTypeScriptBuild": "passed",
+    "backendTypeScript": "passed",
+    "rootTypeScript": "passed",
+    "changedSourceEslint": "passed, zero warnings",
+    "browser": {
+      "checks": 29,
+      "widths": [
+        390,
+        1440
+      ],
+      "errors": [],
+      "actualReact": true,
+      "actualConvex": true,
+      "identities": "synthetic/local only",
+      "productionChanged": false,
+      "realCallsOrMessages": false
+    },
+    "physicalSignContext": {
+      "sameDoorbellSelected": true,
+      "productionChanged": false
+    }
+  },
+  "production": {
+    "backendPublished": false,
+    "frontendPublished": false,
+    "apkBuilt": false
+  },
+  "limitations": [
+    "Browser checks use actual React and Convex functions through a local convex-test bridge with synthetic identities.",
+    "No real call, WhatsApp message, payment or push delivery was performed.",
+    "Existing device/account permissions and plan entitlements are required as before.",
+    "Full configuration remains in advanced settings."
+  ]
+}

@@ -848,3 +848,309 @@ select {
 .vt-public {
   font-family: Arial, Helvetica, sans-serif;
 }
+/* Guided setup: primary contact first; complete configuration remains available. */
+.gd-wizard {
+  max-width: 660px;
+  margin: 0 auto;
+  padding: 28px;
+}
+.gd-wizard h1,
+.gd-ready h1 {
+  font-size: 28px;
+}
+.gd-wizard h2 {
+  font-size: 19px;
+}
+.gd-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding: 0;
+  margin: 20px 0 28px;
+  list-style: none;
+  gap: 12px;
+  font-size: 12px;
+  color: #7c8276;
+}
+.gd-steps li {
+  border-bottom: 2px solid #e2e2dc;
+  padding: 10px 0;
+}
+.gd-steps li.current {
+  color: #b53700;
+  border-color: #e84300;
+  font-weight: 600;
+}
+.gd-steps li.done {
+  color: #287448;
+  border-color: #a0bea4;
+}
+.gd-methods {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+}
+.av-shell .gd-methods > button {
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #dfe2da;
+  border-radius: 6px;
+  background: #fff;
+  color: #202321;
+}
+.gd-methods > button span {
+  display: grid;
+  gap: 6px;
+}
+.gd-methods strong {
+  font-size: 14px;
+}
+.gd-methods small {
+  font-size: 12px;
+  font-weight: 400;
+  color: #6a6d69;
+}
+.av-shell .gd-methods > button.selected {
+  background: #fffaf6;
+  border-color: #d99173;
+}
+.gd-plan-notice {
+  padding: 16px;
+  border: 1px solid #d9dcd4;
+  border-radius: 6px;
+  background: #fafaf7;
+}
+.gd-plan-notice p {
+  font-size: 12px;
+  margin: 0 0 8px;
+}
+.gd-plan-selected {
+  font-size: 13px;
+}
+.gd-list {
+  display: grid;
+  gap: 14px;
+}
+.av-shell .gd-bell-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+.gd-bell-card > div {
+  flex: 1;
+  min-width: 0;
+}
+.gd-bell-card h2 {
+  font-size: 17px;
+  margin: 0 0 5px;
+}
+.gd-bell-card p {
+  margin: 0;
+  font-size: 12px;
+}
+.gd-bell-card small {
+  font-size: 11px;
+  color: #6a6d69;
+}
+.gd-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.8fr);
+  gap: 24px;
+  align-items: start;
+}
+.gd-qr {
+  text-align: center;
+}
+.gd-qr .tea-plate-preview {
+  max-width: 230px;
+  margin: 10px auto;
+}
+.gd-qr .tea-plate-preview svg {
+  max-height: 300px;
+}
+.gd-qr .tea-actions {
+  justify-content: center;
+}
+.gd-qr .tea-actions button {
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-size: 13px;
+}
+.gd-qr .tea-print-size {
+  font-size: 11px;
+}
+.gd-qr details {
+  margin: 18px 0;
+  text-align: left;
+  border-top: 1px solid #e2e2dc;
+  padding-top: 16px;
+}
+.gd-qr summary {
+  font-size: 12px;
+  cursor: pointer;
+}
+.gd-qr details .tea-plate-preview {
+  max-width: 260px;
+}
+.gd-qr .tea-template-picker {
+  font-size: 12px;
+}
+.gd-extras {
+  display: grid;
+  gap: 14px;
+}
+.gd-extras h2 {
+  margin: 0;
+}
+.gd-extras a {
+  font-size: 13px;
+  color: #b53700;
+}
+.gd-ready {
+  max-width: 660px;
+  margin: 0 auto;
+}
+.gd-ready .sb-eyebrow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  color: #287448;
+}
+.gd-next {
+  padding: 8px 0 24px;
+  display: grid;
+  gap: 12px;
+}
+.gd-next h2 {
+  font-size: 19px;
+  margin: 0;
+}
+.gd-next p {
+  font-size: 13px;
+  margin: 0;
+}
+.gd-next a {
+  justify-self: start;
+}
+.gd-advanced-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #e2e2dc;
+  padding-bottom: 12px;
+}
+.gd-advanced-tabs button {
+  font-size: 12px;
+  padding: 8px 12px;
+  border: 1px solid #dedfd7;
+  border-radius: 5px;
+  background: #fff;
+  color: #62695e;
+}
+.gd-advanced-tabs button[aria-pressed="true"] {
+  color: #b53700;
+  border-color: #d8a58f;
+  background: #fffaf6;
+}
+.av-shell section[hidden] {
+  display: none !important;
+}
+@media (max-width: 650px) {
+  .gd-wizard {
+    padding: 20px;
+  }
+  .gd-steps {
+    gap: 8px;
+    font-size: 10px;
+    margin-top: 15px;
+  }
+  .gd-wizard h1,
+  .gd-ready h1 {
+    font-size: 25px;
+  }
+  .gd-editor-layout {
+    grid-template-columns: 1fr;
+  }
+  .av-shell .gd-bell-card {
+    flex-wrap: wrap;
+    padding: 16px;
+    gap: 12px;
+  }
+  .gd-bell-card .av-button {
+    margin-left: 33px;
+  }
+  .gd-methods > button span {
+    gap: 4px;
+  }
+  .gd-qr .tea-plate-preview svg {
+    max-height: 270px;
+  }
+  .gd-advanced-tabs button {
+    padding: 7px 9px;
+    font-size: 11px;
+  }
+}
+.av-editor-layout.gd-focused-editor {
+  display: block;
+  max-width: 900px;
+}
+.gd-focused-editor .av-save-bar {
+  position: static;
+  margin-top: 16px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.gd-qr .tea-qr-preview {
+  max-height: none;
+  overflow: visible;
+}
+.gd-wizard .gd-steps {
+  margin: 14px 0 18px;
+}
+.gd-wizard h1 {
+  margin-bottom: 12px;
+}
+.gd-ready {
+  gap: 14px;
+}
+.gd-ready .gd-steps {
+  margin: 0 0 6px;
+}
+.gd-ready header h1 {
+  margin: 0 0 8px;
+}
+.gd-ready header > p {
+  margin: 0;
+  font-size: 13px;
+}
+.gd-ready .sb-eyebrow {
+  margin-bottom: 10px;
+}
+.gd-ready .gd-qr {
+  padding: 20px;
+}
+.gd-ready .gd-qr h2 {
+  margin: 0 0 12px;
+}
+.gd-ready .gd-qr .tea-plate-preview svg {
+  max-height: 190px;
+}
+.gd-ready .gd-qr .tea-print-size {
+  margin: 6px 0 12px;
+}
+.gd-qr .gd-compact-code {
+  background: #fff;
+  border: 1px solid #e2e2dc;
+  padding: 8px;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.gd-qr .gd-compact-code svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: auto;
+}
