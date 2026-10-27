@@ -3,7 +3,8 @@
 Estado: revisión, sin publicar. El propietario confirmó que Te Aviso debe resolver
 su panel y administración acá, con conexión a VISO solo para clientes que utilizan
 o compran un Deck. Después indicó que la portada, planes y vista móvil publicados
-son confusos. Se mostró una nueva propuesta visual; su aprobación sigue pendiente.
+son confusos. El propietario aprobó la nueva propuesta visual, pero indicó expresamente que
+no se publique todavía. Agregó una evaluación de carteles físicos.
 
 ## Separación implementada para revisión
 
@@ -29,7 +30,7 @@ eliminación global de identidad, cambio de correo sin verificación ni atribuci
 administradores. Los clientes VISO que no usan el servicio Timbre quedan fuera del
 directorio. Los permisos administrativos se verifican por ID del servidor.
 
-## Propuesta de diseño, pendiente
+## Propuesta de diseño aprobada, publicación detenida
 
 [Ver propuesta móvil](design/te-aviso-simplificado-mobile-propuesta.png).
 Las tarjetas y visitas del mockup son ejemplos, no datos reales de clientes.
@@ -56,7 +57,8 @@ visibilidad condicional de Deck, directorio restringido y pausa de un QR públic
 TypeScript, ESLint de archivos modificados y compilación de Te Aviso correctos.
 No se hicieron llamadas o pagos reales. No se compiló una APK.
 
-Antes de publicar: aprobar diseño y alcance, publicar el backend compatible en
+Antes de publicar: completar el alcance de carteles y obtener autorización nueva
+de publicación; después publicar el backend compatible en
 `vivid-nightingale-785`, ejecutar la migración paginada interna
 `teaviso_accounts:migrateLegacyAccounts` para `spaces`, `whatsapp`, `business`,
 `digital` y `members` hasta `done: true` en cada fuente. Conserva perfiles existentes

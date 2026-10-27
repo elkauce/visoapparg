@@ -1,7 +1,7 @@
 {
   "status": "review-not-published",
   "request": "Te Aviso owns its customer panel and customer/doorbell administration; VISO Deck links are conditional.",
-  "designStatus": "Simplified mobile proposal shown to owner; awaiting direction. No public landing or plan redesign applied.",
+  "designStatus": "Owner approved the simplified design, explicitly forbade publication, and requested physical adhesive QR sign options.",
   "backendPublished": false,
   "frontendPublished": false,
   "apkBuilt": false,
@@ -37,5 +37,6 @@
     "New design is a proposal; no plan price or billing activation was performed.",
     "Legacy membership migration must run against vivid-nightingale-785 after publishing the compatible backend.",
     "No separate Te Aviso APK, new call channel or physical device integration."
-  ]
+  ],
+  "publicationHold": true
 }
