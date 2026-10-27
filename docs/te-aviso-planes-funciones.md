@@ -1,5 +1,9 @@
 # Te Aviso · planes con funciones existentes
 
+La versión operativa derivada de esta propuesta ya se publicó con autorización.
+Ver [la entrega y sus condiciones activas](te-aviso-home-planes-publicados.md).
+El resto del documento conserva el registro de la revisión previa.
+
 27 de octubre de 2026. **Actualización del prototipo, sin publicar.**
 
 El propietario aprobó la propuesta visual del home y pidió incorporar a Planes

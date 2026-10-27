@@ -1,0 +1,388 @@
+{
+  "status": "published",
+  "authorization": "User: Publica la web",
+  "sourceCommit": "2a15f54",
+  "checkedAt": "2026-10-27T17:43:36.727Z",
+  "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app",
+  "deployment": {
+    "id": "dpl_2ydzxTioh5X48kp1gnjwmAnPEGqu",
+    "projectId": "prj_hEhkg9sAvj5fdk2CWK1fw61oe2nC",
+    "state": "READY",
+    "target": "production"
+  },
+  "backend": {
+    "deployment": "vivid-nightingale-785",
+    "published": true,
+    "enquiryTableAdded": true,
+    "credentialsChanged": false,
+    "billingChanged": false,
+    "existingFreePlanQuotaWarning": true
+  },
+  "validation": {
+    "testFiles": 111,
+    "testsPassed": 1006,
+    "focusedTestsPassedAfterTypeOnlyCorrection": 11,
+    "frontendBuild": "passed",
+    "backendTypeScript": "passed",
+    "rootTypeScript": "passed",
+    "changedSourceEslint": "passed",
+    "browser": {
+      "checks": [
+        {
+          "width": 1440,
+          "home": true,
+          "plans": true,
+          "comparison": true,
+          "proximityMarkedPending": true,
+          "overflow": false,
+          "errors": [],
+          "externalRequests": []
+        },
+        {
+          "width": 390,
+          "home": true,
+          "plans": true,
+          "comparison": true,
+          "proximityMarkedPending": true,
+          "overflow": false,
+          "errors": [],
+          "externalRequests": []
+        },
+        {
+          "width": 320,
+          "home": true,
+          "plans": true,
+          "comparison": true,
+          "proximityMarkedPending": true,
+          "overflow": false,
+          "errors": [],
+          "externalRequests": []
+        },
+        {
+          "width": 768,
+          "home": true,
+          "plans": true,
+          "comparison": true,
+          "proximityMarkedPending": true,
+          "overflow": false,
+          "errors": [],
+          "externalRequests": []
+        },
+        {
+          "requestCreated": true,
+          "adminResponse": true,
+          "otherAccountIsolated": true,
+          "anonymousGated": true,
+          "realPayment": false,
+          "errors": []
+        }
+      ],
+      "actualReact": true,
+      "actualConvex": true,
+      "identities": "synthetic/local",
+      "productionChanged": false
+    },
+    "https": {
+      "origin": "https://teaviso-manuelhaguilar8-4981s-projects.vercel.app",
+      "checkedAt": "2026-10-27T17:43:36.727Z",
+      "assets": [
+        {
+          "path": "assets/android-native-BSmfeknw.js",
+          "status": 200,
+          "sha256": "22cd95475cff8dcd0bc8e71ce6844214f4fe523b6da4694019d8b4b5ddd45591"
+        },
+        {
+          "path": "assets/android-native-DOmdwlBb.css",
+          "status": 200,
+          "sha256": "6c69246d171796416eedeef754da6ccbdb41ee1d7780ddc652f0e79273ba50cd"
+        },
+        {
+          "path": "assets/call-session-BRQTcRcL.js",
+          "status": 200,
+          "sha256": "2db3425e88fca0120e289d112c16aa72a161754548a2b357d74fbeb2667d04c8"
+        },
+        {
+          "path": "assets/dist-Btb5Jv1E.js",
+          "status": 200,
+          "sha256": "020bd3311ec36b945d412865b91d0b0152780fe623ad1ce85bcc570b836c2b92"
+        },
+        {
+          "path": "assets/es-B8sZbcAv.js",
+          "status": 200,
+          "sha256": "0a24655540b77c05c43320a30eb196e207709294515a5ae8bcd220598bffb068"
+        },
+        {
+          "path": "assets/index-Bstna2ho.css",
+          "status": 200,
+          "sha256": "0db22d4b99adf25b4784056e34ef1d575d6a4f5a6616574b42b4c72359631b41"
+        },
+        {
+          "path": "assets/index-Uz9mhTBo.js",
+          "status": 200,
+          "sha256": "b1e525e888cf9a1c08babee7a6ddb437fe23f07630a5356745060a05c18decfb"
+        },
+        {
+          "path": "assets/page-CJwgFXiq.css",
+          "status": 200,
+          "sha256": "6dc9ccbfedbff56746194d3c3553e4a55ee740d5188622c5cc25cb1de352ccd0"
+        },
+        {
+          "path": "assets/page-Cnftntq_.js",
+          "status": 200,
+          "sha256": "7fe8f5631f05829268094584c272e5a14a20931badf50156c273bc77dac20386"
+        },
+        {
+          "path": "assets/rolldown-runtime-hePW80VL.js",
+          "status": 200,
+          "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021"
+        },
+        {
+          "path": "assets/shield-check-DZtg0ecw.js",
+          "status": 200,
+          "sha256": "591c5336db0728ffa42387835927a63c67280773421ba412f3aee69aa03d4567"
+        },
+        {
+          "path": "assets/visitor-DX8OWpbk.js",
+          "status": 200,
+          "sha256": "0496e55ae6467efab16f89130c51e512a5c4b711d1fa158552cbd8fd031b6e59"
+        },
+        {
+          "path": "assets/web-BP-1yMvb.js",
+          "status": 200,
+          "sha256": "f73cb37e7d759e4c26d8ca9bb12d9721813b2ccd20100c81db458a8ba577decf"
+        },
+        {
+          "path": "brand/viso-icon.png",
+          "status": 200,
+          "sha256": "eceeec8d200d10a99fb1a64cdba3bb90cbed6503ad5849a66f8dea8faa6d93a0"
+        },
+        {
+          "path": "brand/viso-logo.png",
+          "status": 200,
+          "sha256": "706d409be787e977854fbd51e806824d23c44d10ad3c5df319b96555f701dfc1"
+        },
+        {
+          "path": "fonts/bricolage-grotesque-OFL.txt",
+          "status": 200,
+          "sha256": "923f4ddf0fd39f9b7794ab0df7332f3d95dc43e8ad7ec2289d6d9e8491177f51"
+        },
+        {
+          "path": "fonts/bricolage-grotesque-latin-ext-opsz-normal.woff2",
+          "status": 200,
+          "sha256": "776f6dcaf03636cd69a5802c94808cc8896c0a66c8e9ce0fe147231b6ee01957"
+        },
+        {
+          "path": "fonts/bricolage-grotesque-latin-opsz-normal.woff2",
+          "status": 200,
+          "sha256": "a79fdb52d4a5c76552452f69202add96e287401fff03d3e8c0e38b4dcb5a99cd"
+        },
+        {
+          "path": "fonts/geist-mono-OFL.txt",
+          "status": 200,
+          "sha256": "cc815ed4fc045f0e991abb10395b7932bd028c6a067deb13316d6002105074e6"
+        },
+        {
+          "path": "fonts/geist-mono-latin-ext-wght-normal.woff2",
+          "status": 200,
+          "sha256": "1a189eb997c3e2ece68373e387afaec9e8617424186c4b1ab3cff7c54ba6223b"
+        },
+        {
+          "path": "fonts/geist-mono-latin-wght-normal.woff2",
+          "status": 200,
+          "sha256": "684ad5b531f81d43c1e8c7038262d5db7cdc1f68006e04d6c7769efa8d33c8cc"
+        },
+        {
+          "path": "fonts/provenance.json",
+          "status": 200,
+          "sha256": "c452eebbaa7ea2a7a70ecb096570f8f5f5baac1cd59d93edf2f2c5cb29574b0a"
+        },
+        {
+          "path": "images/cartel-instalado.png",
+          "status": 200,
+          "sha256": "bf9b3ed4e5d1aa29ce6dcd2b511a4ae1b6b3d6ff1eb248cc6f47de492d1c5917"
+        },
+        {
+          "path": "images/timbre-qr.png",
+          "status": 200,
+          "sha256": "8e9431875e2af048344f71c099faf6fbc18f6306ec81500c3d113167e0074f16"
+        },
+        {
+          "path": "index.html",
+          "status": 200,
+          "sha256": "5af9d8f9d43385404f299e9a9113efbacbb6c342297a90954c46a1b652043155"
+        },
+        {
+          "path": "symbol.svg",
+          "status": 200,
+          "sha256": "8d4f27a90d86888159c312b7ece3bde4a4eeb272f9fdab605dc42b56a531fbb5"
+        }
+      ],
+      "routes": [
+        {
+          "path": "/",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/planes",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/soluciones",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/equipos",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/login",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/entradas",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/agenda",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/portal",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/dispositivos",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/nuevo",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/nuevo?modo=llamadas",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/timbres",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/timbre",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/w/nonexistent-release-check",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/carteles",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/carteles/address",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/carteles/professional",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/funciones/agenda",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/funciones/llamadas",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/funciones/mensajes",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/carteles",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/admin/carteles",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/plan",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/plan?interes=familia",
+          "status": 200,
+          "indexMatches": true
+        },
+        {
+          "path": "/panel/admin/consultas",
+          "status": 200,
+          "indexMatches": true
+        }
+      ],
+      "backend": {
+        "publicEntryNotFound": true,
+        "ownerListRequiresAuthentication": true,
+        "setupEndpointsRequireAuthentication": [
+          "list",
+          "options"
+        ],
+        "quoteEndpointsRequireAuthentication": [
+          "mine",
+          "directory"
+        ],
+        "configuration": {
+          "business": null,
+          "google": true
+        }
+      },
+      "tlsVerification": true
+    }
+  },
+  "scope": {
+    "nativeApkRebuilt": false,
+    "visoFrontendChanged": false,
+    "visoFrontendDeployment": "dpl_9DVS5zTpqMAb1MV918Xh7zue8zZx",
+    "commercialPlanPricesChanged": false,
+    "licensesGranted": false,
+    "realEnquiriesSubmittedByAgent": false,
+    "realCallsPaymentsOrNotifications": false
+  },
+  "limitations": [
+    "Reference prices and packages require a quote confirming duration, quotas, physical plates and delivery before contracting.",
+    "Proximity validation is explicitly marked in preparation and is not enforced or collected by this release.",
+    "The new Avisos chat-only package still needs its licensed setup flow configured before commercial activation.",
+    "Android receiving uses the existing compatible APK and permissions; web receiving requires an open panel.",
+    "No real Google sign-in, telephone call, hardware test or payment was performed in this release.",
+    "Browser interaction used actual React and Convex functions with synthetic local accounts; deployed assets/routes and unauthenticated server boundaries were verified over TLS."
+  ]
+}

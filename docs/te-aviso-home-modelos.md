@@ -1,5 +1,9 @@
 # Te Aviso · propuesta del home con modelos separados
 
+La versión operativa derivada de esta propuesta ya se publicó con autorización.
+Ver [la entrega y sus condiciones activas](te-aviso-home-planes-publicados.md).
+El resto del documento conserva el registro de la revisión previa.
+
 27 de octubre de 2026. **Propuesta visual para revisión; no publicada.**
 
 El propietario pidió un home que defina con claridad los modelos acordados,
