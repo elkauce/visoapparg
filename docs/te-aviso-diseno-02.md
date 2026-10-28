@@ -1,11 +1,11 @@
 # Te Aviso · diseño 02 implementado
 
-27 de octubre de 2026. **Preparado para revisión; no publicado.**
+27 de octubre de 2026. **Publicado con autorización expresa del propietario («Si autorizo»).**
 
-El propietario eligió la alternativa «02 · Producto conectado». Se aplicó al
-frontend real de Te Aviso y se preparó la APK de revisión 1.0.1. La selección
-aprueba implementar el diseño; se mantiene la indicación anterior de pedir
-una autorización expresa antes de actualizar producción.
+El propietario eligió la alternativa «02 · Producto conectado» y luego autorizó
+publicarla. Se aplicó al frontend real de Te Aviso y se distribuyó la APK 1.0.1.
+Web: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/ .
+Descarga: https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/downloads/Te-Aviso-1.0.1.apk .
 
 [Capturas de la implementación, PDF de 9 páginas](design/te-aviso-02-implementacion/Te-Aviso-02-implementado.pdf).
 [Informe de validación](validation/te-aviso-diseno-02.json).
@@ -74,7 +74,10 @@ Se respetan movimiento reducido, campos de 16 px en móvil y áreas táctiles.
 
 ## APK y reproducción
 
-La APK está en `artifacts/teaviso-android/Te-Aviso-1.0.1.apk`, ignorada por Git.
+La APK de compilación está en `artifacts/teaviso-android/Te-Aviso-1.0.1.apk`.
+El binario público aprobado se versiona en `apps/teaviso/public/downloads/` para
+conservar la descarga en compilaciones futuras. Mi cuenta muestra el enlace solo
+fuera de Android; la APK conserva el diseño y los servicios aprobados.
 El informe registra tamaño, SHA-256 y certificado público. La firma es de pruebas,
 no una entrega de Google Play. Conservar el almacén de firma usado en 1.0.0 es
 necesario para instalar como actualización; no generar otra clave.
@@ -89,16 +92,45 @@ En este entorno se utilizaron Java 21 completo y las ubicaciones persistentes de
 Gradle y Android mediante `JAVA_HOME`, `GRADLE_USER_HOME` y `ANDROID_USER_HOME`.
 Las credenciales, google-services.json y el almacén de firma no se versionaron.
 
-## Publicación pendiente
+## Publicación y comprobación en producción
 
-1. Obtener autorización de publicación y renovar la sesión de Vercel (la CLI
-   informó sesión cerrada). No se cambió el proyecto ni se inició un login nuevo.
-2. Publicar el backend compatible de `vivid-nightingale-785` para la nueva consulta.
-   No requiere migrar datos ni modificar planes, pagos o credenciales.
-3. Publicar solo el frontend del proyecto **teaviso**, sin usar la vinculación
-   `.vercel` raíz de VISO. Verificar rutas y archivos HTTPS.
-4. Distribuir la APK 1.0.1 y comprobar acceso, QR y recepción con un celular físico.
+El propietario completó la autenticación oficial de Vercel y autorizó el pase.
+Se actualizó el backend **vivid-nightingale-785** mediante selección explícita
+por nombre. La producción predeterminada de la cuenta Convex es otro destino,
+`useful-egret-915`, que no se usó. No hubo migración ni modificación de planes,
+cobros o credenciales.
 
-No se actualizó ningún servidor, web pública, QR de descarga ni cuenta real. No se
-hicieron llamadas, enviaron mensajes ni realizaron pagos. VISO conserva su web y
-su APK anteriores.
+Se publicó únicamente el proyecto Vercel **teaviso** (`prj_hEhkg9sAvj5fdk2CWK1fw61oe2nC`)
+mediante Build Output API. Despliegue final **dpl_3Rf8qwr3aaTiXA4mkJdaHU7VEp4z**,
+production, READY. Se conservó el alias canónico de Te Aviso que usa Google y los
+QR; Vercel también mantiene `teaviso-sigma.vercel.app` como alias secundario.
+
+Una primera compilación heredó una dirección local del sitio Convex desde el
+entorno de desarrollo. Se sustituyó por una compilación con los orígenes públicos
+fijados explícitamente, y se volvió a publicar y comprobar antes de cerrar la
+entrega. Las futuras publicaciones deben fijar:
+
+- `VITE_CONVEX_URL=https://vivid-nightingale-785.convex.cloud`
+- `VITE_CONVEX_SITE_URL=https://vivid-nightingale-785.convex.site`
+- `VITE_TEAVISO_PUBLIC_URL` y `VITE_PUBLIC_APP_URL` al alias canónico de Te Aviso.
+- `VITE_TEAVISO_ANDROID=false` para la web; la APK usa su script propio.
+
+Verificación HTTPS con TLS válido: 26 archivos coinciden por SHA-256 con la entrega,
+25 rutas correctas y 404 para una descarga inexistente. La APK responde con tipo
+Android y cabecera de descarga, pesa 13.877.898 bytes y coincide con el binario
+aprobado. Google web y Android siguen disponibles; tres endpoints privados
+rechazan acceso anónimo.
+
+56 comprobaciones de navegador en 320, 390, 768 y 1440 px verificaron marca legible,
+paleta, servicios, login con Google disponible, registro, conservación del plan,
+cartel profesional con/sin dirección y ausencia de desbordes y errores JavaScript.
+Las peticiones pasaron por el proxy configurado con validación TLS; los WebSocket
+usaron un agente de proxy explícito. No se deshabilitó la validación de certificados.
+No se completó consentimiento Google ni se crearon cuentas, consultas, cobros o
+llamadas de prueba en producción.
+
+El índice de VISO mantiene su SHA-256 anterior; su web y APK no se reconstruyeron.
+Falta la prueba física de instalación/actualización, Google, QR y recepción de
+llamadas de Te Aviso 1.0.1 en un celular.
+
+[Informe de publicación](validation/te-aviso-diseno-02-production.json).

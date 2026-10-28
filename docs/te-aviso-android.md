@@ -8,7 +8,7 @@ almacenamiento y enlaces de regreso son distintos.
 | --- | --- |
 | Nombre visible | Te Aviso |
 | Paquete y namespace | `com.teaviso.app` |
-| Versión Android | `1.0.1`, código `2` (revisión del diseño 02; pendiente de publicación) |
+| Versión Android | `1.0.1`, código `2` (diseño 02 publicado) |
 | Android mínimo / objetivo | Android 7, API 24 / API 36 |
 | Backend compartido | `https://vivid-nightingale-785.convex.cloud` |
 | Sitio del backend | `https://vivid-nightingale-785.convex.site` |
@@ -21,7 +21,7 @@ origen web conserva su propia sesión; instalar Te Aviso no importa la sesión d
 VISO. El visitante abre el QR en la web sin instalar ni registrarse.
 
 La revisión visual 1.0.1 está documentada en [diseño 02](te-aviso-diseno-02.md).
-No se publicó ni se reemplazó el enlace de descarga oficial. Para actualizar una
+La web y la descarga oficial 1.0.1 quedaron publicadas con autorización. Para actualizar una
 instalación existente se debe conservar el mismo almacén de firma, incluyendo
 `ANDROID_USER_HOME` cuando se utiliza la firma de prueba de este entorno.
 
@@ -172,3 +172,8 @@ compilaciones de la web conserven la descarga. El acceso aparece en Mi cuenta,
 Recibir llamadas, únicamente fuera de la APK. La instalación y recepción reales
 en un celular siguen pendientes de verificar. El estado de publicación está en
 [diseño 02](te-aviso-diseno-02.md).
+
+La descarga publicada del diseño 02 es
+https://teaviso-manuelhaguilar8-4981s-projects.vercel.app/downloads/Te-Aviso-1.0.1.apk .
+Se comprobó por HTTPS su contenido, tamaño, versión, cabecera de descarga y SHA-256.
+La prueba física en un celular sigue pendiente.
