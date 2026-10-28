@@ -65,3 +65,6 @@ tsconfig.tsbuildinfo
 /apps/teaviso/android/app/src/main/assets/capacitor.config.json
 /apps/teaviso/android/app/src/main/assets/capacitor.plugins.json
 /apps/teaviso/android/app/src/localTest/
+
+# Approved Te Aviso APK served with the standalone website.
+!/apps/teaviso/public/downloads/Te-Aviso-1.0.1.apk

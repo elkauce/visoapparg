@@ -91,7 +91,7 @@ rechazan destinos inválidos. Todavía falta completar el consentimiento Google,
 el ingreso, la vinculación de cuentas y la entrega del callback a la APK en un
 dispositivo.
 
-La misma APK **`Te-Aviso-1.0.1.apk`** sigue siendo válida: ya incluye el regreso
+La APK de esa comprobación, **`Te-Aviso-1.0.0.apk`**, siguió siendo válida: ya incluye el regreso
 nativo y no necesita recompilarse por esta actualización del backend. La web y
 el alojamiento de APK no se publicaron en esta actualización.
 
@@ -146,7 +146,7 @@ con FCM:
 | Google en el backend publicado | 5 comprobaciones en vivo aprobadas: disponibilidad de ambos productos, privacidad anónima e inicio OAuth para Te Aviso y VISO; `artifacts/teaviso-android/google-production-report.json` |
 | Política del callback publicado | 8 comprobaciones aprobadas: cancelación simulada con regreso exacto para ambas apps y 6 destinos inválidos rechazados sin `Location`; `artifacts/teaviso-android/google-callback-production-report.json` |
 | Políticas Android JVM | 4 tests aprobados; `apps/teaviso/android/app/build/test-results/testDebugUnitTest/TEST-com.teaviso.app.TeAvisoPolicyTest.xml` |
-| APK actual y metadatos | `Te-Aviso-1.0.1.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
+| APK comprobada antes del diseño 02 | `Te-Aviso-1.0.0.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
 | APK local con FCM | `Te-Aviso-local-test.apk`, `pushEnabled: true`, build aprobado en 8 s; `artifacts/teaviso-android/local-build-fcm.log` y `local-build.json` |
 | Navegador con backend local aislado | Repetición aprobada de las cinco comprobaciones reales: registro, alta de timbre WhatsApp, descargas PNG/SVG, sesión tras recarga y misma cuenta en dos contextos; `artifacts/teaviso-android/browser-report.json` y `browser-qa-resume.log` |
 | Firebase | Backend confirmado en `viso-ad874`, servicio configurado; cliente correcto de Te Aviso validado e integrado en la ruta ignorada |
@@ -160,3 +160,15 @@ instalación ni la ejecución nativa. Antes de una entrega final faltan instalac
 y coexistencia con VISO, sesión y cambio de cuenta, regreso Google, exportación
 nativa de QR y llamadas/avisos con la app abierta y en segundo plano. El
 consentimiento Google real y la entrega FCM siguen pendientes.
+
+## Entrega del diseño 02
+
+La APK 1.0.1 (código 2) pesa 13.877.898 bytes, mantiene el paquete
+`com.teaviso.app` y el certificado de prueba de 1.0.0, con FCM configurado.
+SHA-256: `9cad8afaf0309174e68fd7d256c72ab47f2092ac985e4e0858f29bcf99db8ba3`.
+
+Se incluye el binario aprobado en `apps/teaviso/public/downloads/` para que las
+compilaciones de la web conserven la descarga. El acceso aparece en Mi cuenta,
+Recibir llamadas, únicamente fuera de la APK. La instalación y recepción reales
+en un celular siguen pendientes de verificar. El estado de publicación está en
+[diseño 02](te-aviso-diseno-02.md).

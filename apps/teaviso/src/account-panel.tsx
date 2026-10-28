@@ -1,6 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { useMutation, useQuery } from "convex/react";
-import { BellRing, Save, Link2 } from "lucide-react";
+import { BellRing, Save, Link2, Download } from "lucide-react";
 import type { FunctionReturnType } from "convex/server";
 import { Link } from "react-router-dom";
 import { api } from "@/convex/_generated/api";
@@ -84,6 +84,16 @@ export default function AccountPanel() {
             ? "Activá los avisos de Android para recibir llamadas con Te Aviso en segundo plano. La recepción depende de tus permisos y los ajustes de batería del celular."
             : "La recepción en segundo plano del celular utiliza la APK compatible y sus permisos."}
         </p>
+        {!isTeavisoAndroid() && (
+          <a
+            className="av-button av-outline"
+            href="/downloads/Te-Aviso-1.0.1.apk"
+            download
+          >
+            <Download size={17} />
+            Descargar Te Aviso para Android · 1.0.1
+          </a>
+        )}
         <Link to="/panel/llamadas">Configurar recepción y notificaciones</Link>
       </section>
       <Link to="/privacidad">Privacidad y uso</Link>
