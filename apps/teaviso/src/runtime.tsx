@@ -36,6 +36,7 @@ import {
   X,
   ArrowUpRight,
   Users,
+  UserRound,
 } from "lucide-react";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -67,6 +68,7 @@ import { Brand } from "./ui-v2";
 import { PlanPanel, AdminPlanRequests } from "./commercial-panel";
 import TimbreAdmin from "@/pages/timbre/admin";
 import Auth from "./auth";
+import { consumeSignInDestination } from "./signin-destination";
 import WhatsappPanel from "./qr";
 import BusinessPanel, { BusinessAdmin } from "./business";
 import "../../../src/index.css";
@@ -118,7 +120,7 @@ function Protected({ children }: { children: ReactNode }) {
     );
   return auth.isAuthenticated ? <>{children}</> : <Auth />;
 }
-function Shell({ children }: { children: ReactNode }) {
+export function Shell({ children }: { children: ReactNode }) {
   const account = useQuery(api.teaviso_accounts.profile, {}),
     register = useMutation(api.teaviso_accounts.register),
     { signOut } = useAuthActions(),
@@ -127,6 +129,14 @@ function Shell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", close);
+    return () => window.removeEventListener("keydown", close);
+  }, [open]);
   useEffect(() => {
     if (account?.id && !account.enrolled)
       void register({}).catch(() =>
@@ -137,6 +147,11 @@ function Shell({ children }: { children: ReactNode }) {
   }, [account?.id, account?.enrolled, register]);
   useEffect(() => {
     const p = new URLSearchParams(location.search);
+    const intended = consumeSignInDestination();
+    if (intended) {
+      navigate(intended, { replace: true });
+      return;
+    }
     if (p.has("google")) {
       p.delete("google");
       navigate(`${location.pathname}${p.size ? `?${p}` : ""}`, {
@@ -151,7 +166,7 @@ function Shell({ children }: { children: ReactNode }) {
     { to: "/panel", label: "Inicio", icon: LayoutDashboard },
     { to: "/panel/timbres", label: "Mis timbres", icon: QrCode },
     { to: "/panel/agenda", label: "Agenda", icon: CalendarDays },
-    { to: "/panel/portal", label: "Portal de visitas", icon: MessageCircle },
+    { to: "/panel/portal", label: "Visitas y mensajes", icon: MessageCircle },
     { to: "/panel/llamadas", label: "Llamadas e integrantes", icon: BellRing },
     { to: "/panel/carteles", label: "Mis carteles", icon: QrCode },
     { to: "/panel/plan", label: "Mi plan", icon: ShieldCheck },
@@ -170,7 +185,16 @@ function Shell({ children }: { children: ReactNode }) {
         </button>
       </header>
       <aside className="av-sidebar">
-        <Brand />
+        <div className="av-sidebar-heading">
+          <Brand />
+          <button
+            className="pc-close-nav"
+            onClick={() => setOpen(false)}
+            aria-label="Cerrar navegación"
+          >
+            <X size={20} />
+          </button>
+        </div>
         <nav aria-label="Panel Te Aviso">
           {links.map(({ to, label, icon: Icon }) => (
             <NavLink
@@ -249,7 +273,25 @@ function Shell({ children }: { children: ReactNode }) {
           {error && <p role="alert">{error}</p>}
         </div>
       </aside>
-      <main className="tea-panel av-panel">{children}</main>
+      <main className="tea-panel av-panel">
+        <header className="pc-panel-topbar">
+          <span>MI ESPACIO / TE AVISO</span>
+          <Link
+            to={withSpace("/panel/cuenta")}
+            aria-label="Mi cuenta"
+            className="pc-account-avatar"
+          >
+            {account?.name
+              ?.trim()
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((part) => part[0])
+              .join("")
+              .toUpperCase() || <UserRound size={18} />}
+          </Link>
+        </header>
+        {children}
+      </main>
       <nav className="av-bottom-nav" aria-label="Navegación móvil">
         {[
           { to: "/panel", name: "Inicio", icon: LayoutDashboard },
@@ -360,7 +402,16 @@ export default function App() {
                   }
                 >
                   <Routes>
-                    <Route path="/" element={isTeavisoAndroid() ? <Navigate to="/panel" replace /> : <Landing />} />
+                    <Route
+                      path="/"
+                      element={
+                        isTeavisoAndroid() ? (
+                          <Navigate to="/panel" replace />
+                        ) : (
+                          <Landing />
+                        )
+                      }
+                    />
                     <Route path="/planes" element={<Plans />} />
                     <Route
                       path="/funciones/:feature"

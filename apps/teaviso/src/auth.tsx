@@ -3,11 +3,17 @@ import { useAuthActions } from "@convex-dev/auth/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Brand } from "./ui-v2";
+import { useLocation } from "react-router-dom";
+import {
+  rememberSignInDestination,
+  clearSignInDestination,
+} from "./signin-destination";
 import { isTeavisoAndroid } from "./native-app";
 import { useNativeGoogleAuth } from "@/lib/native-google-auth-context";
 
 export default function Auth() {
   const { signIn } = useAuthActions();
+  const location = useLocation();
   const native = isTeavisoAndroid();
   const nativeGoogle = useNativeGoogleAuth();
   const config = useQuery(api.teaviso.configuration, {
@@ -32,6 +38,7 @@ export default function Auth() {
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (busy.current) return;
+    clearSignInDestination();
     const form = new FormData(e.currentTarget);
     const email = String(form.get("email")).trim().toLowerCase();
     const password = String(form.get("password"));
@@ -61,6 +68,7 @@ export default function Auth() {
     setPending(true);
     setError("");
     try {
+      rememberSignInDestination(location.pathname, location.search);
       if (native) {
         await nativeGoogle.start("signin");
         busy.current = false;
@@ -72,6 +80,7 @@ export default function Auth() {
       });
       if (!result.redirect) throw new Error();
     } catch {
+      clearSignInDestination();
       setError(
         "No pudimos abrir Google. Probá nuevamente o ingresá con correo y contraseña.",
       );
@@ -80,85 +89,106 @@ export default function Auth() {
     }
   }
   return (
-    <main className="tea-auth">
-      <Brand />
-      <section className="tea-card">
-        <span className="eyebrow">TU PUERTA, CONECTADA</span>
-        <h1>{flow === "signUp" ? "Creá tu cuenta" : "Qué bueno verte."}</h1>
-        <p>
-          Ingresá a Te Aviso para configurar tus timbres, recibir visitas y
-          gestionar tus reservas.
-        </p>
-        {googleAvailable && (
-          <>
-            <button
-              className="tea-secondary"
-              disabled={working || (native && !nativeGoogle.ready)}
-              onClick={() => void google()}
-            >
-              Continuar con Google
-            </button>
-            <p className="tea-muted">o con tu correo</p>
-          </>
-        )}
-        <form onSubmit={submit}>
-          <fieldset disabled={working}>
-            <label>
-              Correo electrónico
-              <input
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                maxLength={254}
-              />
-            </label>
-            <label>
-              Contraseña
-              <input
-                name="password"
-                type="password"
-                autoComplete={
-                  flow === "signUp" ? "new-password" : "current-password"
-                }
-                minLength={flow === "signUp" ? 8 : 1}
-                maxLength={256}
-                required
-              />
-            </label>
-            <button className="button" type="submit">
-              {working
-                ? "Procesando…"
-                : flow === "signUp"
-                  ? "Crear cuenta"
-                  : "Ingresar"}
-            </button>
-          </fieldset>
-        </form>
-        {error && <p role="alert">{error}</p>}
-        <button
-          className="tea-link-button"
-          disabled={working}
-          onClick={() => {
-            setFlow(flow === "signIn" ? "signUp" : "signIn");
-            setError("");
-          }}
-        >
-          {flow === "signIn" ? "Crear una cuenta" : "Ya tengo una cuenta"}
-        </button>
-        {native && nativeGoogle.pending && (
+    <main className="tea-auth pc-auth">
+      <header className="pc-auth-header">
+        <Brand />
+      </header>
+      <div className="pc-auth-layout">
+        <aside className="pc-auth-visual">
+          <span className="pc-auth-halo" aria-hidden="true" />
+          <p className="pc-eyebrow">Tu lugar, conectado</p>
+          <h2>
+            Estés donde estés,
+            <br />
+            Te Aviso.
+          </h2>
+          <p>Tu puerta, tus visitas y tus turnos en un mismo lugar.</p>
+          <img
+            src="/images/cartel-instalado.png"
+            alt="Ejemplo ilustrativo de un cartel Te Aviso junto a una puerta"
+          />
+        </aside>
+        <section className="tea-card">
+          <span className="eyebrow">TU PUERTA, CONECTADA</span>
+          <h1>{flow === "signUp" ? "Creá tu cuenta" : "Bienvenido."}</h1>
+          <p>
+            Ingresá a Te Aviso para configurar tus timbres, recibir visitas y
+            gestionar tus reservas.
+          </p>
+          {googleAvailable && (
+            <>
+              <button
+                className="tea-secondary"
+                disabled={working || (native && !nativeGoogle.ready)}
+                onClick={() => void google()}
+              >
+                Continuar con Google
+              </button>
+              <p className="tea-muted">o con tu correo</p>
+            </>
+          )}
+          <form onSubmit={submit}>
+            <fieldset disabled={working}>
+              <label>
+                Correo electrónico
+                <input
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                />
+              </label>
+              <label>
+                Contraseña
+                <input
+                  name="password"
+                  type="password"
+                  autoComplete={
+                    flow === "signUp" ? "new-password" : "current-password"
+                  }
+                  minLength={flow === "signUp" ? 8 : 1}
+                  maxLength={256}
+                  required
+                />
+              </label>
+              <button className="button" type="submit">
+                {working
+                  ? "Procesando…"
+                  : flow === "signUp"
+                    ? "Crear cuenta"
+                    : "Ingresar"}
+              </button>
+            </fieldset>
+          </form>
+          {error && <p role="alert">{error}</p>}
           <button
             className="tea-link-button"
-            onClick={() => void nativeGoogle.cancel()}
+            disabled={working}
+            onClick={() => {
+              setFlow(flow === "signIn" ? "signUp" : "signIn");
+              setError("");
+            }}
           >
-            Cancelar acceso con Google
+            {flow === "signIn" ? "Crear una cuenta" : "Ya tengo una cuenta"}
           </button>
-        )}
-        <small>
-          El registro no contrata servicios pagos. Elegí cómo recibir desde tu
-          panel.
-        </small>
-      </section>
+          {native && nativeGoogle.pending && (
+            <button
+              className="tea-link-button"
+              onClick={() => {
+                clearSignInDestination();
+                void nativeGoogle.cancel();
+              }}
+            >
+              Cancelar acceso con Google
+            </button>
+          )}
+          <small>
+            El registro no contrata servicios pagos. Elegí cómo recibir desde tu
+            panel.
+          </small>
+        </section>
+      </div>
     </main>
   );
 }

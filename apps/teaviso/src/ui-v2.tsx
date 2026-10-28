@@ -1,59 +1,14 @@
-import { useState, type ReactNode } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { ArrowRight, Menu, X } from "lucide-react";
+import { type ReactNode } from "react";
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 import { solutions } from "./v2-model";
-export function Brand() {
-  return (
-    <Link className="av-brand" to="/" aria-label="Te Aviso, inicio">
-      <span className="av-mark" aria-hidden="true">
-        <i />
-        <i />
-        <i />
-        <i />
-      </span>
-      <span>Te Aviso</span>
-    </Link>
-  );
-}
+export { Brand } from "./brand";
+import { MarketingLayout } from "./marketing-layout";
 export function PublicLayout({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false);
   return (
-    <div className="av-public">
-      <header className="av-header">
-        <Brand />
-        <nav
-          className={open ? "av-public-nav is-open" : "av-public-nav"}
-          aria-label="Principal"
-          onClick={() => setOpen(false)}
-        >
-          <a href="/#como-funciona">Cómo funciona</a>
-          <NavLink to="/carteles">Carteles</NavLink>
-          <NavLink to="/planes">Planes</NavLink>
-          <Link className="av-button av-outline" to="/panel">
-            Ingresar <ArrowRight size={16} />
-          </Link>
-        </nav>
-        <button
-          className="av-menu"
-          onClick={() => setOpen(!open)}
-          aria-expanded={open}
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-        >
-          {open ? <X /> : <Menu />}
-        </button>
-      </header>
-      {children}
-      <footer className="av-footer">
-        <Brand />
-        <p>Tu timbre, en un QR.</p>
-        <nav aria-label="Más información">
-          <Link to="/carteles">Carteles</Link>
-          <Link to="/planes">Planes</Link>
-          <Link to="/privacidad">Privacidad y uso</Link>
-          <Link to="/panel">Mi cuenta</Link>
-        </nav>
-      </footer>
-    </div>
+    <MarketingLayout>
+      <div className="av-public pc-public-content">{children}</div>
+    </MarketingLayout>
   );
 }
 export function SolutionCards({ expanded = false }: { expanded?: boolean }) {
@@ -76,13 +31,7 @@ export function SolutionCards({ expanded = false }: { expanded?: boolean }) {
           )}
           <Link
             className={expanded ? "av-button av-outline" : "av-arrow"}
-            to={
-              s.id === "whatsapp"
-                ? "/panel/nuevo?mode=whatsapp"
-                : s.id === "hardware"
-                  ? "/equipos"
-                  : `/soluciones/${s.id}`
-            }
+            to={`/planes#${s.id}`}
             aria-label={`${s.action}: ${s.title}`}
           >
             {expanded ? s.action : <ArrowRight size={18} />}

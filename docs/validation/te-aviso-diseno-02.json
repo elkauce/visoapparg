@@ -1,0 +1,605 @@
+{
+  "status": "ready_for_review_not_published",
+  "design": "02 Producto conectado",
+  "date": "2026-10-27",
+  "validation": {
+    "vitest": {
+      "passed": 1017,
+      "files": 113
+    },
+    "jvm": {
+      "passed": 4
+    },
+    "typeScript": "Te Aviso, root and backend passed",
+    "eslint": "changed TypeScript files passed without warnings",
+    "publicBrowser": {
+      "rows": [
+        {
+          "name": "home",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Atendé tu puerta.Desde tu celular."
+        },
+        {
+          "name": "planes",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Un plan para tu lugar."
+        },
+        {
+          "name": "carteles",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Elegí tu cartel"
+        },
+        {
+          "name": "direccion",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Dirección + timbre"
+        },
+        {
+          "name": "profesional",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "login",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Bienvenido."
+        },
+        {
+          "name": "privacidad",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Privacidad y uso de tu entrada"
+        },
+        {
+          "name": "home",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Atendé tu puerta.Desde tu celular."
+        },
+        {
+          "name": "planes",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Un plan para tu lugar."
+        },
+        {
+          "name": "carteles",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Elegí tu cartel"
+        },
+        {
+          "name": "direccion",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Dirección + timbre"
+        },
+        {
+          "name": "profesional",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "login",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Bienvenido."
+        },
+        {
+          "name": "privacidad",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Privacidad y uso de tu entrada"
+        },
+        {
+          "name": "home",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Atendé tu puerta.Desde tu celular."
+        },
+        {
+          "name": "planes",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Un plan para tu lugar."
+        },
+        {
+          "name": "carteles",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Elegí tu cartel"
+        },
+        {
+          "name": "direccion",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Dirección + timbre"
+        },
+        {
+          "name": "profesional",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "login",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Bienvenido."
+        },
+        {
+          "name": "privacidad",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Privacidad y uso de tu entrada"
+        },
+        {
+          "name": "home",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Atendé tu puerta.Desde tu celular."
+        },
+        {
+          "name": "planes",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Un plan para tu lugar."
+        },
+        {
+          "name": "carteles",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Elegí tu cartel"
+        },
+        {
+          "name": "direccion",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Dirección + timbre"
+        },
+        {
+          "name": "profesional",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "login",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Bienvenido."
+        },
+        {
+          "name": "privacidad",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Privacidad y uso de tu entrada"
+        }
+      ],
+      "errors": []
+    },
+    "privateBrowser": {
+      "rows": [
+        {
+          "name": "panel",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu puerta, a mano."
+        },
+        {
+          "name": "agenda",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu agenda, en orden."
+        },
+        {
+          "name": "visitas",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu portal de visitas"
+        },
+        {
+          "name": "configuracion",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Preparemos tu timbre."
+        },
+        {
+          "name": "editor",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Consultorio de Lucía Pérez"
+        },
+        {
+          "name": "plan",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi plan y beneficios"
+        },
+        {
+          "name": "carteles",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mis carteles"
+        },
+        {
+          "name": "profesional",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "cuenta",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi cuenta"
+        },
+        {
+          "name": "admin",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Usuarios y timbres"
+        },
+        {
+          "name": "visitante",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Hola, ¿qué necesitás?"
+        },
+        {
+          "name": "reserva",
+          "width": 390,
+          "overflow": false,
+          "broken": [],
+          "heading": "Reservá tu turno"
+        },
+        {
+          "name": "panel",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu puerta, a mano."
+        },
+        {
+          "name": "agenda",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu agenda, en orden."
+        },
+        {
+          "name": "visitas",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu portal de visitas"
+        },
+        {
+          "name": "configuracion",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Preparemos tu timbre."
+        },
+        {
+          "name": "editor",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Consultorio de Lucía Pérez"
+        },
+        {
+          "name": "plan",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi plan y beneficios"
+        },
+        {
+          "name": "carteles",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mis carteles"
+        },
+        {
+          "name": "profesional",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "cuenta",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi cuenta"
+        },
+        {
+          "name": "admin",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Usuarios y timbres"
+        },
+        {
+          "name": "visitante",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Hola, ¿qué necesitás?"
+        },
+        {
+          "name": "reserva",
+          "width": 1440,
+          "overflow": false,
+          "broken": [],
+          "heading": "Reservá tu turno"
+        },
+        {
+          "name": "panel",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu puerta, a mano."
+        },
+        {
+          "name": "agenda",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu agenda, en orden."
+        },
+        {
+          "name": "visitas",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu portal de visitas"
+        },
+        {
+          "name": "configuracion",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Preparemos tu timbre."
+        },
+        {
+          "name": "editor",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Consultorio de Lucía Pérez"
+        },
+        {
+          "name": "plan",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi plan y beneficios"
+        },
+        {
+          "name": "carteles",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mis carteles"
+        },
+        {
+          "name": "profesional",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "cuenta",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi cuenta"
+        },
+        {
+          "name": "admin",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Usuarios y timbres"
+        },
+        {
+          "name": "visitante",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Hola, ¿qué necesitás?"
+        },
+        {
+          "name": "reserva",
+          "width": 320,
+          "overflow": false,
+          "broken": [],
+          "heading": "Reservá tu turno"
+        },
+        {
+          "name": "panel",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu puerta, a mano."
+        },
+        {
+          "name": "agenda",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu agenda, en orden."
+        },
+        {
+          "name": "visitas",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Tu portal de visitas"
+        },
+        {
+          "name": "configuracion",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Preparemos tu timbre."
+        },
+        {
+          "name": "editor",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Consultorio de Lucía Pérez"
+        },
+        {
+          "name": "plan",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi plan y beneficios"
+        },
+        {
+          "name": "carteles",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mis carteles"
+        },
+        {
+          "name": "profesional",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Profesional + timbre"
+        },
+        {
+          "name": "cuenta",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Mi cuenta"
+        },
+        {
+          "name": "admin",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Usuarios y timbres"
+        },
+        {
+          "name": "visitante",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Hola, ¿qué necesitás?"
+        },
+        {
+          "name": "reserva",
+          "width": 768,
+          "overflow": false,
+          "broken": [],
+          "heading": "Reservá tu turno"
+        }
+      ],
+      "errors": []
+    },
+    "interactions": {
+      "passed": 16,
+      "checks": [
+        "No blank space above mobile brand",
+        "Status action contrast restored",
+        "One account navigation with all sections",
+        "Drawer can be closed",
+        "Owner QR downloads a PNG from the real component",
+        "Selected service survives account route",
+        "Only three current proposals selectable",
+        "Real request handler receives household selection",
+        "Submission reports no implicit purchase",
+        "Professional sign shows optional address",
+        "Removing address removes print preview data",
+        "Sign request uses selected owner space and approved fields",
+        "Sign chosen before login retains its route",
+        "Real protected route presents login",
+        "Public brand text is readable",
+        "Home has the three agreed service proposals"
+      ],
+      "privateData": "synthetic query providers; real React components; backend mutation regression tests run separately"
+    }
+  },
+  "android": {
+    "version": "1.0.1",
+    "versionCode": 2,
+    "package": "com.teaviso.app",
+    "pushConfigurationPresent": true,
+    "sha256": "9cad8afaf0309174e68fd7d256c72ab47f2092ac985e4e0858f29bcf99db8ba3",
+    "bytes": 13877898,
+    "sameTestingCertificateAs1_0_0": true,
+    "certificateSha256": "9664805aed9f244425531734609e107ebfac5d0e038cb9260ccbef3879fb12da",
+    "physicalDevice": "not tested this release"
+  },
+  "production": {
+    "webChanged": false,
+    "backendChanged": false,
+    "credentialsChanged": false,
+    "dataMigrated": false,
+    "VISOFrontendChanged": false,
+    "vercelSession": "logged out; renewal needed before preview/deploy"
+  },
+  "pendingFeatures": [
+    "official web-to-personal-WhatsApp bridge",
+    "visitor proximity enforcement",
+    "validated hardware door opening",
+    "commercial price and term definition"
+  ]
+}

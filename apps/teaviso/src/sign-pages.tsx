@@ -12,7 +12,7 @@ import type { Id } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
 import { signModels } from "@/convex/lib/teaviso_signs";
 import { PublicLayout, Feedback, Loading } from "./ui-v2";
-import { qrUrl, publicOrigin } from "./config";
+import { qrUrl } from "./config";
 import { randomToken } from "./v2-model";
 import { useTask } from "./use-teaviso-task";
 
@@ -41,20 +41,42 @@ const statusNames = {
 };
 export function SignCards() {
   return (
-    <div className="sb-products">
-      {Object.entries(signModels).map(([id, m], i) => (
-        <article key={id}>
-          <span className="sb-product-number">0{i + 1}</span>
-          <h3>{m.name}</h3>
-          <p>
-            {id === "address"
-              ? "Vertical compacto · 12 × 18 cm."
-              : m.description}
-          </p>
-          <Link className="av-button av-outline" to={`/carteles/${id}`}>
-            Ver opciones →
-          </Link>
-        </article>
+    <div className="pc-sign-catalog">
+      {(["address", "qr", "professional"] as const).map((model) => (
+        <Link className="pc-sign-choice" to={`/carteles/${model}`} key={model}>
+          <div className="pc-sign-photo">
+            <SignPreview
+              model={model}
+              material="aluminum"
+              fields={{
+                street: "Las Acacias",
+                number: "1250",
+                name: "Nombre profesional",
+                profession: "Especialidad",
+                registration: "Matrícula",
+                details: "",
+              }}
+              url="https://teaviso-ejemplo.invalid/entrada"
+            />
+          </div>
+          <div>
+            <h3>
+              {model === "address"
+                ? "Con dirección"
+                : model === "qr"
+                  ? "Sin dirección"
+                  : "Profesional"}
+            </h3>
+            <p>
+              {model === "professional"
+                ? "Nombre, especialidad y matrícula. Dirección opcional."
+                : model === "address"
+                  ? "Calle y número en una placa vertical."
+                  : "Un formato compacto para tu entrada."}
+            </p>
+            <span>Personalizar →</span>
+          </div>
+        </Link>
       ))}
     </div>
   );
@@ -77,8 +99,10 @@ export function SignCatalog() {
             fabricación y la superficie.
           </p>
           <p>
-            El cartel y el envío se cotizan por separado del plan. También podés
-            descargar tu QR e imprimirlo.
+            Las nuevas propuestas de servicio incluyen el cartel básico.
+            Confirmamos material, medidas, instalación y entrega antes de
+            contratar. Si ya tenés un plan anterior, revisamos sus condiciones
+            sin modificarlo.
           </p>
           <Link className="av-button" to="/panel/timbres">
             Ver mis timbres
@@ -222,6 +246,11 @@ export function SignPreview({
           <text x="14" y="156" fill={ink} fontSize="5.5">
             {fields.details.slice(60, 120)}
           </text>
+          {(fields.street || fields.number) && (
+            <text x="14" y="179" fill={ink} fontSize="7">
+              {`${fields.street} ${fields.number}`.trim()}
+            </text>
+          )}
         </>
       )}
       <QRCodeSVG
@@ -251,6 +280,9 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
   const [fields, setFields] = useState<Fields>(() => stored(model)),
     [material, setMaterial] = useState<"acrylic" | "aluminum">("aluminum"),
     [spaceId, setSpaceId] = useState(params.get("space") ?? ""),
+    [includeAddress, setIncludeAddress] = useState(
+      () => !!(stored(model).street || stored(model).number),
+    ),
     [reviewed, setReviewed] = useState(false),
     [key] = useState(randomToken),
     [sent, setSent] = useState(false);
@@ -287,7 +319,7 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
         reviewed,
       });
       setSent(true);
-    }, "Solicitud recibida. Revisaremos el diseño para cotizarlo.");
+    }, "Solicitud recibida. Revisaremos tu diseño y las condiciones del servicio.");
   };
   return (
     <div className="av-stack">
@@ -310,11 +342,15 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
             model={model}
             material={material}
             fields={fields}
-            url={selected ? qrUrl(selected.token) : publicOrigin()}
+            url={
+              selected
+                ? qrUrl(selected.token)
+                : "https://teaviso-ejemplo.invalid/entrada"
+            }
           />
           <figcaption>
-            Vista previa de diseño. Material, medidas y precio sujetos a
-            confirmación.
+            Vista previa de diseño. QR de ejemplo hasta que elijas un timbre.
+            Material y medidas se confirman en la propuesta.
           </figcaption>
         </figure>
         <form className="av-card av-form" onSubmit={submit}>
@@ -332,7 +368,8 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
                 <option value="acrylic">Acrílico</option>
               </select>
             </label>
-            {model === "address" && (
+            {(model === "address" ||
+              (model === "professional" && includeAddress)) && (
               <>
                 <label>
                   Calle
@@ -355,6 +392,21 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
                   />
                 </label>
               </>
+            )}
+            {model === "professional" && (
+              <label className="av-checkbox">
+                <input
+                  type="checkbox"
+                  checked={includeAddress}
+                  onChange={(e) => {
+                    setIncludeAddress(e.target.checked);
+                    if (!e.target.checked)
+                      setFields((f) => ({ ...f, street: "", number: "" }));
+                    setReviewed(false);
+                  }}
+                />
+                Incluir dirección en el cartel
+              </label>
             )}
             {model === "professional" && (
               <>
@@ -457,7 +509,8 @@ function SignCustomizer({ model, owner }: { model: Model; owner: boolean }) {
           <Feedback task={task} />
           <p className="sb-note">
             Esta solicitud no genera un cobro ni una orden de fabricación.
-            Confirmaremos precio, envío y condiciones antes de encargarlo.
+            Confirmaremos las condiciones de tu plan, el cartel incluido y los
+            detalles de entrega antes de encargarlo.
           </p>
         </form>
       </div>

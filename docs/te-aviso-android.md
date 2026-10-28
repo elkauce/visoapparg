@@ -8,7 +8,7 @@ almacenamiento y enlaces de regreso son distintos.
 | --- | --- |
 | Nombre visible | Te Aviso |
 | Paquete y namespace | `com.teaviso.app` |
-| Versión Android | `1.0.0`, código `1` |
+| Versión Android | `1.0.1`, código `2` (revisión del diseño 02; pendiente de publicación) |
 | Android mínimo / objetivo | Android 7, API 24 / API 36 |
 | Backend compartido | `https://vivid-nightingale-785.convex.cloud` |
 | Sitio del backend | `https://vivid-nightingale-785.convex.site` |
@@ -19,6 +19,11 @@ Las cuentas, timbres, inmuebles, licencias y demás datos siguen en el mismo
 backend que VISO. No hay migración ni duplicación de cuentas. Cada aplicación y
 origen web conserva su propia sesión; instalar Te Aviso no importa la sesión de
 VISO. El visitante abre el QR en la web sin instalar ni registrarse.
+
+La revisión visual 1.0.1 está documentada en [diseño 02](te-aviso-diseno-02.md).
+No se publicó ni se reemplazó el enlace de descarga oficial. Para actualizar una
+instalación existente se debe conservar el mismo almacén de firma, incluyendo
+`ANDROID_USER_HOME` cuando se utiliza la firma de prueba de este entorno.
 
 ## Compilación y Android Studio
 
@@ -41,8 +46,8 @@ por Git.
 El script `scripts/build-teaviso-android.mjs` fija los orígenes HTTPS anteriores y
 deja la APK y su descripción en `artifacts/teaviso-android/`:
 
-- `Te-Aviso-1.0.0.apk` cuando existe una configuración Firebase válida para Te Aviso.
-- `Te-Aviso-1.0.0-preview.apk` sin esa configuración o con `--without-push`.
+- `Te-Aviso-1.0.1.apk` cuando existe una configuración Firebase válida para Te Aviso.
+- `Te-Aviso-1.0.1-preview.apk` sin esa configuración o con `--without-push`.
 - `build.json` identifica backend, versión, variante y disponibilidad de FCM.
 
 Opciones útiles desde la raíz:
@@ -86,7 +91,7 @@ rechazan destinos inválidos. Todavía falta completar el consentimiento Google,
 el ingreso, la vinculación de cuentas y la entrega del callback a la APK en un
 dispositivo.
 
-La misma APK **`Te-Aviso-1.0.0.apk`** sigue siendo válida: ya incluye el regreso
+La misma APK **`Te-Aviso-1.0.1.apk`** sigue siendo válida: ya incluye el regreso
 nativo y no necesita recompilarse por esta actualización del backend. La web y
 el alojamiento de APK no se publicaron en esta actualización.
 
@@ -141,7 +146,7 @@ con FCM:
 | Google en el backend publicado | 5 comprobaciones en vivo aprobadas: disponibilidad de ambos productos, privacidad anónima e inicio OAuth para Te Aviso y VISO; `artifacts/teaviso-android/google-production-report.json` |
 | Política del callback publicado | 8 comprobaciones aprobadas: cancelación simulada con regreso exacto para ambas apps y 6 destinos inválidos rechazados sin `Location`; `artifacts/teaviso-android/google-callback-production-report.json` |
 | Políticas Android JVM | 4 tests aprobados; `apps/teaviso/android/app/build/test-results/testDebugUnitTest/TEST-com.teaviso.app.TeAvisoPolicyTest.xml` |
-| APK actual y metadatos | `Te-Aviso-1.0.0.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
+| APK actual y metadatos | `Te-Aviso-1.0.1.apk`, 17.170.452 bytes, `pushEnabled: true`; build aprobado en 21 s. `artifacts/teaviso-android/build-fcm.log` y `build.json` |
 | APK local con FCM | `Te-Aviso-local-test.apk`, `pushEnabled: true`, build aprobado en 8 s; `artifacts/teaviso-android/local-build-fcm.log` y `local-build.json` |
 | Navegador con backend local aislado | Repetición aprobada de las cinco comprobaciones reales: registro, alta de timbre WhatsApp, descargas PNG/SVG, sesión tras recarga y misma cuenta en dos contextos; `artifacts/teaviso-android/browser-report.json` y `browser-qa-resume.log` |
 | Firebase | Backend confirmado en `viso-ad874`, servicio configurado; cliente correcto de Te Aviso validado e integrado en la ruta ignorada |

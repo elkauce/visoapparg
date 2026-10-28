@@ -1,80 +1,18 @@
-import { ArrowRight, BellRing, Check, QrCode } from "lucide-react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import { PublicLayout, SolutionCards } from "./ui-v2";
-import { solutions } from "./v2-model";
+import { PublicLayout } from "./ui-v2";
 import "./v2.css";
 export { MarketingHome as default, MarketingPlans as Plans } from "./marketing";
 export function Solutions() {
   const { solution } = useParams();
-  const selected = solutions.find((s) => s.id === solution);
-  return (
-    <PublicLayout>
-      <main className="av-page">
-        <header className="av-page-heading">
-          <span className="av-eyebrow">Te Aviso, a tu medida</span>
-          <h1>{selected?.title ?? "Tu entrada. Tus opciones."}</h1>
-          <p>
-            {selected?.description ??
-              "Para tu casa, departamento, negocio, oficina o edificio."}
-          </p>
-        </header>
-        {selected ? (
-          <section className="av-solution-detail">
-            <selected.icon size={44} />
-            <ul>
-              {selected.features.map((f) => (
-                <li key={f}>
-                  <Check />
-                  {f}
-                </li>
-              ))}
-            </ul>
-            {selected.id === "whatsapp" && (
-              <p>
-                Conservá tu número con la opción gratuita. Podés sumar mensajes
-                por empresa o tipo de visita y solicitar un número dedicado como
-                mejoras independientes.
-              </p>
-            )}
-            {selected.id === "negocios" && (
-              <p>
-                Configurá los servicios, su duración y los profesionales. Tus
-                clientes eligen un horario disponible desde tu enlace. Vos
-                gestionás la agenda y los avisos desde tu panel.
-              </p>
-            )}
-            {selected.id === "edificios" && (
-              <p>
-                El responsable configura las unidades y las invitaciones. Cada
-                residente atiende las visitas de sus departamentos. El abono y
-                la asistencia se definen antes de contratar.
-              </p>
-            )}
-            <Link
-              className="av-button"
-              to={
-                selected.id === "hardware"
-                  ? "/equipos"
-                  : `/panel/nuevo?mode=${selected.id}`
-              }
-            >
-              Configurar mi entrada <ArrowRight size={18} />
-            </Link>
-          </section>
-        ) : (
-          <SolutionCards expanded />
-        )}
-        <div className="av-callout">
-          <QrCode />
-          <p>
-            Una placa QR, un enlace estable y una forma sencilla de atender a
-            quienes llegan.
-          </p>
-          <Link to="/planes">Comparar opciones ↗</Link>
-        </div>
-      </main>
-    </PublicLayout>
-  );
+  const target =
+    solution === "edificios"
+      ? "edificios"
+      : solution === "negocios"
+        ? "negocios"
+        : solution === "whatsapp" || solution === "hogares"
+          ? "hogares"
+          : "";
+  return <Navigate to={`/planes${target ? `#${target}` : ""}`} replace />;
 }
 export function Equipment() {
   return <Navigate to="/carteles" replace />;

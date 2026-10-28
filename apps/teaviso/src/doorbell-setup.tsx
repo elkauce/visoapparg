@@ -158,7 +158,11 @@ export function SetupWizard() {
         <li className={step === 2 ? "current" : ""}>2. Tus datos</li>
         <li>3. Tu QR</li>
       </ol>
-      <h1>Crear un timbre</h1>
+      <span className="av-eyebrow">Tu lugar, conectado</span>
+      <h1>Preparemos tu timbre.</h1>
+      <p className="pc-setup-description">
+        Un paso por vez. Revisá cómo atendés y tus datos antes de crear el QR.
+      </p>
       <form className="av-form" onSubmit={submit}>
         <fieldset disabled={task.busy}>
           {step === 1 ? (
@@ -174,7 +178,7 @@ export function SetupWizard() {
                   <MessageCircle size={21} />
                   <span>
                     <strong>Por WhatsApp</strong>
-                    <small>Tu número, un mensaje y QR. Sin cargo.</small>
+                    <small>Contacto directo: la visita verá tu número.</small>
                   </span>
                 </button>
                 <button

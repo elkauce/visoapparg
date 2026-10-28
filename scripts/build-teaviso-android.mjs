@@ -111,8 +111,8 @@ const variant = local ? "localTest" : "debug",
   name = local
     ? "Te-Aviso-local-test.apk"
     : push
-      ? "Te-Aviso-1.0.0.apk"
-      : "Te-Aviso-1.0.0-preview.apk";
+      ? "Te-Aviso-1.0.1.apk"
+      : "Te-Aviso-1.0.1-preview.apk";
 await copyFile(
   resolve(app, `android/app/build/outputs/apk/${variant}/app-${variant}.apk`),
   resolve(output, name),
@@ -123,8 +123,8 @@ await writeFile(
     {
       applicationId: "com.teaviso.app",
       name: "Te Aviso",
-      versionName: "1.0.0",
-      versionCode: 1,
+      versionName: "1.0.1",
+      versionCode: 2,
       pushEnabled: push,
       localTest: local,
       backend,

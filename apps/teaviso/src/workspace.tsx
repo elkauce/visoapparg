@@ -19,8 +19,14 @@ import {
   QrCode,
   Settings2,
   X,
+  House,
+  Building2,
+  ShieldCheck,
+  Globe,
 } from "lucide-react";
 import { getSiteUrl } from "@/lib/site-url";
+import { publicOrigin } from "./config";
+import { QrDownload } from "./qr";
 import { Empty, Feedback, Loading } from "./ui-v2";
 import {
   BasicDoorbellEditor,
@@ -91,8 +97,8 @@ export function Overview() {
       <header className="av-panel-heading">
         <div>
           <span className="av-eyebrow">Tu timbre digital</span>
-          <h1>Tu espacio, conectado.</h1>
-          <p>Recibí visitas y organizá tu día desde un solo lugar.</p>
+          <h1>Tu puerta, a mano.</h1>
+          <p>Lo importante de tu timbre, sin vueltas.</p>
         </div>
         <Link className="av-button" to="/panel/nuevo">
           <Plus size={17} /> Agregar timbre
@@ -109,7 +115,13 @@ export function Overview() {
           </Link>
         </Empty>
       )}
-      <DoorbellList showEmpty={false} />
+      {selected ? (
+        <Link className="sb-text-link" to="/panel/timbres">
+          Ver todos mis timbres →
+        </Link>
+      ) : (
+        <DoorbellList showEmpty={false} />
+      )}
       <div className="av-callout">
         <BellRing />
         <div>
@@ -139,91 +151,158 @@ function OverviewSpace({ id }: { id: Id<"teavisoSpaces"> }) {
   });
   if (!space) return <Loading />;
   return (
-    <>
-      <section
-        className={`av-status-card ${space.enabled ? "available" : "paused"}`}
-      >
-        <span className="av-status-dot" />
-        <div>
-          <h2>{space.enabled ? "Entrada habilitada" : "Entrada pausada"}</h2>
+    <div className="pc-dashboard">
+      <div className="av-stack">
+        <section
+          className={`av-status-card pc-status ${space.enabled ? "available" : "paused"}`}
+        >
+          <div className="pc-status-heading">
+            <span className="pc-status-label">
+              <span className="av-status-dot" />
+              {space.enabled ? "Entrada habilitada" : "Entrada pausada"}
+            </span>
+            <span className="pc-status-icon">
+              {space.kind === "building" ? (
+                <Building2 size={26} />
+              ) : space.kind === "business" ? (
+                <CalendarDays size={26} />
+              ) : (
+                <House size={26} />
+              )}
+            </span>
+          </div>
+          <h2>{space.name}</h2>
           <p>
-            {space.name} · {kindNames[space.kind]}
+            {kindNames[space.kind]} ·{" "}
+            {space.timbreQrId
+              ? "Llamadas en Te Aviso"
+              : "Contacto directo por WhatsApp"}
           </p>
+          <div className="pc-status-actions">
+            <a
+              className="av-button av-outline"
+              href={`${publicOrigin()}/e/${space.token}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Globe size={17} />
+              Ver como visitante
+            </a>
+            <Link
+              to={`/panel/entradas/${id}`}
+              aria-label="Configurar esta entrada"
+            >
+              <Settings2 size={17} />
+              Configurar
+            </Link>
+          </div>
+        </section>
+        <div className="pc-kpis">
+          <div>
+            <strong>{visits?.length ?? "—"}</strong>
+            <span>Últimos avisos</span>
+          </div>
+          <div>
+            <strong>
+              {bookings?.filter(
+                (b) => b.status === "confirmed" || b.status === "pending",
+              ).length ?? "—"}
+            </strong>
+            <span>Próximos turnos</span>
+          </div>
+          <div>
+            <strong>{visits?.filter((v) => !v.seen).length ?? "—"}</strong>
+            <span>Por revisar</span>
+          </div>
         </div>
-        <Link to={`/panel/entradas/${id}`} aria-label="Configurar esta entrada">
-          <Settings2 />
-        </Link>
-      </section>
-      <div className="av-dashboard-actions">
-        <Link className="av-card" to={`/panel/entradas/${id}`}>
-          <QrCode />
-          <strong>Mi QR</strong>
-          <span>Ver y configurar mi entrada</span>
-          <ArrowRight />
-        </Link>
-        <Link className="av-card" to={`/panel/agenda?space=${id}`}>
-          <CalendarDays />
-          <strong>Reservas</strong>
-          <span>
-            {space.capabilities.bookings
-              ? "Administrá tu agenda"
-              : "Conocé la opción con reservas"}
-          </span>
-          <ArrowRight />
-        </Link>
-      </div>
-      <div className="av-dashboard-grid">
-        <section className="av-card">
-          <header className="av-inline-heading">
-            <h2>Próximas reservas</h2>
-            <Link to={`/panel/agenda?space=${id}`}>Ver agenda</Link>
-          </header>
-          {bookings
-            ?.filter((b) => b.status === "confirmed" || b.status === "pending")
-            .slice(0, 5)
-            .map((b) => (
-              <article className="av-small-item" key={b._id}>
-                <CalendarDays />
+        <div className="av-dashboard-grid">
+          <section className="av-card">
+            <header className="av-inline-heading">
+              <h2>Próximas reservas</h2>
+              <Link to={`/panel/agenda?space=${id}`}>Ver agenda</Link>
+            </header>
+            {bookings
+              ?.filter(
+                (b) => b.status === "confirmed" || b.status === "pending",
+              )
+              .slice(0, 5)
+              .map((b) => (
+                <article className="av-small-item" key={b._id}>
+                  <CalendarDays />
+                  <div>
+                    <strong>{b.serviceName}</strong>
+                    <span>
+                      {dateText(b.startsAt, b.timezone)} · {b.name}
+                    </span>
+                  </div>
+                  <span className="av-tag">{statuses[b.status]}</span>
+                </article>
+              ))}
+            {bookings?.filter(
+              (b) => b.status === "confirmed" || b.status === "pending",
+            ).length === 0 && (
+              <p className="av-muted">
+                Todavía no hay turnos para los próximos días.
+              </p>
+            )}
+          </section>
+          <section className="av-card">
+            <header className="av-inline-heading">
+              <h2>Avisos de visitas</h2>
+              <Link to={`/panel/portal?space=${id}`}>Ver todos</Link>
+            </header>
+            {visits?.slice(0, 5).map((v) => (
+              <article className="av-small-item" key={v._id}>
+                <BellRing />
                 <div>
-                  <strong>{b.serviceName}</strong>
-                  <span>
-                    {dateText(b.startsAt, b.timezone)} · {b.name}
-                  </span>
+                  <strong>{v.label}</strong>
+                  <span>{v.message}</span>
+                  <small>Motivo indicado por la visita</small>
                 </div>
-                <span className="av-tag">{statuses[b.status]}</span>
               </article>
             ))}
-          {bookings?.filter(
-            (b) => b.status === "confirmed" || b.status === "pending",
-          ).length === 0 && (
-            <p className="av-muted">
-              Todavía no hay turnos para los próximos días.
-            </p>
-          )}
-        </section>
-        <section className="av-card">
-          <header className="av-inline-heading">
-            <h2>Avisos de visitas</h2>
-            <Link to={`/panel/portal?space=${id}`}>Ver todos</Link>
-          </header>
-          {visits?.slice(0, 5).map((v) => (
-            <article className="av-small-item" key={v._id}>
-              <BellRing />
-              <div>
-                <strong>{v.label}</strong>
-                <span>{v.message}</span>
-                <small>Motivo indicado por la visita</small>
-              </div>
-            </article>
-          ))}
-          {visits?.length === 0 && (
-            <p className="av-muted">
-              Acá aparecerán los avisos enviados desde tu portal.
-            </p>
-          )}
-        </section>
+            {visits?.length === 0 && (
+              <p className="av-muted">
+                Acá aparecerán los avisos enviados desde tu portal.
+              </p>
+            )}
+          </section>
+        </div>
       </div>
-    </>
+      <aside className="av-stack">
+        <section className="av-card pc-dashboard-qr">
+          <header className="av-inline-heading">
+            <h2>El QR de tu timbre</h2>
+            <QrCode size={20} />
+          </header>
+          <QrDownload
+            url={`${publicOrigin()}/w/${space.token}`}
+            label={space.name}
+            compact
+          />
+          <Link
+            className="av-button av-outline"
+            to={`/panel/carteles/address?space=${id}`}
+          >
+            Elegir mi cartel <ArrowRight size={16} />
+          </Link>
+        </section>
+        <section className="av-card pc-privacy-summary">
+          <ShieldCheck size={23} />
+          <div>
+            <h2>{space.phone ? "Tu contacto, claro." : "Tu privacidad."}</h2>
+            <p>
+              {space.phone
+                ? "Este timbre usa WhatsApp directo: la visita verá el número al abrir el chat. El puente con número privado todavía no está habilitado."
+                : "Atendé desde Te Aviso sin publicar tu teléfono. La visita usa la web y vos elegís cuándo responder."}
+            </p>
+            <Link className="sb-text-link" to="/panel/cuenta">
+              Ver mis ajustes →
+            </Link>
+          </div>
+        </section>
+      </aside>
+    </div>
   );
 }
 export function Entries() {

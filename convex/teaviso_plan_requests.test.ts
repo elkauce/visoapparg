@@ -145,3 +145,26 @@ it("limits new requests per account and day without affecting another account", 
     f.other.mutation(api.teaviso_plan_requests.request, base),
   ).resolves.toBeTruthy();
 });
+
+it("accepts the three current service proposals without changing billing or legacy requests", async () => {
+  const f = await fixture();
+  for (const [i, interest] of ["hogares", "negocios", "edificios"].entries()) {
+    await f.owner.mutation(api.teaviso_plan_requests.request, {
+      ...base,
+      interest,
+      requestKey: String(i).repeat(64),
+    });
+  }
+  await f.owner.mutation(api.teaviso_plan_requests.request, base);
+  expect(
+    (await f.owner.query(api.teaviso_plan_requests.mine, {}))
+      .map((row) => row.interest)
+      .sort(),
+  ).toEqual(["edificios", "familia", "hogares", "negocios"]);
+  expect(
+    await f.t.run(async (ctx) => ({
+      licenses: await ctx.db.query("timbreLicenses").collect(),
+      orders: await ctx.db.query("marketplaceOrders").collect(),
+    })),
+  ).toEqual({ licenses: [], orders: [] });
+});

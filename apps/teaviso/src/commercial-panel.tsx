@@ -13,6 +13,7 @@ import TimbreCommercial from "@/pages/timbre/commercial";
 import { Feedback, Loading } from "./ui-v2";
 import { useTask } from "./use-teaviso-task";
 import { randomToken } from "./v2-model";
+import { servicePlans, serviceInterest } from "./service-plans";
 import "./commercial-panel.css";
 
 const statuses = {
@@ -26,7 +27,7 @@ const offerName = (value: string) =>
 export function PlanPanel() {
   const [params] = useSearchParams(),
     raw = params.get("interes"),
-    interest = isTeavisoInterest(raw) ? raw : "";
+    interest = serviceInterest(raw);
   const requests = useQuery(api.teaviso_plan_requests.mine, {});
   return (
     <div className="av-stack ta-plan-account">
@@ -43,18 +44,18 @@ export function PlanPanel() {
           Comparar planes <ArrowRight size={16} />
         </Link>
       </header>
-      <section className="av-card ta-wa-account">
-        <MessageCircle size={25} />
+      <section className="av-card pc-plan-summary">
+        <span className="pc-icon">
+          <MessageCircle size={24} />
+        </span>
         <div>
-          <h2>WhatsApp básico</h2>
+          <h2>Un servicio para tu lugar.</h2>
           <p>
-            QR y mensaje general sin cargo. Portal, reservas, llamadas y número
-            dedicado se contratan según la opción elegida.
+            Casas y departamentos, profesionales y consultorios, edificios. La
+            propuesta de cada servicio incluye un cartel con QR. Confirmamos
+            precio, vigencia y funciones antes de contratar.
           </p>
         </div>
-        <Link className="av-button av-outline" to="/panel/nuevo?mode=whatsapp">
-          Crear mi QR
-        </Link>
       </section>
       <InquiryForm key={interest} initial={interest} />
       <section className="av-card av-stack" id="mis-consultas">
@@ -117,8 +118,8 @@ function InquiryForm({ initial }: { initial: TeavisoInterest | "" }) {
         <span className="av-eyebrow">CONDICIONES ANTES DE CONTRATAR</span>
         <h2>Consultar una opción</h2>
         <p>
-          Te confirmamos prestaciones, precio, vigencia y cualquier producto
-          físico incluido.
+          Te confirmamos las funciones, el precio, la vigencia y los detalles de
+          tu cartel incluido.
         </p>
       </header>
       <form onSubmit={submit}>
@@ -136,9 +137,9 @@ function InquiryForm({ initial }: { initial: TeavisoInterest | "" }) {
             }}
           >
             <option value="">Elegir una opción</option>
-            {Object.entries(teavisoOffers).map(([id, entry]) => (
+            {servicePlans.map(({ id, title }) => (
               <option value={id} key={id}>
-                {entry.name}
+                {title}
               </option>
             ))}
           </select>
@@ -152,7 +153,7 @@ function InquiryForm({ initial }: { initial: TeavisoInterest | "" }) {
                 : "A cotizar"}
             </span>
             <small>
-              El importe, período, cupos, placas y envío se confirman en la
+              Precio, vigencia, cartel e instalación se confirman en la
               propuesta. Esta consulta no es una compra.
             </small>
           </div>
@@ -187,10 +188,9 @@ function InquiryForm({ initial }: { initial: TeavisoInterest | "" }) {
         )}
       </form>
       <p className="ta-inquiry-note">
-        Para número dedicado, usá{" "}
-        <Link to="/panel/business">la consulta de WhatsApp Business</Link>. Para
-        carteles,{" "}
-        <Link to="/panel/carteles">elegí un diseño y pedí presupuesto</Link>.
+        Podés <Link to="/panel/carteles">elegir el diseño de tu cartel</Link>.
+        El puente WhatsApp de hogares y la apertura de puertas requieren validar
+        su integración antes de habilitarse.
       </p>
     </section>
   );
